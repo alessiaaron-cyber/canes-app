@@ -6,10 +6,6 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="Canes Rivalry" />
   <meta name="theme-color" content="#f3f5f8" />
-  <link rel="apple-touch-icon" href="icon.png">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="Canes Rivalry">
   <title>Canes Rivalry</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -371,6 +367,61 @@
       gap:8px;
       margin-top:8px;
     }
+    .manage-list{
+      margin-top:10px;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+    .manage-item{
+      border:1px solid var(--line);
+      background:#fff;
+      border-radius:15px;
+      padding:10px;
+    }
+    .manage-top{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+      font-weight:1000;
+      font-size:13px;
+      margin-bottom:6px;
+    }
+    .manage-fields{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:7px;
+    }
+    .manage-fields.full{
+      grid-template-columns:1fr;
+    }
+    .tiny-btn{
+      width:auto;
+      padding:7px 9px;
+      border-radius:11px;
+      font-size:11px;
+      box-shadow:none;
+      background:#111827;
+    }
+    .tiny-btn.dangerish{
+      background:#fee2e2;
+      color:#991b1b;
+      border:1px solid #fecaca;
+    }
+    .instruction-box{
+      background:#f8fafc;
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:11px;
+      font-size:12px;
+      line-height:1.42;
+      color:#344054;
+      font-weight:750;
+    }
+    .instruction-box strong{
+      color:#111827;
+    }
     .note{
       margin-top:9px;
       color:var(--muted);
@@ -573,7 +624,7 @@ async function loadAll(){
     S.picks = [];
   }
 
-  S.currentGame = S.games.find(g => g.status !== "Final");
+  S.currentGame = S.games.find(g => g.status !== "Final" && g.status !== "Hidden");
   if (!S.currentGame) await createNextGame();
 
   hydrateForm();
@@ -738,22 +789,98 @@ function renderAllTime(){
 }
 
 function renderSettings(){
+  const scheduledGames = S.games
+    .filter(g => g.status !== "Final" && g.status !== "Hidden")
+    .sort((a,b)=>Number(a.game_number)-Number(b.game_number));
+
+  const playerRows = playerNames().map(name => {
+    const p = S.players.find(x => x.player_name === name) || {};
+    return `
+      <div class="manage-item">
+        <div class="manage-top">
+          <span>${esc(name)}</span>
+          <button class="tiny-btn dangerish" onclick="deactivatePlayer('${esc(name)}')">Remove</button>
+        </div>
+        <div class="manage-fields">
+          <div><label>Name</label><input value="${esc(name)}" onchange="renamePlayer('${esc(name)}', this.value)"></div>
+          <div><label>Position</label><input value="${esc(p.position || "")}" onchange="updatePlayerPosition('${esc(name)}', this.value)"></div>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  const gameRows = scheduledGames.map(g => `
+    <div class="manage-item">
+      <div class="manage-top">
+        <span>Game ${esc(g.game_number)} ${g.status === "Hidden" ? "• Hidden" : ""}</span>
+        <button class="tiny-btn dangerish" onclick="hideGame(${g.id})">Remove</button>
+      </div>
+      <div class="manage-fields">
+        <div><label>Date</label><input type="date" value="${esc(g.game_date || "")}" onchange="updateGameField(${g.id}, 'game_date', this.value)"></div>
+        <div><label>Opponent</label><input value="${esc(g.opponent || "")}" onchange="updateGameField(${g.id}, 'opponent', this.value)"></div>
+        <div><label>Type</label>
+          <select onchange="updateGameField(${g.id}, 'game_type', this.value)">
+            <option ${g.game_type==="Regular Season"?"selected":""}>Regular Season</option>
+            <option ${g.game_type==="Playoffs"?"selected":""}>Playoffs</option>
+          </select>
+        </div>
+        <div><label>First Pick</label>
+          <select onchange="updateGameField(${g.id}, 'first_picker', this.value)">
+            <option ${g.first_picker==="Aaron"?"selected":""}>Aaron</option>
+            <option ${g.first_picker==="Julie"?"selected":""}>Julie</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  `).join("");
+
   document.getElementById("settingsView").innerHTML = `
     <div class="hero">
-      <div class="topline"><span>Controls</span><span class="badge">Safe</span></div>
+      <div class="topline"><span>Controls</span><span class="badge">Manual</span></div>
       <h1>Settings</h1>
-      <div class="meta">Finalized games are protected by your database rules.</div>
+      <div class="meta">Manage roster and upcoming schedule safely from the app.</div>
     </div>
 
     <div class="section">
-      <div class="section-head"><div class="section-title">Refresh Data</div><div class="mini">NHL</div></div>
-      <button class="secondary" onclick="refreshRoster()">Refresh Roster</button>
-      <div class="actions">
-        <button class="light" onclick="refreshSchedule()">Refresh Schedule</button>
-        <button class="light" onclick="startNewSeason()">New Season</button>
+      <div class="section-head"><div class="section-title">NHL Update Instructions</div></div>
+      <div class="instruction-box">
+        <strong>Roster:</strong> Go to NHL.com → Hurricanes → Roster. Add/remove skaters below as needed. Goalies should stay out of the pick list.<br><br>
+        <strong>Schedule:</strong> Go to NHL.com → Hurricanes → Schedule. Add future/playoff games below with date, opponent, game type, and first picker.<br><br>
+        The old auto-refresh buttons were removed because direct NHL API calls can fail from iPhone/GitHub Pages.
       </div>
-      <div class="note">Roster refresh updates Players only. Schedule refresh inserts/updates only non-final scheduled games. It does not touch finalized games or picks.</div>
-      <div class="danger">Deletes are blocked by RLS, so history is protected from accidental wipeouts.</div>
+    </div>
+
+    <div class="section">
+      <div class="section-head"><div class="section-title">Roster</div><div class="mini">${playerNames().length} active</div></div>
+      <div class="manage-fields full">
+        <div><label>Add Player</label><input id="newPlayerName" placeholder="Player name"></div>
+        <div><label>Position</label><input id="newPlayerPos" placeholder="F or D"></div>
+      </div>
+      <button class="secondary" style="margin-top:10px" onclick="addPlayerFromUI()">Add Player</button>
+      <div class="manage-list">${playerRows || '<div class="note">No players yet. Add the Canes skaters above.</div>'}</div>
+    </div>
+
+    <div class="section">
+      <div class="section-head"><div class="section-title">Upcoming Schedule</div><div class="mini">${scheduledGames.length} games</div></div>
+      <div class="manage-fields">
+        <div><label>Date</label><input id="newGameDate" type="date"></div>
+        <div><label>Opponent</label><input id="newGameOpponent" placeholder="NYR, FLA, etc."></div>
+        <div><label>Type</label>
+          <select id="newGameType">
+            <option>Regular Season</option>
+            <option>Playoffs</option>
+          </select>
+        </div>
+        <div><label>First Pick</label>
+          <select id="newGameFirstPicker">
+            <option>Aaron</option>
+            <option>Julie</option>
+          </select>
+        </div>
+      </div>
+      <button class="secondary" style="margin-top:10px" onclick="addGameFromUI()">Add Game</button>
+      <div class="manage-list">${gameRows || '<div class="note">No upcoming games. Add the next game above.</div>'}</div>
+      <div class="note">Remove hides an upcoming game instead of deleting it. Finalized games are not editable here to protect your history.</div>
     </div>
 
     <div class="section">
@@ -763,6 +890,10 @@ function renderSettings(){
         Games loaded: ${S.games.length}<br>
         Picks loaded: ${S.picks.length}<br>
         Players loaded: ${S.players.length}
+      </div>
+      <div class="actions">
+        <button class="light" onclick="startNewSeason()">New Season</button>
+        <button class="light" onclick="manualRefresh()">Refresh App</button>
       </div>
     </div>
   `;
@@ -993,6 +1124,111 @@ window.addEventListener("focus", autoRefresh);
 window.addEventListener("pageshow", (event) => {
   if (event.persisted) autoRefresh();
 });
+
+
+async function addPlayerFromUI(){
+  const name = document.getElementById("newPlayerName")?.value?.trim();
+  const pos = document.getElementById("newPlayerPos")?.value?.trim();
+  if (!name) return toast("Enter a player name.");
+  try{
+    const res = await db.from("players").upsert({
+      player_name:name,
+      position:pos || "",
+      is_active:true
+    }, {onConflict:"player_name"});
+    if (res.error) throw res.error;
+    await loadAll();
+    toast("Player added.");
+  } catch(e){
+    toast(e.message || "Could not add player.");
+  }
+}
+
+async function deactivatePlayer(name){
+  if (!confirm(`Remove ${name} from active roster?`)) return;
+  try{
+    const res = await db.from("players").update({is_active:false}).eq("player_name", name);
+    if (res.error) throw res.error;
+    await loadAll();
+    toast("Player removed.");
+  } catch(e){
+    toast(e.message || "Could not remove player.");
+  }
+}
+
+async function renamePlayer(oldName, newName){
+  newName = (newName || "").trim();
+  if (!newName || newName === oldName) return;
+  try{
+    const res = await db.from("players").update({player_name:newName, is_active:true}).eq("player_name", oldName);
+    if (res.error) throw res.error;
+    await loadAll();
+    toast("Player updated.");
+  } catch(e){
+    toast(e.message || "Could not rename player.");
+  }
+}
+
+async function updatePlayerPosition(name, pos){
+  try{
+    const res = await db.from("players").update({position:pos || ""}).eq("player_name", name);
+    if (res.error) throw res.error;
+    toast("Position updated.");
+  } catch(e){
+    toast(e.message || "Could not update position.");
+  }
+}
+
+async function addGameFromUI(){
+  const date = document.getElementById("newGameDate")?.value || null;
+  const opponent = document.getElementById("newGameOpponent")?.value?.trim() || "TBD";
+  const gameType = document.getElementById("newGameType")?.value || "Regular Season";
+  const firstPicker = document.getElementById("newGameFirstPicker")?.value || "Aaron";
+  try{
+    const maxNum = S.games.reduce((m,g) => Math.max(m, Number(g.game_number || 0)), 0);
+    const res = await db.from("games").insert({
+      season_id:S.activeSeason.id,
+      game_number:maxNum + 1,
+      game_date:date,
+      opponent,
+      game_type:gameType,
+      first_picker:firstPicker,
+      status:"Scheduled",
+      aaron_points:0,
+      julie_points:0
+    });
+    if (res.error) throw res.error;
+    await loadAll();
+    toast("Game added.");
+  } catch(e){
+    toast(e.message || "Could not add game.");
+  }
+}
+
+async function updateGameField(gameId, field, value){
+  try{
+    const patch = {};
+    patch[field] = value || null;
+    const res = await db.from("games").update(patch).eq("id", gameId).neq("status", "Final");
+    if (res.error) throw res.error;
+    await loadAll();
+    toast("Game updated.");
+  } catch(e){
+    toast(e.message || "Could not update game.");
+  }
+}
+
+async function hideGame(gameId){
+  if (!confirm("Remove this upcoming game from the app?")) return;
+  try{
+    const res = await db.from("games").update({status:"Hidden"}).eq("id", gameId).neq("status", "Final");
+    if (res.error) throw res.error;
+    await loadAll();
+    toast("Game removed.");
+  } catch(e){
+    toast(e.message || "Could not remove game.");
+  }
+}
 
 window.addEventListener("load", async () => {
   try{
