@@ -6,10 +6,6 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="Canes Rivalry" />
   <meta name="theme-color" content="#f3f5f8" />
-  <link rel="apple-touch-icon" href="icon.png">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="Canes Rivalry">
   <title>Canes Rivalry</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -76,6 +72,30 @@
       font-size:11px;
       letter-spacing:.05em;
       white-space:nowrap;
+    }
+    .badge.playoff{
+      background:linear-gradient(135deg,#111827,#c8102e);
+      box-shadow:0 0 0 2px rgba(200,16,46,.12), 0 6px 15px rgba(200,16,46,.22);
+    }
+    .hero.playoff-mode:before{
+      height:8px;
+      background:linear-gradient(90deg,#111827,var(--red),#111827,var(--red));
+    }
+    .leader.playoff-mode{
+      background:linear-gradient(135deg,#111827,#7f1d1d);
+    }
+    .playoff-strip{
+      margin-top:10px;
+      background:#fff1f2;
+      border:1px solid #fecdd3;
+      color:#9f1239;
+      border-radius:14px;
+      padding:8px 10px;
+      text-align:center;
+      font-size:12px;
+      font-weight:1000;
+      letter-spacing:.06em;
+      text-transform:uppercase;
     }
     h1{
       text-align:center;
@@ -558,19 +578,22 @@ function renderGame(){
   const l = liveScore();
   const lead = t.a === t.j ? "ALL SQUARE" : t.a > t.j ? `AARON +${t.a-t.j}` : `JULIE +${t.j-t.a}`;
   const opp = g.opponent && g.opponent !== "Next Game" ? g.opponent : "Next Game";
+  const isPlayoff = (g.game_type === "Playoffs") || Number(g.game_number || 0) >= 83;
+  const modeLabel = isPlayoff ? "Playoffs" : "Live";
 
   document.getElementById("gameView").innerHTML = `
-    <div class="hero">
-      <div class="topline"><span>Canes Rivalry</span><span class="badge">Live</span></div>
-      <h1>Game Day</h1>
+    <div class="hero ${isPlayoff ? "playoff-mode" : ""}">
+      <div class="topline"><span>Canes Rivalry</span><span class="badge ${isPlayoff ? "playoff" : ""}">${modeLabel}</span></div>
+      <h1>${isPlayoff ? "Playoff Game" : "Game Day"}</h1>
       <div class="meta">${esc(opp)} • Game ${esc(g.game_number || "—")} • First Pick: ${esc(g.first_picker || "—")}</div>
+      ${isPlayoff ? `<div class="playoff-strip">Stanley Cup Mode Activated</div>` : ""}
 
       <div class="scoreboard">
         <div class="score-card"><div class="name">Aaron</div><div class="bigscore">${t.a}</div></div>
         <div class="score-card"><div class="name">Julie</div><div class="bigscore">${t.j}</div></div>
       </div>
 
-      <div class="leader">${lead}</div>
+      <div class="leader ${isPlayoff ? "playoff-mode" : ""}">${lead}</div>
     </div>
 
     <div class="section">
