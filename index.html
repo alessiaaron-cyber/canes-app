@@ -6,6 +6,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="Canes Rivalry" />
   <meta name="theme-color" content="#f3f5f8" />
+  <link rel="apple-touch-icon" href="icon.png">
   <title>Canes Rivalry</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -17,9 +18,7 @@
       --bg:#f3f5f8;
       --card:#ffffff;
       --line:#e4e7ec;
-      --soft:#f9fafb;
       --black:#111827;
-      --green:#15803d;
       --shadow:0 12px 30px rgba(16,24,40,.08);
     }
     *{box-sizing:border-box}
@@ -34,7 +33,6 @@
       min-height:100vh;
       padding:calc(10px + env(safe-area-inset-top)) 12px calc(88px + env(safe-area-inset-bottom));
     }
-
     .hero{
       background:linear-gradient(180deg,#ffffff 0%,#fbfcfe 100%);
       border:1px solid var(--line);
@@ -51,6 +49,10 @@
       height:6px;
       background:linear-gradient(90deg,var(--red),#111827,var(--red));
     }
+    .hero.playoff-mode:before{
+      height:8px;
+      background:linear-gradient(90deg,#111827,var(--red),#111827,var(--red));
+    }
     .topline{
       display:flex;
       align-items:center;
@@ -63,25 +65,7 @@
       letter-spacing:.08em;
       margin-top:3px;
     }
-    .top-actions{
-      display:flex;
-      align-items:center;
-      gap:7px;
-    }
-    .refresh-mini{
-      width:auto;
-      padding:6px 9px;
-      border-radius:999px;
-      background:#eef1f5;
-      color:var(--ink);
-      border:1px solid var(--line);
-      box-shadow:none;
-      font-size:11px;
-      font-weight:1000;
-      letter-spacing:.03em;
-      text-transform:uppercase;
-      white-space:nowrap;
-    }
+    .top-actions{display:flex;align-items:center;gap:7px}
     .badge{
       background:var(--red);
       color:white;
@@ -96,25 +80,19 @@
       background:linear-gradient(135deg,#111827,#c8102e);
       box-shadow:0 0 0 2px rgba(200,16,46,.12), 0 6px 15px rgba(200,16,46,.22);
     }
-    .hero.playoff-mode:before{
-      height:8px;
-      background:linear-gradient(90deg,#111827,var(--red),#111827,var(--red));
-    }
-    .leader.playoff-mode{
-      background:linear-gradient(135deg,#111827,#7f1d1d);
-    }
-    .playoff-strip{
-      margin-top:10px;
-      background:#fff1f2;
-      border:1px solid #fecdd3;
-      color:#9f1239;
-      border-radius:14px;
-      padding:8px 10px;
-      text-align:center;
-      font-size:12px;
+    .refresh-mini{
+      width:auto;
+      padding:6px 9px;
+      border-radius:999px;
+      background:#eef1f5;
+      color:var(--ink);
+      border:1px solid var(--line);
+      box-shadow:none;
+      font-size:11px;
       font-weight:1000;
-      letter-spacing:.06em;
+      letter-spacing:.03em;
       text-transform:uppercase;
+      white-space:nowrap;
     }
     h1{
       text-align:center;
@@ -131,7 +109,6 @@
       font-size:13px;
       line-height:1.3;
     }
-
     .scoreboard{
       display:grid;
       grid-template-columns:1fr 1fr;
@@ -171,7 +148,20 @@
       font-weight:1000;
       letter-spacing:.01em;
     }
-
+    .leader.playoff-mode{background:linear-gradient(135deg,#111827,#7f1d1d)}
+    .playoff-strip{
+      margin-top:10px;
+      background:#fff1f2;
+      border:1px solid #fecdd3;
+      color:#9f1239;
+      border-radius:14px;
+      padding:8px 10px;
+      text-align:center;
+      font-size:12px;
+      font-weight:1000;
+      letter-spacing:.06em;
+      text-transform:uppercase;
+    }
     .section{
       background:var(--card);
       border:1px solid var(--line);
@@ -286,7 +276,6 @@
       text-transform:uppercase;
       letter-spacing:.07em;
     }
-
     button{
       width:100%;
       border:0;
@@ -307,8 +296,20 @@
       padding:12px 9px;
       font-size:13px;
     }
+    button.tiny-btn{
+      width:auto;
+      padding:7px 9px;
+      border-radius:11px;
+      font-size:11px;
+      box-shadow:none;
+      background:#111827;
+    }
+    button.dangerish{
+      background:#fee2e2;
+      color:#991b1b;
+      border:1px solid #fecaca;
+    }
     button:disabled{opacity:.55}
-
     .tabs{
       position:fixed;
       left:0;right:0;bottom:0;
@@ -337,7 +338,6 @@
       font-weight:1000;
     }
     .tab.active{background:var(--black);color:white}
-
     .hidden{display:none}
     .row-card{
       background:white;
@@ -393,35 +393,7 @@
       grid-template-columns:1fr 1fr;
       gap:7px;
     }
-    .manage-fields.full{
-      grid-template-columns:1fr;
-    }
-    .tiny-btn{
-      width:auto;
-      padding:7px 9px;
-      border-radius:11px;
-      font-size:11px;
-      box-shadow:none;
-      background:#111827;
-    }
-    .tiny-btn.dangerish{
-      background:#fee2e2;
-      color:#991b1b;
-      border:1px solid #fecaca;
-    }
-    .instruction-box{
-      background:#f8fafc;
-      border:1px solid var(--line);
-      border-radius:16px;
-      padding:11px;
-      font-size:12px;
-      line-height:1.42;
-      color:#344054;
-      font-weight:750;
-    }
-    .instruction-box strong{
-      color:#111827;
-    }
+    .manage-fields.full{grid-template-columns:1fr}
     .note{
       margin-top:9px;
       color:var(--muted);
@@ -440,6 +412,17 @@
       font-weight:850;
       line-height:1.35;
     }
+    .instruction-box{
+      background:#f8fafc;
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:11px;
+      font-size:12px;
+      line-height:1.42;
+      color:#344054;
+      font-weight:750;
+    }
+    .instruction-box strong{color:#111827}
     .loader{
       padding:35px 20px;
       text-align:center;
@@ -472,16 +455,16 @@
   <div class="app">
     <div id="gameView" class="loader">Loading Canes Rivalry…</div>
     <div id="historyView" class="hidden"></div>
+    <div id="manageView" class="hidden"></div>
     <div id="alltimeView" class="hidden"></div>
-    <div id="settingsView" class="hidden"></div>
   </div>
 
   <div class="tabs">
     <div class="tabs-inner">
       <button class="tab active" onclick="showTab('game', this)">Game</button>
       <button class="tab" onclick="showTab('history', this)">History</button>
+      <button class="tab" onclick="showTab('manage', this)">Manage</button>
       <button class="tab" onclick="showTab('alltime', this)">All-Time</button>
-      <button class="tab" onclick="showTab('settings', this)">Settings</button>
     </div>
   </div>
 
@@ -495,8 +478,11 @@ const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let S = {
   seasons: [],
   activeSeason: null,
+  selectedHistorySeasonId: null,
   games: [],
+  allGames: [],
   picks: [],
+  allPicks: [],
   players: [],
   currentGame: null,
   form: {
@@ -515,7 +501,7 @@ function toast(msg){
 }
 
 function showTab(tab, btn){
-  ["gameView","historyView","alltimeView","settingsView"].forEach(id => {
+  ["gameView","historyView","manageView","alltimeView"].forEach(id => {
     document.getElementById(id).classList.add("hidden");
   });
   document.getElementById(tab + "View").classList.remove("hidden");
@@ -605,22 +591,29 @@ async function loadAll(){
   S.seasons = seasons.data || [];
   S.activeSeason = S.seasons.find(s => s.is_active) || S.seasons[S.seasons.length - 1];
   if (!S.activeSeason) throw new Error("No active season found.");
+  if (!S.selectedHistorySeasonId) S.selectedHistorySeasonId = S.activeSeason.id;
 
-  const [games, players] = await Promise.all([
+  const [allGames, activeGames, players] = await Promise.all([
+    db.from("games").select("*").order("game_number"),
     db.from("games").select("*").eq("season_id", S.activeSeason.id).order("game_number"),
     db.from("players").select("*").eq("is_active", true).order("player_name")
   ]);
-  if (games.error) throw games.error;
 
-  S.games = games.data || [];
+  if (allGames.error) throw allGames.error;
+  if (activeGames.error) throw activeGames.error;
+
+  S.allGames = allGames.data || [];
+  S.games = activeGames.data || [];
   S.players = players.data || [];
 
-  if (S.games.length){
-    const ids = S.games.map(g => g.id);
+  if (S.allGames.length){
+    const ids = S.allGames.map(g => g.id);
     const picks = await db.from("picks").select("*").in("game_id", ids).order("pick_slot");
     if (picks.error) throw picks.error;
-    S.picks = picks.data || [];
+    S.allPicks = picks.data || [];
+    S.picks = S.allPicks.filter(p => S.games.some(g => g.id === p.game_id));
   } else {
+    S.allPicks = [];
     S.picks = [];
   }
 
@@ -733,16 +726,35 @@ function renderGame(){
   `;
 }
 
-function picksFor(gameId, owner){
-  return S.picks
+function picksFor(gameId, owner, source = S.allPicks){
+  return source
     .filter(p => p.game_id === gameId && p.owner === owner)
     .sort((a,b) => Number(a.pick_slot) - Number(b.pick_slot))
     .map(p => (p.is_carry_forward ? "*" : "") + p.player_name)
     .join(" / ");
 }
 
+function setHistorySeason(value){
+  S.selectedHistorySeasonId = Number(value);
+  renderHistory();
+}
+
 function renderHistory(){
-  const rows = [...S.games].sort((a,b) => Number(b.game_number)-Number(a.game_number)).map(g => `
+  const selectedSeason = S.seasons.find(s => Number(s.id) === Number(S.selectedHistorySeasonId)) || S.activeSeason;
+  const games = S.allGames
+    .filter(g => Number(g.season_id) === Number(selectedSeason.id))
+    .sort((a,b) => Number(b.game_number)-Number(a.game_number));
+
+  const seasonTotal = {
+    a: games.filter(g=>g.status==="Final").reduce((n,g)=>n+Number(g.aaron_points||0),0),
+    j: games.filter(g=>g.status==="Final").reduce((n,g)=>n+Number(g.julie_points||0),0)
+  };
+
+  const seasonOptions = S.seasons.map(s =>
+    `<option value="${s.id}" ${Number(s.id)===Number(selectedSeason.id) ? "selected" : ""}>${esc(s.display_name)}</option>`
+  ).join("");
+
+  const rows = games.map(g => `
     <div class="row-card">
       <div class="row-top"><span>Game ${esc(g.game_number)} • ${esc(g.game_type || "")}</span><span>${Number(g.aaron_points||0)}-${Number(g.julie_points||0)}</span></div>
       <div class="row-sub">
@@ -755,11 +767,19 @@ function renderHistory(){
 
   document.getElementById("historyView").innerHTML = `
     <div class="hero">
-      <div class="topline"><span>History</span><span class="badge">${S.games.length} Games</span></div>
+      <div class="topline"><span>History</span><span class="badge">${games.length} Games</span></div>
       <h1>Game Log</h1>
-      <div class="meta">Full current-season archive and picks.</div>
+      <div class="meta">Browse season history and picks.</div>
+      <div style="margin-top:12px">
+        <label>Season</label>
+        <select onchange="setHistorySeason(this.value)">${seasonOptions}</select>
+      </div>
+      <div class="scoreboard">
+        <div class="score-card"><div class="name">Aaron</div><div class="bigscore">${seasonTotal.a}</div></div>
+        <div class="score-card"><div class="name">Julie</div><div class="bigscore">${seasonTotal.j}</div></div>
+      </div>
     </div>
-    <div style="margin-top:12px">${rows}</div>
+    <div style="margin-top:12px">${rows || '<div class="section">No games for this season yet.</div>'}</div>
   `;
 }
 
@@ -788,7 +808,7 @@ function renderAllTime(){
   `;
 }
 
-function renderSettings(){
+function renderManage(){
   const scheduledGames = S.games
     .filter(g => g.status !== "Final" && g.status !== "Hidden")
     .sort((a,b)=>Number(a.game_number)-Number(b.game_number));
@@ -812,7 +832,7 @@ function renderSettings(){
   const gameRows = scheduledGames.map(g => `
     <div class="manage-item">
       <div class="manage-top">
-        <span>Game ${esc(g.game_number)} ${g.status === "Hidden" ? "• Hidden" : ""}</span>
+        <span>Game ${esc(g.game_number)}</span>
         <button class="tiny-btn dangerish" onclick="hideGame(${g.id})">Remove</button>
       </div>
       <div class="manage-fields">
@@ -834,19 +854,18 @@ function renderSettings(){
     </div>
   `).join("");
 
-  document.getElementById("settingsView").innerHTML = `
+  document.getElementById("manageView").innerHTML = `
     <div class="hero">
-      <div class="topline"><span>Controls</span><span class="badge">Manual</span></div>
-      <h1>Settings</h1>
-      <div class="meta">Manage roster and upcoming schedule safely from the app.</div>
+      <div class="topline"><span>Manage</span><span class="badge">Control Room</span></div>
+      <h1>Manage</h1>
+      <div class="meta">Roster, schedule, and season controls.</div>
     </div>
 
     <div class="section">
-      <div class="section-head"><div class="section-title">NHL Update Instructions</div></div>
+      <div class="section-head"><div class="section-title">Update Instructions</div></div>
       <div class="instruction-box">
-        <strong>Roster:</strong> Go to NHL.com → Hurricanes → Roster. Add/remove skaters below as needed. Goalies should stay out of the pick list.<br><br>
-        <strong>Schedule:</strong> Go to NHL.com → Hurricanes → Schedule. Add future/playoff games below with date, opponent, game type, and first picker.<br><br>
-        The old auto-refresh buttons were removed because direct NHL API calls can fail from iPhone/GitHub Pages.
+        <strong>Roster:</strong> Use NHL.com → Hurricanes → Roster. Add/remove skaters below as needed. Goalies should stay out of the pick list.<br><br>
+        <strong>Schedule:</strong> Use NHL.com → Hurricanes → Schedule. Add future/playoff games below with date, opponent, type, and first picker.
       </div>
     </div>
 
@@ -880,11 +899,11 @@ function renderSettings(){
       </div>
       <button class="secondary" style="margin-top:10px" onclick="addGameFromUI()">Add Game</button>
       <div class="manage-list">${gameRows || '<div class="note">No upcoming games. Add the next game above.</div>'}</div>
-      <div class="note">Remove hides an upcoming game instead of deleting it. Finalized games are not editable here to protect your history.</div>
+      <div class="note">Remove hides an upcoming game instead of deleting it. Finalized games are protected.</div>
     </div>
 
     <div class="section">
-      <div class="section-head"><div class="section-title">Database</div></div>
+      <div class="section-head"><div class="section-title">Season Controls</div></div>
       <div class="row-sub">
         Active season: <strong>${esc(S.activeSeason?.display_name || "")}</strong><br>
         Games loaded: ${S.games.length}<br>
@@ -895,6 +914,7 @@ function renderSettings(){
         <button class="light" onclick="startNewSeason()">New Season</button>
         <button class="light" onclick="manualRefresh()">Refresh App</button>
       </div>
+      <div class="danger">Deletes are blocked by RLS, so history is protected from accidental wipeouts.</div>
     </div>
   `;
 }
@@ -902,8 +922,8 @@ function renderSettings(){
 function renderAll(){
   renderGame();
   renderHistory();
+  renderManage();
   renderAllTime();
-  renderSettings();
 }
 
 async function createNextGame(){
@@ -926,10 +946,11 @@ async function createNextGame(){
   if (ins.error) throw ins.error;
   S.currentGame = ins.data;
   S.games.push(ins.data);
+  S.allGames.push(ins.data);
 }
 
 async function upsertPick(gameId, owner, slot, player, goals, assists, points){
-  const existing = S.picks.find(p => p.game_id===gameId && p.owner===owner && Number(p.pick_slot)===slot);
+  const existing = S.allPicks.find(p => p.game_id===gameId && p.owner===owner && Number(p.pick_slot)===slot);
 
   const row = {
     game_id:gameId,
@@ -985,146 +1006,6 @@ async function finalizeGame(){
     toast(e.message || "Could not finalize.");
   }
 }
-
-async function refreshRoster(){
-  try{
-    toast("Refreshing roster…");
-    const res = await fetch("https://api-web.nhle.com/v1/roster/CAR/current");
-    const data = await res.json();
-
-    const skaters = [...(data.forwards || []), ...(data.defensemen || [])]
-      .map(p => ({
-        player_name:`${p.firstName?.default || ""} ${p.lastName?.default || ""}`.trim(),
-        position:p.positionCode || "",
-        is_active:true
-      }))
-      .filter(p => p.player_name);
-
-    for (const p of skaters){
-      const r = await db.from("players").upsert(p, {onConflict:"player_name"});
-      if (r.error) throw r.error;
-    }
-
-    await loadAll();
-    toast("Roster refreshed.");
-  } catch(e){
-    toast("Roster refresh failed.");
-  }
-}
-
-async function refreshSchedule(){
-  try{
-    toast("Refreshing schedule…");
-    const seasonKey = S.activeSeason.season_key.replace("-","");
-    const res = await fetch(`https://api-web.nhle.com/v1/club-schedule-season/CAR/${seasonKey}`);
-    const data = await res.json();
-    const nhlGames = data.games || [];
-
-    const existingFinalByDate = new Map(
-      S.games.filter(g => g.status === "Final" && g.game_date).map(g => [g.game_date, g])
-    );
-
-    let inserted = 0;
-
-    for (const item of nhlGames){
-      const d = item.gameDate;
-      if (!d || existingFinalByDate.has(d)) continue;
-
-      const home = item.homeTeam?.abbrev === "CAR";
-      const opp = home ? item.awayTeam?.abbrev : item.homeTeam?.abbrev;
-      const existing = S.games.find(g => g.game_date === d && g.status !== "Final");
-
-      const row = {
-        season_id:S.activeSeason.id,
-        game_date:d,
-        opponent:opp || "TBD",
-        home_away:home ? "Home" : "Away",
-        game_type:item.gameType === 3 ? "Playoffs" : "Regular Season",
-        status:"Scheduled",
-        aaron_points:0,
-        julie_points:0
-      };
-
-      if (existing){
-        const up = await db.from("games").update(row).eq("id", existing.id);
-        if (up.error) throw up.error;
-      } else {
-        const maxNum = S.games.reduce((m,g) => Math.max(m, Number(g.game_number || 0)), 0) + inserted + 1;
-        const ins = await db.from("games").insert({
-          ...row,
-          game_number:maxNum,
-          first_picker:maxNum % 2 ? "Julie" : "Aaron"
-        });
-        if (ins.error) throw ins.error;
-        inserted++;
-      }
-    }
-
-    await loadAll();
-    toast("Schedule refreshed.");
-  } catch(e){
-    toast("Schedule refresh failed.");
-  }
-}
-
-async function startNewSeason(){
-  const key = prompt("New season key? Example: 2026-2027");
-  if (!key) return;
-
-  const display = key.replace("-", "–");
-
-  try{
-    const currentTotals = totals();
-
-    if (S.activeSeason){
-      await db.from("seasons").update({
-        aaron_final_total:currentTotals.a,
-        julie_final_total:currentTotals.j,
-        is_active:false
-      }).eq("id", S.activeSeason.id);
-    }
-
-    const res = await db.from("seasons").upsert({
-      season_key:key,
-      display_name:display,
-      is_active:true,
-      aaron_final_total:0,
-      julie_final_total:0,
-      total_source:"active"
-    }, {onConflict:"season_key"});
-
-    if (res.error) throw res.error;
-
-    await loadAll();
-    toast("New season active.");
-  } catch(e){
-    toast(e.message || "Could not start season.");
-  }
-}
-
-let lastAutoRefresh = 0;
-
-async function autoRefresh(){
-  const now = Date.now();
-  if (now - lastAutoRefresh < 3000) return;
-  lastAutoRefresh = now;
-  try{
-    await loadAll();
-  } catch(e){
-    console.warn("Auto-refresh failed", e);
-  }
-}
-
-document.addEventListener("visibilitychange", () => {
-  if (!document.hidden) autoRefresh();
-});
-
-window.addEventListener("focus", autoRefresh);
-
-window.addEventListener("pageshow", (event) => {
-  if (event.persisted) autoRefresh();
-});
-
 
 async function addPlayerFromUI(){
   const name = document.getElementById("newPlayerName")?.value?.trim();
@@ -1229,6 +1110,65 @@ async function hideGame(gameId){
     toast(e.message || "Could not remove game.");
   }
 }
+
+async function startNewSeason(){
+  const key = prompt("New season key? Example: 2026-2027");
+  if (!key) return;
+
+  const display = key.replace("-", "–");
+
+  try{
+    const currentTotals = totals();
+
+    if (S.activeSeason){
+      await db.from("seasons").update({
+        aaron_final_total:currentTotals.a,
+        julie_final_total:currentTotals.j,
+        is_active:false
+      }).eq("id", S.activeSeason.id);
+    }
+
+    const res = await db.from("seasons").upsert({
+      season_key:key,
+      display_name:display,
+      is_active:true,
+      aaron_final_total:0,
+      julie_final_total:0,
+      total_source:"active"
+    }, {onConflict:"season_key"});
+
+    if (res.error) throw res.error;
+
+    S.selectedHistorySeasonId = null;
+    await loadAll();
+    toast("New season active.");
+  } catch(e){
+    toast(e.message || "Could not start season.");
+  }
+}
+
+let lastAutoRefresh = 0;
+
+async function autoRefresh(){
+  const now = Date.now();
+  if (now - lastAutoRefresh < 3000) return;
+  lastAutoRefresh = now;
+  try{
+    await loadAll();
+  } catch(e){
+    console.warn("Auto-refresh failed", e);
+  }
+}
+
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden) autoRefresh();
+});
+
+window.addEventListener("focus", autoRefresh);
+
+window.addEventListener("pageshow", (event) => {
+  if (event.persisted) autoRefresh();
+});
 
 window.addEventListener("load", async () => {
   try{
