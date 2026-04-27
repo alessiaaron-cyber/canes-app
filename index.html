@@ -361,6 +361,27 @@
       font-weight:750;
       line-height:1.45;
     }
+    .card-actions{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:8px;
+      margin-top:10px;
+    }
+    .edit-form{
+      margin-top:10px;
+      border-top:1px solid var(--line);
+      padding-top:10px;
+    }
+    .edit-form .manage-fields{
+      margin-top:6px;
+    }
+    .total-only{
+      text-align:center;
+      padding:16px 12px;
+      color:var(--muted);
+      font-weight:850;
+      line-height:1.4;
+    }
     .actions{
       display:grid;
       grid-template-columns:1fr 1fr;
@@ -479,6 +500,7 @@ let S = {
   seasons: [],
   activeSeason: null,
   selectedHistorySeasonId: null,
+  editingGameId: null,
   games: [],
   allGames: [],
   picks: [],
@@ -739,37 +761,105 @@ function setHistorySeason(value){
   renderHistory();
 }
 
+function setEditingGame(gameId){
+  S.editingGameId = Number(gameId);
+  renderHistory();
+}
+
+function cancelEditingGame(){
+  S.editingGameId = null;
+  renderHistory();
+}
+
 function renderHistory(){
   const selectedSeason = S.seasons.find(s => Number(s.id) === Number(S.selectedHistorySeasonId)) || S.activeSeason;
   const games = S.allGames
     .filter(g => Number(g.season_id) === Number(selectedSeason.id))
     .sort((a,b) => Number(b.game_number)-Number(a.game_number));
 
-  const seasonTotal = {
+  const hasGameRows = games.length > 0;
+  const calculated = {
     a: games.filter(g=>g.status==="Final").reduce((n,g)=>n+Number(g.aaron_points||0),0),
     j: games.filter(g=>g.status==="Final").reduce((n,g)=>n+Number(g.julie_points||0),0)
   };
+  const seasonTotal = hasGameRows
+    ? calculated
+    : {a:Number(selectedSeason.aaron_final_total||0), j:Number(selectedSeason.julie_final_total||0)};
 
   const seasonOptions = S.seasons.map(s =>
     `<option value="${s.id}" ${Number(s.id)===Number(selectedSeason.id) ? "selected" : ""}>${esc(s.display_name)}</option>`
   ).join("");
 
-  const rows = games.map(g => `
-    <div class="row-card">
-      <div class="row-top"><span>Game ${esc(g.game_number)} • ${esc(g.game_type || "")}</span><span>${Number(g.aaron_points||0)}-${Number(g.julie_points||0)}</span></div>
-      <div class="row-sub">
-        ${esc(g.game_date || "")} ${g.opponent ? "• " + esc(g.opponent) : ""}<br>
-        Aaron: ${esc(picksFor(g.id,"Aaron") || "—")}<br>
-        Julie: ${esc(picksFor(g.id,"Julie") || "—")}
+  const rows = games.map(g => {
+    const editing = Number(S.editingGameId) === Number(g.id);
+    const aPicks = S.allPicks.filter(p => p.game_id === g.id && p.owner === "Aaron").sort((a,b)=>Number(a.pick_slot)-Number(b.pick_slot));
+    const jPicks = S.allPicks.filter(p => p.game_id === g.id && p.owner === "Julie").sort((a,b)=>Number(a.pick_slot)-Number(b.pick_slot));
+    const getPick = (arr, slot) => arr.find(p => Number(p.pick_slot) === slot)?.player_name || "";
+    const editBlock = editing ? `
+      <div class="edit-form">
+        <div class="manage-fields">
+          <div><label>Date</label><input id="editDate_${g.id}" type="date" value="${esc(g.game_date || "")}"></div>
+          <div><label>Opponent</label><input id="editOpponent_${g.id}" value="${esc(g.opponent || "")}"></div>
+          <div><label>Type</label>
+            <select id="editType_${g.id}">
+              <option ${g.game_type==="Regular Season"?"selected":""}>Regular Season</option>
+              <option ${g.game_type==="Playoffs"?"selected":""}>Playoffs</option>
+            </select>
+          </div>
+          <div><label>First Pick</label>
+            <select id="editFirst_${g.id}">
+              <option ${g.first_picker==="Aaron"?"selected":""}>Aaron</option>
+              <option ${g.first_picker==="Julie"?"selected":""}>Julie</option>
+            </select>
+          </div>
+          <div><label>Aaron Pts</label><input id="editAaronPts_${g.id}" type="number" value="${Number(g.aaron_points||0)}"></div>
+          <div><label>Julie Pts</label><input id="editJuliePts_${g.id}" type="number" value="${Number(g.julie_points||0)}"></div>
+        </div>
+
+        <div class="manage-fields" style="margin-top:8px">
+          <div><label>Aaron Pick 1</label><input id="editA1_${g.id}" value="${esc(getPick(aPicks,1))}"></div>
+          <div><label>Aaron Pick 2</label><input id="editA2_${g.id}" value="${esc(getPick(aPicks,2))}"></div>
+          <div><label>Julie Pick 1</label><input id="editJ1_${g.id}" value="${esc(getPick(jPicks,1))}"></div>
+          <div><label>Julie Pick 2</label><input id="editJ2_${g.id}" value="${esc(getPick(jPicks,2))}"></div>
+        </div>
+
+        <div class="card-actions">
+          <button class="light" onclick="cancelEditingGame()">Cancel</button>
+          <button onclick="saveHistoryGame(${g.id})">Save Changes</button>
+        </div>
+        <div class="note">This edits the historical record. Season totals shown in History recalculate from finalized games.</div>
       </div>
+    ` : `
+      <div class="card-actions">
+        <button class="light" onclick="setEditingGame(${g.id})">Edit Game</button>
+        <button class="light" onclick="manualRefresh()">Refresh</button>
+      </div>
+    `;
+
+    return `
+      <div class="row-card">
+        <div class="row-top"><span>Game ${esc(g.game_number)} • ${esc(g.game_type || "")}</span><span>${Number(g.aaron_points||0)}-${Number(g.julie_points||0)}</span></div>
+        <div class="row-sub">
+          ${esc(g.game_date || "")} ${g.opponent ? "• " + esc(g.opponent) : ""}<br>
+          Aaron: ${esc(picksFor(g.id,"Aaron") || "—")}<br>
+          Julie: ${esc(picksFor(g.id,"Julie") || "—")}
+        </div>
+        ${editBlock}
+      </div>
+    `;
+  }).join("");
+
+  const noGameRowsMessage = !hasGameRows ? `
+    <div class="section total-only">
+      Season totals were imported, but game-by-game history was not available for this season.
     </div>
-  `).join("");
+  ` : "";
 
   document.getElementById("historyView").innerHTML = `
     <div class="hero">
-      <div class="topline"><span>History</span><span class="badge">${games.length} Games</span></div>
+      <div class="topline"><span>History</span><span class="badge">${hasGameRows ? games.length + " Games" : "Totals"}</span></div>
       <h1>Game Log</h1>
-      <div class="meta">Browse season history and picks.</div>
+      <div class="meta">Browse seasons, review picks, and fix past records.</div>
       <div style="margin-top:12px">
         <label>Season</label>
         <select onchange="setHistorySeason(this.value)">${seasonOptions}</select>
@@ -779,7 +869,8 @@ function renderHistory(){
         <div class="score-card"><div class="name">Julie</div><div class="bigscore">${seasonTotal.j}</div></div>
       </div>
     </div>
-    <div style="margin-top:12px">${rows || '<div class="section">No games for this season yet.</div>'}</div>
+    ${noGameRowsMessage}
+    <div style="margin-top:12px">${rows || ""}</div>
   `;
 }
 
@@ -1108,6 +1199,43 @@ async function hideGame(gameId){
     toast("Game removed.");
   } catch(e){
     toast(e.message || "Could not remove game.");
+  }
+}
+
+
+async function saveHistoryGame(gameId){
+  try{
+    const aPts = Number(document.getElementById(`editAaronPts_${gameId}`)?.value || 0);
+    const jPts = Number(document.getElementById(`editJuliePts_${gameId}`)?.value || 0);
+    const patch = {
+      game_date: document.getElementById(`editDate_${gameId}`)?.value || null,
+      opponent: document.getElementById(`editOpponent_${gameId}`)?.value || null,
+      game_type: document.getElementById(`editType_${gameId}`)?.value || "Regular Season",
+      first_picker: document.getElementById(`editFirst_${gameId}`)?.value || null,
+      aaron_points: aPts,
+      julie_points: jPts,
+      winner: win(aPts, jPts),
+      recap: `Edited historical record. Aaron ${aPts}, Julie ${jPts}.`
+    };
+
+    const upd = await db.from("games").update(patch).eq("id", gameId);
+    if (upd.error) throw upd.error;
+
+    const a1 = document.getElementById(`editA1_${gameId}`)?.value?.trim();
+    const a2 = document.getElementById(`editA2_${gameId}`)?.value?.trim();
+    const j1 = document.getElementById(`editJ1_${gameId}`)?.value?.trim();
+    const j2 = document.getElementById(`editJ2_${gameId}`)?.value?.trim();
+
+    if (a1) await upsertPick(gameId, "Aaron", 1, a1, 0, 0, 0);
+    if (a2) await upsertPick(gameId, "Aaron", 2, a2, 0, 0, 0);
+    if (j1) await upsertPick(gameId, "Julie", 1, j1, 0, 0, 0);
+    if (j2) await upsertPick(gameId, "Julie", 2, j2, 0, 0, 0);
+
+    S.editingGameId = null;
+    await loadAll();
+    toast("History updated.");
+  } catch(e){
+    toast(e.message || "Could not save history.");
   }
 }
 
