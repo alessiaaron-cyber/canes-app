@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Canes Rivalry" />
+  <meta name="theme-color" content="#f7f8fa" />
+  <title>Canes Rivalry</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root{
+      --red:#c8102e;
+      --black:#111827;
+      --ink:#111827;
+      --muted:#6b7280;
+      --bg:#f7f8fa;
+      --card:#ffffff;
+      --line:#e5e7eb;
+      --soft:#f1f3f5;
+      --green:#15803d;
+      --blue:#1d4ed8;
+      --gold:#b45309;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--ink);
+      font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      -webkit-font-smoothing:antialiased;
+    }
+    .app{
+      max-width:430px;
+      margin:0 auto;
+      padding:calc(10px + env(safe-area-inset-top)) 12px calc(86px + env(safe-area-inset-bottom));
+      min-height:100vh;
+    }
+    .hero{
+      background:linear-gradient(180deg,#fff,#f9fafb);
+      border:1px solid var(--line);
+      border-radius:24px;
+      padding:14px;
+      box-shadow:0 12px 30px rgba(17,24,39,.08);
+    }
+    .topline{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      font-weight:900;
+      color:var(--muted);
+      font-size:11px;
+    }
+    .badge{
+      background:var(--red);
+      color:#fff;
+      padding:6px 9px;
+      border-radius:999px;
+      font-size:11px;
+      font-weight:950;
+      letter-spacing:.05em;
+      white-space:nowrap;
+    }
+    h1{
+      margin:9px 0 4px;
+      font-size:30px;
+      letter-spacing:-.055em;
+      line-height:.95;
+    }
+    .meta{
+      color:var(--muted);
+      font-weight:800;
+      font-size:13px;
+      line-height:1.3;
+    }
+    .scoreboard{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+      margin-top:12px;
+    }
+    .score-card{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:19px;
+      text-align:center;
+      padding:12px 8px 10px;
+    }
+    .name{
+      color:var(--muted);
+      font-weight:950;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      font-size:12px;
+    }
+    .bigscore{
+      margin-top:5px;
+      font-size:52px;
+      line-height:.9;
+      font-weight:1000;
+      letter-spacing:-.07em;
+    }
+    .leader{
+      margin-top:10px;
+      background:var(--black);
+      color:#fff;
+      border-radius:15px;
+      padding:10px;
+      text-align:center;
+      font-size:14px;
+      font-weight:950;
+      letter-spacing:.01em;
+    }
+    .section{
+      margin-top:12px;
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:22px;
+      padding:13px;
+      box-shadow:0 8px 22px rgba(17,24,39,.045);
+    }
+    .section-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:10px;
+    }
+    .section-title{
+      font-weight:1000;
+      font-size:15px;
+      letter-spacing:-.02em;
+    }
+    .mini{
+      color:var(--muted);
+      font-size:12px;
+      font-weight:850;
+    }
+    .grid2{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+    }
+    .panel{
+      border:1px solid var(--line);
+      border-radius:17px;
+      padding:10px;
+      background:#fbfbfc;
+    }
+    .panel-title{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      margin:0 0 9px;
+      font-size:15px;
+      font-weight:1000;
+      letter-spacing:-.02em;
+    }
+    label{
+      display:block;
+      margin:8px 0 4px;
+      text-transform:uppercase;
+      letter-spacing:.06em;
+      font-size:10px;
+      font-weight:950;
+      color:var(--muted);
+    }
+    select,input{
+      width:100%;
+      border:1px solid var(--line);
+      border-radius:13px;
+      background:#fff;
+      color:var(--ink);
+      min-height:42px;
+      padding:9px 8px;
+      font-size:14px;
+      font-weight:850;
+      outline:none;
+    }
+    input[type=number]{
+      text-align:center;
+      font-size:16px;
+      padding-left:3px;
+      padding-right:3px;
+    }
+    .stat-row{
+      display:grid;
+      grid-template-columns:minmax(0,1fr) 44px 44px;
+      gap:7px;
+      align-items:end;
+      margin-top:8px;
+    }
+    .player-mini{
+      font-weight:950;
+      color:#374151;
+      font-size:12px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      padding-bottom:11px;
+    }
+    .live-score{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+    }
+    .live-box{
+      border:1px solid var(--line);
+      border-radius:17px;
+      background:#fbfbfc;
+      text-align:center;
+      padding:11px 8px;
+    }
+    .live-num{
+      font-size:34px;
+      line-height:.95;
+      font-weight:1000;
+      letter-spacing:-.05em;
+    }
+    .live-label{
+      margin-top:5px;
+      color:var(--muted);
+      font-size:11px;
+      font-weight:950;
+      text-transform:uppercase;
+      letter-spacing:.07em;
+    }
+    button{
+      width:100%;
+      border:0;
+      border-radius:16px;
+      padding:14px 12px;
+      background:var(--red);
+      color:#fff;
+      font-size:16px;
+      font-weight:1000;
+      box-shadow:0 10px 22px rgba(200,16,46,.22);
+    }
+    button.secondary{
+      background:var(--black);
+      box-shadow:none;
+    }
+    button.light{
+      background:#fff;
+      color:var(--ink);
+      border:1px solid var(--line);
+      box-shadow:none;
+      padding:11px 9px;
+      font-size:13px;
+    }
+    button:disabled{opacity:.55}
+    .tabs{
+      position:fixed;
+      left:0;right:0;bottom:0;
+      display:flex;
+      justify-content:center;
+      padding:8px 10px calc(8px + env(safe-area-inset-bottom));
+      background:rgba(255,255,255,.94);
+      backdrop-filter:blur(14px);
+      border-top:1px solid var(--line);
+      z-index:10;
+    }
+    .tabs-inner{
+      max-width:430px;
+      width:100%;
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:8px;
+    }
+    .tab{
+      border-radius:14px;
+      padding:10px 4px;
+      background:#f0f2f5;
+      color:var(--ink);
+      box-shadow:none;
+      font-size:12px;
+      font-weight:950;
+    }
+    .tab.active{
+      background:var(--black);
+      color:#fff;
+    }
+    .hidden{display:none}
+    .row-card{
+      border:1px solid var(--line);
+      border-radius:17px;
+      background:#fff;
+      padding:11px;
+      margin-bottom:9px;
+    }
+    .row-top{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:8px;
+      font-weight:1000;
+      margin-bottom:6px;
+    }
+    .row-sub{
+      color:#374151;
+      font-size:12px;
+      font-weight:700;
+      line-height:1.45;
+    }
+    .actions{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:8px;
+      margin-top:8px;
+    }
+    .note{
+      font-size:12px;
+      color:var(--muted);
+      font-weight:700;
+      line-height:1.35;
+      margin-top:9px;
+    }
+    .toast{
+      position:fixed;
+      left:50%;
+      bottom:88px;
+      transform:translateX(-50%);
+      background:var(--black);
+      color:#fff;
+      padding:11px 15px;
+      border-radius:999px;
+      font-size:13px;
+      font-weight:950;
+      opacity:0;
+      pointer-events:none;
+      transition:.2s ease;
+      z-index:20;
+      max-width:90vw;
+      text-align:center;
+    }
+    .toast.show{opacity:1}
+    .loader{
+      padding:30px 20px;
+      text-align:center;
+      color:var(--muted);
+      font-weight:900;
+    }
+    .danger{
+      color:#991b1b;
+      background:#fee2e2;
+      border:1px solid #fecaca;
+      border-radius:14px;
+      padding:10px;
+      font-size:12px;
+      font-weight:800;
+      line-height:1.35;
+      margin-top:10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div id="gameView" class="loader">Loading Canes Rivalry…</div>
+    <div id="historyView" class="hidden"></div>
+    <div id="alltimeView" class="hidden"></div>
+    <div id="settingsView" class="hidden"></div>
+  </div>
+
+  <div class="tabs">
+    <div class="tabs-inner">
+      <button class="tab active" onclick="showTab('game', this)">Game</button>
+      <button class="tab" onclick="showTab('history', this)">History</button>
+      <button class="tab" onclick="showTab('alltime', this)">All-Time</button>
+      <button class="tab" onclick="showTab('settings', this)">Settings</button>
+    </div>
+  </div>
+  <div id="toast" class="toast"></div>
+
+<script>
+const SUPABASE_URL = "https://hhhxgbztfizmwxbuoprq.supabase.co";
+const SUPABASE_KEY = "sb_publishable_4laNe86TxiC5pLkAF5NeIg_oMmf1unQ";
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let S = {
+  seasons: [],
+  activeSeason: null,
+  games: [],
+  picks: [],
+  players: [],
+  currentGame: null,
+  form: {
+    a1:"", a2:"", j1:"", j2:"",
+    ag1:0, aa1:0, ag2:0, aa2:0,
+    jg1:0, ja1:0, jg2:0, ja2:0,
+    firstGoal:""
+  }
+};
+
+function toast(msg){
+  const el = document.getElementById("toast");
+  el.textContent = msg;
+  el.classList.add("show");
+  setTimeout(()=>el.classList.remove("show"), 2300);
+}
+
+function showTab(tab, btn){
+  for (const id of ["gameView","historyView","alltimeView","settingsView"]) {
+    document.getElementById(id).classList.add("hidden");
+  }
+  document.getElementById(tab+"View").classList.remove("hidden");
+  document.querySelectorAll(".tab").forEach(b=>b.classList.remove("active"));
+  btn.classList.add("active");
+}
+
+function esc(x){ return (x ?? "").toString().replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])); }
+function win(a,j){ return Number(a)>Number(j) ? "Aaron" : Number(j)>Number(a) ? "Julie" : "Tie"; }
+function pickPoints(player, goals, assists, firstGoal){
+  goals = Number(goals || 0); assists = Number(assists || 0);
+  let pts = goals * 2 + assists;
+  if (player && firstGoal && player === firstGoal && goals > 0) pts += 1;
+  return pts;
+}
+function liveScore(){
+  const f = S.form;
+  const a = pickPoints(f.a1,f.ag1,f.aa1,f.firstGoal) + pickPoints(f.a2,f.ag2,f.aa2,f.firstGoal);
+  const j = pickPoints(f.j1,f.jg1,f.ja1,f.firstGoal) + pickPoints(f.j2,f.jg2,f.ja2,f.firstGoal);
+  return {a,j,w:win(a,j)};
+}
+function totals(){
+  const finals = S.games.filter(g=>g.status === "Final");
+  return {
+    a: finals.reduce((n,g)=>n + Number(g.aaron_points || 0), 0),
+    j: finals.reduce((n,g)=>n + Number(g.julie_points || 0), 0)
+  };
+}
+function playerNames(){
+  const fromDb = S.players.map(p=>p.player_name).filter(Boolean);
+  const fallback = ["Aho","Jarvis","Svech","Ehlers","Stanky","Blake","Ghost","Hall","Staal","Martinook","Brindy","Nikishin"];
+  return [...new Set((fromDb.length ? fromDb : fallback))].sort();
+}
+function playerOptions(selected){
+  return `<option value="">Select</option>` + playerNames().map(p=>`<option value="${esc(p)}" ${p===selected?"selected":""}>${esc(p)}</option>`).join("");
+}
+function firstGoalOptions(){
+  const vals = [...new Set([S.form.a1,S.form.a2,S.form.j1,S.form.j2].filter(Boolean))];
+  return `<option value="">No picked first goal</option>` + vals.map(p=>`<option value="${esc(p)}" ${p===S.form.firstGoal?"selected":""}>${esc(p)}</option>`).join("");
+}
+function setF(k,v){
+  S.form[k] = v;
+  renderGame();
+}
+function setNum(k,v){
+  S.form[k] = Math.max(0, Number(v || 0));
+  renderGame();
+}
+
+async function loadAll(){
+  const seasons = await db.from("seasons").select("*").order("season_key");
+  if (seasons.error) throw seasons.error;
+  S.seasons = seasons.data || [];
+  S.activeSeason = S.seasons.find(s=>s.is_active) || S.seasons[S.seasons.length - 1];
+  if (!S.activeSeason) throw new Error("No active season found.");
+
+  const [games, players] = await Promise.all([
+    db.from("games").select("*").eq("season_id", S.activeSeason.id).order("game_number"),
+    db.from("players").select("*").eq("is_active", true).order("player_name")
+  ]);
+  if (games.error) throw games.error;
+  S.games = games.data || [];
+  S.players = players.data || [];
+
+  if (S.games.length){
+    const ids = S.games.map(g=>g.id);
+    const picks = await db.from("picks").select("*").in("game_id", ids).order("pick_slot");
+    if (picks.error) throw picks.error;
+    S.picks = picks.data || [];
+  } else {
+    S.picks = [];
+  }
+
+  S.currentGame = S.games.find(g=>g.status !== "Final");
+  if (!S.currentGame) await createNextGame();
+
+  hydrateForm();
+  renderAll();
+}
+
+function hydrateForm(){
+  const g = S.currentGame;
+  const p = S.picks.filter(x=>x.game_id === g?.id);
+  const fp = (owner, slot) => p.find(x=>x.owner===owner && Number(x.pick_slot)===slot);
+  const a1=fp("Aaron",1), a2=fp("Aaron",2), j1=fp("Julie",1), j2=fp("Julie",2);
+  S.form = {
+    a1:a1?.player_name || "", a2:a2?.player_name || "", j1:j1?.player_name || "", j2:j2?.player_name || "",
+    ag1:a1?.goals || 0, aa1:a1?.assists || 0, ag2:a2?.goals || 0, aa2:a2?.assists || 0,
+    jg1:j1?.goals || 0, ja1:j1?.assists || 0, jg2:j2?.goals || 0, ja2:j2?.assists || 0,
+    firstGoal:g?.first_goal_scorer || ""
+  };
+}
+
+function renderGame(){
+  const g = S.currentGame || {};
+  const t = totals();
+  const l = liveScore();
+  const lead = t.a===t.j ? "ALL SQUARE" : t.a>t.j ? `AARON +${t.a-t.j}` : `JULIE +${t.j-t.a}`;
+  const opp = g.opponent && g.opponent !== "Next Game" ? g.opponent : "Next Game";
+
+  document.getElementById("gameView").innerHTML = `
+    <div class="hero">
+      <div class="topline"><span>Canes Rivalry</span><span class="badge">${esc(S.activeSeason?.display_name || "")}</span></div>
+      <h1>Game Day</h1>
+      <div class="meta">${esc(opp)} • Game ${esc(g.game_number || "—")} • First Pick: ${esc(g.first_picker || "—")}</div>
+      <div class="scoreboard">
+        <div class="score-card"><div class="name">Aaron</div><div class="bigscore">${t.a}</div></div>
+        <div class="score-card"><div class="name">Julie</div><div class="bigscore">${t.j}</div></div>
+      </div>
+      <div class="leader">${lead}</div>
+    </div>
+
+    <div class="section">
+      <div class="section-head"><div class="section-title">Picks</div><div class="mini">2 each</div></div>
+      <div class="grid2">
+        <div class="panel">
+          <div class="panel-title">Aaron</div>
+          <label>Pick 1</label><select onchange="setF('a1',this.value)">${playerOptions(S.form.a1)}</select>
+          <label>Pick 2</label><select onchange="setF('a2',this.value)">${playerOptions(S.form.a2)}</select>
+        </div>
+        <div class="panel">
+          <div class="panel-title">Julie</div>
+          <label>Pick 1</label><select onchange="setF('j1',this.value)">${playerOptions(S.form.j1)}</select>
+          <label>Pick 2</label><select onchange="setF('j2',this.value)">${playerOptions(S.form.j2)}</select>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-head"><div class="section-title">Live Stats</div><div class="mini">G / A</div></div>
+      <div class="grid2">
+        <div>
+          <div class="stat-row"><div class="player-mini">${esc(S.form.a1 || "Aaron P1")}</div><div><label>G</label><input type="number" min="0" value="${S.form.ag1}" oninput="setNum('ag1',this.value)"></div><div><label>A</label><input type="number" min="0" value="${S.form.aa1}" oninput="setNum('aa1',this.value)"></div></div>
+          <div class="stat-row"><div class="player-mini">${esc(S.form.a2 || "Aaron P2")}</div><div><label>G</label><input type="number" min="0" value="${S.form.ag2}" oninput="setNum('ag2',this.value)"></div><div><label>A</label><input type="number" min="0" value="${S.form.aa2}" oninput="setNum('aa2',this.value)"></div></div>
+        </div>
+        <div>
+          <div class="stat-row"><div class="player-mini">${esc(S.form.j1 || "Julie P1")}</div><div><label>G</label><input type="number" min="0" value="${S.form.jg1}" oninput="setNum('jg1',this.value)"></div><div><label>A</label><input type="number" min="0" value="${S.form.ja1}" oninput="setNum('ja1',this.value)"></div></div>
+          <div class="stat-row"><div class="player-mini">${esc(S.form.j2 || "Julie P2")}</div><div><label>G</label><input type="number" min="0" value="${S.form.jg2}" oninput="setNum('jg2',this.value)"></div><div><label>A</label><input type="number" min="0" value="${S.form.ja2}" oninput="setNum('ja2',this.value)"></div></div>
+        </div>
+      </div>
+      <label>First Goal Scorer</label>
+      <select onchange="setF('firstGoal',this.value)">${firstGoalOptions()}</select>
+    </div>
+
+    <div class="section">
+      <div class="section-head"><div class="section-title">Game Score</div><div class="mini">${esc(l.w)}</div></div>
+      <div class="live-score">
+        <div class="live-box"><div class="live-num">${l.a}</div><div class="live-label">Aaron</div></div>
+        <div class="live-box"><div class="live-num">${l.j}</div><div class="live-label">Julie</div></div>
+      </div>
+      <div style="margin-top:12px"><button onclick="finalizeGame()">🔒 Lock Final</button></div>
+    </div>
+  `;
+}
+
+function picksFor(gameId, owner){
+  return S.picks
+    .filter(p=>p.game_id===gameId && p.owner===owner)
+    .sort((a,b)=>Number(a.pick_slot)-Number(b.pick_slot))
+    .map(p=>(p.is_carry_forward ? "*" : "") + p.player_name)
+    .join(" / ");
+}
+
+function renderHistory(){
+  const rows = [...S.games].sort((a,b)=>Number(b.game_number)-Number(a.game_number)).map(g=>`
+    <div class="row-card">
+      <div class="row-top"><span>Game ${esc(g.game_number)} • ${esc(g.game_type || "")}</span><span>${Number(g.aaron_points||0)}-${Number(g.julie_points||0)}</span></div>
+      <div class="row-sub">
+        ${esc(g.game_date || "")} ${g.opponent ? "• " + esc(g.opponent) : ""}<br>
+        Aaron: ${esc(picksFor(g.id,"Aaron") || "—")}<br>
+        Julie: ${esc(picksFor(g.id,"Julie") || "—")}
+      </div>
+    </div>
+  `).join("");
+  document.getElementById("historyView").innerHTML = `
+    <div class="hero"><div class="topline">History</div><h1>Game Log</h1><div class="meta">Full current season and picks.</div></div>
+    <div style="margin-top:12px">${rows}</div>
+  `;
+}
+
+function renderAllTime(){
+  const totalA = S.seasons.reduce((n,s)=>n+Number(s.aaron_final_total || 0),0);
+  const totalJ = S.seasons.reduce((n,s)=>n+Number(s.julie_final_total || 0),0);
+  const rows = S.seasons.map(s=>`
+    <div class="row-card">
+      <div class="row-top"><span>${esc(s.display_name)}</span><span>${Number(s.aaron_final_total||0)}-${Number(s.julie_final_total||0)}</span></div>
+      <div class="row-sub">${Number(s.aaron_final_total)>Number(s.julie_final_total) ? "Aaron season win" : Number(s.julie_final_total)>Number(s.aaron_final_total) ? "Julie season win" : "Season tie"} • ${esc(s.total_source || "")}</div>
+    </div>
+  `).join("");
+  document.getElementById("alltimeView").innerHTML = `
+    <div class="hero">
+      <div class="topline">All-Time</div><h1>Rivalry Board</h1>
+      <div class="scoreboard">
+        <div class="score-card"><div class="name">Aaron</div><div class="bigscore">${totalA}</div></div>
+        <div class="score-card"><div class="name">Julie</div><div class="bigscore">${totalJ}</div></div>
+      </div>
+      <div class="leader">${totalA===totalJ ? "ALL-TIME TIE" : totalA>totalJ ? "AARON ALL-TIME LEAD" : "JULIE ALL-TIME LEAD"}</div>
+    </div>
+    <div style="margin-top:12px">${rows}</div>
+  `;
+}
+
+function renderSettings(){
+  document.getElementById("settingsView").innerHTML = `
+    <div class="hero"><div class="topline">Controls</div><h1>Settings</h1><div class="meta">Safe actions only. Finalized games are protected.</div></div>
+    <div class="section">
+      <div class="section-head"><div class="section-title">Refresh</div><div class="mini">NHL data</div></div>
+      <button class="secondary" onclick="refreshRoster()">Refresh Roster</button>
+      <div class="actions">
+        <button class="light" onclick="refreshSchedule()">Refresh Schedule</button>
+        <button class="light" onclick="startNewSeason()">New Season</button>
+      </div>
+      <div class="note">Roster refresh updates the Players list. Schedule refresh only inserts/updates non-final scheduled games. It does not touch finalized games or picks.</div>
+      <div class="danger">Security note: your RLS blocks deletes. That protects history from accidental wipeouts.</div>
+    </div>
+    <div class="section">
+      <div class="section-head"><div class="section-title">Database</div></div>
+      <div class="row-sub">
+        Active season: <strong>${esc(S.activeSeason?.display_name || "")}</strong><br>
+        Games loaded: ${S.games.length}<br>
+        Picks loaded: ${S.picks.length}<br>
+        Players loaded: ${S.players.length}
+      </div>
+    </div>
+  `;
+}
+
+function renderAll(){
+  renderGame();
+  renderHistory();
+  renderAllTime();
+  renderSettings();
+}
+
+async function createNextGame(){
+  const maxNum = S.games.reduce((m,g)=>Math.max(m, Number(g.game_number || 0)),0);
+  const nextNum = maxNum + 1;
+  const firstPicker = nextNum % 2 ? "Julie" : "Aaron";
+  const ins = await db.from("games").insert({
+    season_id:S.activeSeason.id,
+    game_number:nextNum,
+    game_type:"Regular Season",
+    opponent:"Next Game",
+    first_picker:firstPicker,
+    status:"Scheduled",
+    aaron_points:0,
+    julie_points:0
+  }).select().single();
+  if (ins.error) throw ins.error;
+  S.currentGame = ins.data;
+  S.games.push(ins.data);
+}
+
+async function upsertPick(gameId, owner, slot, player, goals, assists, points){
+  const existing = S.picks.find(p=>p.game_id===gameId && p.owner===owner && Number(p.pick_slot)===slot);
+  const row = {
+    game_id:gameId,
+    owner,
+    pick_slot:slot,
+    player_name:player,
+    goals:Number(goals||0),
+    assists:Number(assists||0),
+    points:Number(points||0),
+    is_carry_forward:false,
+    original_pick_text:player
+  };
+  if (existing){
+    const res = await db.from("picks").update(row).eq("id", existing.id);
+    if (res.error) throw res.error;
+  } else {
+    const res = await db.from("picks").insert(row);
+    if (res.error) throw res.error;
+  }
+}
+
+async function finalizeGame(){
+  try{
+    const g = S.currentGame;
+    if (!g) return toast("No current game.");
+    if (!S.form.a1 || !S.form.a2 || !S.form.j1 || !S.form.j2) return toast("Pick all 4 players first.");
+    const l = liveScore();
+    const recap = l.w === "Tie" ? `Tie ${l.a}-${l.j}. Nobody gets bragging rights.` : `${l.w} wins ${l.a}-${l.j}.`;
+    const upd = await db.from("games").update({
+      status:"Final",
+      first_goal_scorer:S.form.firstGoal || null,
+      aaron_points:l.a,
+      julie_points:l.j,
+      winner:l.w,
+      recap
+    }).eq("id", g.id);
+    if (upd.error) throw upd.error;
+
+    await upsertPick(g.id,"Aaron",1,S.form.a1,S.form.ag1,S.form.aa1,pickPoints(S.form.a1,S.form.ag1,S.form.aa1,S.form.firstGoal));
+    await upsertPick(g.id,"Aaron",2,S.form.a2,S.form.ag2,S.form.aa2,pickPoints(S.form.a2,S.form.ag2,S.form.aa2,S.form.firstGoal));
+    await upsertPick(g.id,"Julie",1,S.form.j1,S.form.jg1,S.form.ja1,pickPoints(S.form.j1,S.form.jg1,S.form.ja1,S.form.firstGoal));
+    await upsertPick(g.id,"Julie",2,S.form.j2,S.form.jg2,S.form.ja2,pickPoints(S.form.j2,S.form.jg2,S.form.ja2,S.form.firstGoal));
+
+    await loadAll();
+    toast("Game locked. Next game loaded.");
+  } catch(e){
+    toast(e.message || "Could not finalize.");
+  }
+}
+
+async function refreshRoster(){
+  try{
+    toast("Refreshing roster…");
+    const res = await fetch("https://api-web.nhle.com/v1/roster/CAR/current");
+    const data = await res.json();
+    const skaters = [...(data.forwards||[]), ...(data.defensemen||[])].map(p=>({
+      player_name: `${p.firstName?.default || ""} ${p.lastName?.default || ""}`.trim(),
+      position: p.positionCode || "",
+      is_active:true
+    })).filter(p=>p.player_name);
+    for (const p of skaters){
+      await db.from("players").upsert(p, {onConflict:"player_name"});
+    }
+    await loadAll();
+    toast("Roster refreshed.");
+  } catch(e){ toast("Roster refresh failed."); }
+}
+
+async function refreshSchedule(){
+  try{
+    toast("Refreshing schedule…");
+    const seasonKey = S.activeSeason.season_key.replace("-","");
+    const res = await fetch(`https://api-web.nhle.com/v1/club-schedule-season/CAR/${seasonKey}`);
+    const data = await res.json();
+    const games = data.games || [];
+    const existingFinalByDate = new Map(S.games.filter(g=>g.status==="Final").map(g=>[g.game_date,g]));
+    let inserted = 0;
+    for (const item of games){
+      const d = item.gameDate;
+      if (!d || existingFinalByDate.has(d)) continue;
+      const home = item.homeTeam?.abbrev === "CAR";
+      const opp = home ? item.awayTeam?.abbrev : item.homeTeam?.abbrev;
+      const existing = S.games.find(g=>g.game_date===d && g.status!=="Final");
+      const row = {
+        season_id:S.activeSeason.id,
+        game_date:d,
+        opponent:opp || "TBD",
+        home_away: home ? "Home" : "Away",
+        game_type: item.gameType === 3 ? "Playoffs" : "Regular Season",
+        status:"Scheduled",
+        aaron_points:0,
+        julie_points:0
+      };
+      if (existing){
+        await db.from("games").update(row).eq("id", existing.id);
+      } else {
+        const maxNum = S.games.reduce((m,g)=>Math.max(m, Number(g.game_number || 0)),0) + inserted + 1;
+        await db.from("games").insert({...row, game_number:maxNum, first_picker: maxNum % 2 ? "Julie" : "Aaron"});
+        inserted++;
+      }
+    }
+    await loadAll();
+    toast("Schedule refreshed.");
+  } catch(e){ toast("Schedule refresh failed."); }
+}
+
+async function startNewSeason(){
+  const key = prompt("New season key? Example: 2026-2027");
+  if (!key) return;
+  const display = key.replace("-", "–");
+  try{
+    await db.from("seasons").update({is_active:false}).neq("season_key", key);
+    const res = await db.from("seasons").upsert({
+      season_key:key,
+      display_name:display,
+      is_active:true,
+      aaron_final_total:0,
+      julie_final_total:0,
+      total_source:"active"
+    }, {onConflict:"season_key"});
+    if (res.error) throw res.error;
+    await loadAll();
+    toast("New season active.");
+  } catch(e){ toast(e.message || "Could not start season."); }
+}
+
+window.addEventListener("load", async ()=>{
+  try{ await loadAll(); }
+  catch(e){
+    document.getElementById("gameView").innerHTML = `<div class="hero"><h1>Setup issue</h1><div class="meta">${esc(e.message)}</div></div>`;
+  }
+});
+</script>
+</body>
+</html>
