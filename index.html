@@ -747,6 +747,184 @@
       width:100% !important;
     }
 
+  
+    /* Game Day visual scale fix: make it feel like the other tabs, not tiny bubbles */
+    #gameView{
+      padding:0 !important;
+      margin:0 !important;
+    }
+
+    #gameView .hero,
+    #gameView .section{
+      width:100% !important;
+      margin-left:0 !important;
+      margin-right:0 !important;
+      border-radius:26px !important;
+      padding:16px 14px !important;
+      box-shadow:0 12px 30px rgba(16,24,40,.075) !important;
+    }
+
+    #gameView .hero{
+      min-height:0 !important;
+      padding-top:18px !important;
+      padding-bottom:18px !important;
+    }
+
+    #gameView h1{
+      font-size:46px !important;
+      line-height:.95 !important;
+      margin:12px 0 6px !important;
+      letter-spacing:-.07em !important;
+    }
+
+    #gameView .meta{
+      font-size:16px !important;
+      font-weight:900 !important;
+    }
+
+    #gameView .playoff-strip{
+      margin-top:14px !important;
+      padding:12px 10px !important;
+      font-size:13px !important;
+      border-radius:18px !important;
+    }
+
+    #gameView .scoreboard{
+      gap:12px !important;
+      margin-top:16px !important;
+    }
+
+    #gameView .score-card{
+      border-radius:24px !important;
+      padding:18px 8px 16px !important;
+      min-height:150px !important;
+      display:flex !important;
+      flex-direction:column !important;
+      align-items:center !important;
+      justify-content:center !important;
+    }
+
+    #gameView .name{
+      font-size:14px !important;
+      letter-spacing:.12em !important;
+      margin-bottom:8px !important;
+    }
+
+    #gameView .bigscore{
+      font-size:86px !important;
+      line-height:.82 !important;
+      letter-spacing:-.09em !important;
+    }
+
+    #gameView .leader{
+      margin-top:14px !important;
+      padding:15px 12px !important;
+      border-radius:22px !important;
+      font-size:20px !important;
+    }
+
+    #gameView .section-head{
+      margin-bottom:14px !important;
+    }
+
+    #gameView .section-title{
+      font-size:22px !important;
+      letter-spacing:-.04em !important;
+    }
+
+    #gameView .mini{
+      font-size:15px !important;
+      font-weight:950 !important;
+    }
+
+    #gameView .panel{
+      border-radius:24px !important;
+      padding:16px 14px !important;
+      min-height:190px !important;
+      display:flex !important;
+      flex-direction:column !important;
+      justify-content:center !important;
+    }
+
+    #gameView .panel-title{
+      font-size:22px !important;
+      margin-bottom:12px !important;
+    }
+
+    #gameView label{
+      font-size:12px !important;
+      letter-spacing:.09em !important;
+      margin-top:10px !important;
+      margin-bottom:6px !important;
+    }
+
+    #gameView select,
+    #gameView input{
+      min-height:56px !important;
+      border-radius:20px !important;
+      font-size:19px !important;
+      padding:12px 14px !important;
+      font-weight:950 !important;
+    }
+
+    #gameView input[type=number]{
+      font-size:24px !important;
+      padding-left:4px !important;
+      padding-right:4px !important;
+    }
+
+    #gameView .stat-row{
+      grid-template-columns:minmax(0,1fr) 66px 66px !important;
+      gap:10px !important;
+      margin-top:12px !important;
+    }
+
+    #gameView .player-mini{
+      font-size:17px !important;
+      padding-bottom:15px !important;
+    }
+
+    #gameView .live-score{
+      gap:12px !important;
+    }
+
+    #gameView .live-box{
+      border-radius:24px !important;
+      padding:18px 10px 16px !important;
+      min-height:116px !important;
+      display:flex !important;
+      flex-direction:column !important;
+      justify-content:center !important;
+    }
+
+    #gameView .live-num{
+      font-size:58px !important;
+      line-height:.86 !important;
+    }
+
+    #gameView .live-label{
+      font-size:13px !important;
+      margin-top:8px !important;
+    }
+
+    #gameView button:not(.refresh-mini){
+      min-height:58px !important;
+      border-radius:22px !important;
+      font-size:19px !important;
+    }
+
+    @media (max-width: 390px){
+      #gameView .bigscore{
+        font-size:78px !important;
+      }
+      #gameView h1{
+        font-size:42px !important;
+      }
+      #gameView .stat-row{
+        grid-template-columns:minmax(0,1fr) 58px 58px !important;
+      }
+    }
+
   </style>
 </head>
 
