@@ -484,8 +484,8 @@
     <div class="tabs-inner">
       <button class="tab active" onclick="showTab('game', this)">Game</button>
       <button class="tab" onclick="showTab('history', this)">History</button>
-      <button class="tab" onclick="showTab('manage', this)">Manage</button>
       <button class="tab" onclick="showTab('alltime', this)">All-Time</button>
+      <button class="tab" onclick="showTab('manage', this)">Manage</button>
     </div>
   </div>
 
@@ -590,8 +590,8 @@ function playerOptions(selected){
 }
 
 function firstGoalOptions(){
-  const vals = [...new Set([S.form.a1,S.form.a2,S.form.j1,S.form.j2].filter(Boolean))];
-  return `<option value="">No picked first goal</option>` + vals.map(p =>
+  const vals = playerNames();
+  return `<option value="">No first goal selected</option>` + vals.map(p =>
     `<option value="${esc(p)}" ${p===S.form.firstGoal ? "selected" : ""}>${esc(p)}</option>`
   ).join("");
 }
@@ -771,6 +771,12 @@ function cancelEditingGame(){
   renderHistory();
 }
 
+function optionsFromPlayers(selected){
+  return `<option value="">None</option>` + playerNames().map(p =>
+    `<option value="${esc(p)}" ${p===selected ? "selected" : ""}>${esc(p)}</option>`
+  ).join("");
+}
+
 function renderHistory(){
   const selectedSeason = S.seasons.find(s => Number(s.id) === Number(S.selectedHistorySeasonId)) || S.activeSeason;
   const games = S.allGames
@@ -794,7 +800,9 @@ function renderHistory(){
     const editing = Number(S.editingGameId) === Number(g.id);
     const aPicks = S.allPicks.filter(p => p.game_id === g.id && p.owner === "Aaron").sort((a,b)=>Number(a.pick_slot)-Number(b.pick_slot));
     const jPicks = S.allPicks.filter(p => p.game_id === g.id && p.owner === "Julie").sort((a,b)=>Number(a.pick_slot)-Number(b.pick_slot));
-    const getPick = (arr, slot) => arr.find(p => Number(p.pick_slot) === slot)?.player_name || "";
+    const gp = (arr, slot) => arr.find(p => Number(p.pick_slot) === slot) || {};
+    const a1=gp(aPicks,1), a2=gp(aPicks,2), j1=gp(jPicks,1), j2=gp(jPicks,2);
+
     const editBlock = editing ? `
       <div class="edit-form">
         <div class="manage-fields">
@@ -812,22 +820,43 @@ function renderHistory(){
               <option ${g.first_picker==="Julie"?"selected":""}>Julie</option>
             </select>
           </div>
-          <div><label>Aaron Pts</label><input id="editAaronPts_${g.id}" type="number" value="${Number(g.aaron_points||0)}"></div>
-          <div><label>Julie Pts</label><input id="editJuliePts_${g.id}" type="number" value="${Number(g.julie_points||0)}"></div>
+          <div><label>First Goal Scorer</label>
+            <select id="editFirstGoal_${g.id}">${optionsFromPlayers(g.first_goal_scorer || "")}</select>
+          </div>
+          <div><label>Status</label>
+            <select id="editStatus_${g.id}">
+              <option ${g.status==="Final"?"selected":""}>Final</option>
+              <option ${g.status==="Scheduled"?"selected":""}>Scheduled</option>
+              <option ${g.status==="Hidden"?"selected":""}>Hidden</option>
+            </select>
+          </div>
         </div>
 
-        <div class="manage-fields" style="margin-top:8px">
-          <div><label>Aaron Pick 1</label><input id="editA1_${g.id}" value="${esc(getPick(aPicks,1))}"></div>
-          <div><label>Aaron Pick 2</label><input id="editA2_${g.id}" value="${esc(getPick(aPicks,2))}"></div>
-          <div><label>Julie Pick 1</label><input id="editJ1_${g.id}" value="${esc(getPick(jPicks,1))}"></div>
-          <div><label>Julie Pick 2</label><input id="editJ2_${g.id}" value="${esc(getPick(jPicks,2))}"></div>
+        <div class="section-head" style="margin-top:12px;margin-bottom:4px"><div class="section-title">Aaron Picks</div><div class="mini">G/A recalc points</div></div>
+        <div class="manage-fields">
+          <div><label>Pick 1</label><input id="editA1_${g.id}" value="${esc(a1.player_name || "")}"></div>
+          <div><label>Pick 2</label><input id="editA2_${g.id}" value="${esc(a2.player_name || "")}"></div>
+          <div><label>P1 Goals</label><input id="editA1G_${g.id}" type="number" value="${Number(a1.goals||0)}"></div>
+          <div><label>P1 Assists</label><input id="editA1A_${g.id}" type="number" value="${Number(a1.assists||0)}"></div>
+          <div><label>P2 Goals</label><input id="editA2G_${g.id}" type="number" value="${Number(a2.goals||0)}"></div>
+          <div><label>P2 Assists</label><input id="editA2A_${g.id}" type="number" value="${Number(a2.assists||0)}"></div>
+        </div>
+
+        <div class="section-head" style="margin-top:12px;margin-bottom:4px"><div class="section-title">Julie Picks</div><div class="mini">G/A recalc points</div></div>
+        <div class="manage-fields">
+          <div><label>Pick 1</label><input id="editJ1_${g.id}" value="${esc(j1.player_name || "")}"></div>
+          <div><label>Pick 2</label><input id="editJ2_${g.id}" value="${esc(j2.player_name || "")}"></div>
+          <div><label>P1 Goals</label><input id="editJ1G_${g.id}" type="number" value="${Number(j1.goals||0)}"></div>
+          <div><label>P1 Assists</label><input id="editJ1A_${g.id}" type="number" value="${Number(j1.assists||0)}"></div>
+          <div><label>P2 Goals</label><input id="editJ2G_${g.id}" type="number" value="${Number(j2.goals||0)}"></div>
+          <div><label>P2 Assists</label><input id="editJ2A_${g.id}" type="number" value="${Number(j2.assists||0)}"></div>
         </div>
 
         <div class="card-actions">
           <button class="light" onclick="cancelEditingGame()">Cancel</button>
           <button onclick="saveHistoryGame(${g.id})">Save Changes</button>
         </div>
-        <div class="note">This edits the historical record. Season totals shown in History recalculate from finalized games.</div>
+        <div class="note">First goal can be any roster player for tracking. Bonus applies only if that player was picked and has a goal logged.</div>
       </div>
     ` : `
       <div class="card-actions">
@@ -841,6 +870,7 @@ function renderHistory(){
         <div class="row-top"><span>Game ${esc(g.game_number)} • ${esc(g.game_type || "")}</span><span>${Number(g.aaron_points||0)}-${Number(g.julie_points||0)}</span></div>
         <div class="row-sub">
           ${esc(g.game_date || "")} ${g.opponent ? "• " + esc(g.opponent) : ""}<br>
+          First goal: ${esc(g.first_goal_scorer || "—")}<br>
           Aaron: ${esc(picksFor(g.id,"Aaron") || "—")}<br>
           Julie: ${esc(picksFor(g.id,"Julie") || "—")}
         </div>
@@ -874,9 +904,72 @@ function renderHistory(){
   `;
 }
 
+function computeFunStats(){
+  const finals = S.allGames.filter(g => g.status === "Final");
+  const activeFinals = S.games.filter(g => g.status === "Final");
+  const sortedActive = [...activeFinals].sort((a,b)=>Number(a.game_number)-Number(b.game_number));
+
+  let currentStreak = "—";
+  if (sortedActive.length){
+    const lastWinner = sortedActive[sortedActive.length-1].winner;
+    if (lastWinner && lastWinner !== "Tie"){
+      let n = 0;
+      for (let i=sortedActive.length-1; i>=0; i--){
+        if (sortedActive[i].winner === lastWinner) n++;
+        else break;
+      }
+      currentStreak = `${lastWinner} W${n}`;
+    } else currentStreak = "No streak";
+  }
+
+  let longest = {winner:"—", count:0};
+  let current = {winner:null, count:0};
+  sortedActive.forEach(g=>{
+    if (!g.winner || g.winner === "Tie"){
+      current = {winner:null, count:0};
+    } else if (g.winner === current.winner){
+      current.count++;
+    } else {
+      current = {winner:g.winner, count:1};
+    }
+    if (current.count > longest.count) longest = {...current};
+  });
+
+  const biggest = finals.reduce((best,g)=>{
+    const margin = Math.abs(Number(g.aaron_points||0)-Number(g.julie_points||0));
+    return margin > best.margin ? {game:g, margin} : best;
+  }, {game:null, margin:0});
+
+  const bestScore = finals.reduce((best,g)=>{
+    const maxScore = Math.max(Number(g.aaron_points||0), Number(g.julie_points||0));
+    return maxScore > best.score ? {game:g, score:maxScore} : best;
+  }, {game:null, score:0});
+
+  const pickCounts = {};
+  const pickPointsMap = {};
+  S.allPicks.forEach(p=>{
+    pickCounts[p.player_name] = (pickCounts[p.player_name] || 0) + 1;
+    pickPointsMap[p.player_name] = (pickPointsMap[p.player_name] || 0) + Number(p.points || 0);
+  });
+  const mostPicked = Object.entries(pickCounts).sort((a,b)=>b[1]-a[1])[0];
+  const bestAvg = Object.keys(pickCounts)
+    .map(name=>({name, avg: pickPointsMap[name] / pickCounts[name], count: pickCounts[name]}))
+    .filter(x=>x.count >= 2 && x.avg > 0)
+    .sort((a,b)=>b.avg-a.avg)[0];
+
+  const firstGoals = {};
+  finals.forEach(g=>{
+    if (g.first_goal_scorer) firstGoals[g.first_goal_scorer] = (firstGoals[g.first_goal_scorer] || 0) + 1;
+  });
+  const topFirstGoal = Object.entries(firstGoals).sort((a,b)=>b[1]-a[1])[0];
+
+  return {currentStreak, longest, biggest, bestScore, mostPicked, bestAvg, topFirstGoal};
+}
+
 function renderAllTime(){
   const totalA = S.seasons.reduce((n,s) => n + Number(s.aaron_final_total || 0), 0);
   const totalJ = S.seasons.reduce((n,s) => n + Number(s.julie_final_total || 0), 0);
+  const stats = computeFunStats();
 
   const rows = S.seasons.map(s => `
     <div class="row-card">
@@ -895,6 +988,22 @@ function renderAllTime(){
       </div>
       <div class="leader">${totalA===totalJ ? "ALL-TIME TIE" : totalA>totalJ ? "AARON ALL-TIME LEAD" : "JULIE ALL-TIME LEAD"}</div>
     </div>
+
+    <div class="section">
+      <div class="section-head"><div class="section-title">Fun Stats</div><div class="mini">from your history</div></div>
+      <div class="stat-grid">
+        <div class="stat-tile"><div class="stat-value">${esc(stats.currentStreak)}</div><div class="stat-label">Current Streak</div></div>
+        <div class="stat-tile"><div class="stat-value">${stats.longest.count ? esc(stats.longest.winner + " W" + stats.longest.count) : "—"}</div><div class="stat-label">Longest Streak</div></div>
+        <div class="stat-tile"><div class="stat-value">${stats.biggest.game ? esc(stats.biggest.game.winner + " +" + stats.biggest.margin) : "—"}</div><div class="stat-label">Biggest Blowout</div></div>
+        <div class="stat-tile"><div class="stat-value">${stats.bestScore.game ? esc(stats.bestScore.game.winner + " " + stats.bestScore.score) : "—"}</div><div class="stat-label">Best Game</div></div>
+        <div class="stat-tile"><div class="stat-value">${stats.mostPicked ? esc(stats.mostPicked[0]) : "—"}</div><div class="stat-label">Most Picked</div></div>
+        <div class="stat-tile"><div class="stat-value">${stats.bestAvg ? esc(stats.bestAvg.name + " " + stats.bestAvg.avg.toFixed(1)) : "—"}</div><div class="stat-label">Best Avg Pick</div></div>
+        <div class="stat-tile"><div class="stat-value">${stats.topFirstGoal ? esc(stats.topFirstGoal[0]) : "—"}</div><div class="stat-label">First Goal King</div></div>
+        <div class="stat-tile"><div class="stat-value">${stats.topFirstGoal ? stats.topFirstGoal[1] : 0}</div><div class="stat-label">First Goals</div></div>
+      </div>
+      <div class="note">Best Avg Pick uses pick-point data. Older imported picks without goal/assist details may not count much until you enter more games or edit history.</div>
+    </div>
+
     <div style="margin-top:12px">${rows}</div>
   `;
 }
@@ -1069,6 +1178,7 @@ async function finalizeGame(){
     const g = S.currentGame;
     if (!g) return toast("No current game.");
     if (!S.form.a1 || !S.form.a2 || !S.form.j1 || !S.form.j2) return toast("Pick all 4 players first.");
+    if (!confirm("Lock this game as final? This will save the result and advance to the next game.")) return;
 
     const l = liveScore();
     const recap = l.w === "Tie"
@@ -1205,13 +1315,37 @@ async function hideGame(gameId){
 
 async function saveHistoryGame(gameId){
   try{
-    const aPts = Number(document.getElementById(`editAaronPts_${gameId}`)?.value || 0);
-    const jPts = Number(document.getElementById(`editJuliePts_${gameId}`)?.value || 0);
+    if (!confirm("Save changes to this historical game?")) return;
+
+    const firstGoal = document.getElementById(`editFirstGoal_${gameId}`)?.value || "";
+    const a1 = document.getElementById(`editA1_${gameId}`)?.value?.trim();
+    const a2 = document.getElementById(`editA2_${gameId}`)?.value?.trim();
+    const j1 = document.getElementById(`editJ1_${gameId}`)?.value?.trim();
+    const j2 = document.getElementById(`editJ2_${gameId}`)?.value?.trim();
+
+    const a1g = Number(document.getElementById(`editA1G_${gameId}`)?.value || 0);
+    const a1a = Number(document.getElementById(`editA1A_${gameId}`)?.value || 0);
+    const a2g = Number(document.getElementById(`editA2G_${gameId}`)?.value || 0);
+    const a2a = Number(document.getElementById(`editA2A_${gameId}`)?.value || 0);
+    const j1g = Number(document.getElementById(`editJ1G_${gameId}`)?.value || 0);
+    const j1a = Number(document.getElementById(`editJ1A_${gameId}`)?.value || 0);
+    const j2g = Number(document.getElementById(`editJ2G_${gameId}`)?.value || 0);
+    const j2a = Number(document.getElementById(`editJ2A_${gameId}`)?.value || 0);
+
+    const a1pts = a1 ? pickPoints(a1, a1g, a1a, firstGoal) : 0;
+    const a2pts = a2 ? pickPoints(a2, a2g, a2a, firstGoal) : 0;
+    const j1pts = j1 ? pickPoints(j1, j1g, j1a, firstGoal) : 0;
+    const j2pts = j2 ? pickPoints(j2, j2g, j2a, firstGoal) : 0;
+    const aPts = a1pts + a2pts;
+    const jPts = j1pts + j2pts;
+
     const patch = {
       game_date: document.getElementById(`editDate_${gameId}`)?.value || null,
       opponent: document.getElementById(`editOpponent_${gameId}`)?.value || null,
       game_type: document.getElementById(`editType_${gameId}`)?.value || "Regular Season",
       first_picker: document.getElementById(`editFirst_${gameId}`)?.value || null,
+      status: document.getElementById(`editStatus_${gameId}`)?.value || "Final",
+      first_goal_scorer: firstGoal || null,
       aaron_points: aPts,
       julie_points: jPts,
       winner: win(aPts, jPts),
@@ -1221,15 +1355,10 @@ async function saveHistoryGame(gameId){
     const upd = await db.from("games").update(patch).eq("id", gameId);
     if (upd.error) throw upd.error;
 
-    const a1 = document.getElementById(`editA1_${gameId}`)?.value?.trim();
-    const a2 = document.getElementById(`editA2_${gameId}`)?.value?.trim();
-    const j1 = document.getElementById(`editJ1_${gameId}`)?.value?.trim();
-    const j2 = document.getElementById(`editJ2_${gameId}`)?.value?.trim();
-
-    if (a1) await upsertPick(gameId, "Aaron", 1, a1, 0, 0, 0);
-    if (a2) await upsertPick(gameId, "Aaron", 2, a2, 0, 0, 0);
-    if (j1) await upsertPick(gameId, "Julie", 1, j1, 0, 0, 0);
-    if (j2) await upsertPick(gameId, "Julie", 2, j2, 0, 0, 0);
+    if (a1) await upsertPick(gameId, "Aaron", 1, a1, a1g, a1a, a1pts);
+    if (a2) await upsertPick(gameId, "Aaron", 2, a2, a2g, a2a, a2pts);
+    if (j1) await upsertPick(gameId, "Julie", 1, j1, j1g, j1a, j1pts);
+    if (j2) await upsertPick(gameId, "Julie", 2, j2, j2g, j2a, j2pts);
 
     S.editingGameId = null;
     await loadAll();
@@ -1239,9 +1368,11 @@ async function saveHistoryGame(gameId){
   }
 }
 
+
 async function startNewSeason(){
   const key = prompt("New season key? Example: 2026-2027");
   if (!key) return;
+  if (!confirm(`Start new season ${key}? This archives the current season totals and makes ${key} active.`)) return;
 
   const display = key.replace("-", "–");
 
