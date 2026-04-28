@@ -1234,6 +1234,55 @@
       line-height:1.35;
     }
 
+
+    /* Compact History edit Picks panel */
+    .pick-edit-grid{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:8px;
+      margin-top:6px;
+    }
+    .pick-edit-row{
+      display:grid;
+      grid-template-columns:minmax(0,1fr) 52px 52px;
+      gap:8px;
+      align-items:end;
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:9px;
+    }
+    .pick-edit-name input{
+      min-height:42px !important;
+      font-size:14px !important;
+      font-weight:900 !important;
+      border-radius:13px !important;
+    }
+    .pick-edit-mini input{
+      min-height:42px !important;
+      font-size:17px !important;
+      font-weight:950 !important;
+      border-radius:13px !important;
+      text-align:center !important;
+      padding-left:2px !important;
+      padding-right:2px !important;
+    }
+    .pick-edit-row label{
+      margin-top:0 !important;
+      margin-bottom:4px !important;
+      font-size:9px !important;
+    }
+    @media (max-width:390px){
+      .pick-edit-row{
+        grid-template-columns:minmax(0,1fr) 46px 46px;
+        gap:6px;
+        padding:8px;
+      }
+      .pick-edit-name input{
+        font-size:13px !important;
+      }
+    }
+
 </style>
 </head>
 
@@ -1644,24 +1693,32 @@ function renderHistory(){
     `;
 
     const picksPanel = `
-      <div class="section-head" style="margin-top:6px;margin-bottom:4px"><div class="section-title">Aaron Picks</div><div class="mini">G/A</div></div>
-      <div class="manage-fields">
-        <div><label>Pick 1</label><input id="editA1_${g.id}" value="${esc(a1.player_name || "")}"></div>
-        <div><label>Pick 2</label><input id="editA2_${g.id}" value="${esc(a2.player_name || "")}"></div>
-        <div><label>P1 Goals</label><input id="editA1G_${g.id}" type="text" inputmode="numeric" pattern="[0-9]*" value="${Number(a1.goals||0)}"></div>
-        <div><label>P1 Assists</label><input id="editA1A_${g.id}" type="text" inputmode="numeric" pattern="[0-9]*" value="${Number(a1.assists||0)}"></div>
-        <div><label>P2 Goals</label><input id="editA2G_${g.id}" type="text" inputmode="numeric" pattern="[0-9]*" value="${Number(a2.goals||0)}"></div>
-        <div><label>P2 Assists</label><input id="editA2A_${g.id}" type="text" inputmode="numeric" pattern="[0-9]*" value="${Number(a2.assists||0)}"></div>
+      <div class="section-head" style="margin-top:6px;margin-bottom:4px"><div class="section-title">Aaron Picks</div><div class="mini">G / A</div></div>
+      <div class="pick-edit-grid">
+        <div class="pick-edit-row">
+          <div class="pick-edit-name"><label>Pick 1</label><input id="editA1_${g.id}" value="${esc(a1.player_name || "")}"></div>
+          <div class="pick-edit-mini"><label>G</label><input id="editA1G_${g.id}" type="text" inputmode="numeric" pattern="[0-9]*" value="${Number(a1.goals||0)}"></div>
+          <div class="pick-edit-mini"><label>A</label><input id="editA1A_${g.id}" type="text" inputmode="numeric" pattern="[0-9]*" value="${Number(a1.assists||0)}"></div>
+        </div>
+        <div class="pick-edit-row">
+          <div class="pick-edit-name"><label>Pick 2</label><input id="editA2_${g.id}" value="${esc(a2.player_name || "")}"></div>
+          <div class="pick-edit-mini"><label>G</label><input id="editA2G_${g.id}" type="text" inputmode="numeric" pattern="[0-9]*" value="${Number(a2.goals||0)}"></div>
+          <div class="pick-edit-mini"><label>A</label><input id="editA2A_${g.id}" type="text" inputmode="numeric" pattern="[0-9]*" value="${Number(a2.assists||0)}"></div>
+        </div>
       </div>
 
-      <div class="section-head" style="margin-top:12px;margin-bottom:4px"><div class="section-title">Julie Picks</div><div class="mini">G/A</div></div>
-      <div class="manage-fields">
-        <div><label>Pick 1</label><input id="editJ1_${g.id}" value="${esc(j1.player_name || "")}"></div>
-        <div><label>Pick 2</label><input id="editJ2_${g.id}" value="${esc(j2.player_name || "")}"></div>
-        <div><label>P1 Goals</label><input id="editJ1G_${g.id}" type="text" inputmode="numeric" pattern="[0-9]*" value="${Number(j1.goals||0)}"></div>
-        <div><label>P1 Assists</label><input id="editJ1A_${g.id}" type="text" inputmode="numeric" pattern="[0-9]*" value="${Number(j1.assists||0)}"></div>
-        <div><label>P2 Goals</label><input id="editJ2G_${g.id}" type="text" inputmode="numeric" pattern="[0-9]*" value="${Number(j2.goals||0)}"></div>
-        <div><label>P2 Assists</label><input id="editJ2A_${g.id}" type="text" inputmode="numeric" pattern="[0-9]*" value="${Number(j2.assists||0)}"></div>
+      <div class="section-head" style="margin-top:12px;margin-bottom:4px"><div class="section-title">Julie Picks</div><div class="mini">G / A</div></div>
+      <div class="pick-edit-grid">
+        <div class="pick-edit-row">
+          <div class="pick-edit-name"><label>Pick 1</label><input id="editJ1_${g.id}" value="${esc(j1.player_name || "")}"></div>
+          <div class="pick-edit-mini"><label>G</label><input id="editJ1G_${g.id}" type="text" inputmode="numeric" pattern="[0-9]*" value="${Number(j1.goals||0)}"></div>
+          <div class="pick-edit-mini"><label>A</label><input id="editJ1A_${g.id}" type="text" inputmode="numeric" pattern="[0-9]*" value="${Number(j1.assists||0)}"></div>
+        </div>
+        <div class="pick-edit-row">
+          <div class="pick-edit-name"><label>Pick 2</label><input id="editJ2_${g.id}" value="${esc(j2.player_name || "")}"></div>
+          <div class="pick-edit-mini"><label>G</label><input id="editJ2G_${g.id}" type="text" inputmode="numeric" pattern="[0-9]*" value="${Number(j2.goals||0)}"></div>
+          <div class="pick-edit-mini"><label>A</label><input id="editJ2A_${g.id}" type="text" inputmode="numeric" pattern="[0-9]*" value="${Number(j2.assists||0)}"></div>
+        </div>
       </div>
     `;
 
