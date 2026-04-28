@@ -7,9 +7,7 @@
   <meta name="apple-mobile-web-app-title" content="Canes Rivalry" />
   <meta name="theme-color" content="#f3f5f8" />
   <link rel="apple-touch-icon" href="icon.png">
-  
   <title>Canes Rivalry</title>
-  
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
@@ -1409,13 +1407,7 @@
 
 
     /* Premium polish: sync highlight + last updated */
-    .last-updated{
-      margin-top:8px;
-      text-align:center;
-      color:var(--muted);
-      font-size:11px;
-      font-weight:850;
-    }
+    
     .sync-flash{
       animation: syncFlash 1.25s ease-out;
     }
@@ -1539,10 +1531,7 @@ function markUpdated(keys = []){
   }, 1300);
 }
 
-function updatedText(){
-  if (!S.lastUpdated) return "";
-  return "Updated just now";
-}
+
 
 function changedClass(key){
   return S.justChangedKeys.includes(key) ? "sync-flash" : "";
@@ -1816,13 +1805,6 @@ async function saveDraftPick(key){
 
   const [owner, slot, player, goals, assists] = spec;
 
-  const slotKey = owner === "Aaron" ? (slot === 1 ? "a1" : "a2") : (slot === 1 ? "j1" : "j2");
-  const dupe = findDuplicatePick(slotKey, player);
-  if (dupe){
-    toast(`${player} is already picked in ${dupe}.`);
-    return;
-  }
-
   if (S.currentGame.status === "Scheduled"){
     await saveCurrentGameField("status", "In Progress");
   }
@@ -1881,45 +1863,11 @@ function playerNames(){
   return [...new Set(fromDb.length ? fromDb : fallback)].sort();
 }
 
-function selectedPickMap(){
-  return {
-    a1:S.form.a1 || "",
-    a2:S.form.a2 || "",
-    j1:S.form.j1 || "",
-    j2:S.form.j2 || ""
-  };
+function playerOptions(selected){
+  return `<option value="">Select</option>` + playerNames().map(p =>
+    `<option value="${esc(p)}" ${p===selected ? "selected" : ""}>${esc(p)}</option>`
+  ).join("");
 }
-
-function isPlayerAlreadyPicked(player, currentSlot){
-  if (!player) return false;
-  const picks = selectedPickMap();
-  return Object.entries(picks).some(([slot, value]) => slot !== currentSlot && value === player);
-}
-
-function playerOptions(selected, currentSlot){
-  return `<option value="">Select</option>` + playerNames().map(p => {
-    const disabled = isPlayerAlreadyPicked(p, currentSlot) && p !== selected;
-    return `<option value="${esc(p)}" ${p===selected ? "selected" : ""} ${disabled ? "disabled" : ""}>${esc(p)}${disabled ? " — picked" : ""}</option>`;
-  }).join("");
-}
-
-function findDuplicatePick(slot, player){
-  if (!player) return null;
-  const labels = {a1:"Aaron Pick 1", a2:"Aaron Pick 2", j1:"Julie Pick 1", j2:"Julie Pick 2"};
-  const picks = selectedPickMap();
-  const dupe = Object.entries(picks).find(([s,v]) => s !== slot && v === player);
-  return dupe ? labels[dupe[0]] : null;
-}
-
-function friendlyDbError(error){
-  if (!error) return "";
-  const msg = error.message || "";
-  if (error.code === "23505" || msg.toLowerCase().includes("duplicate key")){
-    return "That player is already picked for this game.";
-  }
-  return msg || "Could not save.";
-}
-
 
 function firstGoalOptions(){
   const vals = playerNames();
@@ -1929,16 +1877,6 @@ function firstGoalOptions(){
 }
 
 function setF(k,v){
-  if (["a1","a2","j1","j2"].includes(k)){
-    const dupe = findDuplicatePick(k, v);
-    if (dupe){
-      toast(`${v} is already picked in ${dupe}.`);
-      haptic();
-      renderGame();
-      return;
-    }
-  }
-
   S.form[k] = v;
   renderGame();
 
@@ -2054,7 +1992,7 @@ function renderGame(){
       </div>
 
       <div class="leader ${isPlayoff ? "playoff-mode" : ""}">${lead}</div>
-      ${S.lastUpdated ? `<div class="last-updated">${updatedText()}</div>` : ""}
+      
     </div>
 
     ${S.lastRecap ? `
@@ -2071,16 +2009,16 @@ function renderGame(){
         <div class="panel">
           <div class="panel-title">Aaron</div>
           <label>Pick 1</label>
-          <select class="${changedClass('a1')}" onchange="setF('a1',this.value)">${playerOptions(S.form.a1, 'a1')}</select>
+          <select class="${changedClass('a1')}" onchange="setF('a1',this.value)">${playerOptions(S.form.a1)}</select>
           <label>Pick 2</label>
-          <select class="${changedClass('a2')}" onchange="setF('a2',this.value)">${playerOptions(S.form.a2, 'a2')}</select>
+          <select class="${changedClass('a2')}" onchange="setF('a2',this.value)">${playerOptions(S.form.a2)}</select>
         </div>
         <div class="panel">
           <div class="panel-title">Julie</div>
           <label>Pick 1</label>
-          <select class="${changedClass('j1')}" onchange="setF('j1',this.value)">${playerOptions(S.form.j1, 'j1')}</select>
+          <select class="${changedClass('j1')}" onchange="setF('j1',this.value)">${playerOptions(S.form.j1)}</select>
           <label>Pick 2</label>
-          <select class="${changedClass('j2')}" onchange="setF('j2',this.value)">${playerOptions(S.form.j2, 'j2')}</select>
+          <select class="${changedClass('j2')}" onchange="setF('j2',this.value)">${playerOptions(S.form.j2)}</select>
         </div>
       </div>
     </div>
@@ -2723,21 +2661,39 @@ async function upsertPick(gameId, owner, slot, player, goals, assists, points){
     game_id:gameId,
     owner,
     pick_slot:slot,
-    player_name:player || "",
+    player_name:player,
     goals:Number(goals||0),
     assists:Number(assists||0),
     points:Number(points||0),
     is_carry_forward:false,
-    original_pick_text:player || ""
+    original_pick_text:player
   };
 
   if (existing){
     const res = await db.from("picks").update(row).eq("id", existing.id);
-    if (res.error) throw new Error(friendlyDbError(res.error));
+    if (res.error) throw res.error;
   } else {
     const res = await db.from("picks").insert(row);
-    if (res.error) throw new Error(friendlyDbError(res.error));
+    if (res.error) throw res.error;
   }
+}
+
+
+function buildPostgameRecap(game, live){
+  const winnerText = live.w === "Tie" ? "Dead heat" : `${live.w} takes it`;
+  const scoreText = `${live.a}-${live.j}`;
+  const margin = Math.abs(live.a - live.j);
+  let vibe = "Scoreboard updated. The rivalry continues.";
+  if (live.w === "Tie") vibe = "No bragging rights tonight. The tension rolls into the next game.";
+  else if (margin >= 5) vibe = "That was a statement game. The group chat may not survive this.";
+  else if (margin <= 1) vibe = "A tight one. Every assist mattered and the chirps are absolutely valid.";
+  else vibe = "Solid win. Enough room to brag, not enough room to get comfortable.";
+
+  const fg = S.form.firstGoal ? ` First goal tracked: ${S.form.firstGoal}.` : "";
+  return {
+    title: `${winnerText} ${scoreText}`,
+    copy: `${vibe}${fg}`
+  };
 }
 
 async function finalizeGame(){
@@ -2746,8 +2702,6 @@ async function finalizeGame(){
     const g = S.currentGame;
     if (!g) return toast("No current game.");
     if (!S.form.a1 || !S.form.a2 || !S.form.j1 || !S.form.j2) return toast("Pick all 4 players first.");
-    const finalPicks = [S.form.a1,S.form.a2,S.form.j1,S.form.j2];
-    if (new Set(finalPicks).size !== finalPicks.length) return toast("Each player can only be picked once for this game.");
     if (!confirm("Lock this game as final? This will save the result and advance to the next game.")) return;
 
     const l = liveScore();
@@ -2944,12 +2898,6 @@ async function saveHistoryGame(gameId){
     const a2 = val(`editA2_${gameId}`, existingPick("Aaron",2).player_name || "").trim();
     const j1 = val(`editJ1_${gameId}`, existingPick("Julie",1).player_name || "").trim();
     const j2 = val(`editJ2_${gameId}`, existingPick("Julie",2).player_name || "").trim();
-
-    const editPicks = [a1,a2,j1,j2].filter(Boolean);
-    if (new Set(editPicks).size !== editPicks.length){
-      toast("Each player can only be picked once for a game.");
-      return;
-    }
 
     const a1g = numVal(`editA1G_${gameId}`, existingPick("Aaron",1).goals || 0);
     const a1a = numVal(`editA1A_${gameId}`, existingPick("Aaron",1).assists || 0);
