@@ -631,6 +631,22 @@
       color:var(--red);
       font-weight:1000;
     }
+  
+    /* Mobile form fix: prevent Date/Opponent overlap in Manage and History edit forms */
+    .manage-fields{
+      grid-template-columns:1fr !important;
+      gap:12px !important;
+    }
+    .manage-item .manage-fields,
+    .section .manage-fields{
+      grid-template-columns:1fr !important;
+    }
+    .manage-fields input,
+    .manage-fields select{
+      min-width:0;
+      width:100%;
+    }
+
   </style>
 </head>
 
