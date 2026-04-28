@@ -1562,10 +1562,10 @@
 
 .pick-row-line{
   display:grid;
-  grid-template-columns: auto 1fr 48px 48px;
+  grid-template-columns:auto 1fr 48px 48px;
   gap:8px;
   align-items:center;
-  margin-bottom:8px;
+  margin-bottom:10px;
 }
 .pick-row-line select{
   width:100%;
@@ -2188,7 +2188,78 @@ function renderGame(){
       <input type="text" inputmode="numeric" value="${S.form[goalsKey]}" class="${changedClass(goalsKey)}" onchange="setNum('${goalsKey}',this.value)">
       <input type="text" inputmode="numeric" value="${S.form[assistsKey]}" class="${changedClass(assistsKey)}" onchange="setNum('${assistsKey}',this.value)">
     </div>
-`;}
+  `;
+
+  document.getElementById("gameView").innerHTML = `
+    <div class="hero ${isPlayoff ? "playoff-mode" : ""}">
+      <div class="topline">
+        <span>Canes Rivalry</span>
+        <span class="top-actions">
+          <button class="refresh-mini" onclick="manualRefresh()">↻ Refresh</button>
+          <span class="sync-badge ${S.realtimeChannel ? "" : "off"}">Live</span>
+          <span class="badge ${isPlayoff ? "playoff" : ""}">${modeLabel}</span>
+        </span>
+      </div>
+      <h1>${isPlayoff ? "Playoff Game" : "Game Day"}</h1>
+      <div class="meta">${esc(opp)} • Game ${esc(g.game_number || "—")} • First Pick: ${esc(g.first_picker || "—")}</div>
+      ${isPlayoff ? `<div class="playoff-strip">Stanley Cup Mode Activated</div>` : ""}
+
+      <div class="scoreboard">
+        <div class="score-card"><div class="name">Aaron</div><div class="bigscore">${t.a}</div></div>
+        <div class="score-card"><div class="name">Julie</div><div class="bigscore">${t.j}</div></div>
+      </div>
+
+      <div class="leader ${isPlayoff ? "playoff-mode" : ""}">${lead}</div>
+    </div>
+
+    ${S.lastRecap ? `
+      <div class="postgame-banner">
+        <div class="postgame-kicker">Postgame Recap</div>
+        <div class="postgame-title">${esc(S.lastRecap.title)}</div>
+        <div class="postgame-copy">${esc(S.lastRecap.copy)}</div>
+      </div>
+    ` : ""}
+
+    <div class="picks-stats-card">
+      <div class="section-head"><div class="section-title">Picks & Stats</div><div class="mini">G / A</div></div>
+      <div class="picks-stats-grid">
+        <div class="owner-pick-card">
+          <div class="owner-pick-title">Aaron</div>
+          ${pickBlock("Aaron","Pick 1","a1","ag1","aa1")}
+          ${pickBlock("Aaron","Pick 2","a2","ag2","aa2")}
+        </div>
+        <div class="owner-pick-card">
+          <div class="owner-pick-title">Julie</div>
+          ${pickBlock("Julie","Pick 1","j1","jg1","ja1")}
+          ${pickBlock("Julie","Pick 2","j2","jg2","ja2")}
+        </div>
+      </div>
+    </div>
+
+    <div class="first-goal-bonus-card">
+      <div class="section-head"><div class="section-title">First Goal ⚡</div><div class="mini">Bonus</div></div>
+      <select class="${changedClass('firstGoal')}" onchange="setF('firstGoal',this.value)">${firstGoalOptions()}</select>
+      <div class="bonus-note">+1 if the first goal scorer was picked.</div>
+    </div>
+
+    <div class="section">
+      <div class="section-head"><div class="section-title">Game Score</div><div class="mini">${esc(l.w)}</div></div>
+      <div class="live-score">
+        <div class="live-box"><div class="live-num">${l.a}</div><div class="live-label">Aaron</div></div>
+        <div class="live-box"><div class="live-num">${l.j}</div><div class="live-label">Julie</div></div>
+      </div>
+      <div style="margin-top:12px"><button onclick="finalizeGame()">${S.user ? "🔒 Lock Final" : "🔒 Sign in to Lock Final"}</button></div>
+    </div>
+  `;
+}
+
+function picksFor(gameId, owner, source = S.allPicks){
+  return source
+    .filter(p => p.game_id === gameId && p.owner === owner)
+    .sort((a,b) => Number(a.pick_slot) - Number(b.pick_slot))
+    .map(p => (p.is_carry_forward ? "*" : "") + p.player_name)
+    .join(" / ");
+}
 
 function setHistorySeason(value){
   S.selectedHistorySeasonId = Number(value);
