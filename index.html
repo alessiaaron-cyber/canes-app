@@ -978,6 +978,63 @@
   padding-right:14px !important;
 }
 
+
+    /* Live Stats final layout: stacked team cards so G/A bubbles never hit screen edge */
+    #gameView .live-stats-stack{
+      display:grid !important;
+      grid-template-columns:1fr !important;
+      gap:12px !important;
+      width:100% !important;
+    }
+    #gameView .live-team-card{
+      border:1px solid var(--line) !important;
+      background:#fbfcfe !important;
+      border-radius:22px !important;
+      padding:14px 12px !important;
+      width:100% !important;
+      overflow:hidden !important;
+    }
+    #gameView .live-team-title{
+      font-size:22px !important;
+      font-weight:1000 !important;
+      letter-spacing:-.03em !important;
+      color:#667085 !important;
+      margin-bottom:8px !important;
+    }
+    #gameView .live-team-card .stat-row{
+      grid-template-columns:minmax(120px, 1fr) 62px 62px !important;
+      gap:10px !important;
+      width:100% !important;
+      align-items:center !important;
+      margin-top:10px !important;
+    }
+    #gameView .live-team-card .player-mini{
+      white-space:nowrap !important;
+      overflow:hidden !important;
+      text-overflow:ellipsis !important;
+      font-size:18px !important;
+      line-height:1 !important;
+      padding-bottom:0 !important;
+      min-width:0 !important;
+    }
+    #gameView .live-team-card input[type=number]{
+      min-height:54px !important;
+      font-size:22px !important;
+      border-radius:18px !important;
+      padding-left:2px !important;
+      padding-right:2px !important;
+      width:100% !important;
+    }
+    @media (max-width:390px){
+      #gameView .live-team-card .stat-row{
+        grid-template-columns:minmax(92px, 1fr) 54px 54px !important;
+        gap:8px !important;
+      }
+      #gameView .live-team-card .player-mini{
+        font-size:15px !important;
+      }
+    }
+
 </style>
 </head>
 
@@ -1231,14 +1288,16 @@ function renderGame(){
 
     <div class="section">
       <div class="section-head"><div class="section-title">Live Stats</div><div class="mini">Goals / Assists</div></div>
-      <div class="grid2">
-        <div>
-          <div class="stat-row"><div class="player-mini">${esc(S.form.a1 || "Aaron P1")}</div><div><label>G</label><input type="number" min="0" value="${S.form.ag1}" oninput="setNum('ag1',this.value)"></div><div><label>A</label><input type="number" min="0" value="${S.form.aa1}" oninput="setNum('aa1',this.value)"></div></div>
-          <div class="stat-row"><div class="player-mini">${esc(S.form.a2 || "Aaron P2")}</div><div><label>G</label><input type="number" min="0" value="${S.form.ag2}" oninput="setNum('ag2',this.value)"></div><div><label>A</label><input type="number" min="0" value="${S.form.aa2}" oninput="setNum('aa2',this.value)"></div></div>
+      <div class="live-stats-stack">
+        <div class="live-team-card">
+          <div class="live-team-title">Aaron</div>
+          <div class="stat-row"><div class="player-mini">${esc(S.form.a1 || "Pick 1")}</div><div><label>G</label><input type="number" min="0" value="${S.form.ag1}" oninput="setNum('ag1',this.value)"></div><div><label>A</label><input type="number" min="0" value="${S.form.aa1}" oninput="setNum('aa1',this.value)"></div></div>
+          <div class="stat-row"><div class="player-mini">${esc(S.form.a2 || "Pick 2")}</div><div><label>G</label><input type="number" min="0" value="${S.form.ag2}" oninput="setNum('ag2',this.value)"></div><div><label>A</label><input type="number" min="0" value="${S.form.aa2}" oninput="setNum('aa2',this.value)"></div></div>
         </div>
-        <div>
-          <div class="stat-row"><div class="player-mini">${esc(S.form.j1 || "Julie P1")}</div><div><label>G</label><input type="number" min="0" value="${S.form.jg1}" oninput="setNum('jg1',this.value)"></div><div><label>A</label><input type="number" min="0" value="${S.form.ja1}" oninput="setNum('ja1',this.value)"></div></div>
-          <div class="stat-row"><div class="player-mini">${esc(S.form.j2 || "Julie P2")}</div><div><label>G</label><input type="number" min="0" value="${S.form.jg2}" oninput="setNum('jg2',this.value)"></div><div><label>A</label><input type="number" min="0" value="${S.form.ja2}" oninput="setNum('ja2',this.value)"></div></div>
+        <div class="live-team-card">
+          <div class="live-team-title">Julie</div>
+          <div class="stat-row"><div class="player-mini">${esc(S.form.j1 || "Pick 1")}</div><div><label>G</label><input type="number" min="0" value="${S.form.jg1}" oninput="setNum('jg1',this.value)"></div><div><label>A</label><input type="number" min="0" value="${S.form.ja1}" oninput="setNum('ja1',this.value)"></div></div>
+          <div class="stat-row"><div class="player-mini">${esc(S.form.j2 || "Pick 2")}</div><div><label>G</label><input type="number" min="0" value="${S.form.jg2}" oninput="setNum('jg2',this.value)"></div><div><label>A</label><input type="number" min="0" value="${S.form.ja2}" oninput="setNum('ja2',this.value)"></div></div>
         </div>
       </div>
 
