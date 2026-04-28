@@ -469,6 +469,168 @@
       transition:.2s ease;
     }
     .toast.show{opacity:1}
+  .rivalry-board{
+      background:linear-gradient(180deg,#ffffff 0%,#fbfcfe 100%);
+      border:1px solid var(--line);
+      border-radius:24px;
+      padding:14px;
+      margin-top:12px;
+      box-shadow:0 10px 24px rgba(16,24,40,.06);
+      overflow:hidden;
+      position:relative;
+    }
+    .rivalry-board:before{
+      content:"";
+      position:absolute;
+      left:0;right:0;top:0;
+      height:5px;
+      background:linear-gradient(90deg,var(--red),#111827,var(--red));
+    }
+    .rivalry-title{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin:4px 0 12px;
+    }
+    .rivalry-title-main{
+      font-size:20px;
+      font-weight:1000;
+      letter-spacing:-.035em;
+    }
+    .rivalry-title-tag{
+      background:#111827;
+      color:white;
+      border-radius:999px;
+      padding:6px 9px;
+      font-size:10px;
+      font-weight:1000;
+      text-transform:uppercase;
+      letter-spacing:.07em;
+      white-space:nowrap;
+    }
+    .headline-stat{
+      background:linear-gradient(135deg,#111827 0%,#1f2937 52%,#c8102e 130%);
+      color:white;
+      border-radius:22px;
+      padding:15px;
+      box-shadow:0 10px 22px rgba(17,24,39,.18);
+      margin-bottom:10px;
+    }
+    .headline-top{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:10px;
+    }
+    .headline-icon{
+      font-size:29px;
+      line-height:1;
+    }
+    .headline-label{
+      color:rgba(255,255,255,.72);
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      font-size:10px;
+      font-weight:1000;
+      margin-bottom:6px;
+    }
+    .headline-value{
+      font-size:38px;
+      line-height:.95;
+      font-weight:1000;
+      letter-spacing:-.06em;
+    }
+    .headline-sub{
+      color:rgba(255,255,255,.78);
+      font-size:12px;
+      font-weight:800;
+      line-height:1.3;
+      margin-top:8px;
+    }
+    .stat-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:9px;
+      margin-top:10px;
+    }
+    .stat-tile{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:11px 10px;
+      min-height:98px;
+      box-shadow:0 6px 15px rgba(16,24,40,.04);
+      position:relative;
+      overflow:hidden;
+    }
+    .stat-tile:before{
+      content:"";
+      position:absolute;
+      left:0;top:0;bottom:0;
+      width:4px;
+      background:var(--red);
+      opacity:.9;
+    }
+    .stat-tile.alt:before{
+      background:#111827;
+    }
+    .stat-row-icon{
+      display:flex;
+      align-items:center;
+      gap:7px;
+      margin-bottom:8px;
+    }
+    .stat-icon{
+      width:30px;
+      height:30px;
+      border-radius:50%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:#f3f5f8;
+      font-size:17px;
+      flex:0 0 30px;
+    }
+    .stat-label{
+      color:var(--muted);
+      font-size:9px;
+      font-weight:1000;
+      text-transform:uppercase;
+      letter-spacing:.075em;
+      line-height:1.1;
+    }
+    .stat-value{
+      font-size:23px;
+      font-weight:1000;
+      line-height:1;
+      letter-spacing:-.045em;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .stat-sub{
+      margin-top:5px;
+      color:#667085;
+      font-size:11px;
+      font-weight:800;
+      line-height:1.25;
+    }
+    .ticker{
+      margin-top:12px;
+      border:1px solid #fecaca;
+      border-radius:17px;
+      background:linear-gradient(180deg,#fff7f7,#ffffff);
+      padding:11px;
+      font-size:12px;
+      font-weight:850;
+      color:#344054;
+      line-height:1.38;
+    }
+    .ticker strong{
+      color:var(--red);
+      font-weight:1000;
+    }
   </style>
 </head>
 
@@ -989,55 +1151,57 @@ function renderAllTime(){
       <div class="leader">${totalA===totalJ ? "ALL-TIME TIE" : totalA>totalJ ? "AARON ALL-TIME LEAD" : "JULIE ALL-TIME LEAD"}</div>
     </div>
 
-    <div class="section">
-      <div class="section-head"><div class="section-title">Rivalry Highlights</div><div class="mini">broadcast booth</div></div>
+    <div class="rivalry-board">
+      <div class="rivalry-title">
+        <div class="rivalry-title-main">Rivalry Highlights</div>
+        <div class="rivalry-title-tag">Broadcast Booth</div>
+      </div>
+
+      <div class="headline-stat">
+        <div class="headline-top">
+          <div>
+            <div class="headline-label">Current heater</div>
+            <div class="headline-value">${esc(stats.currentStreak)}</div>
+          </div>
+          <div class="headline-icon">🔥</div>
+        </div>
+        <div class="headline-sub">${stats.currentStreak === "No streak" ? "Nobody has momentum. The booth is calling this one chaos." : "Momentum is officially a storyline. Expect chirping."}</div>
+      </div>
+
       <div class="stat-grid">
-        <div class="stat-tile feature">
-          <div class="stat-icon">🔥</div>
-          <div class="stat-value">${esc(stats.currentStreak)}</div>
-          <div class="stat-label">Current heater</div>
-          <div class="stat-sub">${stats.currentStreak === "No streak" ? "Nobody has momentum. Chaos reigns." : "Momentum is officially a storyline."}</div>
-        </div>
-
-        <div class="stat-tile redline">
-          <div class="stat-icon">🏆</div>
-          <div class="stat-value">${stats.longest.count ? esc(stats.longest.winner + " W" + stats.longest.count) : "—"}</div>
-          <div class="stat-label">Longest streak</div>
-          <div class="stat-sub">The run everyone has to hear about forever.</div>
-        </div>
-
-        <div class="stat-tile redline">
-          <div class="stat-icon">💥</div>
-          <div class="stat-value">${stats.biggest.game ? esc(stats.biggest.game.winner + " +" + stats.biggest.margin) : "—"}</div>
-          <div class="stat-label">Biggest blowout</div>
-          <div class="stat-sub">${stats.biggest.game ? "Game " + esc(stats.biggest.game.game_number) + " was not close." : "No blowouts yet."}</div>
-        </div>
-
         <div class="stat-tile">
-          <div class="stat-icon">🚀</div>
+          <div class="stat-row-icon"><div class="stat-icon">🏆</div><div class="stat-label">Longest streak</div></div>
+          <div class="stat-value">${stats.longest.count ? esc(stats.longest.winner + " W" + stats.longest.count) : "—"}</div>
+          <div class="stat-sub">The run everyone hears about forever.</div>
+        </div>
+
+        <div class="stat-tile alt">
+          <div class="stat-row-icon"><div class="stat-icon">💥</div><div class="stat-label">Biggest blowout</div></div>
+          <div class="stat-value">${stats.biggest.game ? esc(stats.biggest.game.winner + " +" + stats.biggest.margin) : "—"}</div>
+          <div class="stat-sub">${stats.biggest.game ? "Game " + esc(stats.biggest.game.game_number) + " was a statement." : "No blowouts yet."}</div>
+        </div>
+
+        <div class="stat-tile alt">
+          <div class="stat-row-icon"><div class="stat-icon">🚀</div><div class="stat-label">Best game</div></div>
           <div class="stat-value">${stats.bestScore.game ? esc(stats.bestScore.game.winner + " " + stats.bestScore.score) : "—"}</div>
-          <div class="stat-label">Best single game</div>
           <div class="stat-sub">${stats.bestScore.game ? "Game " + esc(stats.bestScore.game.game_number) + " went nuclear." : "Waiting for a heater."}</div>
         </div>
 
         <div class="stat-tile">
-          <div class="stat-icon">🎯</div>
+          <div class="stat-row-icon"><div class="stat-icon">🎯</div><div class="stat-label">Most picked</div></div>
           <div class="stat-value">${stats.mostPicked ? esc(stats.mostPicked[0]) : "—"}</div>
-          <div class="stat-label">Most picked</div>
           <div class="stat-sub">${stats.mostPicked ? esc(stats.mostPicked[1]) + " total picks" : "No pick data yet."}</div>
         </div>
 
         <div class="stat-tile">
-          <div class="stat-icon">📈</div>
+          <div class="stat-row-icon"><div class="stat-icon">📈</div><div class="stat-label">Best avg pick</div></div>
           <div class="stat-value">${stats.bestAvg ? esc(stats.bestAvg.name) : "—"}</div>
-          <div class="stat-label">Best avg pick</div>
           <div class="stat-sub">${stats.bestAvg ? stats.bestAvg.avg.toFixed(1) + " pts per pick" : "Needs more stat detail."}</div>
         </div>
 
-        <div class="stat-tile">
-          <div class="stat-icon">🥅</div>
+        <div class="stat-tile alt">
+          <div class="stat-row-icon"><div class="stat-icon">🥅</div><div class="stat-label">First goal king</div></div>
           <div class="stat-value">${stats.topFirstGoal ? esc(stats.topFirstGoal[0]) : "—"}</div>
-          <div class="stat-label">First goal king</div>
           <div class="stat-sub">${stats.topFirstGoal ? stats.topFirstGoal[1] + " first goals tracked" : "Start tracking first goals."}</div>
         </div>
       </div>
@@ -1047,7 +1211,7 @@ function renderAllTime(){
         ${stats.biggest.game ? esc(stats.biggest.game.winner) + " owns the biggest statement win so far, while " + (stats.mostPicked ? esc(stats.mostPicked[0]) : "the pick board") + " keeps showing up in the strategy room." : "Once more games are finalized, this turns into your rivalry storyline machine."}
       </div>
 
-      <div class="note">These stats use only your rivalry data: picks, finalized scores, first goals, and history. No NHL box-score feed needed.</div>
+      <div class="note">Powered only by your rivalry data: picks, finalized scores, first goals, and history.</div>
     </div>
 
     <div style="margin-top:12px">${rows}</div>
