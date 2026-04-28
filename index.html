@@ -647,6 +647,44 @@
       width:100%;
     }
 
+  
+    /* Width polish: use more of the iPhone screen */
+    .app{
+      max-width:none !important;
+      width:100% !important;
+      padding-left:8px !important;
+      padding-right:8px !important;
+    }
+    .tabs-inner{
+      max-width:none !important;
+      width:100% !important;
+    }
+
+    /* iOS date/input fix: keep fields inside cards */
+    input, select{
+      max-width:100% !important;
+      min-width:0 !important;
+      box-sizing:border-box !important;
+    }
+    input[type="date"]{
+      width:100% !important;
+      max-width:100% !important;
+      min-width:0 !important;
+      display:block !important;
+      -webkit-appearance:none;
+      appearance:none;
+    }
+    .manage-item,
+    .section,
+    .hero{
+      max-width:100% !important;
+      overflow:hidden;
+    }
+    .manage-fields > div{
+      min-width:0 !important;
+      width:100% !important;
+    }
+
   </style>
 </head>
 
