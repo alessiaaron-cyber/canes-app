@@ -1361,6 +1361,50 @@
       border-color:var(--line);
     }
 
+
+    /* Sign-in modal */
+    .auth-modal{
+      position:fixed;
+      inset:0;
+      z-index:50;
+      background:rgba(17,24,39,.38);
+      backdrop-filter:blur(10px);
+      display:flex;
+      align-items:flex-end;
+      justify-content:center;
+      padding:14px 12px calc(14px + env(safe-area-inset-bottom));
+    }
+    .auth-modal.hidden{display:none!important}
+    .auth-modal-card{
+      width:100%;
+      max-width:430px;
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:26px;
+      padding:16px;
+      box-shadow:0 18px 45px rgba(16,24,40,.22);
+    }
+    .auth-modal-title{
+      font-size:28px;
+      font-weight:1000;
+      letter-spacing:-.05em;
+      text-align:center;
+    }
+    .auth-modal-sub{
+      margin:6px 0 12px;
+      color:var(--muted);
+      font-size:13px;
+      font-weight:850;
+      text-align:center;
+      line-height:1.35;
+    }
+    #authCodeInput{
+      text-align:center;
+      font-size:28px!important;
+      letter-spacing:.16em;
+      font-weight:1000;
+    }
+
 </style>
 </head>
 
@@ -1380,6 +1424,28 @@
       <button class="tab" onclick="showTab('history', this)">History</button>
       <button class="tab" onclick="showTab('alltime', this)">All-Time</button>
       <button class="tab" onclick="showTab('manage', this)">Manage</button>
+    </div>
+  </div>
+
+  
+  <div id="authModal" class="auth-modal hidden">
+    <div class="auth-modal-card">
+      <div class="auth-modal-title">Sign in</div>
+      <div class="auth-modal-sub" id="authModalSub">Enter your approved email.</div>
+
+      <div id="authEmailStep">
+        <label>Email</label>
+        <input id="authEmailInput" type="email" placeholder="you@example.com" autocomplete="email">
+        <button style="margin-top:10px" onclick="sendAuthCodeFromModal()">Send Code</button>
+      </div>
+
+      <div id="authCodeStep" class="hidden">
+        <label>8-digit code</label>
+        <input id="authCodeInput" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="8" placeholder="12345678" autocomplete="one-time-code">
+        <button style="margin-top:10px" onclick="verifyAuthCodeFromModal()">Verify Code</button>
+      </div>
+
+      <button class="light" style="margin-top:8px" onclick="closeAuthModal(false)">Cancel</button>
     </div>
   </div>
 
@@ -1458,36 +1524,7 @@ async function refreshAuth(){
 }
 
 async function signInWithEmailCode(){
-  const email = prompt("Enter your approved email");
-  if (!email) return;
-
-  const send = await db.auth.signInWithOtp({
-    email,
-    options: { shouldCreateUser: true }
-  });
-
-  if (send.error){
-    toast(send.error.message || "Could not send code.");
-    return;
-  }
-
-  const token = prompt("Enter the 6-digit email code");
-  if (!token) return;
-
-  const verify = await db.auth.verifyOtp({
-    email,
-    token,
-    type: "email"
-  });
-
-  if (verify.error){
-    toast(verify.error.message || "Code did not work.");
-    return;
-  }
-
-  await refreshAuth();
-  renderAll();
-  toast("Signed in.");
+  await openAuthModal();
 }
 
 async function signOut(){
@@ -1500,10 +1537,82 @@ async function signOut(){
 async function requireAuth(actionLabel = "edit"){
   await refreshAuth();
   if (S.user) return true;
-  if (!confirm(`Sign in to ${actionLabel}?`)) return false;
-  await signInWithEmailCode();
-  return !!S.user;
+  const ok = await openAuthModal();
+  return !!ok && !!S.user;
 }
+
+let authModalResolve = null;
+let pendingAuthEmail = "";
+
+function openAuthModal(){
+  return new Promise((resolve) => {
+    authModalResolve = resolve;
+    pendingAuthEmail = "";
+    document.getElementById("authModal")?.classList.remove("hidden");
+    document.getElementById("authEmailStep")?.classList.remove("hidden");
+    document.getElementById("authCodeStep")?.classList.add("hidden");
+    const sub = document.getElementById("authModalSub");
+    if (sub) sub.textContent = "Enter your approved email. We’ll send you an 8-digit code.";
+    const emailInput = document.getElementById("authEmailInput");
+    const codeInput = document.getElementById("authCodeInput");
+    if (emailInput) emailInput.value = "";
+    if (codeInput) codeInput.value = "";
+    setTimeout(() => emailInput?.focus(), 150);
+  });
+}
+
+function closeAuthModal(success){
+  document.getElementById("authModal")?.classList.add("hidden");
+  if (authModalResolve){
+    authModalResolve(!!success);
+    authModalResolve = null;
+  }
+}
+
+async function sendAuthCodeFromModal(){
+  const email = document.getElementById("authEmailInput")?.value?.trim();
+  if (!email) return toast("Enter your email.");
+  pendingAuthEmail = email;
+
+  const send = await db.auth.signInWithOtp({
+    email,
+    options: { shouldCreateUser: true }
+  });
+
+  if (send.error){
+    toast(send.error.message || "Could not send code.");
+    return;
+  }
+
+  document.getElementById("authEmailStep")?.classList.add("hidden");
+  document.getElementById("authCodeStep")?.classList.remove("hidden");
+  const sub = document.getElementById("authModalSub");
+  if (sub) sub.textContent = `Enter the 8-digit code sent to ${email}.`;
+  setTimeout(() => document.getElementById("authCodeInput")?.focus(), 150);
+}
+
+async function verifyAuthCodeFromModal(){
+  const token = document.getElementById("authCodeInput")?.value?.trim();
+  if (!pendingAuthEmail) return toast("Enter your email first.");
+  if (!token || token.length < 6) return toast("Enter the code from your email.");
+
+  const verify = await db.auth.verifyOtp({
+    email: pendingAuthEmail,
+    token,
+    type: "email"
+  });
+
+  if (verify.error){
+    toast(verify.error.message || "Code did not work.");
+    return;
+  }
+
+  await refreshAuth();
+  renderAll();
+  toast("Signed in.");
+  closeAuthModal(true);
+}
+
 
 function isGameDayEditingActive(){
   const el = document.activeElement;
@@ -1630,14 +1739,16 @@ async function saveDraftPick(key){
   if (!spec) return;
 
   const [owner, slot, player, goals, assists] = spec;
-  if (!player) return;
 
   if (S.currentGame.status === "Scheduled"){
     await saveCurrentGameField("status", "In Progress");
   }
 
-  const points = pickPoints(player, goals, assists, S.form.firstGoal);
-  await upsertPick(S.currentGame.id, owner, slot, player, goals, assists, points);
+  const cleanPlayer = player || "";
+  const cleanGoals = cleanPlayer ? goals : 0;
+  const cleanAssists = cleanPlayer ? assists : 0;
+  const points = cleanPlayer ? pickPoints(cleanPlayer, cleanGoals, cleanAssists, S.form.firstGoal) : 0;
+  await upsertPick(S.currentGame.id, owner, slot, cleanPlayer, cleanGoals, cleanAssists, points);
 }
 
 
@@ -2828,7 +2939,18 @@ db.auth.onAuthStateChange(async (_event, session) => {
   renderAll();
 });
 
+
+function authCodeInputEnterHandler(){
+  document.getElementById("authEmailInput")?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") sendAuthCodeFromModal();
+  });
+  document.getElementById("authCodeInput")?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") verifyAuthCodeFromModal();
+  });
+}
+
 window.addEventListener("load", async () => {
+  authCodeInputEnterHandler();
   try{
     await loadAll();
   } catch(e){
