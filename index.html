@@ -990,18 +990,64 @@ function renderAllTime(){
     </div>
 
     <div class="section">
-      <div class="section-head"><div class="section-title">Fun Stats</div><div class="mini">from your history</div></div>
+      <div class="section-head"><div class="section-title">Rivalry Highlights</div><div class="mini">broadcast booth</div></div>
       <div class="stat-grid">
-        <div class="stat-tile"><div class="stat-value">${esc(stats.currentStreak)}</div><div class="stat-label">Current Streak</div></div>
-        <div class="stat-tile"><div class="stat-value">${stats.longest.count ? esc(stats.longest.winner + " W" + stats.longest.count) : "—"}</div><div class="stat-label">Longest Streak</div></div>
-        <div class="stat-tile"><div class="stat-value">${stats.biggest.game ? esc(stats.biggest.game.winner + " +" + stats.biggest.margin) : "—"}</div><div class="stat-label">Biggest Blowout</div></div>
-        <div class="stat-tile"><div class="stat-value">${stats.bestScore.game ? esc(stats.bestScore.game.winner + " " + stats.bestScore.score) : "—"}</div><div class="stat-label">Best Game</div></div>
-        <div class="stat-tile"><div class="stat-value">${stats.mostPicked ? esc(stats.mostPicked[0]) : "—"}</div><div class="stat-label">Most Picked</div></div>
-        <div class="stat-tile"><div class="stat-value">${stats.bestAvg ? esc(stats.bestAvg.name + " " + stats.bestAvg.avg.toFixed(1)) : "—"}</div><div class="stat-label">Best Avg Pick</div></div>
-        <div class="stat-tile"><div class="stat-value">${stats.topFirstGoal ? esc(stats.topFirstGoal[0]) : "—"}</div><div class="stat-label">First Goal King</div></div>
-        <div class="stat-tile"><div class="stat-value">${stats.topFirstGoal ? stats.topFirstGoal[1] : 0}</div><div class="stat-label">First Goals</div></div>
+        <div class="stat-tile feature">
+          <div class="stat-icon">🔥</div>
+          <div class="stat-value">${esc(stats.currentStreak)}</div>
+          <div class="stat-label">Current heater</div>
+          <div class="stat-sub">${stats.currentStreak === "No streak" ? "Nobody has momentum. Chaos reigns." : "Momentum is officially a storyline."}</div>
+        </div>
+
+        <div class="stat-tile redline">
+          <div class="stat-icon">🏆</div>
+          <div class="stat-value">${stats.longest.count ? esc(stats.longest.winner + " W" + stats.longest.count) : "—"}</div>
+          <div class="stat-label">Longest streak</div>
+          <div class="stat-sub">The run everyone has to hear about forever.</div>
+        </div>
+
+        <div class="stat-tile redline">
+          <div class="stat-icon">💥</div>
+          <div class="stat-value">${stats.biggest.game ? esc(stats.biggest.game.winner + " +" + stats.biggest.margin) : "—"}</div>
+          <div class="stat-label">Biggest blowout</div>
+          <div class="stat-sub">${stats.biggest.game ? "Game " + esc(stats.biggest.game.game_number) + " was not close." : "No blowouts yet."}</div>
+        </div>
+
+        <div class="stat-tile">
+          <div class="stat-icon">🚀</div>
+          <div class="stat-value">${stats.bestScore.game ? esc(stats.bestScore.game.winner + " " + stats.bestScore.score) : "—"}</div>
+          <div class="stat-label">Best single game</div>
+          <div class="stat-sub">${stats.bestScore.game ? "Game " + esc(stats.bestScore.game.game_number) + " went nuclear." : "Waiting for a heater."}</div>
+        </div>
+
+        <div class="stat-tile">
+          <div class="stat-icon">🎯</div>
+          <div class="stat-value">${stats.mostPicked ? esc(stats.mostPicked[0]) : "—"}</div>
+          <div class="stat-label">Most picked</div>
+          <div class="stat-sub">${stats.mostPicked ? esc(stats.mostPicked[1]) + " total picks" : "No pick data yet."}</div>
+        </div>
+
+        <div class="stat-tile">
+          <div class="stat-icon">📈</div>
+          <div class="stat-value">${stats.bestAvg ? esc(stats.bestAvg.name) : "—"}</div>
+          <div class="stat-label">Best avg pick</div>
+          <div class="stat-sub">${stats.bestAvg ? stats.bestAvg.avg.toFixed(1) + " pts per pick" : "Needs more stat detail."}</div>
+        </div>
+
+        <div class="stat-tile">
+          <div class="stat-icon">🥅</div>
+          <div class="stat-value">${stats.topFirstGoal ? esc(stats.topFirstGoal[0]) : "—"}</div>
+          <div class="stat-label">First goal king</div>
+          <div class="stat-sub">${stats.topFirstGoal ? stats.topFirstGoal[1] + " first goals tracked" : "Start tracking first goals."}</div>
+        </div>
       </div>
-      <div class="note">Best Avg Pick uses pick-point data. Older imported picks without goal/assist details may not count much until you enter more games or edit history.</div>
+
+      <div class="ticker">
+        <strong>Booth note:</strong>
+        ${stats.biggest.game ? esc(stats.biggest.game.winner) + " owns the biggest statement win so far, while " + (stats.mostPicked ? esc(stats.mostPicked[0]) : "the pick board") + " keeps showing up in the strategy room." : "Once more games are finalized, this turns into your rivalry storyline machine."}
+      </div>
+
+      <div class="note">These stats use only your rivalry data: picks, finalized scores, first goals, and history. No NHL box-score feed needed.</div>
     </div>
 
     <div style="margin-top:12px">${rows}</div>
