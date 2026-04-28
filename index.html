@@ -1814,6 +1814,13 @@ async function saveDraftPick(key){
 
   const [owner, slot, player, goals, assists] = spec;
 
+  const slotKey = owner === "Aaron" ? (slot === 1 ? "a1" : "a2") : (slot === 1 ? "j1" : "j2");
+  const dupe = findDuplicatePick(slotKey, player);
+  if (dupe){
+    toast(`${player} is already picked in ${dupe}.`);
+    return;
+  }
+
   if (S.currentGame.status === "Scheduled"){
     await saveCurrentGameField("status", "In Progress");
   }
@@ -1872,10 +1879,34 @@ function playerNames(){
   return [...new Set(fromDb.length ? fromDb : fallback)].sort();
 }
 
-function playerOptions(selected){
-  return `<option value="">Select</option>` + playerNames().map(p =>
-    `<option value="${esc(p)}" ${p===selected ? "selected" : ""}>${esc(p)}</option>`
-  ).join("");
+function selectedPickMap(){
+  return {
+    a1:S.form.a1 || "",
+    a2:S.form.a2 || "",
+    j1:S.form.j1 || "",
+    j2:S.form.j2 || ""
+  };
+}
+
+function isPlayerAlreadyPicked(player, currentSlot){
+  if (!player) return false;
+  const picks = selectedPickMap();
+  return Object.entries(picks).some(([slot, value]) => slot !== currentSlot && value === player);
+}
+
+function playerOptions(selected, currentSlot){
+  return `<option value="">Select</option>` + playerNames().map(p => {
+    const disabled = isPlayerAlreadyPicked(p, currentSlot) && p !== selected;
+    return `<option value="${esc(p)}" ${p===selected ? "selected" : ""} ${disabled ? "disabled" : ""}>${esc(p)}${disabled ? " — picked" : ""}</option>`;
+  }).join("");
+}
+
+function findDuplicatePick(slot, player){
+  if (!player) return null;
+  const labels = {a1:"Aaron Pick 1", a2:"Aaron Pick 2", j1:"Julie Pick 1", j2:"Julie Pick 2"};
+  const picks = selectedPickMap();
+  const dupe = Object.entries(picks).find(([s,v]) => s !== slot && v === player);
+  return dupe ? labels[dupe[0]] : null;
 }
 
 function firstGoalOptions(){
@@ -1886,6 +1917,16 @@ function firstGoalOptions(){
 }
 
 function setF(k,v){
+  if (["a1","a2","j1","j2"].includes(k)){
+    const dupe = findDuplicatePick(k, v);
+    if (dupe){
+      toast(`${v} is already picked in ${dupe}.`);
+      haptic();
+      renderGame();
+      return;
+    }
+  }
+
   S.form[k] = v;
   renderGame();
 
@@ -2018,16 +2059,16 @@ function renderGame(){
         <div class="panel">
           <div class="panel-title">Aaron</div>
           <label>Pick 1</label>
-          <select class="${changedClass('a1')}" onchange="setF('a1',this.value)">${playerOptions(S.form.a1)}</select>
+          <select class="${changedClass('a1')}" onchange="setF('a1',this.value)">${playerOptions(S.form.a1, 'a1')}</select>
           <label>Pick 2</label>
-          <select class="${changedClass('a2')}" onchange="setF('a2',this.value)">${playerOptions(S.form.a2)}</select>
+          <select class="${changedClass('a2')}" onchange="setF('a2',this.value)">${playerOptions(S.form.a2, 'a2')}</select>
         </div>
         <div class="panel">
           <div class="panel-title">Julie</div>
           <label>Pick 1</label>
-          <select class="${changedClass('j1')}" onchange="setF('j1',this.value)">${playerOptions(S.form.j1)}</select>
+          <select class="${changedClass('j1')}" onchange="setF('j1',this.value)">${playerOptions(S.form.j1, 'j1')}</select>
           <label>Pick 2</label>
-          <select class="${changedClass('j2')}" onchange="setF('j2',this.value)">${playerOptions(S.form.j2)}</select>
+          <select class="${changedClass('j2')}" onchange="setF('j2',this.value)">${playerOptions(S.form.j2, 'j2')}</select>
         </div>
       </div>
     </div>
@@ -2711,6 +2752,8 @@ async function finalizeGame(){
     const g = S.currentGame;
     if (!g) return toast("No current game.");
     if (!S.form.a1 || !S.form.a2 || !S.form.j1 || !S.form.j2) return toast("Pick all 4 players first.");
+    const finalPicks = [S.form.a1,S.form.a2,S.form.j1,S.form.j2];
+    if (new Set(finalPicks).size !== finalPicks.length) return toast("Each player can only be picked once for this game.");
     if (!confirm("Lock this game as final? This will save the result and advance to the next game.")) return;
 
     const l = liveScore();
@@ -2907,6 +2950,12 @@ async function saveHistoryGame(gameId){
     const a2 = val(`editA2_${gameId}`, existingPick("Aaron",2).player_name || "").trim();
     const j1 = val(`editJ1_${gameId}`, existingPick("Julie",1).player_name || "").trim();
     const j2 = val(`editJ2_${gameId}`, existingPick("Julie",2).player_name || "").trim();
+
+    const editPicks = [a1,a2,j1,j2].filter(Boolean);
+    if (new Set(editPicks).size !== editPicks.length){
+      toast("Each player can only be picked once for a game.");
+      return;
+    }
 
     const a1g = numVal(`editA1G_${gameId}`, existingPick("Aaron",1).goals || 0);
     const a1a = numVal(`editA1A_${gameId}`, existingPick("Aaron",1).assists || 0);
