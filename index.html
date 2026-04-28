@@ -1405,6 +1405,37 @@
       font-weight:1000;
     }
 
+
+    /* Premium polish: sync highlight + last updated */
+    .last-updated{
+      margin-top:8px;
+      text-align:center;
+      color:var(--muted);
+      font-size:11px;
+      font-weight:850;
+    }
+    .sync-flash{
+      animation: syncFlash 1.25s ease-out;
+    }
+    @keyframes syncFlash{
+      0%{
+        box-shadow:0 0 0 0 rgba(200,16,46,.34), 0 0 0 999px rgba(200,16,46,0);
+        border-color:#fda4af;
+        background:#fff1f2;
+      }
+      100%{
+        box-shadow:none;
+      }
+    }
+    .save-pulse{
+      animation: savePulse .55s ease-out;
+    }
+    @keyframes savePulse{
+      0%{transform:scale(.985)}
+      70%{transform:scale(1.01)}
+      100%{transform:scale(1)}
+    }
+
 </style>
 </head>
 
@@ -1472,6 +1503,8 @@ let S = {
   user: null,
   realtimeChannel: null,
   suppressRealtimeRender: false,
+  lastUpdated: null,
+  justChangedKeys: [],
   form: {
     a1:"", a2:"", j1:"", j2:"",
     ag1:0, aa1:0, ag2:0, aa2:0,
@@ -1486,6 +1519,33 @@ function toast(msg){
   el.classList.add("show");
   setTimeout(()=>el.classList.remove("show"), 2300);
 }
+
+function haptic(style = "light"){
+  try{
+    if (navigator.vibrate){
+      navigator.vibrate(style === "success" ? [12, 25, 12] : 10);
+    }
+  } catch(e){}
+}
+
+function markUpdated(keys = []){
+  S.lastUpdated = new Date();
+  S.justChangedKeys = Array.isArray(keys) ? keys : [];
+  setTimeout(() => {
+    S.justChangedKeys = [];
+    try{ renderGame(); } catch(e){}
+  }, 1300);
+}
+
+function updatedText(){
+  if (!S.lastUpdated) return "";
+  return "Updated just now";
+}
+
+function changedClass(key){
+  return S.justChangedKeys.includes(key) ? "sync-flash" : "";
+}
+
 
 function showTab(tab, btn){
   ["gameView","historyView","manageView","rosterView","scheduleView","alltimeView"].forEach(id => {
@@ -1531,6 +1591,7 @@ async function signOut(){
   await db.auth.signOut();
   S.user = null;
   renderAll();
+  haptic();
   toast("Signed out.");
 }
 
@@ -1609,6 +1670,7 @@ async function verifyAuthCodeFromModal(){
 
   await refreshAuth();
   renderAll();
+  haptic("success");
   toast("Signed in.");
   closeAuthModal(true);
 }
@@ -1652,6 +1714,10 @@ function applyRealtimePayload(payload){
     mergeRow(S.allGames, row);
     S.currentGame = {...S.currentGame, ...row};
 
+    const changed = [];
+    if (oldRow && row && oldRow.first_goal_scorer !== row.first_goal_scorer) changed.push("firstGoal");
+    markUpdated(changed);
+
     if (!isGameDayEditingActive()){
       hydrateForm();
       renderAll();
@@ -1674,6 +1740,12 @@ function applyRealtimePayload(payload){
 
     mergeRow(S.picks, row);
     mergeRow(S.allPicks, row);
+
+    const pickKey = row.owner === "Aaron" ? (Number(row.pick_slot) === 1 ? "a1" : "a2") : (Number(row.pick_slot) === 1 ? "j1" : "j2");
+    const statKeys = row.owner === "Aaron"
+      ? (Number(row.pick_slot) === 1 ? ["ag1","aa1"] : ["ag2","aa2"])
+      : (Number(row.pick_slot) === 1 ? ["jg1","ja1"] : ["jg2","ja2"]);
+    markUpdated([pickKey, ...statKeys]);
 
     if (!isGameDayEditingActive()){
       hydrateForm();
@@ -1714,6 +1786,8 @@ async function saveCurrentGameField(field, value){
   S.currentGame = {...S.currentGame, ...patch};
   mergeRow(S.games, S.currentGame);
   mergeRow(S.allGames, S.currentGame);
+  markUpdated([field === "first_goal_scorer" ? "firstGoal" : field]);
+  haptic();
 }
 
 async function saveDraftPick(key){
@@ -1749,6 +1823,8 @@ async function saveDraftPick(key){
   const cleanAssists = cleanPlayer ? assists : 0;
   const points = cleanPlayer ? pickPoints(cleanPlayer, cleanGoals, cleanAssists, S.form.firstGoal) : 0;
   await upsertPick(S.currentGame.id, owner, slot, cleanPlayer, cleanGoals, cleanAssists, points);
+  markUpdated([key]);
+  haptic();
 }
 
 
@@ -1925,6 +2001,7 @@ function renderGame(){
       </div>
 
       <div class="leader ${isPlayoff ? "playoff-mode" : ""}">${lead}</div>
+      ${S.lastUpdated ? `<div class="last-updated">${updatedText()}</div>` : ""}
     </div>
 
     ${S.lastRecap ? `
@@ -1941,16 +2018,16 @@ function renderGame(){
         <div class="panel">
           <div class="panel-title">Aaron</div>
           <label>Pick 1</label>
-          <select onchange="setF('a1',this.value)">${playerOptions(S.form.a1)}</select>
+          <select class="${changedClass('a1')}" onchange="setF('a1',this.value)">${playerOptions(S.form.a1)}</select>
           <label>Pick 2</label>
-          <select onchange="setF('a2',this.value)">${playerOptions(S.form.a2)}</select>
+          <select class="${changedClass('a2')}" onchange="setF('a2',this.value)">${playerOptions(S.form.a2)}</select>
         </div>
         <div class="panel">
           <div class="panel-title">Julie</div>
           <label>Pick 1</label>
-          <select onchange="setF('j1',this.value)">${playerOptions(S.form.j1)}</select>
+          <select class="${changedClass('j1')}" onchange="setF('j1',this.value)">${playerOptions(S.form.j1)}</select>
           <label>Pick 2</label>
-          <select onchange="setF('j2',this.value)">${playerOptions(S.form.j2)}</select>
+          <select class="${changedClass('j2')}" onchange="setF('j2',this.value)">${playerOptions(S.form.j2)}</select>
         </div>
       </div>
     </div>
@@ -1964,16 +2041,16 @@ function renderGame(){
           <div class="pick-stat-card">
             <div class="pick-stat-name">${esc(S.form.a1 || "Pick 1")}</div>
             <div class="ga-pair">
-              <div><label>G</label><input type="text" inputmode="numeric" pattern="[0-9]*" data-stat-input="true" value="${S.form.ag1}" onchange="setNum('ag1',this.value)"></div>
-              <div><label>A</label><input type="text" inputmode="numeric" pattern="[0-9]*" data-stat-input="true" value="${S.form.aa1}" onchange="setNum('aa1',this.value)"></div>
+              <div><label>G</label><input type="text" inputmode="numeric" pattern="[0-9]*" data-stat-input="true" class="${changedClass('ag1')}" value="${S.form.ag1}" onchange="setNum('ag1',this.value)"></div>
+              <div><label>A</label><input type="text" inputmode="numeric" pattern="[0-9]*" data-stat-input="true" class="${changedClass('aa1')}" value="${S.form.aa1}" onchange="setNum('aa1',this.value)"></div>
             </div>
           </div>
 
           <div class="pick-stat-card">
             <div class="pick-stat-name">${esc(S.form.a2 || "Pick 2")}</div>
             <div class="ga-pair">
-              <div><label>G</label><input type="text" inputmode="numeric" pattern="[0-9]*" data-stat-input="true" value="${S.form.ag2}" onchange="setNum('ag2',this.value)"></div>
-              <div><label>A</label><input type="text" inputmode="numeric" pattern="[0-9]*" data-stat-input="true" value="${S.form.aa2}" onchange="setNum('aa2',this.value)"></div>
+              <div><label>G</label><input type="text" inputmode="numeric" pattern="[0-9]*" data-stat-input="true" class="${changedClass('ag2')}" value="${S.form.ag2}" onchange="setNum('ag2',this.value)"></div>
+              <div><label>A</label><input type="text" inputmode="numeric" pattern="[0-9]*" data-stat-input="true" class="${changedClass('aa2')}" value="${S.form.aa2}" onchange="setNum('aa2',this.value)"></div>
             </div>
           </div>
         </div>
@@ -1984,23 +2061,23 @@ function renderGame(){
           <div class="pick-stat-card">
             <div class="pick-stat-name">${esc(S.form.j1 || "Pick 1")}</div>
             <div class="ga-pair">
-              <div><label>G</label><input type="text" inputmode="numeric" pattern="[0-9]*" data-stat-input="true" value="${S.form.jg1}" onchange="setNum('jg1',this.value)"></div>
-              <div><label>A</label><input type="text" inputmode="numeric" pattern="[0-9]*" data-stat-input="true" value="${S.form.ja1}" onchange="setNum('ja1',this.value)"></div>
+              <div><label>G</label><input type="text" inputmode="numeric" pattern="[0-9]*" data-stat-input="true" class="${changedClass('jg1')}" value="${S.form.jg1}" onchange="setNum('jg1',this.value)"></div>
+              <div><label>A</label><input type="text" inputmode="numeric" pattern="[0-9]*" data-stat-input="true" class="${changedClass('ja1')}" value="${S.form.ja1}" onchange="setNum('ja1',this.value)"></div>
             </div>
           </div>
 
           <div class="pick-stat-card">
             <div class="pick-stat-name">${esc(S.form.j2 || "Pick 2")}</div>
             <div class="ga-pair">
-              <div><label>G</label><input type="text" inputmode="numeric" pattern="[0-9]*" data-stat-input="true" value="${S.form.jg2}" onchange="setNum('jg2',this.value)"></div>
-              <div><label>A</label><input type="text" inputmode="numeric" pattern="[0-9]*" data-stat-input="true" value="${S.form.ja2}" onchange="setNum('ja2',this.value)"></div>
+              <div><label>G</label><input type="text" inputmode="numeric" pattern="[0-9]*" data-stat-input="true" class="${changedClass('jg2')}" value="${S.form.jg2}" onchange="setNum('jg2',this.value)"></div>
+              <div><label>A</label><input type="text" inputmode="numeric" pattern="[0-9]*" data-stat-input="true" class="${changedClass('ja2')}" value="${S.form.ja2}" onchange="setNum('ja2',this.value)"></div>
             </div>
           </div>
         </div>
       </div>
 
       <label>First Goal Scorer</label>
-      <select onchange="setF('firstGoal',this.value)">${firstGoalOptions()}</select>
+      <select class="${changedClass('firstGoal')}" onchange="setF('firstGoal',this.value)">${firstGoalOptions()}</select>
     </div>
 
     <div class="section">
@@ -2659,6 +2736,7 @@ async function finalizeGame(){
 
     S.lastRecap = buildPostgameRecap(g, l);
     await loadAll();
+    haptic("success");
     toast(S.lastRecap ? S.lastRecap.title : "Game locked. Next game loaded.");
   } catch(e){
     toast(e.message || "Could not finalize.");
@@ -2678,6 +2756,7 @@ async function addPlayerFromUI(){
     }, {onConflict:"player_name"});
     if (res.error) throw res.error;
     await loadAll();
+    haptic("success");
     toast("Player added.");
   } catch(e){
     toast(e.message || "Could not add player.");
@@ -2691,6 +2770,7 @@ async function deactivatePlayer(name){
     const res = await db.from("players").update({is_active:false}).eq("player_name", name);
     if (res.error) throw res.error;
     await loadAll();
+    haptic();
     toast("Player removed.");
   } catch(e){
     toast(e.message || "Could not remove player.");
@@ -2748,6 +2828,7 @@ async function addGameFromUI(){
       }).eq("id", existing.id);
       if (res.error) throw res.error;
       await loadAll();
+      haptic("success");
       toast("Game reactivated.");
       return;
     }
@@ -2766,6 +2847,7 @@ async function addGameFromUI(){
     });
     if (res.error) throw res.error;
     await loadAll();
+    haptic("success");
     toast("Game added.");
   } catch(e){
     toast(e.message || "Could not add game.");
@@ -2794,6 +2876,7 @@ async function hideGame(gameId){
     const res = await db.from("games").update({status:"Hidden"}).eq("id", gameId).neq("status", "Final");
     if (res.error) throw res.error;
     await loadAll();
+    haptic();
     toast("Game removed.");
   } catch(e){
     toast(e.message || "Could not remove game.");
@@ -2865,6 +2948,7 @@ async function saveHistoryGame(gameId){
     S.editingGameId = null;
     S.editPanel = "result";
     await loadAll();
+    haptic("success");
     toast("History updated.");
   } catch(e){
     toast(e.message || "Could not save history.");
