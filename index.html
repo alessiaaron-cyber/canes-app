@@ -1909,6 +1909,16 @@ function findDuplicatePick(slot, player){
   return dupe ? labels[dupe[0]] : null;
 }
 
+function friendlyDbError(error){
+  if (!error) return "";
+  const msg = error.message || "";
+  if (error.code === "23505" || msg.toLowerCase().includes("duplicate key")){
+    return "That player is already picked for this game.";
+  }
+  return msg || "Could not save.";
+}
+
+
 function firstGoalOptions(){
   const vals = playerNames();
   return `<option value="">No first goal selected</option>` + vals.map(p =>
@@ -2711,39 +2721,21 @@ async function upsertPick(gameId, owner, slot, player, goals, assists, points){
     game_id:gameId,
     owner,
     pick_slot:slot,
-    player_name:player,
+    player_name:player || "",
     goals:Number(goals||0),
     assists:Number(assists||0),
     points:Number(points||0),
     is_carry_forward:false,
-    original_pick_text:player
+    original_pick_text:player || ""
   };
 
   if (existing){
     const res = await db.from("picks").update(row).eq("id", existing.id);
-    if (res.error) throw res.error;
+    if (res.error) throw new Error(friendlyDbError(res.error));
   } else {
     const res = await db.from("picks").insert(row);
-    if (res.error) throw res.error;
+    if (res.error) throw new Error(friendlyDbError(res.error));
   }
-}
-
-
-function buildPostgameRecap(game, live){
-  const winnerText = live.w === "Tie" ? "Dead heat" : `${live.w} takes it`;
-  const scoreText = `${live.a}-${live.j}`;
-  const margin = Math.abs(live.a - live.j);
-  let vibe = "Scoreboard updated. The rivalry continues.";
-  if (live.w === "Tie") vibe = "No bragging rights tonight. The tension rolls into the next game.";
-  else if (margin >= 5) vibe = "That was a statement game. The group chat may not survive this.";
-  else if (margin <= 1) vibe = "A tight one. Every assist mattered and the chirps are absolutely valid.";
-  else vibe = "Solid win. Enough room to brag, not enough room to get comfortable.";
-
-  const fg = S.form.firstGoal ? ` First goal tracked: ${S.form.firstGoal}.` : "";
-  return {
-    title: `${winnerText} ${scoreText}`,
-    copy: `${vibe}${fg}`
-  };
 }
 
 async function finalizeGame(){
