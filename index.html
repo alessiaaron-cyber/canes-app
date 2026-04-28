@@ -925,6 +925,43 @@
       }
     }
 
+  
+    /* Live Stats final polish: no ellipses, no wrapping */
+    #gameView .stat-row{
+      grid-template-columns: minmax(74px, 1fr) 56px 56px !important;
+      gap:8px !important;
+      align-items:center !important;
+    }
+    #gameView .player-mini{
+      white-space:nowrap !important;
+      overflow:visible !important;
+      text-overflow:clip !important;
+      font-size:14px !important;
+      line-height:1 !important;
+      padding-bottom:0 !important;
+      min-width:0 !important;
+    }
+    #gameView .stat-row input[type=number]{
+      min-height:54px !important;
+      font-size:22px !important;
+      border-radius:18px !important;
+      padding-left:2px !important;
+      padding-right:2px !important;
+    }
+    @media (max-width: 390px){
+      #gameView .stat-row{
+        grid-template-columns: minmax(58px, 1fr) 52px 52px !important;
+        gap:6px !important;
+      }
+      #gameView .player-mini{
+        font-size:12px !important;
+      }
+      #gameView .stat-row input[type=number]{
+        min-height:50px !important;
+        font-size:20px !important;
+      }
+    }
+
   </style>
 </head>
 
