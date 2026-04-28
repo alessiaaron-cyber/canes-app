@@ -1065,6 +1065,25 @@
       }
     }
 
+
+    /* Full UX upgrade */
+    .icon-btn{width:38px!important;height:38px!important;min-height:38px!important;padding:0!important;border-radius:12px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;background:#fff!important;color:var(--ink)!important;border:1px solid var(--line)!important;box-shadow:none!important;font-size:16px!important;flex:0 0 38px}
+    .icon-btn.danger{color:#991b1b!important;background:#fff1f2!important;border-color:#fecdd3!important}
+    .row-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:10px}
+    .manage-menu{display:grid;grid-template-columns:1fr;gap:10px;margin-top:10px}
+    .manage-menu-card{border:1px solid var(--line);border-radius:20px;background:#fff;padding:14px;display:flex;align-items:center;justify-content:space-between;gap:12px;box-shadow:0 6px 15px rgba(16,24,40,.04)}
+    .manage-menu-title{font-size:18px;font-weight:1000;letter-spacing:-.03em}
+    .manage-menu-sub{margin-top:3px;color:var(--muted);font-size:12px;font-weight:800;line-height:1.25}
+    .chevron{width:38px;height:38px;border-radius:14px;background:#111827;color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:1000;flex:0 0 38px}
+    .subscreen-back{width:auto!important;min-height:38px!important;padding:8px 11px!important;border-radius:999px!important;background:#eef1f5!important;color:var(--ink)!important;border:1px solid var(--line)!important;box-shadow:none!important;font-size:12px!important}
+    .compact-list{margin-top:10px;display:flex;flex-direction:column;gap:8px}
+    .compact-item{border:1px solid var(--line);background:#fff;border-radius:16px;padding:10px}
+    .compact-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+    .compact-title{font-size:15px;font-weight:1000;letter-spacing:-.02em;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+    .compact-actions{display:flex;gap:7px;flex:0 0 auto}
+    .history-score-pill{background:#111827;color:#fff;border-radius:999px;padding:6px 9px;font-size:12px;font-weight:1000;white-space:nowrap}
+    #gameView .ga-pair input,#gameView input[data-stat-input="true"]{-webkit-appearance:none;appearance:none}
+
 </style>
 </head>
 
@@ -1073,6 +1092,8 @@
     <div id="gameView" class="loader">Loading Canes Rivalry…</div>
     <div id="historyView" class="hidden"></div>
     <div id="manageView" class="hidden"></div>
+    <div id="rosterView" class="hidden"></div>
+    <div id="scheduleView" class="hidden"></div>
     <div id="alltimeView" class="hidden"></div>
   </div>
 
@@ -1119,7 +1140,7 @@ function toast(msg){
 }
 
 function showTab(tab, btn){
-  ["gameView","historyView","manageView","alltimeView"].forEach(id => {
+  ["gameView","historyView","manageView","rosterView","scheduleView","alltimeView"].forEach(id => {
     document.getElementById(id).classList.add("hidden");
   });
   document.getElementById(tab + "View").classList.remove("hidden");
@@ -1198,7 +1219,8 @@ function setF(k,v){
 }
 
 function setNum(k,v){
-  S.form[k] = Math.max(0, Number(v || 0));
+  const clean = String(v || "0").replace(/\D/g, "");
+  S.form[k] = Math.max(0, Number(clean || 0));
   renderGame();
 }
 
@@ -1297,7 +1319,7 @@ function renderGame(){
     </div>
 
     <div class="section">
-      <div class="section-head"><div class="section-title">Picks</div><div class="mini">2 each</div></div>
+      <div class="section-head"><div class="section-title">Picks</div></div>
       <div class="grid2">
         <div class="panel">
           <div class="panel-title">Aaron</div>
@@ -1325,16 +1347,16 @@ function renderGame(){
           <div class="pick-stat-card">
             <div class="pick-stat-name">${esc(S.form.a1 || "Pick 1")}</div>
             <div class="ga-pair">
-              <div><label>G</label><input type="number" min="0" value="${S.form.ag1}" oninput="setNum('ag1',this.value)"></div>
-              <div><label>A</label><input type="number" min="0" value="${S.form.aa1}" oninput="setNum('aa1',this.value)"></div>
+              <div><label>G</label><input type="text" inputmode="numeric" pattern="[0-9]*" data-stat-input="true" value="${S.form.ag1}" onchange="setNum('ag1',this.value)"></div>
+              <div><label>A</label><input type="text" inputmode="numeric" pattern="[0-9]*" data-stat-input="true" value="${S.form.aa1}" onchange="setNum('aa1',this.value)"></div>
             </div>
           </div>
 
           <div class="pick-stat-card">
             <div class="pick-stat-name">${esc(S.form.a2 || "Pick 2")}</div>
             <div class="ga-pair">
-              <div><label>G</label><input type="number" min="0" value="${S.form.ag2}" oninput="setNum('ag2',this.value)"></div>
-              <div><label>A</label><input type="number" min="0" value="${S.form.aa2}" oninput="setNum('aa2',this.value)"></div>
+              <div><label>G</label><input type="text" inputmode="numeric" pattern="[0-9]*" data-stat-input="true" value="${S.form.ag2}" onchange="setNum('ag2',this.value)"></div>
+              <div><label>A</label><input type="text" inputmode="numeric" pattern="[0-9]*" data-stat-input="true" value="${S.form.aa2}" onchange="setNum('aa2',this.value)"></div>
             </div>
           </div>
         </div>
@@ -1345,16 +1367,16 @@ function renderGame(){
           <div class="pick-stat-card">
             <div class="pick-stat-name">${esc(S.form.j1 || "Pick 1")}</div>
             <div class="ga-pair">
-              <div><label>G</label><input type="number" min="0" value="${S.form.jg1}" oninput="setNum('jg1',this.value)"></div>
-              <div><label>A</label><input type="number" min="0" value="${S.form.ja1}" oninput="setNum('ja1',this.value)"></div>
+              <div><label>G</label><input type="text" inputmode="numeric" pattern="[0-9]*" data-stat-input="true" value="${S.form.jg1}" onchange="setNum('jg1',this.value)"></div>
+              <div><label>A</label><input type="text" inputmode="numeric" pattern="[0-9]*" data-stat-input="true" value="${S.form.ja1}" onchange="setNum('ja1',this.value)"></div>
             </div>
           </div>
 
           <div class="pick-stat-card">
             <div class="pick-stat-name">${esc(S.form.j2 || "Pick 2")}</div>
             <div class="ga-pair">
-              <div><label>G</label><input type="number" min="0" value="${S.form.jg2}" oninput="setNum('jg2',this.value)"></div>
-              <div><label>A</label><input type="number" min="0" value="${S.form.ja2}" oninput="setNum('ja2',this.value)"></div>
+              <div><label>G</label><input type="text" inputmode="numeric" pattern="[0-9]*" data-stat-input="true" value="${S.form.jg2}" onchange="setNum('jg2',this.value)"></div>
+              <div><label>A</label><input type="text" inputmode="numeric" pattern="[0-9]*" data-stat-input="true" value="${S.form.ja2}" onchange="setNum('ja2',this.value)"></div>
             </div>
           </div>
         </div>
@@ -1486,9 +1508,8 @@ function renderHistory(){
         <div class="note">First goal can be any roster player for tracking. Bonus applies only if that player was picked and has a goal logged.</div>
       </div>
     ` : `
-      <div class="card-actions">
-        <button class="light" onclick="setEditingGame(${g.id})">Edit Game</button>
-        <button class="light" onclick="manualRefresh()">Refresh</button>
+      <div class="row-actions">
+        <button class="icon-btn" aria-label="Edit game" onclick="setEditingGame(${g.id})">✏️</button>
       </div>
     `;
 
@@ -1688,13 +1709,90 @@ function renderManage(){
     .filter(g => g.status !== "Final" && g.status !== "Hidden")
     .sort((a,b)=>Number(a.game_number)-Number(b.game_number));
 
+  document.getElementById("manageView").innerHTML = `
+    <div class="hero">
+      <div class="topline"><span>Manage</span><span class="badge">Control Room</span></div>
+      <h1>Manage</h1>
+      <div class="meta">Roster, schedule, and season controls without the endless scroll.</div>
+    </div>
+
+    <div class="section">
+      <div class="section-head"><div class="section-title">Admin Tools</div></div>
+      <div class="manage-menu">
+        <div class="manage-menu-card" onclick="showSubScreen('roster')">
+          <div>
+            <div class="manage-menu-title">Roster</div>
+            <div class="manage-menu-sub">${playerNames().length} active players • add, edit, remove skaters</div>
+          </div>
+          <div class="chevron">›</div>
+        </div>
+
+        <div class="manage-menu-card" onclick="showSubScreen('schedule')">
+          <div>
+            <div class="manage-menu-title">Schedule</div>
+            <div class="manage-menu-sub">${scheduledGames.length} upcoming games • date, opponent, type, first pick</div>
+          </div>
+          <div class="chevron">›</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-head"><div class="section-title">Season Controls</div></div>
+      <div class="row-sub">
+        Active season: <strong>${esc(S.activeSeason?.display_name || "")}</strong><br>
+        Games loaded: ${S.games.length}<br>
+        Picks loaded: ${S.picks.length}<br>
+        Players loaded: ${S.players.length}
+      </div>
+      <div class="actions">
+        <button class="light" onclick="startNewSeason()">New Season</button>
+        <button class="light" onclick="manualRefresh()">Refresh App</button>
+      </div>
+      <div class="danger">Deletes are blocked by RLS. Remove actions hide/deactivate records instead of wiping history.</div>
+    </div>
+
+    <div class="section">
+      <div class="section-head"><div class="section-title">Update Notes</div></div>
+      <div class="instruction-box">
+        <strong>Roster:</strong> Use NHL.com → Hurricanes → Roster. Add/remove skaters as needed. Goalies should stay out of the pick list.<br><br>
+        <strong>Schedule:</strong> Use NHL.com → Hurricanes → Schedule. Add future/playoff games with date, opponent, type, and first picker.
+      </div>
+    </div>
+  `;
+}
+
+function showSubScreen(which){
+  ["gameView","historyView","manageView","rosterView","scheduleView","alltimeView"].forEach(id => {
+    document.getElementById(id).classList.add("hidden");
+  });
+  if (which === "roster"){
+    renderRosterScreen();
+    document.getElementById("rosterView").classList.remove("hidden");
+  } else {
+    renderScheduleScreen();
+    document.getElementById("scheduleView").classList.remove("hidden");
+  }
+}
+
+function backToManage(){
+  ["gameView","historyView","rosterView","scheduleView","alltimeView"].forEach(id => {
+    document.getElementById(id).classList.add("hidden");
+  });
+  renderManage();
+  document.getElementById("manageView").classList.remove("hidden");
+}
+
+function renderRosterScreen(){
   const playerRows = playerNames().map(name => {
     const p = S.players.find(x => x.player_name === name) || {};
     return `
-      <div class="manage-item">
-        <div class="manage-top">
-          <span>${esc(name)}</span>
-          <button class="tiny-btn dangerish" onclick="deactivatePlayer('${esc(name)}')">Remove</button>
+      <div class="compact-item">
+        <div class="compact-top">
+          <div class="compact-title">${esc(name)}</div>
+          <div class="compact-actions">
+            <button class="icon-btn danger" aria-label="Remove player" onclick="deactivatePlayer('${esc(name)}')">🗑️</button>
+          </div>
         </div>
         <div class="manage-fields">
           <div><label>Name</label><input value="${esc(name)}" onchange="renamePlayer('${esc(name)}', this.value)"></div>
@@ -1704,11 +1802,41 @@ function renderManage(){
     `;
   }).join("");
 
+  document.getElementById("rosterView").innerHTML = `
+    <div class="hero">
+      <div class="topline"><button class="subscreen-back" onclick="backToManage()">← Manage</button><span class="badge">Roster</span></div>
+      <h1>Roster</h1>
+      <div class="meta">Active pick list. Keep it to Canes skaters.</div>
+    </div>
+
+    <div class="section">
+      <div class="section-head"><div class="section-title">Add Player</div></div>
+      <div class="manage-fields">
+        <div><label>Name</label><input id="newPlayerName" placeholder="Player name"></div>
+        <div><label>Position</label><input id="newPlayerPos" placeholder="F or D"></div>
+      </div>
+      <button class="secondary" style="margin-top:10px" onclick="addPlayerFromUI()">Add Player</button>
+    </div>
+
+    <div class="section">
+      <div class="section-head"><div class="section-title">Active Players</div><div class="mini">${playerNames().length}</div></div>
+      <div class="compact-list">${playerRows || '<div class="note">No players yet.</div>'}</div>
+    </div>
+  `;
+}
+
+function renderScheduleScreen(){
+  const scheduledGames = S.games
+    .filter(g => g.status !== "Final" && g.status !== "Hidden")
+    .sort((a,b)=>Number(a.game_number)-Number(b.game_number));
+
   const gameRows = scheduledGames.map(g => `
-    <div class="manage-item">
-      <div class="manage-top">
-        <span>Game ${esc(g.game_number)}</span>
-        <button class="tiny-btn dangerish" onclick="hideGame(${g.id})">Remove</button>
+    <div class="compact-item">
+      <div class="compact-top">
+        <div class="compact-title">Game ${esc(g.game_number)} • ${esc(g.opponent || "TBD")}</div>
+        <div class="compact-actions">
+          <button class="icon-btn danger" aria-label="Remove game" onclick="hideGame(${g.id})">🗑️</button>
+        </div>
       </div>
       <div class="manage-fields">
         <div><label>Date</label><input type="date" value="${esc(g.game_date || "")}" onchange="updateGameField(${g.id}, 'game_date', this.value)"></div>
@@ -1729,33 +1857,15 @@ function renderManage(){
     </div>
   `).join("");
 
-  document.getElementById("manageView").innerHTML = `
+  document.getElementById("scheduleView").innerHTML = `
     <div class="hero">
-      <div class="topline"><span>Manage</span><span class="badge">Control Room</span></div>
-      <h1>Manage</h1>
-      <div class="meta">Roster, schedule, and season controls.</div>
+      <div class="topline"><button class="subscreen-back" onclick="backToManage()">← Manage</button><span class="badge">Schedule</span></div>
+      <h1>Schedule</h1>
+      <div class="meta">Upcoming games only. Finalized history stays protected.</div>
     </div>
 
     <div class="section">
-      <div class="section-head"><div class="section-title">Update Instructions</div></div>
-      <div class="instruction-box">
-        <strong>Roster:</strong> Use NHL.com → Hurricanes → Roster. Add/remove skaters below as needed. Goalies should stay out of the pick list.<br><br>
-        <strong>Schedule:</strong> Use NHL.com → Hurricanes → Schedule. Add future/playoff games below with date, opponent, type, and first picker.
-      </div>
-    </div>
-
-    <div class="section">
-      <div class="section-head"><div class="section-title">Roster</div><div class="mini">${playerNames().length} active</div></div>
-      <div class="manage-fields full">
-        <div><label>Add Player</label><input id="newPlayerName" placeholder="Player name"></div>
-        <div><label>Position</label><input id="newPlayerPos" placeholder="F or D"></div>
-      </div>
-      <button class="secondary" style="margin-top:10px" onclick="addPlayerFromUI()">Add Player</button>
-      <div class="manage-list">${playerRows || '<div class="note">No players yet. Add the Canes skaters above.</div>'}</div>
-    </div>
-
-    <div class="section">
-      <div class="section-head"><div class="section-title">Upcoming Schedule</div><div class="mini">${scheduledGames.length} games</div></div>
+      <div class="section-head"><div class="section-title">Add Game</div></div>
       <div class="manage-fields">
         <div><label>Date</label><input id="newGameDate" type="date"></div>
         <div><label>Opponent</label><input id="newGameOpponent" placeholder="NYR, FLA, etc."></div>
@@ -1773,23 +1883,11 @@ function renderManage(){
         </div>
       </div>
       <button class="secondary" style="margin-top:10px" onclick="addGameFromUI()">Add Game</button>
-      <div class="manage-list">${gameRows || '<div class="note">No upcoming games. Add the next game above.</div>'}</div>
-      <div class="note">Remove hides an upcoming game instead of deleting it. Finalized games are protected.</div>
     </div>
 
     <div class="section">
-      <div class="section-head"><div class="section-title">Season Controls</div></div>
-      <div class="row-sub">
-        Active season: <strong>${esc(S.activeSeason?.display_name || "")}</strong><br>
-        Games loaded: ${S.games.length}<br>
-        Picks loaded: ${S.picks.length}<br>
-        Players loaded: ${S.players.length}
-      </div>
-      <div class="actions">
-        <button class="light" onclick="startNewSeason()">New Season</button>
-        <button class="light" onclick="manualRefresh()">Refresh App</button>
-      </div>
-      <div class="danger">Deletes are blocked by RLS, so history is protected from accidental wipeouts.</div>
+      <div class="section-head"><div class="section-title">Upcoming Games</div><div class="mini">${scheduledGames.length}</div></div>
+      <div class="compact-list">${gameRows || '<div class="note">No upcoming games.</div>'}</div>
     </div>
   `;
 }
@@ -1976,7 +2074,7 @@ async function updateGameField(gameId, field, value){
 }
 
 async function hideGame(gameId){
-  if (!confirm("Remove this upcoming game from the app?")) return;
+  if (!confirm("Remove this upcoming game from the app? It will be hidden, not deleted.")) return;
   try{
     const res = await db.from("games").update({status:"Hidden"}).eq("id", gameId).neq("status", "Final");
     if (res.error) throw res.error;
