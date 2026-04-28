@@ -1430,6 +1430,46 @@
       100%{transform:scale(1)}
     }
 
+
+.pick-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+.pick-card{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:12px;
+}
+.pick-card-title{
+  font-weight:1000;
+  margin-bottom:8px;
+}
+.pick-row{
+  display:flex;
+  gap:8px;
+  margin-bottom:8px;
+}
+.pick-row select{
+  flex:1;
+}
+.ga{
+  display:flex;
+  gap:4px;
+}
+.ga input{
+  width:42px;
+  text-align:center;
+}
+.first-goal-card{
+  margin-top:12px;
+  padding:12px;
+  border-radius:18px;
+  border:1px solid var(--line);
+  background:#f9fafb;
+}
+
 </style>
 </head>
 
@@ -1964,120 +2004,55 @@ function hydrateForm(){
   };
 }
 
+
+// --- Redesigned Picks & Stats Layout ---
 function renderGame(){
-  const g = S.currentGame || {};
-  const t = totals();
-  const l = liveScore();
-  const lead = t.a === t.j ? "ALL SQUARE" : t.a > t.j ? `AARON +${t.a-t.j}` : `JULIE +${t.j-t.a}`;
-  const opp = g.opponent && g.opponent !== "Next Game" ? g.opponent : "Next Game";
-  const isPlayoff = (g.game_type === "Playoffs") || Number(g.game_number || 0) >= 83;
-  const modeLabel = isPlayoff ? "Playoffs" : "Live";
+  const g = S.currentGame;
+  if (!g) return;
+
+  const isPlayoff = g.game_type === "Playoffs";
+
+  const card = (name, p1, p2, g1, a1, g2, a2, key1, key2) => `
+    <div class="pick-card">
+      <div class="pick-card-title">${name}</div>
+
+      <div class="pick-row">
+        <select onchange="setF('${key1}',this.value)">
+          ${playerOptions(S.form[key1], '${key1}')}
+        </select>
+        <div class="ga">
+          <input type="text" inputmode="numeric" value="${S.form[g1]}" onchange="setNum('${g1}',this.value)">
+          <input type="text" inputmode="numeric" value="${S.form[a1]}" onchange="setNum('${a1}',this.value)">
+        </div>
+      </div>
+
+      <div class="pick-row">
+        <select onchange="setF('${key2}',this.value)">
+          ${playerOptions(S.form[key2], '${key2}')}
+        </select>
+        <div class="ga">
+          <input type="text" inputmode="numeric" value="${S.form[g2]}" onchange="setNum('${g2}',this.value)">
+          <input type="text" inputmode="numeric" value="${S.form[a2]}" onchange="setNum('${a2}',this.value)">
+        </div>
+      </div>
+    </div>
+  `;
 
   document.getElementById("gameView").innerHTML = `
-    <div class="hero ${isPlayoff ? "playoff-mode" : ""}">
-      <div class="topline">
-        <span>Canes Rivalry</span>
-        <span class="top-actions">
-          <button class="refresh-mini" onclick="manualRefresh()">↻ Refresh</button>
-          <span class="sync-badge ${S.realtimeChannel ? "" : "off"}">Live</span><span class="badge ${isPlayoff ? "playoff" : ""}">${modeLabel}</span>
-        </span>
-      </div>
-      <h1>${isPlayoff ? "Playoff Game" : "Game Day"}</h1>
-      <div class="meta">${esc(opp)} • Game ${esc(g.game_number || "—")} • First Pick: ${esc(g.first_picker || "—")}</div>
-      ${isPlayoff ? `<div class="playoff-strip">Stanley Cup Mode Activated</div>` : ""}
-
-      <div class="scoreboard">
-        <div class="score-card"><div class="name">Aaron</div><div class="bigscore">${t.a}</div></div>
-        <div class="score-card"><div class="name">Julie</div><div class="bigscore">${t.j}</div></div>
-      </div>
-
-      <div class="leader ${isPlayoff ? "playoff-mode" : ""}">${lead}</div>
-      
-    </div>
-
-    ${S.lastRecap ? `
-      <div class="postgame-banner">
-        <div class="postgame-kicker">Postgame Recap</div>
-        <div class="postgame-title">${esc(S.lastRecap.title)}</div>
-        <div class="postgame-copy">${esc(S.lastRecap.copy)}</div>
-      </div>
-    ` : ""}
-
     <div class="section">
-      <div class="section-head"><div class="section-title">Picks</div></div>
-      <div class="grid2">
-        <div class="panel">
-          <div class="panel-title">Aaron</div>
-          <label>Pick 1</label>
-          <select class="${changedClass('a1')}" onchange="setF('a1',this.value)">${playerOptions(S.form.a1)}</select>
-          <label>Pick 2</label>
-          <select class="${changedClass('a2')}" onchange="setF('a2',this.value)">${playerOptions(S.form.a2)}</select>
-        </div>
-        <div class="panel">
-          <div class="panel-title">Julie</div>
-          <label>Pick 1</label>
-          <select class="${changedClass('j1')}" onchange="setF('j1',this.value)">${playerOptions(S.form.j1)}</select>
-          <label>Pick 2</label>
-          <select class="${changedClass('j2')}" onchange="setF('j2',this.value)">${playerOptions(S.form.j2)}</select>
-        </div>
-      </div>
-    </div>
+      <div class="section-title">Picks & Stats</div>
 
-    <div class="section live-stats-section">
-      <div class="section-head"><div class="section-title">Live Stats</div><div class="mini">Goals / Assists</div></div>
-      <div class="live-stats-grid">
-        <div class="live-owner-card">
-          <div class="live-owner-title">Aaron</div>
-
-          <div class="pick-stat-card">
-            <div class="pick-stat-name">${esc(S.form.a1 || "Pick 1")}</div>
-            <div class="ga-pair">
-              <div><label>G</label><input type="text" inputmode="numeric" pattern="[0-9]*" data-stat-input="true" class="${changedClass('ag1')}" value="${S.form.ag1}" onchange="setNum('ag1',this.value)"></div>
-              <div><label>A</label><input type="text" inputmode="numeric" pattern="[0-9]*" data-stat-input="true" class="${changedClass('aa1')}" value="${S.form.aa1}" onchange="setNum('aa1',this.value)"></div>
-            </div>
-          </div>
-
-          <div class="pick-stat-card">
-            <div class="pick-stat-name">${esc(S.form.a2 || "Pick 2")}</div>
-            <div class="ga-pair">
-              <div><label>G</label><input type="text" inputmode="numeric" pattern="[0-9]*" data-stat-input="true" class="${changedClass('ag2')}" value="${S.form.ag2}" onchange="setNum('ag2',this.value)"></div>
-              <div><label>A</label><input type="text" inputmode="numeric" pattern="[0-9]*" data-stat-input="true" class="${changedClass('aa2')}" value="${S.form.aa2}" onchange="setNum('aa2',this.value)"></div>
-            </div>
-          </div>
-        </div>
-
-        <div class="live-owner-card">
-          <div class="live-owner-title">Julie</div>
-
-          <div class="pick-stat-card">
-            <div class="pick-stat-name">${esc(S.form.j1 || "Pick 1")}</div>
-            <div class="ga-pair">
-              <div><label>G</label><input type="text" inputmode="numeric" pattern="[0-9]*" data-stat-input="true" class="${changedClass('jg1')}" value="${S.form.jg1}" onchange="setNum('jg1',this.value)"></div>
-              <div><label>A</label><input type="text" inputmode="numeric" pattern="[0-9]*" data-stat-input="true" class="${changedClass('ja1')}" value="${S.form.ja1}" onchange="setNum('ja1',this.value)"></div>
-            </div>
-          </div>
-
-          <div class="pick-stat-card">
-            <div class="pick-stat-name">${esc(S.form.j2 || "Pick 2")}</div>
-            <div class="ga-pair">
-              <div><label>G</label><input type="text" inputmode="numeric" pattern="[0-9]*" data-stat-input="true" class="${changedClass('jg2')}" value="${S.form.jg2}" onchange="setNum('jg2',this.value)"></div>
-              <div><label>A</label><input type="text" inputmode="numeric" pattern="[0-9]*" data-stat-input="true" class="${changedClass('ja2')}" value="${S.form.ja2}" onchange="setNum('ja2',this.value)"></div>
-            </div>
-          </div>
-        </div>
+      <div class="pick-grid">
+        ${card("Aaron","a1","a2","ag1","aa1","ag2","aa2","a1","a2")}
+        ${card("Julie","j1","j2","jg1","ja1","jg2","ja2","j1","j2")}
       </div>
 
-      <label>First Goal Scorer</label>
-      <select class="${changedClass('firstGoal')}" onchange="setF('firstGoal',this.value)">${firstGoalOptions()}</select>
-    </div>
-
-    <div class="section">
-      <div class="section-head"><div class="section-title">Game Score</div><div class="mini">${esc(l.w)}</div></div>
-      <div class="live-score">
-        <div class="live-box"><div class="live-num">${l.a}</div><div class="live-label">Aaron</div></div>
-        <div class="live-box"><div class="live-num">${l.j}</div><div class="live-label">Julie</div></div>
+      <div class="first-goal-card">
+        <div class="section-title">First Goal ⚡</div>
+        <select onchange="setF('firstGoal',this.value)">
+          ${firstGoalOptions()}
+        </select>
       </div>
-      <div style="margin-top:12px"><button onclick="finalizeGame()">${S.user ? "🔒 Lock Final" : "🔒 Sign in to Lock Final"}</button></div>
     </div>
   `;
 }
