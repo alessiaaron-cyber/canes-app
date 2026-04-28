@@ -1084,6 +1084,122 @@
     .history-score-pill{background:#111827;color:#fff;border-radius:999px;padding:6px 9px;font-size:12px;font-weight:1000;white-space:nowrap}
     #gameView .ga-pair input,#gameView input[data-stat-input="true"]{-webkit-appearance:none;appearance:none}
 
+
+    /* Final polish: modern text pills + compact roster */
+    .action-pill{
+      width:auto !important;
+      min-height:32px !important;
+      padding:7px 11px !important;
+      border-radius:999px !important;
+      border:1px solid var(--line) !important;
+      background:#fff !important;
+      color:var(--ink) !important;
+      box-shadow:none !important;
+      font-size:12px !important;
+      font-weight:1000 !important;
+      letter-spacing:.01em !important;
+      white-space:nowrap !important;
+    }
+    .action-pill.danger{
+      color:#b42318 !important;
+      border-color:#fecaca !important;
+      background:#fff7f7 !important;
+    }
+    .card-title-row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+      margin-bottom:6px;
+    }
+    .card-title-left{
+      font-weight:1000;
+      min-width:0;
+      overflow:hidden;
+      white-space:nowrap;
+      text-overflow:ellipsis;
+    }
+    .card-title-actions{
+      display:flex;
+      align-items:center;
+      gap:7px;
+      flex:0 0 auto;
+    }
+    .score-pill{
+      background:#111827;
+      color:#fff;
+      border-radius:999px;
+      padding:6px 9px;
+      font-size:12px;
+      font-weight:1000;
+      white-space:nowrap;
+    }
+    .roster-inline{
+      display:grid;
+      grid-template-columns:minmax(0,1fr) 58px auto;
+      gap:8px;
+      align-items:center;
+    }
+    .roster-inline input,
+    .roster-inline select{
+      min-height:42px !important;
+      border-radius:14px !important;
+      font-size:14px !important;
+      font-weight:900 !important;
+    }
+    .roster-inline select{
+      text-align:center;
+      text-align-last:center;
+      padding-left:6px !important;
+      padding-right:6px !important;
+    }
+    .postgame-banner{
+      margin-top:12px;
+      background:linear-gradient(135deg,#111827,#1f2937 55%,#c8102e 140%);
+      color:white;
+      border-radius:22px;
+      padding:14px;
+      box-shadow:0 10px 22px rgba(17,24,39,.16);
+    }
+    .postgame-kicker{
+      color:rgba(255,255,255,.72);
+      font-size:10px;
+      font-weight:1000;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      margin-bottom:5px;
+    }
+    .postgame-title{
+      font-size:22px;
+      font-weight:1000;
+      letter-spacing:-.035em;
+      line-height:1;
+    }
+    .postgame-copy{
+      margin-top:7px;
+      color:rgba(255,255,255,.82);
+      font-size:12px;
+      font-weight:800;
+      line-height:1.32;
+    }
+    .empty-state{
+      text-align:center;
+      color:var(--muted);
+      font-weight:850;
+      line-height:1.35;
+      padding:14px 10px;
+    }
+    @media (max-width:390px){
+      .roster-inline{
+        grid-template-columns:minmax(0,1fr) 52px auto;
+        gap:6px;
+      }
+      .action-pill{
+        padding-left:9px !important;
+        padding-right:9px !important;
+      }
+    }
+
 </style>
 </head>
 
@@ -1124,6 +1240,7 @@ let S = {
   allPicks: [],
   players: [],
   currentGame: null,
+  lastRecap: null,
   form: {
     a1:"", a2:"", j1:"", j2:"",
     ag1:0, aa1:0, ag2:0, aa2:0,
@@ -1318,6 +1435,14 @@ function renderGame(){
       <div class="leader ${isPlayoff ? "playoff-mode" : ""}">${lead}</div>
     </div>
 
+    ${S.lastRecap ? `
+      <div class="postgame-banner">
+        <div class="postgame-kicker">Postgame Recap</div>
+        <div class="postgame-title">${esc(S.lastRecap.title)}</div>
+        <div class="postgame-copy">${esc(S.lastRecap.copy)}</div>
+      </div>
+    ` : ""}
+
     <div class="section">
       <div class="section-head"><div class="section-title">Picks</div></div>
       <div class="grid2">
@@ -1503,19 +1628,23 @@ function renderHistory(){
 
         <div class="card-actions">
           <button class="light" onclick="cancelEditingGame()">Cancel</button>
-          <button onclick="saveHistoryGame(${g.id})">Save Changes</button>
+          <button onclick="saveHistoryGame(${g.id})">Save</button>
         </div>
         <div class="note">First goal can be any roster player for tracking. Bonus applies only if that player was picked and has a goal logged.</div>
       </div>
     ` : `
-      <div class="row-actions">
-        <button class="icon-btn" aria-label="Edit game" onclick="setEditingGame(${g.id})">✏️</button>
-      </div>
+      
     `;
 
     return `
       <div class="row-card">
-        <div class="row-top"><span>Game ${esc(g.game_number)} • ${esc(g.game_type || "")}</span><span>${Number(g.aaron_points||0)}-${Number(g.julie_points||0)}</span></div>
+        <div class="card-title-row">
+          <div class="card-title-left">Game ${esc(g.game_number)} • ${esc(g.game_type || "")}</div>
+          <div class="card-title-actions">
+            <span class="score-pill">${Number(g.aaron_points||0)}-${Number(g.julie_points||0)}</span>
+            ${editing ? "" : `<button class="action-pill" onclick="setEditingGame(${g.id})">Edit</button>`}
+          </div>
+        </div>
         <div class="row-sub">
           ${esc(g.game_date || "")} ${g.opponent ? "• " + esc(g.opponent) : ""}<br>
           First goal: ${esc(g.first_goal_scorer || "—")}<br>
@@ -1788,15 +1917,14 @@ function renderRosterScreen(){
     const p = S.players.find(x => x.player_name === name) || {};
     return `
       <div class="compact-item">
-        <div class="compact-top">
-          <div class="compact-title">${esc(name)}</div>
-          <div class="compact-actions">
-            <button class="icon-btn danger" aria-label="Remove player" onclick="deactivatePlayer('${esc(name)}')">🗑️</button>
-          </div>
-        </div>
-        <div class="manage-fields">
-          <div><label>Name</label><input value="${esc(name)}" onchange="renamePlayer('${esc(name)}', this.value)"></div>
-          <div><label>Position</label><input value="${esc(p.position || "")}" onchange="updatePlayerPosition('${esc(name)}', this.value)"></div>
+        <div class="roster-inline">
+          <input value="${esc(name)}" onchange="renamePlayer('${esc(name)}', this.value)">
+          <select onchange="updatePlayerPosition('${esc(name)}', this.value)">
+            <option ${p.position==="F"?"selected":""}>F</option>
+            <option ${p.position==="D"?"selected":""}>D</option>
+            <option ${!p.position?"selected":""}></option>
+          </select>
+          <button class="action-pill danger" onclick="deactivatePlayer('${esc(name)}')">Remove</button>
         </div>
       </div>
     `;
@@ -1820,7 +1948,7 @@ function renderRosterScreen(){
 
     <div class="section">
       <div class="section-head"><div class="section-title">Active Players</div><div class="mini">${playerNames().length}</div></div>
-      <div class="compact-list">${playerRows || '<div class="note">No players yet.</div>'}</div>
+      <div class="compact-list">${playerRows || '<div class="note">No players yet. Add your first skater above.</div>'}</div>
     </div>
   `;
 }
@@ -1835,7 +1963,7 @@ function renderScheduleScreen(){
       <div class="compact-top">
         <div class="compact-title">Game ${esc(g.game_number)} • ${esc(g.opponent || "TBD")}</div>
         <div class="compact-actions">
-          <button class="icon-btn danger" aria-label="Remove game" onclick="hideGame(${g.id})">🗑️</button>
+          <button class="action-pill danger" onclick="hideGame(${g.id})">Hide</button>
         </div>
       </div>
       <div class="manage-fields">
@@ -1887,7 +2015,7 @@ function renderScheduleScreen(){
 
     <div class="section">
       <div class="section-head"><div class="section-title">Upcoming Games</div><div class="mini">${scheduledGames.length}</div></div>
-      <div class="compact-list">${gameRows || '<div class="note">No upcoming games.</div>'}</div>
+      <div class="compact-list">${gameRows || '<div class="note">No upcoming games. Add the next matchup above.</div>'}</div>
     </div>
   `;
 }
@@ -1946,6 +2074,24 @@ async function upsertPick(gameId, owner, slot, player, goals, assists, points){
   }
 }
 
+
+function buildPostgameRecap(game, live){
+  const winnerText = live.w === "Tie" ? "Dead heat" : `${live.w} takes it`;
+  const scoreText = `${live.a}-${live.j}`;
+  const margin = Math.abs(live.a - live.j);
+  let vibe = "Scoreboard updated. The rivalry continues.";
+  if (live.w === "Tie") vibe = "No bragging rights tonight. The tension rolls into the next game.";
+  else if (margin >= 5) vibe = "That was a statement game. The group chat may not survive this.";
+  else if (margin <= 1) vibe = "A tight one. Every assist mattered and the chirps are absolutely valid.";
+  else vibe = "Solid win. Enough room to brag, not enough room to get comfortable.";
+
+  const fg = S.form.firstGoal ? ` First goal tracked: ${S.form.firstGoal}.` : "";
+  return {
+    title: `${winnerText} ${scoreText}`,
+    copy: `${vibe}${fg}`
+  };
+}
+
 async function finalizeGame(){
   try{
     const g = S.currentGame;
@@ -1974,8 +2120,9 @@ async function finalizeGame(){
     await upsertPick(g.id,"Julie",1,S.form.j1,S.form.jg1,S.form.ja1,pickPoints(S.form.j1,S.form.jg1,S.form.ja1,S.form.firstGoal));
     await upsertPick(g.id,"Julie",2,S.form.j2,S.form.jg2,S.form.ja2,pickPoints(S.form.j2,S.form.jg2,S.form.ja2,S.form.firstGoal));
 
+    S.lastRecap = buildPostgameRecap(g, l);
     await loadAll();
-    toast("Game locked. Next game loaded.");
+    toast(S.lastRecap ? S.lastRecap.title : "Game locked. Next game loaded.");
   } catch(e){
     toast(e.message || "Could not finalize.");
   }
