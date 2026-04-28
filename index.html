@@ -1338,6 +1338,29 @@
       margin-top:8px;
     }
 
+
+    /* Realtime sync polish */
+    .sync-badge{
+      display:inline-flex;
+      align-items:center;
+      gap:5px;
+      border-radius:999px;
+      padding:5px 8px;
+      background:#ecfdf3;
+      color:#027a48;
+      border:1px solid #abefc6;
+      font-size:10px;
+      font-weight:1000;
+      text-transform:uppercase;
+      letter-spacing:.05em;
+      white-space:nowrap;
+    }
+    .sync-badge.off{
+      background:#f8fafc;
+      color:#667085;
+      border-color:var(--line);
+    }
+
 </style>
 </head>
 
@@ -1381,6 +1404,8 @@ let S = {
   currentGame: null,
   lastRecap: null,
   user: null,
+  realtimeChannel: null,
+  suppressRealtimeRender: false,
   form: {
     a1:"", a2:"", j1:"", j2:"",
     ag1:0, aa1:0, ag2:0, aa2:0,
@@ -1480,6 +1505,142 @@ async function requireAuth(actionLabel = "edit"){
   return !!S.user;
 }
 
+function isGameDayEditingActive(){
+  const el = document.activeElement;
+  if (!el) return false;
+  const gameView = document.getElementById("gameView");
+  return gameView && gameView.contains(el) && ["INPUT","SELECT","TEXTAREA"].includes(el.tagName);
+}
+
+function mergeRow(list, row){
+  const idx = list.findIndex(x => x.id === row.id);
+  if (idx >= 0) list[idx] = {...list[idx], ...row};
+  else list.push(row);
+}
+
+function removeDeletedRow(list, oldRow){
+  const idx = list.findIndex(x => x.id === oldRow.id);
+  if (idx >= 0) list.splice(idx, 1);
+}
+
+function applyRealtimePayload(payload){
+  if (!S.currentGame) return;
+  const table = payload.table;
+  const row = payload.new;
+  const oldRow = payload.old;
+
+  if (table === "games"){
+    const targetId = row?.id || oldRow?.id;
+    if (targetId !== S.currentGame.id) return;
+
+    if (payload.eventType === "DELETE"){
+      removeDeletedRow(S.games, oldRow);
+      removeDeletedRow(S.allGames, oldRow);
+      return;
+    }
+
+    mergeRow(S.games, row);
+    mergeRow(S.allGames, row);
+    S.currentGame = {...S.currentGame, ...row};
+
+    if (!isGameDayEditingActive()){
+      hydrateForm();
+      renderAll();
+    } else {
+      renderHistory();
+      renderAllTime();
+      renderManage();
+    }
+  }
+
+  if (table === "picks"){
+    const gameId = row?.game_id || oldRow?.game_id;
+    if (gameId !== S.currentGame.id) return;
+
+    if (payload.eventType === "DELETE"){
+      removeDeletedRow(S.picks, oldRow);
+      removeDeletedRow(S.allPicks, oldRow);
+      return;
+    }
+
+    mergeRow(S.picks, row);
+    mergeRow(S.allPicks, row);
+
+    if (!isGameDayEditingActive()){
+      hydrateForm();
+      renderAll();
+    } else {
+      renderHistory();
+      renderAllTime();
+      renderManage();
+    }
+  }
+}
+
+async function setupRealtime(){
+  if (S.realtimeChannel) return;
+
+  S.realtimeChannel = db
+    .channel("current-game-sync")
+    .on("postgres_changes", { event:"*", schema:"public", table:"games" }, applyRealtimePayload)
+    .on("postgres_changes", { event:"*", schema:"public", table:"picks" }, applyRealtimePayload)
+    .subscribe((status) => {
+      console.log("Realtime status:", status);
+    });
+}
+
+async function saveCurrentGameField(field, value){
+  if (!(await requireAuth("save game updates"))) return;
+  if (!S.currentGame?.id) return;
+
+  const patch = {};
+  patch[field] = value || null;
+
+  const res = await db.from("games").update(patch).eq("id", S.currentGame.id);
+  if (res.error){
+    toast(res.error.message || "Could not save.");
+    return;
+  }
+
+  S.currentGame = {...S.currentGame, ...patch};
+  mergeRow(S.games, S.currentGame);
+  mergeRow(S.allGames, S.currentGame);
+}
+
+async function saveDraftPick(key){
+  if (!(await requireAuth("save picks"))) return;
+  if (!S.currentGame?.id) return;
+
+  const map = {
+    a1: ["Aaron", 1, S.form.a1, S.form.ag1, S.form.aa1],
+    a2: ["Aaron", 2, S.form.a2, S.form.ag2, S.form.aa2],
+    j1: ["Julie", 1, S.form.j1, S.form.jg1, S.form.ja1],
+    j2: ["Julie", 2, S.form.j2, S.form.jg2, S.form.ja2],
+    ag1: ["Aaron", 1, S.form.a1, S.form.ag1, S.form.aa1],
+    aa1: ["Aaron", 1, S.form.a1, S.form.ag1, S.form.aa1],
+    ag2: ["Aaron", 2, S.form.a2, S.form.ag2, S.form.aa2],
+    aa2: ["Aaron", 2, S.form.a2, S.form.ag2, S.form.aa2],
+    jg1: ["Julie", 1, S.form.j1, S.form.jg1, S.form.ja1],
+    ja1: ["Julie", 1, S.form.j1, S.form.jg1, S.form.ja1],
+    jg2: ["Julie", 2, S.form.j2, S.form.jg2, S.form.ja2],
+    ja2: ["Julie", 2, S.form.j2, S.form.ja2],
+  };
+
+  const spec = map[key];
+  if (!spec) return;
+
+  const [owner, slot, player, goals, assists] = spec;
+  if (!player) return;
+
+  if (S.currentGame.status === "Scheduled"){
+    await saveCurrentGameField("status", "In Progress");
+  }
+
+  const points = pickPoints(player, goals, assists, S.form.firstGoal);
+  await upsertPick(S.currentGame.id, owner, slot, player, goals, assists, points);
+}
+
+
 
 function esc(x){
   return (x ?? "").toString().replace(/[&<>"']/g, m => ({
@@ -1540,12 +1701,23 @@ function firstGoalOptions(){
 function setF(k,v){
   S.form[k] = v;
   renderGame();
+
+  if (["a1","a2","j1","j2"].includes(k)){
+    saveDraftPick(k);
+  }
+
+  if (k === "firstGoal"){
+    saveCurrentGameField("first_goal_scorer", v);
+    // First goal can change draft point totals, so resave existing picks.
+    ["a1","a2","j1","j2"].forEach(saveDraftPick);
+  }
 }
 
 function setNum(k,v){
   const clean = String(v || "0").replace(/\D/g, "");
   S.form[k] = Math.max(0, Number(clean || 0));
   renderGame();
+  saveDraftPick(k);
 }
 
 async function loadAll(){
@@ -1586,6 +1758,7 @@ async function loadAll(){
   if (!S.currentGame) await createNextGame();
 
   hydrateForm();
+  await setupRealtime();
   renderAll();
 }
 
@@ -1628,7 +1801,7 @@ function renderGame(){
         <span>Canes Rivalry</span>
         <span class="top-actions">
           <button class="refresh-mini" onclick="manualRefresh()">↻ Refresh</button>
-          <span class="badge ${isPlayoff ? "playoff" : ""}">${modeLabel}</span>
+          <span class="sync-badge ${S.realtimeChannel ? "" : "off"}">Live</span><span class="badge ${isPlayoff ? "playoff" : ""}">${modeLabel}</span>
         </span>
       </div>
       <h1>${isPlayoff ? "Playoff Game" : "Game Day"}</h1>
