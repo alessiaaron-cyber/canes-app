@@ -1560,30 +1560,156 @@
     }
 
 
-.pick-row-line{
-  display:grid;
-  grid-template-columns:auto 1fr 48px 48px;
-  gap:8px;
-  align-items:center;
-  margin-bottom:10px;
-}
-.pick-row-line select{
-  width:100%;
-  min-height:44px;
-  border-radius:14px;
-}
-.pick-row-line input{
-  width:100%;
-  height:44px;
-  text-align:center;
-  border-radius:12px;
-  font-weight:900;
-}
-.pick-label{
-  font-size:11px;
-  font-weight:900;
-  color:var(--muted);
-}
+    /* Final Game Day full-width owner blocks, matching History edit spacing */
+    .picks-stats-card{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:24px;
+      padding:14px;
+      margin-top:12px;
+      box-shadow:0 8px 22px rgba(16,24,40,.045);
+    }
+    .game-owner-block{
+      background:#fbfcfe;
+      border:1px solid var(--line);
+      border-radius:22px;
+      padding:12px;
+      margin-top:12px;
+      width:100%;
+      overflow:hidden;
+    }
+    .game-owner-block:first-of-type{
+      margin-top:6px;
+    }
+    .game-owner-head{
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:8px;
+    }
+    .game-owner-name{
+      font-size:24px;
+      font-weight:1000;
+      color:#344054;
+      letter-spacing:-.04em;
+      line-height:1;
+    }
+    .game-owner-columns{
+      display:grid;
+      grid-template-columns:1fr 48px 48px;
+      gap:8px;
+      width:min(72%, 300px);
+      color:var(--muted);
+      font-size:10px;
+      font-weight:1000;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      text-align:center;
+    }
+    .game-owner-columns span:first-child{
+      text-align:left;
+    }
+    .game-pick-row{
+      display:grid;
+      grid-template-columns:minmax(0,1fr) 52px 52px;
+      gap:8px;
+      align-items:end;
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:10px;
+      margin-top:8px;
+      min-width:0;
+    }
+    .game-pick-select{
+      min-width:0;
+    }
+    .game-pick-select label,
+    .game-ga-mini label{
+      margin:0 0 5px !important;
+      font-size:10px !important;
+      letter-spacing:.08em !important;
+    }
+    .game-ga-mini label{
+      text-align:center !important;
+    }
+    .game-pick-select select{
+      width:100% !important;
+      max-width:100% !important;
+      min-width:0 !important;
+      min-height:46px !important;
+      border-radius:15px !important;
+      font-size:17px !important;
+      font-weight:1000 !important;
+      padding:8px 10px !important;
+    }
+    .game-ga-mini input{
+      width:100% !important;
+      min-width:0 !important;
+      min-height:46px !important;
+      border-radius:15px !important;
+      text-align:center !important;
+      font-size:21px !important;
+      font-weight:1000 !important;
+      padding:2px !important;
+    }
+    .first-goal-bonus-card{
+      background:linear-gradient(180deg,#fff,#fbfcfe);
+      border:1px solid var(--line);
+      border-radius:24px;
+      padding:14px;
+      margin-top:12px;
+      box-shadow:0 8px 22px rgba(16,24,40,.045);
+    }
+    .first-goal-bonus-card select{
+      margin-top:8px;
+      min-height:54px !important;
+      border-radius:18px !important;
+      font-size:18px !important;
+      font-weight:1000 !important;
+    }
+    .bonus-note{
+      margin-top:8px;
+      color:var(--muted);
+      text-align:center;
+      font-size:12px;
+      font-weight:850;
+    }
+    #gameView .hero:before,
+    #historyView .hero:before,
+    #alltimeView .hero:before,
+    #manageView .hero:before,
+    #rosterView .hero:before,
+    #scheduleView .hero:before{
+      height:6px !important;
+    }
+    @media (max-width:390px){
+      .game-owner-block{
+        padding:10px;
+      }
+      .game-owner-name{
+        font-size:22px;
+      }
+      .game-owner-columns{
+        grid-template-columns:1fr 46px 46px;
+        gap:6px;
+        width:min(76%, 280px);
+      }
+      .game-pick-row{
+        grid-template-columns:minmax(0,1fr) 46px 46px;
+        gap:6px;
+        padding:8px;
+      }
+      .game-pick-select select{
+        font-size:15px !important;
+        min-height:44px !important;
+      }
+      .game-ga-mini input{
+        min-height:44px !important;
+        font-size:20px !important;
+      }
+    }
 
 </style>
 </head>
@@ -2179,14 +2305,22 @@ function renderGame(){
   const isPlayoff = (g.game_type === "Playoffs") || Number(g.game_number || 0) >= 83;
   const modeLabel = isPlayoff ? "Playoffs" : "Live";
 
-  const pickBlock = (owner, slotLabel, pickKey, goalsKey, assistsKey) => `
-    <div class="pick-row-line">
-      <div class="pick-label">${slotLabel}</div>
-      <select class="${changedClass(pickKey)}" onchange="setF('${pickKey}',this.value)">
-        ${playerOptions(S.form[pickKey], pickKey)}
-      </select>
-      <input type="text" inputmode="numeric" value="${S.form[goalsKey]}" class="${changedClass(goalsKey)}" onchange="setNum('${goalsKey}',this.value)">
-      <input type="text" inputmode="numeric" value="${S.form[assistsKey]}" class="${changedClass(assistsKey)}" onchange="setNum('${assistsKey}',this.value)">
+  const pickRow = (slotLabel, pickKey, goalsKey, assistsKey) => `
+    <div class="game-pick-row">
+      <div class="game-pick-select">
+        <label>${slotLabel}</label>
+        <select class="${changedClass(pickKey)}" onchange="setF('${pickKey}',this.value)">
+          ${playerOptions(S.form[pickKey], pickKey)}
+        </select>
+      </div>
+      <div class="game-ga-mini">
+        <label>G</label>
+        <input type="text" inputmode="numeric" pattern="[0-9]*" data-stat-input="true" class="${changedClass(goalsKey)}" value="${S.form[goalsKey]}" onchange="setNum('${goalsKey}',this.value)">
+      </div>
+      <div class="game-ga-mini">
+        <label>A</label>
+        <input type="text" inputmode="numeric" pattern="[0-9]*" data-stat-input="true" class="${changedClass(assistsKey)}" value="${S.form[assistsKey]}" onchange="setNum('${assistsKey}',this.value)">
+      </div>
     </div>
   `;
 
@@ -2221,18 +2355,27 @@ function renderGame(){
     ` : ""}
 
     <div class="picks-stats-card">
-      <div class="section-head"><div class="section-title">Picks & Stats</div><div class="mini">G / A</div></div>
-      <div class="picks-stats-grid">
-        <div class="owner-pick-card">
-          <div class="owner-pick-title">Aaron</div>
-          ${pickBlock("Aaron","Pick 1","a1","ag1","aa1")}
-          ${pickBlock("Aaron","Pick 2","a2","ag2","aa2")}
+      <div class="section-head">
+        <div class="section-title">Picks & Stats</div>
+        <div class="mini">Player / G / A</div>
+      </div>
+
+      <div class="game-owner-block">
+        <div class="game-owner-head">
+          <div class="game-owner-name">Aaron</div>
+          <div class="game-owner-columns"><span>Player</span><span>G</span><span>A</span></div>
         </div>
-        <div class="owner-pick-card">
-          <div class="owner-pick-title">Julie</div>
-          ${pickBlock("Julie","Pick 1","j1","jg1","ja1")}
-          ${pickBlock("Julie","Pick 2","j2","jg2","ja2")}
+        ${pickRow("Pick 1","a1","ag1","aa1")}
+        ${pickRow("Pick 2","a2","ag2","aa2")}
+      </div>
+
+      <div class="game-owner-block">
+        <div class="game-owner-head">
+          <div class="game-owner-name">Julie</div>
+          <div class="game-owner-columns"><span>Player</span><span>G</span><span>A</span></div>
         </div>
+        ${pickRow("Pick 1","j1","jg1","ja1")}
+        ${pickRow("Pick 2","j2","jg2","ja2")}
       </div>
     </div>
 
