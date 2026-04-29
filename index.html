@@ -1773,6 +1773,7 @@ let S = {
   picks: [],
   allPicks: [],
   players: [],
+  allPlayers: [],
   currentGame: null,
   lastRecap: null,
   user: null,
@@ -2146,28 +2147,13 @@ function totals(){
 }
 
 function playerNames(){
-  const fromDb = S.players.map(p => p.player_name).filter(Boolean);
-  const fallback = ["Aho","Jarvis","Svech","Ehlers","Stanky","Blake","Ghost","Hall","Staal","Martinook","Brindy","Nikishin"];
-  return [...new Set(fromDb.length ? fromDb : fallback)].sort();
-}
-
-function selectedPickMap(){
-  return {
-    a1:S.form.a1 || "",
-    a2:S.form.a2 || "",
-    j1:S.form.j1 || "",
-    j2:S.form.j2 || ""
-  };
-}
-
-function isPlayerAlreadyPicked(player, currentSlot){
-  if (!player) return false;
-  const picks = selectedPickMap();
-  return Object.entries(picks).some(([slot, value]) => slot !== currentSlot && value === player);
+  return [...new Set(S.players.map(p => p.player_name).filter(Boolean))].sort();
 }
 
 function playerOptions(selected, currentSlot){
-  return `<option value="">Select</option>` + playerNames().map(p => {
+  const names = playerNames();
+  if (!names.length) return `<option value="">No active players</option>`;
+  return `<option value="">Select</option>` + names.map(p => {
     const disabled = isPlayerAlreadyPicked(p, currentSlot) && p !== selected;
     return `<option value="${esc(p)}" ${p===selected ? "selected" : ""} ${disabled ? "disabled" : ""}>${esc(p)}${disabled ? " — picked" : ""}</option>`;
   }).join("");
@@ -2193,6 +2179,7 @@ function friendlyDbError(error){
 
 function firstGoalOptions(){
   const vals = playerNames();
+  if (!vals.length) return `<option value="">No active players</option>`;
   return `<option value="">No first goal selected</option>` + vals.map(p =>
     `<option value="${esc(p)}" ${p===S.form.firstGoal ? "selected" : ""}>${esc(p)}</option>`
   ).join("");
@@ -2243,7 +2230,7 @@ async function loadAll(){
   const [allGames, activeGames, players] = await Promise.all([
     db.from("games").select("*").order("game_number"),
     db.from("games").select("*").eq("season_id", S.activeSeason.id).order("game_number"),
-    db.from("players").select("*").eq("is_active", true).order("player_name")
+    db.from("players").select("*").order("player_name")
   ]);
 
   if (allGames.error) throw allGames.error;
@@ -2251,7 +2238,8 @@ async function loadAll(){
 
   S.allGames = allGames.data || [];
   S.games = activeGames.data || [];
-  S.players = players.data || [];
+  S.allPlayers = players.data || [];
+  S.players = S.allPlayers.filter(p => p.is_active !== false);
 
   if (S.allGames.length){
     const ids = S.allGames.map(g => g.id);
@@ -2854,7 +2842,7 @@ function renderRosterScreen(){
     <div class="hero">
       <div class="topline"><button class="subscreen-back" onclick="backToManage()">← Manage</button><span class="badge">Roster</span></div>
       <h1>Roster</h1>
-      <div class="meta">Active pick list. Keep it to Canes skaters.</div>
+      <div class="meta">Active pick list from Supabase. Removed players stay in history but disappear from future picks.</div>
     </div>
 
     <div class="section">
@@ -2874,7 +2862,7 @@ function renderRosterScreen(){
 
     <div class="section">
       <div class="section-head"><div class="section-title">Active Players</div><div class="mini">${activePlayers.length}</div></div>
-      <div class="compact-list">${playerRows || '<div class="empty-state">No players yet. Add your first skater above.</div>'}</div>
+      <div class="compact-list">${playerRows || '<div class="empty-state">No active players yet.<br>Add skaters above to populate Game Day dropdowns.</div>'}</div>
     </div>
   `;
 }
