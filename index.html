@@ -2831,18 +2831,20 @@ function backToManage(){
 }
 
 function renderRosterScreen(){
-  const playerRows = playerNames().map(name => {
-    const p = S.players.find(x => x.player_name === name) || {};
+  const activePlayers = [...S.players].sort((a,b) => String(a.player_name || "").localeCompare(String(b.player_name || "")));
+
+  const playerRows = activePlayers.map(p => {
+    const name = p.player_name || "";
     return `
       <div class="compact-item">
         <div class="roster-inline">
-          <input value="${esc(name)}" onchange="renamePlayer('${esc(name)}', this.value)">
-          <select onchange="updatePlayerPosition('${esc(name)}', this.value)">
-            <option ${p.position==="F"?"selected":""}>F</option>
-            <option ${p.position==="D"?"selected":""}>D</option>
-            <option ${!p.position?"selected":""}></option>
+          <input value="${esc(name)}" onchange="renamePlayerById(${p.id}, this.value)">
+          <select onchange="updatePlayerPositionById(${p.id}, this.value)">
+            <option value="" ${!p.position?"selected":""}></option>
+            <option value="F" ${p.position==="F"?"selected":""}>F</option>
+            <option value="D" ${p.position==="D"?"selected":""}>D</option>
           </select>
-          <button class="action-pill danger" onclick="deactivatePlayer('${esc(name)}')">Remove</button>
+          <button class="action-pill danger" onclick="deactivatePlayerById(${p.id})">Remove</button>
         </div>
       </div>
     `;
@@ -2859,14 +2861,20 @@ function renderRosterScreen(){
       <div class="section-head"><div class="section-title">Add Player</div></div>
       <div class="manage-fields">
         <div><label>Name</label><input id="newPlayerName" placeholder="Player name"></div>
-        <div><label>Position</label><input id="newPlayerPos" placeholder="F or D"></div>
+        <div><label>Position</label>
+          <select id="newPlayerPos">
+            <option value="">—</option>
+            <option value="F">F</option>
+            <option value="D">D</option>
+          </select>
+        </div>
       </div>
       <button class="secondary" style="margin-top:10px" onclick="addPlayerFromUI()">Add Player</button>
     </div>
 
     <div class="section">
-      <div class="section-head"><div class="section-title">Active Players</div><div class="mini">${playerNames().length}</div></div>
-      <div class="compact-list">${playerRows || '<div class="note">No players yet. Add your first skater above.</div>'}</div>
+      <div class="section-head"><div class="section-title">Active Players</div><div class="mini">${activePlayers.length}</div></div>
+      <div class="compact-list">${playerRows || '<div class="empty-state">No players yet. Add your first skater above.</div>'}</div>
     </div>
   `;
 }
@@ -3042,15 +3050,18 @@ async function addPlayerFromUI(){
       player_name:name,
       position:pos || "",
       is_active:true
-    }, {onConflict:"player_name"});
+    }, {onConflict:"player_name"}).select("id, player_name, position, is_active");
     if (res.error) throw res.error;
+    if (!res.data || res.data.length === 0) throw new Error("No roster row saved. Check sign-in permissions.");
     await loadAll();
+    renderRosterScreen();
     haptic("success");
     toast("Player added.");
   } catch(e){
     toast(e.message || "Could not add player.");
   }
 }
+
 
 async function deactivatePlayer(name){
   if (!(await requireAuth('manage roster'))) return;
@@ -3088,6 +3099,82 @@ async function updatePlayerPosition(name, pos){
     toast("Position updated.");
   } catch(e){
     toast(e.message || "Could not update position.");
+  }
+}
+
+
+async function renamePlayerById(playerId, newName){
+  if (!(await requireAuth('manage roster'))) return;
+  newName = (newName || "").trim();
+  if (!newName) return toast("Player name cannot be blank.");
+
+  try{
+    const res = await db
+      .from("players")
+      .update({player_name:newName, is_active:true})
+      .eq("id", playerId)
+      .select("id, player_name, position, is_active");
+
+    if (res.error) throw res.error;
+    if (!res.data || res.data.length === 0) throw new Error("No roster row updated. Check sign-in permissions.");
+
+    await loadAll();
+    renderRosterScreen();
+    haptic("success");
+    toast("Player updated.");
+  } catch(e){
+    toast(e.message || "Could not update player.");
+    await loadAll();
+    renderRosterScreen();
+  }
+}
+
+async function updatePlayerPositionById(playerId, pos){
+  if (!(await requireAuth('manage roster'))) return;
+
+  try{
+    const res = await db
+      .from("players")
+      .update({position:pos || ""})
+      .eq("id", playerId)
+      .select("id, player_name, position, is_active");
+
+    if (res.error) throw res.error;
+    if (!res.data || res.data.length === 0) throw new Error("No roster row updated. Check sign-in permissions.");
+
+    await loadAll();
+    renderRosterScreen();
+    haptic("success");
+    toast("Position updated.");
+  } catch(e){
+    toast(e.message || "Could not update position.");
+    await loadAll();
+    renderRosterScreen();
+  }
+}
+
+async function deactivatePlayerById(playerId){
+  if (!(await requireAuth('manage roster'))) return;
+  if (!confirm("Remove this player from the active roster?")) return;
+
+  try{
+    const res = await db
+      .from("players")
+      .update({is_active:false})
+      .eq("id", playerId)
+      .select("id, player_name, position, is_active");
+
+    if (res.error) throw res.error;
+    if (!res.data || res.data.length === 0) throw new Error("No roster row updated. Check sign-in permissions.");
+
+    await loadAll();
+    renderRosterScreen();
+    haptic();
+    toast("Player removed.");
+  } catch(e){
+    toast(e.message || "Could not remove player.");
+    await loadAll();
+    renderRosterScreen();
   }
 }
 
