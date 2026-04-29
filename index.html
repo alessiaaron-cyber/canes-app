@@ -1779,6 +1779,7 @@ let S = {
   user: null,
   realtimeChannel: null,
   suppressRealtimeRender: false,
+  pendingRealtimeEchoes: {},
   lastUpdated: null,
   justChangedKeys: [],
   form: {
@@ -1817,6 +1818,28 @@ function markUpdated(keys = []){
 
 function changedClass(key){
   return S.justChangedKeys.includes(key) ? "sync-flash" : "";
+}
+
+function realtimeEchoKey(table, row){
+  if (!table || !row) return "";
+  if (table === "games") return `games:${row.id}`;
+  if (table === "picks") return `picks:${row.game_id}:${row.owner}:${Number(row.pick_slot)}`;
+  return "";
+}
+
+function markLocalWrite(table, row){
+  const key = realtimeEchoKey(table, row);
+  if (!key) return;
+  S.pendingRealtimeEchoes[key] = Date.now() + 1200;
+}
+
+function shouldIgnoreRealtimeEcho(table, row){
+  const key = realtimeEchoKey(table, row);
+  if (!key) return false;
+  const until = S.pendingRealtimeEchoes[key];
+  if (!until) return false;
+  delete S.pendingRealtimeEchoes[key];
+  return Date.now() < until;
 }
 
 
@@ -1973,6 +1996,8 @@ function applyRealtimePayload(payload){
   const row = payload.new;
   const oldRow = payload.old;
 
+  if (payload.eventType !== "DELETE" && shouldIgnoreRealtimeEcho(table, row)) return;
+
   if (table === "games"){
     const targetId = row?.id || oldRow?.id;
     if (targetId !== S.currentGame.id) return;
@@ -2056,6 +2081,7 @@ async function saveCurrentGameField(field, value){
     return;
   }
 
+  markLocalWrite("games", { id: S.currentGame.id });
   S.currentGame = {...S.currentGame, ...patch};
   mergeRow(S.games, S.currentGame);
   mergeRow(S.allGames, S.currentGame);
@@ -2079,7 +2105,7 @@ async function saveDraftPick(key){
     jg1: ["Julie", 1, S.form.j1, S.form.jg1, S.form.ja1],
     ja1: ["Julie", 1, S.form.j1, S.form.jg1, S.form.ja1],
     jg2: ["Julie", 2, S.form.j2, S.form.jg2, S.form.ja2],
-    ja2: ["Julie", 2, S.form.j2, S.form.ja2],
+    ja2: ["Julie", 2, S.form.j2, S.form.jg2, S.form.ja2],
   };
 
   const spec = map[key];
@@ -2146,8 +2172,23 @@ function totals(){
   };
 }
 
+function lastNameLabel(name){
+  const parts = String(name || "").trim().split(/\s+/).filter(Boolean);
+  if (parts.length < 2) return name || "";
+  const last = parts.pop();
+  return `${last}, ${parts.join(" ")}`;
+}
+
+function lastNameSortValue(name){
+  const parts = String(name || "").trim().split(/\s+/).filter(Boolean);
+  return parts.length ? parts[parts.length - 1] : "";
+}
+
 function playerNames(){
-  return [...new Set(S.players.map(p => p.player_name).filter(Boolean))].sort();
+  return [...new Set(S.players.map(p => p.player_name).filter(Boolean))].sort((a,b) => {
+    const lastCompare = lastNameSortValue(a).localeCompare(lastNameSortValue(b));
+    return lastCompare || a.localeCompare(b);
+  });
 }
 
 
@@ -2181,7 +2222,7 @@ function playerOptions(selected, currentSlot){
   if (!names.length) return `<option value="">No active players</option>`;
   return `<option value="">Select</option>` + names.map(p => {
     const disabled = isPlayerAlreadyPicked(p, currentSlot) && p !== selected;
-    return `<option value="${esc(p)}" ${p===selected ? "selected" : ""} ${disabled ? "disabled" : ""}>${esc(p)}${disabled ? " — picked" : ""}</option>`;
+    return `<option value="${esc(p)}" ${p===selected ? "selected" : ""} ${disabled ? "disabled" : ""}>${esc(lastNameLabel(p))}${disabled ? " — picked" : ""}</option>`;
   }).join("");
 }
 
@@ -2189,7 +2230,7 @@ function firstGoalOptions(){
   const vals = playerNames();
   if (!vals.length) return `<option value="">No active players</option>`;
   return `<option value="">No first goal selected</option>` + vals.map(p =>
-    `<option value="${esc(p)}" ${p===S.form.firstGoal ? "selected" : ""}>${esc(p)}</option>`
+    `<option value="${esc(p)}" ${p===S.form.firstGoal ? "selected" : ""}>${esc(lastNameLabel(p))}</option>`
   ).join("");
 }
 
@@ -2993,6 +3034,8 @@ async function upsertPick(gameId, owner, slot, player, goals, assists, points){
     const res = await db.from("picks").insert(row);
     if (res.error) throw new Error(friendlyDbError(res.error));
   }
+
+  markLocalWrite("picks", row);
 }
 
 async function finalizeGame(){
