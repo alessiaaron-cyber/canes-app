@@ -2150,6 +2150,9 @@ function playerNames(){
   return [...new Set(S.players.map(p => p.player_name).filter(Boolean))].sort();
 }
 
+
+
+
 function selectedPickMap(){
   return {
     a1: S.form.a1 || "",
@@ -2165,15 +2168,6 @@ function isPlayerAlreadyPicked(player, currentSlot){
   return Object.entries(picks).some(([slot, value]) => slot !== currentSlot && value === player);
 }
 
-function playerOptions(selected, currentSlot){
-  const names = playerNames();
-  if (!names.length) return `<option value="">No active players</option>`;
-  return `<option value="">Select</option>` + names.map(p => {
-    const disabled = isPlayerAlreadyPicked(p, currentSlot) && p !== selected;
-    return `<option value="${esc(p)}" ${p===selected ? "selected" : ""} ${disabled ? "disabled" : ""}>${esc(p)}${disabled ? " — picked" : ""}</option>`;
-  }).join("");
-}
-
 function findDuplicatePick(slot, player){
   if (!player) return null;
   const labels = {a1:"Aaron Pick 1", a2:"Aaron Pick 2", j1:"Julie Pick 1", j2:"Julie Pick 2"};
@@ -2182,15 +2176,14 @@ function findDuplicatePick(slot, player){
   return dupe ? labels[dupe[0]] : null;
 }
 
-function friendlyDbError(error){
-  if (!error) return "";
-  const msg = error.message || "";
-  if (error.code === "23505" || msg.toLowerCase().includes("duplicate key")){
-    return "That player is already picked for this game.";
-  }
-  return msg || "Could not save.";
+function playerOptions(selected, currentSlot){
+  const names = playerNames();
+  if (!names.length) return `<option value="">No active players</option>`;
+  return `<option value="">Select</option>` + names.map(p => {
+    const disabled = isPlayerAlreadyPicked(p, currentSlot) && p !== selected;
+    return `<option value="${esc(p)}" ${p===selected ? "selected" : ""} ${disabled ? "disabled" : ""}>${esc(p)}${disabled ? " — picked" : ""}</option>`;
+  }).join("");
 }
-
 
 function firstGoalOptions(){
   const vals = playerNames();
