@@ -2629,18 +2629,35 @@ function computeFunStats(){
   const finals = S.allGames.filter(g => g.status === "Final");
   const activeFinals = S.games.filter(g => g.status === "Final");
   const sortedActive = [...activeFinals].sort((a,b)=>Number(a.game_number)-Number(b.game_number));
+  const sortedAll = [...finals].sort((a,b)=>{
+    const da = String(a.game_date || "");
+    const db = String(b.game_date || "");
+    if (da !== db) return da.localeCompare(db);
+    return Number(a.game_number || 0) - Number(b.game_number || 0);
+  });
 
   let currentStreak = "—";
+  let currentStreakOwner = "";
+  let currentStreakCount = 0;
   if (sortedActive.length){
     const lastWinner = sortedActive[sortedActive.length-1].winner;
     if (lastWinner && lastWinner !== "Tie"){
-      let n = 0;
       for (let i=sortedActive.length-1; i>=0; i--){
-        if (sortedActive[i].winner === lastWinner) n++;
+        if (sortedActive[i].winner === lastWinner) currentStreakCount++;
         else break;
       }
-      currentStreak = `${lastWinner} W${n}`;
+      currentStreakOwner = lastWinner;
+      currentStreak = `${lastWinner} W${currentStreakCount}`;
     } else currentStreak = "No streak";
+  }
+
+  let headlineSub = "Once more games go final, the booth will find the storyline.";
+  if (currentStreak === "No streak"){
+    headlineSub = "Nobody owns momentum. The booth is calling this one chaos.";
+  } else if (currentStreakOwner){
+    if (currentStreakCount >= 4) headlineSub = `${currentStreakOwner} is fully in villain mode. The chirping is justified.`;
+    else if (currentStreakCount >= 2) headlineSub = `${currentStreakOwner} has momentum. This is officially a storyline.`;
+    else headlineSub = "Momentum is officially a storyline. Expect chirping.";
   }
 
   let longest = {winner:"—", count:0};
@@ -2662,29 +2679,63 @@ function computeFunStats(){
   }, {game:null, margin:0});
 
   const bestScore = finals.reduce((best,g)=>{
-    const maxScore = Math.max(Number(g.aaron_points||0), Number(g.julie_points||0));
-    return maxScore > best.score ? {game:g, score:maxScore} : best;
+    const a = Number(g.aaron_points||0);
+    const j = Number(g.julie_points||0);
+    const maxScore = Math.max(a, j);
+    const winner = a === j ? "Tie" : a > j ? "Aaron" : "Julie";
+    return maxScore > best.score ? {game:{...g, winner}, score:maxScore} : best;
   }, {game:null, score:0});
 
   const pickCounts = {};
   const pickPointsMap = {};
+  const ownerPickMap = {};
   S.allPicks.forEach(p=>{
-    pickCounts[p.player_name] = (pickCounts[p.player_name] || 0) + 1;
-    pickPointsMap[p.player_name] = (pickPointsMap[p.player_name] || 0) + Number(p.points || 0);
+    const name = p.player_name;
+    if (!name) return;
+    const pts = Number(p.points || 0);
+    pickCounts[name] = (pickCounts[name] || 0) + 1;
+    pickPointsMap[name] = (pickPointsMap[name] || 0) + pts;
+
+    const owner = p.owner || "";
+    if (owner){
+      const key = `${owner}|${name}`;
+      if (!ownerPickMap[key]) ownerPickMap[key] = {owner, name, count:0, points:0};
+      ownerPickMap[key].count++;
+      ownerPickMap[key].points += pts;
+    }
   });
-  const mostPicked = Object.entries(pickCounts).sort((a,b)=>b[1]-a[1])[0];
+
+  const mostPicked = Object.entries(pickCounts).sort((a,b)=>b[1]-a[1] || a[0].localeCompare(b[0]))[0];
   const bestAvg = Object.keys(pickCounts)
     .map(name=>({name, avg: pickPointsMap[name] / pickCounts[name], count: pickCounts[name]}))
     .filter(x=>x.count >= 2 && x.avg > 0)
-    .sort((a,b)=>b.avg-a.avg)[0];
+    .sort((a,b)=>b.avg-a.avg || b.count-a.count || a.name.localeCompare(b.name))[0];
+
+  const clutchPick = Object.values(ownerPickMap)
+    .map(x=>({...x, avg:x.points / x.count}))
+    .filter(x=>x.count >= 2 && x.avg > 0)
+    .sort((a,b)=>b.avg-a.avg || b.count-a.count || a.name.localeCompare(b.name))[0];
 
   const firstGoals = {};
   finals.forEach(g=>{
     if (g.first_goal_scorer) firstGoals[g.first_goal_scorer] = (firstGoals[g.first_goal_scorer] || 0) + 1;
   });
-  const topFirstGoal = Object.entries(firstGoals).sort((a,b)=>b[1]-a[1])[0];
+  const topFirstGoal = Object.entries(firstGoals).sort((a,b)=>b[1]-a[1] || a[0].localeCompare(b[0]))[0];
 
-  return {currentStreak, longest, biggest, bestScore, mostPicked, bestAvg, topFirstGoal};
+  const lastFinal = sortedAll[sortedAll.length - 1];
+  let boothNote = "Once more games are finalized, this turns into your rivalry storyline machine.";
+  if (lastFinal){
+    const lastMargin = Math.abs(Number(lastFinal.aaron_points||0)-Number(lastFinal.julie_points||0));
+    if (lastFinal.winner && lastFinal.winner !== "Tie" && lastMargin >= 5){
+      boothNote = `${lastFinal.winner} just dropped a statement win, and the booth has no choice but to respect the scoreboard.`;
+    } else if (biggest.game && mostPicked){
+      boothNote = `${biggest.game.winner} owns the biggest statement win so far, while ${mostPicked[0]} keeps showing up in the strategy room.`;
+    } else if (mostPicked){
+      boothNote = `${mostPicked[0]} is becoming the default strategy-room name.`;
+    }
+  }
+
+  return {currentStreak, currentStreakOwner, currentStreakCount, headlineSub, longest, biggest, bestScore, mostPicked, bestAvg, clutchPick, topFirstGoal, boothNote};
 }
 
 function renderAllTime(){
@@ -2724,12 +2775,12 @@ function renderAllTime(){
           </div>
           <div class="headline-icon">🔥</div>
         </div>
-        <div class="headline-sub">${stats.currentStreak === "No streak" ? "Nobody has momentum. The booth is calling this one chaos." : "Momentum is officially a storyline. Expect chirping."}</div>
+        <div class="headline-sub">${esc(stats.headlineSub)}</div>
       </div>
 
       <div class="stat-grid">
         <div class="stat-tile">
-          <div class="stat-row-icon"><div class="stat-icon">🏆</div><div class="stat-label">Longest streak</div></div>
+          <div class="stat-row-icon"><div class="stat-icon">🏆</div><div class="stat-label">Longest win streak</div></div>
           <div class="stat-value">${stats.longest.count ? esc(stats.longest.winner + " W" + stats.longest.count) : "—"}</div>
           <div class="stat-sub">The run everyone hears about forever.</div>
         </div>
@@ -2741,13 +2792,13 @@ function renderAllTime(){
         </div>
 
         <div class="stat-tile alt">
-          <div class="stat-row-icon"><div class="stat-icon">🚀</div><div class="stat-label">Best game</div></div>
+          <div class="stat-row-icon"><div class="stat-icon">🚀</div><div class="stat-label">Highest score</div></div>
           <div class="stat-value">${stats.bestScore.game ? esc(stats.bestScore.game.winner + " " + stats.bestScore.score) : "—"}</div>
           <div class="stat-sub">${stats.bestScore.game ? "Game " + esc(stats.bestScore.game.game_number) + " went nuclear." : "Waiting for a heater."}</div>
         </div>
 
         <div class="stat-tile">
-          <div class="stat-row-icon"><div class="stat-icon">🎯</div><div class="stat-label">Most picked</div></div>
+          <div class="stat-row-icon"><div class="stat-icon">🎯</div><div class="stat-label">Most picked player</div></div>
           <div class="stat-value">${stats.mostPicked ? esc(stats.mostPicked[0]) : "—"}</div>
           <div class="stat-sub">${stats.mostPicked ? esc(stats.mostPicked[1]) + " total picks" : "No pick data yet."}</div>
         </div>
@@ -2755,19 +2806,19 @@ function renderAllTime(){
         <div class="stat-tile">
           <div class="stat-row-icon"><div class="stat-icon">📈</div><div class="stat-label">Best avg pick</div></div>
           <div class="stat-value">${stats.bestAvg ? esc(stats.bestAvg.name) : "—"}</div>
-          <div class="stat-sub">${stats.bestAvg ? stats.bestAvg.avg.toFixed(1) + " pts per pick" : "Needs more stat detail."}</div>
+          <div class="stat-sub">${stats.bestAvg ? stats.bestAvg.avg.toFixed(1) + " pts/pick over " + stats.bestAvg.count + " picks" : "Needs more stat detail."}</div>
         </div>
 
         <div class="stat-tile alt">
           <div class="stat-row-icon"><div class="stat-icon">🥅</div><div class="stat-label">First goal king</div></div>
           <div class="stat-value">${stats.topFirstGoal ? esc(stats.topFirstGoal[0]) : "—"}</div>
-          <div class="stat-sub">${stats.topFirstGoal ? stats.topFirstGoal[1] + " first goals tracked" : "Start tracking first goals."}</div>
+          <div class="stat-sub">${stats.topFirstGoal ? stats.topFirstGoal[1] + " first-goal hits" : "Start tracking first goals."}</div>
         </div>
       </div>
 
       <div class="ticker">
         <strong>Booth note:</strong>
-        ${stats.biggest.game ? esc(stats.biggest.game.winner) + " owns the biggest statement win so far, while " + (stats.mostPicked ? esc(stats.mostPicked[0]) : "the pick board") + " keeps showing up in the strategy room." : "Once more games are finalized, this turns into your rivalry storyline machine."}
+        ${esc(stats.boothNote)}
       </div>
 
       <div class="note">Powered only by your rivalry data: picks, finalized scores, first goals, and history.</div>
