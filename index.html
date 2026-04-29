@@ -2150,6 +2150,21 @@ function playerNames(){
   return [...new Set(S.players.map(p => p.player_name).filter(Boolean))].sort();
 }
 
+function selectedPickMap(){
+  return {
+    a1: S.form.a1 || "",
+    a2: S.form.a2 || "",
+    j1: S.form.j1 || "",
+    j2: S.form.j2 || ""
+  };
+}
+
+function isPlayerAlreadyPicked(player, currentSlot){
+  if (!player) return false;
+  const picks = selectedPickMap();
+  return Object.entries(picks).some(([slot, value]) => slot !== currentSlot && value === player);
+}
+
 function playerOptions(selected, currentSlot){
   const names = playerNames();
   if (!names.length) return `<option value="">No active players</option>`;
@@ -2205,7 +2220,6 @@ function setF(k,v){
 
   if (k === "firstGoal"){
     saveCurrentGameField("first_goal_scorer", v);
-    // First goal can change draft point totals, so resave existing picks.
     ["a1","a2","j1","j2"].forEach(saveDraftPick);
   }
 }
