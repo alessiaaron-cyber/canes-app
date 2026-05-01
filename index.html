@@ -2153,6 +2153,29 @@ function pickPoints(player, goals, assists, firstGoal){
   return pts;
 }
 
+function parseGameDateLocal(dateStr){
+  if (!dateStr) return null;
+  const raw = String(dateStr).trim();
+  const m = raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (m) return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+  const d = new Date(raw);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
+function formatGameDate(dateStr){
+  const d = parseGameDateLocal(dateStr);
+  if (!d) return "";
+
+  const startOfDay = (x) => new Date(x.getFullYear(), x.getMonth(), x.getDate());
+  const dayMs = 24 * 60 * 60 * 1000;
+  const diffDays = Math.round((startOfDay(d) - startOfDay(new Date())) / dayMs);
+
+  if (diffDays === 0) return "Today";
+  if (diffDays === 1) return "Tomorrow";
+
+  return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+}
+
 function liveScore(){
   const f = S.form;
   const a =
@@ -2338,6 +2361,8 @@ function renderGame(){
   const l = liveScore();
   const lead = t.a === t.j ? "ALL SQUARE" : t.a > t.j ? `AARON +${t.a-t.j}` : `JULIE +${t.j-t.a}`;
   const opp = g.opponent && g.opponent !== "Next Game" ? g.opponent : "Next Game";
+  const gameDateLabel = formatGameDate(g.game_date);
+  const matchupLabel = `${opp}${gameDateLabel ? " • " + gameDateLabel : ""}`;
   const isPlayoff = (g.game_type === "Playoffs") || Number(g.game_number || 0) >= 83;
   const modeLabel = isPlayoff ? "Playoffs" : "Live";
 
@@ -2371,7 +2396,7 @@ function renderGame(){
         </span>
       </div>
       <h1>${isPlayoff ? "Playoff Game" : "Game Day"}</h1>
-      <div class="meta">${esc(opp)} • Game ${esc(g.game_number || "—")} • First Pick: ${esc(g.first_picker || "—")}</div>
+      <div class="meta">${esc(matchupLabel)} • Game ${esc(g.game_number || "—")} • First Pick: ${esc(g.first_picker || "—")}</div>
       ${isPlayoff ? `<div class="playoff-strip">Stanley Cup Mode Activated</div>` : ""}
 
       <div class="scoreboard">
