@@ -3103,15 +3103,24 @@ async function upsertPick(gameId, owner, slot, player, goals, assists, points){
     original_pick_text:player || ""
   };
 
+  let savedRow;
   if (existing){
-    const res = await db.from("picks").update(row).eq("id", existing.id);
+    const res = await db.from("picks").update(row).eq("id", existing.id).select().single();
     if (res.error) throw new Error(friendlyDbError(res.error));
+    savedRow = res.data || {...existing, ...row};
   } else {
-    const res = await db.from("picks").insert(row);
+    const res = await db.from("picks").insert(row).select().single();
     if (res.error) throw new Error(friendlyDbError(res.error));
+    savedRow = res.data || row;
   }
 
-  markLocalWrite("picks", row);
+  if (savedRow){
+    mergeRow(S.allPicks, savedRow);
+    if (Number(gameId) === Number(S.currentGame?.id)) mergeRow(S.picks, savedRow);
+  }
+
+  markLocalWrite("picks", savedRow || row);
+  return savedRow;
 }
 
 async function finalizeGame(){
