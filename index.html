@@ -1780,6 +1780,9 @@ let S = {
   realtimeChannel: null,
   suppressRealtimeRender: false,
   pendingRealtimeEchoes: {},
+  needsGameRender: false,
+  needsGameHydrate: false,
+  savingCount: 0,
   lastUpdated: null,
   justChangedKeys: [],
   form: {
@@ -1810,11 +1813,57 @@ function markUpdated(keys = []){
   S.justChangedKeys = Array.isArray(keys) ? keys : [];
   setTimeout(() => {
     S.justChangedKeys = [];
-    try{ renderGame(); } catch(e){}
+    try{ requestGameRender(); } catch(e){}
   }, 1300);
 }
 
+function requestGameRender({hydrate = false} = {}){
+  if (isGameDayEditingActive()){
+    S.needsGameRender = true;
+    S.needsGameHydrate = S.needsGameHydrate || hydrate;
+    return;
+  }
+  if (hydrate) hydrateForm();
+  renderGame();
+}
 
+function flushDeferredGameRender(){
+  setTimeout(() => {
+    if (isGameDayEditingActive()) return;
+    if (!S.needsGameRender) return;
+
+    const shouldHydrate = S.needsGameHydrate;
+    S.needsGameRender = false;
+    S.needsGameHydrate = false;
+
+    try{
+      if (shouldHydrate) hydrateForm();
+      renderGame();
+    } catch(e){}
+  }, 80);
+}
+
+function updateSaveIndicator(){
+  const el = document.getElementById("savingBadge");
+  if (el) el.classList.toggle("hidden", !S.savingCount);
+}
+
+function beginSave(){
+  S.savingCount = Number(S.savingCount || 0) + 1;
+  updateSaveIndicator();
+}
+
+function endSave(){
+  S.savingCount = Math.max(0, Number(S.savingCount || 0) - 1);
+  updateSaveIndicator();
+}
+
+if (!window.__canesDeferredRenderListenersAttached){
+  window.__canesDeferredRenderListenersAttached = true;
+  document.addEventListener("focusout", flushDeferredGameRender, true);
+  document.addEventListener("change", flushDeferredGameRender, true);
+  document.addEventListener("pointerup", flushDeferredGameRender, true);
+}
 
 function changedClass(key){
   return S.justChangedKeys.includes(key) ? "sync-flash" : "";
@@ -2020,6 +2069,8 @@ function applyRealtimePayload(payload){
       hydrateForm();
       renderAll();
     } else {
+      S.needsGameRender = true;
+      S.needsGameHydrate = true;
       renderHistory();
       renderAllTime();
       renderManage();
@@ -2049,6 +2100,8 @@ function applyRealtimePayload(payload){
       hydrateForm();
       renderAll();
     } else {
+      S.needsGameRender = true;
+      S.needsGameHydrate = true;
       renderHistory();
       renderAllTime();
       renderManage();
@@ -2075,18 +2128,23 @@ async function saveCurrentGameField(field, value){
   const patch = {};
   patch[field] = value || null;
 
-  const res = await db.from("games").update(patch).eq("id", S.currentGame.id);
-  if (res.error){
-    toast(res.error.message || "Could not save.");
-    return;
-  }
+  beginSave();
+  try{
+    const res = await db.from("games").update(patch).eq("id", S.currentGame.id);
+    if (res.error){
+      toast(res.error.message || "Could not save.");
+      return;
+    }
 
-  markLocalWrite("games", { id: S.currentGame.id });
-  S.currentGame = {...S.currentGame, ...patch};
-  mergeRow(S.games, S.currentGame);
-  mergeRow(S.allGames, S.currentGame);
-  markUpdated([field === "first_goal_scorer" ? "firstGoal" : field]);
-  haptic();
+    markLocalWrite("games", { id: S.currentGame.id });
+    S.currentGame = {...S.currentGame, ...patch};
+    mergeRow(S.games, S.currentGame);
+    mergeRow(S.allGames, S.currentGame);
+    markUpdated([field === "first_goal_scorer" ? "firstGoal" : field]);
+    haptic();
+  } finally {
+    endSave();
+  }
 }
 
 async function saveDraftPick(key){
@@ -2120,17 +2178,24 @@ async function saveDraftPick(key){
     return;
   }
 
-  if (S.currentGame.status === "Scheduled"){
-    await saveCurrentGameField("status", "In Progress");
-  }
+  beginSave();
+  try{
+    if (S.currentGame.status === "Scheduled"){
+      await saveCurrentGameField("status", "In Progress");
+    }
 
-  const cleanPlayer = player || "";
-  const cleanGoals = cleanPlayer ? goals : 0;
-  const cleanAssists = cleanPlayer ? assists : 0;
-  const points = cleanPlayer ? pickPoints(cleanPlayer, cleanGoals, cleanAssists, S.form.firstGoal) : 0;
-  await upsertPick(S.currentGame.id, owner, slot, cleanPlayer, cleanGoals, cleanAssists, points);
-  markUpdated([key]);
-  haptic();
+    const cleanPlayer = player || "";
+    const cleanGoals = cleanPlayer ? goals : 0;
+    const cleanAssists = cleanPlayer ? assists : 0;
+    const points = cleanPlayer ? pickPoints(cleanPlayer, cleanGoals, cleanAssists, S.form.firstGoal) : 0;
+    await upsertPick(S.currentGame.id, owner, slot, cleanPlayer, cleanGoals, cleanAssists, points);
+    markUpdated([key]);
+    haptic();
+  } catch(e){
+    toast(e.message || "Could not save pick.");
+  } finally {
+    endSave();
+  }
 }
 
 
@@ -2391,6 +2456,7 @@ function renderGame(){
         <span>Canes Rivalry</span>
         <span class="top-actions">
           <button class="refresh-mini" onclick="manualRefresh()">↻ Refresh</button>
+          <span id="savingBadge" class="sync-badge off ${S.savingCount ? "" : "hidden"}">Saving…</span>
           <span class="sync-badge ${S.realtimeChannel ? "" : "off"}">Live</span>
           <span class="badge ${isPlayoff ? "playoff" : ""}">${modeLabel}</span>
         </span>
