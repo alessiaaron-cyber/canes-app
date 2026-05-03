@@ -2353,6 +2353,8 @@ async function syncNhlStats(){
     const patch = {
       nhl_game_id: data.nhl_game_id || g.nhl_game_id || null,
       last_synced_at: data.syncedAt || new Date().toISOString(),
+      game_start_time: data.gameStartTime || g.game_start_time || null,
+      nhl_game_state: data.gameState || g.nhl_game_state || null,
       first_goal_scorer: syncedForm.firstGoal || null,
       status: g.status === "Scheduled" ? "In Progress" : g.status
     };
