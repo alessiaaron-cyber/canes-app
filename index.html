@@ -2246,15 +2246,53 @@ function formatGameDate(dateStr){
 function normalizePlayerNameForMatch(name){
   return String(name || "")
     .toLowerCase()
+    .replace(/,/g, " ")
     .replace(/[^a-z0-9\s]/g, "")
     .replace(/\s+/g, " ")
     .trim();
 }
 
+function playerNameMatchKeys(name){
+  const normal = normalizePlayerNameForMatch(name);
+  const parts = normal.split(" ").filter(Boolean);
+  return {
+    normal,
+    sorted: [...parts].sort().join(" "),
+    last: parts.length ? parts[parts.length - 1] : ""
+  };
+}
+
 function findSyncedPlayerStat(playerName, playerStats){
-  const target = normalizePlayerNameForMatch(playerName);
-  if (!target) return null;
-  return (playerStats || []).find(s => normalizePlayerNameForMatch(s.playerName) === target) || null;
+  const target = playerNameMatchKeys(playerName);
+  if (!target.normal) return null;
+
+  const stats = (playerStats || []).map(s => ({
+    ...s,
+    _keys: playerNameMatchKeys(s.playerName)
+  }));
+
+  // 1) Exact normalized full-name match.
+  let match = stats.find(s => s._keys.normal === target.normal);
+  if (match) return match;
+
+  // 2) Token-sorted match catches "Aho, Sebastian" vs "Sebastian Aho".
+  match = stats.find(s => s._keys.sorted && s._keys.sorted === target.sorted);
+  if (match) return match;
+
+  // 3) Last-name fallback, but only if the NHL scorer last name is unique.
+  if (target.last){
+    const lastMatches = stats.filter(s => s._keys.last === target.last);
+    if (lastMatches.length === 1) return lastMatches[0];
+  }
+
+  return null;
+}
+
+function canonicalRosterNameForSyncedName(name){
+  if (!name) return "";
+  const names = playerNames();
+  const fakeStat = [{ playerName: name, goals: 0, assists: 0 }];
+  return names.find(n => findSyncedPlayerStat(n, fakeStat)) || name;
 }
 
 async function syncNhlStats(){
@@ -2277,13 +2315,16 @@ async function syncNhlStats(){
     if (!data?.ok) throw new Error(data?.error || "NHL sync could not find game stats.");
 
     const stats = Array.isArray(data.playerStats) ? data.playerStats : [];
-    const firstGoal = data.firstGoalScorer || S.form.firstGoal || "";
+    const syncedFirstGoal = data.firstCanesGoalScorer || data.firstGoalScorer || "";
+    const firstGoal = canonicalRosterNameForSyncedName(syncedFirstGoal) || S.form.firstGoal || "";
 
     const getGA = (player) => {
       const stat = findSyncedPlayerStat(player, stats);
       return {
         goals: Number(stat?.goals || 0),
-        assists: Number(stat?.assists || 0)
+        assists: Number(stat?.assists || 0),
+        matched: !!stat,
+        nhlName: stat?.playerName || ""
       };
     };
 
@@ -2291,6 +2332,7 @@ async function syncNhlStats(){
     const a2 = getGA(S.form.a2);
     const j1 = getGA(S.form.j1);
     const j2 = getGA(S.form.j2);
+    const matchedPicks = [a1,a2,j1,j2].filter(x => x.matched && (x.goals || x.assists)).length;
 
     const syncedForm = {
       ...S.form,
@@ -2328,7 +2370,8 @@ async function syncNhlStats(){
     renderAllTime();
     renderManage();
     haptic("success");
-    toast(`NHL sync updated ${stats.length} scorer${stats.length === 1 ? "" : "s"}.`);
+    const firstGoalNote = firstGoal ? ` First Canes goal: ${lastNameLabel(firstGoal)}.` : "";
+    toast(`NHL sync updated ${matchedPicks} picked player${matchedPicks === 1 ? "" : "s"}.${firstGoalNote}`);
   } catch(e){
     toast(e.message || "Could not sync NHL stats.");
   } finally {
