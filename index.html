@@ -7,6 +7,7 @@
   <meta name="apple-mobile-web-app-title" content="Canes Rivalry" />
   <meta name="theme-color" content="#f3f5f8" />
   <link rel="apple-touch-icon" href="icon.png">
+  <link rel="manifest" href="manifest.json">
   <title>Canes Rivalry</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -1760,6 +1761,7 @@
 <script>
 const SUPABASE_URL = "https://hhhxgbztfizmwxbuoprq.supabase.co";
 const SUPABASE_KEY = "sb_publishable_4laNe86TxiC5pLkAF5NeIg_oMmf1unQ";
+const VAPID_PUBLIC_KEY = "BCtu4eICB4IXlVESLhWYmyaUP1P-qFi2dL0I0QYzmPDxjpZSiZY7Eulp1VemhtQnNe8647Q16NUdoT-a5qyKNhM";
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let S = {
@@ -2021,6 +2023,88 @@ async function verifyAuthCodeFromModal(){
 }
 
 
+function pushSupported(){
+  return "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
+}
+
+function urlBase64ToUint8Array(base64String){
+  const padding = "=".repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+  const rawData = atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+  for (let i = 0; i < rawData.length; ++i) outputArray[i] = rawData.charCodeAt(i);
+  return outputArray;
+}
+
+async function enablePushNotifications(){
+  if (!(await requireAuth("enable notifications"))) return;
+  if (!pushSupported()) return toast("Push notifications are not supported on this device/browser.");
+
+  try{
+    const permission = await Notification.requestPermission();
+    if (permission !== "granted") return toast("Notifications were not allowed.");
+
+    const reg = await navigator.serviceWorker.register("service-worker.js");
+    const ready = await navigator.serviceWorker.ready;
+
+    let sub = await ready.pushManager.getSubscription();
+    if (!sub){
+      sub = await ready.pushManager.subscribe({
+        userVisibleOnly:true,
+        applicationServerKey:urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+      });
+    }
+
+    const jsonSub = sub.toJSON();
+    const row = {
+      user_email:S.user?.email || "",
+      endpoint:jsonSub.endpoint,
+      p256dh:jsonSub.keys?.p256dh,
+      auth:jsonSub.keys?.auth,
+      last_seen_at:new Date().toISOString()
+    };
+
+    if (!row.user_email || !row.endpoint || !row.p256dh || !row.auth){
+      throw new Error("Device subscription was incomplete.");
+    }
+
+    const res = await db.from("push_subscriptions").upsert(row, { onConflict:"endpoint" });
+    if (res.error) throw new Error(friendlyDbError(res.error));
+
+    haptic("success");
+    toast("Notifications enabled on this device.");
+    renderManage();
+  } catch(e){
+    toast(e.message || "Could not enable notifications.");
+  }
+}
+
+async function sendPushNotification(title, message, tag="canes-rivalry"){
+  try{
+    await refreshAuth();
+    if (!S.user) return;
+    await db.functions.invoke("send-push", {
+      body:{ title, message, tag, url:"/" }
+    });
+  } catch(e){
+    console.warn("Push send failed", e);
+  }
+}
+
+async function testPushNotification(){
+  if (!(await requireAuth("test notifications"))) return;
+  await sendPushNotification("Canes Rivalry", "Test notification worked. The rivalry is officially mobile.", "test-push");
+  toast("Test notification sent.");
+}
+
+function notificationStatusLabel(){
+  if (!pushSupported()) return "Not supported";
+  if (Notification.permission === "granted") return "Enabled";
+  if (Notification.permission === "denied") return "Blocked";
+  return "Not enabled";
+}
+
+
 function isGameDayEditingActive(){
   const el = document.activeElement;
   if (!el) return false;
@@ -2189,6 +2273,9 @@ async function saveDraftPick(key){
     const cleanAssists = cleanPlayer ? assists : 0;
     const points = cleanPlayer ? pickPoints(cleanPlayer, cleanGoals, cleanAssists, S.form.firstGoal) : 0;
     await upsertPick(S.currentGame.id, owner, slot, cleanPlayer, cleanGoals, cleanAssists, points);
+    if (["a1","a2","j1","j2"].includes(key) && cleanPlayer){
+      sendPushNotification("Canes Rivalry Pick", `${owner} picked ${lastNameLabel(cleanPlayer)}.`, `pick-${S.currentGame.id}-${owner}-${slot}`);
+    }
     renderHistory();
     renderAllTime();
     markUpdated([key]);
@@ -3080,6 +3167,8 @@ function renderManage(){
         </div>
         ${S.user ? `<button class="action-pill" onclick="signOut()">Sign out</button>` : `<button class="action-pill" onclick="signInWithEmailCode()">Sign in</button>`}
       </div>
+      <div class="lock-note">Notifications: ${esc(notificationStatusLabel())}</div>
+      ${S.user ? `<div class="actions"><button class="light" onclick="enablePushNotifications()">Enable Notifications</button><button class="light" onclick="testPushNotification()">Test Push</button></div>` : ""}
     </div>
 
     <div class="section">
@@ -3377,6 +3466,8 @@ async function finalizeGame(){
     S.lastRecap = buildPostgameRecap(g, finalScore);
     await loadAll();
     haptic("success");
+    const finalMsg = finalScore.w === "Tie" ? `Final: Tie ${finalScore.a}-${finalScore.j}.` : `Final: ${finalScore.w} wins ${finalScore.a}-${finalScore.j}.`;
+    sendPushNotification("Canes Rivalry Final", finalMsg, `final-${g.id}`);
     toast(S.lastRecap ? S.lastRecap.title : "Game locked. Next game loaded.");
   } catch(e){
     toast(e.message || "Could not finalize.");
