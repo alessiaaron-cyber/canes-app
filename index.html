@@ -2243,6 +2243,99 @@ function formatGameDate(dateStr){
   return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
 }
 
+function normalizePlayerNameForMatch(name){
+  return String(name || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function findSyncedPlayerStat(playerName, playerStats){
+  const target = normalizePlayerNameForMatch(playerName);
+  if (!target) return null;
+  return (playerStats || []).find(s => normalizePlayerNameForMatch(s.playerName) === target) || null;
+}
+
+async function syncNhlStats(){
+  if (!(await requireAuth("sync NHL stats"))) return;
+  const g = S.currentGame;
+  if (!g?.id) return toast("No current game to sync.");
+  if (!g.game_date && !g.nhl_game_id) return toast("Add a game date first so NHL sync can find the game.");
+
+  beginSave();
+  try{
+    const { data, error } = await db.functions.invoke("sync-nhl-game", {
+      body: {
+        nhl_game_id: g.nhl_game_id || null,
+        game_date: g.game_date || null,
+        opponent: g.opponent || null
+      }
+    });
+
+    if (error) throw new Error(error.message || "NHL sync failed.");
+    if (!data?.ok) throw new Error(data?.error || "NHL sync could not find game stats.");
+
+    const stats = Array.isArray(data.playerStats) ? data.playerStats : [];
+    const firstGoal = data.firstGoalScorer || S.form.firstGoal || "";
+
+    const getGA = (player) => {
+      const stat = findSyncedPlayerStat(player, stats);
+      return {
+        goals: Number(stat?.goals || 0),
+        assists: Number(stat?.assists || 0)
+      };
+    };
+
+    const a1 = getGA(S.form.a1);
+    const a2 = getGA(S.form.a2);
+    const j1 = getGA(S.form.j1);
+    const j2 = getGA(S.form.j2);
+
+    const syncedForm = {
+      ...S.form,
+      ag1:a1.goals, aa1:a1.assists,
+      ag2:a2.goals, aa2:a2.assists,
+      jg1:j1.goals, ja1:j1.assists,
+      jg2:j2.goals, ja2:j2.assists,
+      firstGoal
+    };
+
+    S.form = syncedForm;
+
+    await upsertPick(g.id,"Aaron",1,syncedForm.a1,syncedForm.ag1,syncedForm.aa1,pickPoints(syncedForm.a1,syncedForm.ag1,syncedForm.aa1,syncedForm.firstGoal));
+    await upsertPick(g.id,"Aaron",2,syncedForm.a2,syncedForm.ag2,syncedForm.aa2,pickPoints(syncedForm.a2,syncedForm.ag2,syncedForm.aa2,syncedForm.firstGoal));
+    await upsertPick(g.id,"Julie",1,syncedForm.j1,syncedForm.jg1,syncedForm.ja1,pickPoints(syncedForm.j1,syncedForm.jg1,syncedForm.ja1,syncedForm.firstGoal));
+    await upsertPick(g.id,"Julie",2,syncedForm.j2,syncedForm.jg2,syncedForm.ja2,pickPoints(syncedForm.j2,syncedForm.jg2,syncedForm.ja2,syncedForm.firstGoal));
+
+    const patch = {
+      nhl_game_id: data.nhl_game_id || g.nhl_game_id || null,
+      last_synced_at: data.syncedAt || new Date().toISOString(),
+      first_goal_scorer: syncedForm.firstGoal || null,
+      status: g.status === "Scheduled" ? "In Progress" : g.status
+    };
+
+    const upd = await db.from("games").update(patch).eq("id", g.id);
+    if (upd.error) throw new Error(friendlyDbError(upd.error));
+
+    markLocalWrite("games", { id:g.id });
+    S.currentGame = {...S.currentGame, ...patch};
+    mergeRow(S.games, S.currentGame);
+    mergeRow(S.allGames, S.currentGame);
+
+    renderGame();
+    renderHistory();
+    renderAllTime();
+    renderManage();
+    haptic("success");
+    toast(`NHL sync updated ${stats.length} scorer${stats.length === 1 ? "" : "s"}.`);
+  } catch(e){
+    toast(e.message || "Could not sync NHL stats.");
+  } finally {
+    endSave();
+  }
+}
+
 function liveScore(){
   const f = S.form;
   const a =
@@ -2519,6 +2612,8 @@ function renderGame(){
         <div class="live-box"><div class="live-num">${l.a}</div><div class="live-label">Aaron</div></div>
         <div class="live-box"><div class="live-num">${l.j}</div><div class="live-label">Julie</div></div>
       </div>
+      <div style="margin-top:12px"><button class="secondary" onclick="syncNhlStats()">🏒 Sync NHL Stats</button></div>
+      <div class="bonus-note">${g.last_synced_at ? `Last NHL sync: ${esc(new Date(g.last_synced_at).toLocaleString([], {month:"short", day:"numeric", hour:"numeric", minute:"2-digit"}))}` : "Manual sync uses NHL game data when available."}</div>
       <div style="margin-top:12px"><button onclick="finalizeGame()">${S.user ? "🔒 Lock Final" : "🔒 Sign in to Lock Final"}</button></div>
     </div>
   `;
