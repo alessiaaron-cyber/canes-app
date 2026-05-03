@@ -3539,6 +3539,12 @@ function renderScheduleScreen(){
     </div>
 
     <div class="section">
+      <div class="section-head"><div class="section-title">NHL Schedule Import</div><div class="mini">Safe sync</div></div>
+      <div class="instruction-box"><strong>Import today + upcoming Canes games.</strong><br>Final and hidden games are skipped. Existing non-final games are updated by NHL ID or date/opponent; missing games are added in schedule order with alternating first pick.</div>
+      <button class="secondary" style="margin-top:10px" onclick="importNhlScheduleFromUI()">Import NHL Schedule</button>
+    </div>
+
+    <div class="section">
       <div class="section-head"><div class="section-title">Add Game</div></div>
       <div class="manage-fields">
         <div><label>Date</label><input id="newGameDate" type="date"></div>
@@ -3826,6 +3832,153 @@ async function deactivatePlayerById(playerId){
     toast(e.message || "Could not remove player.");
     await loadAll();
     renderRosterScreen();
+  }
+}
+
+
+function easternDateOnlyFromIso(iso){
+  if (!iso) return "";
+  try{
+    const parts = new Intl.DateTimeFormat("en-CA", {
+      timeZone:"America/New_York",
+      year:"numeric",
+      month:"2-digit",
+      day:"2-digit"
+    }).formatToParts(new Date(iso));
+    const y = parts.find(p=>p.type==="year")?.value;
+    const m = parts.find(p=>p.type==="month")?.value;
+    const d = parts.find(p=>p.type==="day")?.value;
+    return y && m && d ? `${y}-${m}-${d}` : String(iso).slice(0,10);
+  } catch(e){
+    return String(iso).slice(0,10);
+  }
+}
+
+function nhlSeasonForImport(){
+  const dates = (S.allGames || [])
+    .map(g => g.game_date)
+    .filter(Boolean)
+    .sort();
+  const anchor = dates.length ? dates[dates.length - 1] : new Date().toISOString().slice(0,10);
+  const d = parseGameDateLocal(anchor) || new Date();
+  const y = d.getFullYear();
+  const m = d.getMonth() + 1;
+  const start = m >= 7 ? y : y - 1;
+  return `${start}${start + 1}`;
+}
+
+function latestGameForAlternation(){
+  const seasonId = Number(S.activeSeason?.id);
+  const games = (S.allGames && S.allGames.length ? S.allGames : S.games)
+    .filter(g => Number(g.season_id) === seasonId && g.status !== "Hidden")
+    .slice()
+    .sort((a,b) => {
+      const da = String(a.game_date || "");
+      const db = String(b.game_date || "");
+      if (da !== db) return da.localeCompare(db);
+      return Number(a.game_number || 0) - Number(b.game_number || 0);
+    });
+  return games[games.length - 1] || null;
+}
+
+function nextPickerAfter(picker){
+  return picker === "Aaron" ? "Julie" : picker === "Julie" ? "Aaron" : "Julie";
+}
+
+async function importNhlScheduleFromUI(){
+  if (!(await requireAuth('import NHL schedule'))) return;
+  if (!S.activeSeason?.id) return toast("No active season.");
+
+  try{
+    toast("Importing NHL schedule…");
+    const season = nhlSeasonForImport();
+    const invoke = await db.functions.invoke("import-nhl-schedule", {
+      body: { season, team: "CAR" }
+    });
+
+    if (invoke.error) throw invoke.error;
+    const payload = invoke.data || {};
+    if (!payload.ok) throw new Error(payload.error || "Could not import NHL schedule.");
+
+    const today = new Date();
+    const yesterday = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1);
+    const cutoff = easternDateOnlyFromIso(yesterday.toISOString());
+
+    const nhlGames = (payload.games || [])
+      .filter(g => String(g.game_date || "") >= cutoff)
+      .sort((a,b) => String(a.game_start_time || a.game_date || "").localeCompare(String(b.game_start_time || b.game_date || "")));
+
+    if (!nhlGames.length){
+      toast("No today/upcoming NHL games found.");
+      return;
+    }
+
+    const existingActive = (S.allGames || S.games).filter(g => Number(g.season_id) === Number(S.activeSeason.id));
+    const existingWritable = existingActive.filter(g => g.status !== "Final" && g.status !== "Hidden");
+    const byNhlId = new Map(existingWritable.filter(g => g.nhl_game_id).map(g => [String(g.nhl_game_id), g]));
+    const byDateOpp = new Map(existingWritable.map(g => [`${g.game_date || ""}|${String(g.opponent || "").toUpperCase()}`, g]));
+
+    let maxNum = existingActive.reduce((m,g) => Math.max(m, Number(g.game_number || 0)), 0);
+    let lastPicker = latestGameForAlternation()?.first_picker || null;
+    let inserted = 0;
+    let updated = 0;
+    let skippedFinal = 0;
+
+    for (const ng of nhlGames){
+      const nhlId = String(ng.nhl_game_id || "");
+      const key = `${ng.game_date || ""}|${String(ng.opponent || "").toUpperCase()}`;
+      const finalMatch = existingActive.find(g =>
+        (nhlId && String(g.nhl_game_id || "") === nhlId) ||
+        (`${g.game_date || ""}|${String(g.opponent || "").toUpperCase()}` === key)
+      );
+
+      if (finalMatch && (finalMatch.status === "Final" || finalMatch.status === "Hidden")){
+        skippedFinal += 1;
+        continue;
+      }
+
+      const existing = (nhlId && byNhlId.get(nhlId)) || byDateOpp.get(key);
+      const patch = {
+        game_date: ng.game_date || null,
+        opponent: ng.opponent || null,
+        home_away: ng.home_away || null,
+        game_type: ng.game_type || "Regular Season",
+        nhl_game_id: nhlId || null,
+        game_start_time: ng.game_start_time || null,
+        nhl_game_state: ng.nhl_game_state || null
+      };
+
+      if (existing){
+        const res = await db.from("games").update(patch).eq("id", existing.id).neq("status", "Final").neq("status", "Hidden");
+        if (res.error) throw res.error;
+        updated += 1;
+        continue;
+      }
+
+      const firstPicker = nextPickerAfter(lastPicker);
+      lastPicker = firstPicker;
+      maxNum += 1;
+
+      const res = await db.from("games").insert({
+        season_id: S.activeSeason.id,
+        game_number: maxNum,
+        status: "Scheduled",
+        first_picker: firstPicker,
+        aaron_points: 0,
+        julie_points: 0,
+        ...patch
+      });
+      if (res.error) throw res.error;
+      inserted += 1;
+    }
+
+    await loadAll();
+    renderScheduleScreen();
+    renderGame();
+    haptic("success");
+    toast(`NHL schedule: ${inserted} added, ${updated} updated${skippedFinal ? `, ${skippedFinal} protected` : ""}.`);
+  } catch(e){
+    toast(e.message || "Could not import NHL schedule.");
   }
 }
 
