@@ -2104,6 +2104,56 @@ function notificationStatusLabel(){
   return "Not enabled";
 }
 
+function currentPickRow(owner, slot){
+  return S.picks.find(p =>
+    Number(p.game_id) === Number(S.currentGame?.id) &&
+    p.owner === owner &&
+    Number(p.pick_slot) === Number(slot)
+  ) || null;
+}
+
+function shortPlayerName(name){
+  const parts = String(name || "").trim().split(/\s+/).filter(Boolean);
+  if (parts.length >= 2) return parts[parts.length - 1];
+  return String(name || "").trim();
+}
+
+function pushUiPickChange({owner, slot, oldRow, player, goals, assists, points, key}){
+  if (!S.currentGame?.id || !player) return;
+
+  const oldPlayer = oldRow?.player_name || "";
+  const oldGoals = Number(oldRow?.goals || 0);
+  const oldAssists = Number(oldRow?.assists || 0);
+  const oldPoints = Number(oldRow?.points || 0);
+
+  const playerChanged = oldPlayer !== player;
+  const statChanged = oldGoals !== Number(goals || 0) || oldAssists !== Number(assists || 0) || oldPoints !== Number(points || 0);
+
+  if (["a1","a2","j1","j2"].includes(key)){
+    if (!playerChanged) return;
+    sendPushNotification(
+      "Canes Rivalry Pick",
+      `${owner} picked ${lastNameLabel(player)}.`,
+      `ui-pick-${S.currentGame.id}-${owner}-${slot}-${player}`
+    );
+    return;
+  }
+
+  if (!statChanged) return;
+
+  const statBits = [];
+  if (oldGoals !== Number(goals || 0)) statBits.push(`${Number(goals || 0)}G`);
+  if (oldAssists !== Number(assists || 0)) statBits.push(`${Number(assists || 0)}A`);
+  if (!statBits.length) statBits.push(`${Number(points || 0)} pts`);
+
+  const delta = Number(points || 0) - oldPoints;
+  sendPushNotification(
+    "Rivalry Stat Update",
+    `${owner}'s ${shortPlayerName(player)} updated: ${statBits.join(" ")} (${delta >= 0 ? "+" : ""}${delta}).`,
+    `ui-stat-${S.currentGame.id}-${owner}-${slot}-${Number(goals || 0)}-${Number(assists || 0)}-${Number(points || 0)}`
+  );
+}
+
 
 function isGameDayEditingActive(){
   const el = document.activeElement;
@@ -2209,8 +2259,11 @@ async function saveCurrentGameField(field, value){
   if (!(await requireAuth("save game updates"))) return;
   if (!S.currentGame?.id) return;
 
+  const oldValue = S.currentGame?.[field] || "";
+  const newValue = value || "";
+
   const patch = {};
-  patch[field] = value || null;
+  patch[field] = newValue || null;
 
   beginSave();
   try{
@@ -2225,6 +2278,13 @@ async function saveCurrentGameField(field, value){
     mergeRow(S.games, S.currentGame);
     mergeRow(S.allGames, S.currentGame);
     markUpdated([field === "first_goal_scorer" ? "firstGoal" : field]);
+    if (field === "first_goal_scorer" && oldValue !== newValue && newValue){
+      sendPushNotification(
+        "First Canes Goal",
+        `${lastNameLabel(newValue)} gets the first-goal bonus. Absolutely disgusting behavior.`,
+        `ui-first-goal-${S.currentGame.id}-${newValue}`
+      );
+    }
     haptic();
   } finally {
     endSave();
@@ -2272,10 +2332,18 @@ async function saveDraftPick(key){
     const cleanGoals = cleanPlayer ? goals : 0;
     const cleanAssists = cleanPlayer ? assists : 0;
     const points = cleanPlayer ? pickPoints(cleanPlayer, cleanGoals, cleanAssists, S.form.firstGoal) : 0;
+    const oldRow = currentPickRow(owner, slot);
     await upsertPick(S.currentGame.id, owner, slot, cleanPlayer, cleanGoals, cleanAssists, points);
-    if (["a1","a2","j1","j2"].includes(key) && cleanPlayer){
-      sendPushNotification("Canes Rivalry Pick", `${owner} picked ${lastNameLabel(cleanPlayer)}.`, `pick-${S.currentGame.id}-${owner}-${slot}`);
-    }
+    pushUiPickChange({
+      owner,
+      slot,
+      oldRow,
+      player:cleanPlayer,
+      goals:cleanGoals,
+      assists:cleanAssists,
+      points,
+      key
+    });
     renderHistory();
     renderAllTime();
     markUpdated([key]);
