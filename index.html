@@ -3092,6 +3092,7 @@ function renderHistory(){
         </div>
         <div class="row-sub">
           ${esc(g.game_date || "")} ${g.opponent ? "• " + esc(g.opponent) : ""}<br>
+          First pick: ${esc(g.first_picker || "—")}<br>
           First goal: ${esc(g.first_goal_scorer || "—")}<br>
           Aaron: ${esc(picksFor(g.id,"Aaron") || "—")}<br>
           Julie: ${esc(picksFor(g.id,"Julie") || "—")}
@@ -3469,10 +3470,39 @@ function renderRosterScreen(){
   `;
 }
 
+function latestActiveSeasonGame(){
+  const seasonId = Number(S.activeSeason?.id);
+  const games = (S.allGames && S.allGames.length ? S.allGames : S.games)
+    .filter(g => Number(g.season_id) === seasonId && g.status !== "Hidden")
+    .slice()
+    .sort((a,b) => {
+      const gn = Number(b.game_number || 0) - Number(a.game_number || 0);
+      if (gn) return gn;
+      return new Date(b.created_at || 0) - new Date(a.created_at || 0);
+    });
+  return games[0] || null;
+}
+
+function nextGameDefaults(){
+  const last = latestActiveSeasonGame();
+  const maxNum = S.games.reduce((m,g) => Math.max(m, Number(g.game_number || 0)), 0);
+  const nextNum = maxNum + 1;
+  const fallbackFirstPicker = nextNum % 2 ? "Julie" : "Aaron";
+  const fallbackGameType = nextNum <= 82 ? "Regular Season" : "Playoffs";
+
+  const lastPicker = last?.first_picker;
+  const firstPicker = lastPicker === "Aaron" ? "Julie" : lastPicker === "Julie" ? "Aaron" : fallbackFirstPicker;
+  const gameType = last?.game_type || fallbackGameType;
+
+  return { firstPicker, gameType };
+}
+
 function renderScheduleScreen(){
   const scheduledGames = S.games
     .filter(g => g.status !== "Final" && g.status !== "Hidden")
     .sort((a,b)=>Number(a.game_number)-Number(b.game_number));
+
+  const defaults = nextGameDefaults();
 
   const gameRows = scheduledGames.map(g => `
     <div class="compact-item">
@@ -3515,14 +3545,14 @@ function renderScheduleScreen(){
         <div><label>Opponent</label><input id="newGameOpponent" placeholder="NYR, FLA, etc."></div>
         <div><label>Type</label>
           <select id="newGameType">
-            <option>Regular Season</option>
-            <option>Playoffs</option>
+            <option ${defaults.gameType === "Regular Season" ? "selected" : ""}>Regular Season</option>
+            <option ${defaults.gameType === "Playoffs" ? "selected" : ""}>Playoffs</option>
           </select>
         </div>
         <div><label>First Pick</label>
           <select id="newGameFirstPicker">
-            <option>Aaron</option>
-            <option>Julie</option>
+            <option ${defaults.firstPicker === "Aaron" ? "selected" : ""}>Aaron</option>
+            <option ${defaults.firstPicker === "Julie" ? "selected" : ""}>Julie</option>
           </select>
         </div>
       </div>
@@ -3546,8 +3576,9 @@ function renderAll(){
 async function createNextGame(){
   const maxNum = S.games.reduce((m,g) => Math.max(m, Number(g.game_number || 0)), 0);
   const nextNum = maxNum + 1;
-  const firstPicker = nextNum % 2 ? "Julie" : "Aaron";
-  const gameType = nextNum <= 82 ? "Regular Season" : "Playoffs";
+  const defaults = nextGameDefaults();
+  const firstPicker = defaults.firstPicker;
+  const gameType = defaults.gameType;
 
   const ins = await db.from("games").insert({
     season_id:S.activeSeason.id,
@@ -3813,8 +3844,9 @@ async function addGameFromUI(){
   const clearNewGameForm = () => {
     if (dateEl) dateEl.value = "";
     if (opponentEl) opponentEl.value = "";
-    if (typeEl) typeEl.value = "Regular Season";
-    if (firstPickerEl) firstPickerEl.value = "Aaron";
+    const defaults = nextGameDefaults();
+    if (typeEl) typeEl.value = defaults.gameType;
+    if (firstPickerEl) firstPickerEl.value = defaults.firstPicker;
   };
 
   try{
