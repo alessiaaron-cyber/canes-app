@@ -2617,8 +2617,20 @@ function firstGoalOptions(){
   ).join("");
 }
 
+function resetPickStatsForKey(pickKey){
+  const statMap = {
+    a1:["ag1","aa1"],
+    a2:["ag2","aa2"],
+    j1:["jg1","ja1"],
+    j2:["jg2","ja2"]
+  };
+  const keys = statMap[pickKey] || [];
+  keys.forEach(k => S.form[k] = 0);
+}
+
 function setF(k,v){
   if (["a1","a2","j1","j2"].includes(k)){
+    const oldPlayer = S.form[k] || "";
     const dupe = findDuplicatePick(k, v);
     if (dupe){
       toast(`${v} is already picked in ${dupe}.`);
@@ -2626,14 +2638,22 @@ function setF(k,v){
       renderGame();
       return;
     }
+
+    S.form[k] = v;
+
+    // A changed player is a brand-new pick, so clear the old player's G/A before saving.
+    // This also avoids separate stat-reset push spam because saveDraftPick is called for the pick key only.
+    if (oldPlayer !== v){
+      resetPickStatsForKey(k);
+    }
+
+    renderGame();
+    saveDraftPick(k);
+    return;
   }
 
   S.form[k] = v;
   renderGame();
-
-  if (["a1","a2","j1","j2"].includes(k)){
-    saveDraftPick(k);
-  }
 
   if (k === "firstGoal"){
     saveCurrentGameField("first_goal_scorer", v);
