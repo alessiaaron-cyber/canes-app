@@ -1712,6 +1712,49 @@
       }
     }
 
+
+    /* App confirmation modal */
+    .confirm-modal{
+      position:fixed;
+      inset:0;
+      z-index:60;
+      background:rgba(17,24,39,.38);
+      backdrop-filter:blur(10px);
+      display:flex;
+      align-items:flex-end;
+      justify-content:center;
+      padding:14px 12px calc(14px + env(safe-area-inset-bottom));
+    }
+    .confirm-modal.hidden{display:none!important}
+    .confirm-card{
+      width:100%;
+      max-width:430px;
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:26px;
+      padding:16px;
+      box-shadow:0 18px 45px rgba(16,24,40,.22);
+    }
+    .confirm-title{
+      font-size:26px;
+      font-weight:1000;
+      letter-spacing:-.045em;
+      text-align:center;
+    }
+    .confirm-copy{
+      margin:7px 0 13px;
+      color:var(--muted);
+      font-size:13px;
+      font-weight:850;
+      text-align:center;
+      line-height:1.35;
+    }
+    .confirm-actions{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:8px;
+    }
+
 </style>
 </head>
 
@@ -1753,6 +1796,18 @@
       </div>
 
       <button class="light" style="margin-top:8px" onclick="closeAuthModal(false)">Cancel</button>
+    </div>
+  </div>
+
+
+  <div id="confirmModal" class="confirm-modal hidden">
+    <div class="confirm-card">
+      <div class="confirm-title" id="confirmTitle">Are you sure?</div>
+      <div class="confirm-copy" id="confirmCopy">Confirm this action.</div>
+      <div class="confirm-actions">
+        <button class="light" onclick="resolveAppConfirm(false)">Cancel</button>
+        <button id="confirmOkBtn" onclick="resolveAppConfirm(true)">Confirm</button>
+      </div>
     </div>
   </div>
 
@@ -1808,6 +1863,45 @@ function haptic(style = "light"){
       navigator.vibrate(style === "success" ? [12, 25, 12] : 10);
     }
   } catch(e){}
+}
+
+let appConfirmResolve = null;
+
+function appConfirm(title, copy, okText = "Confirm"){
+  return new Promise((resolve) => {
+    appConfirmResolve = resolve;
+    const modal = document.getElementById("confirmModal");
+    const titleEl = document.getElementById("confirmTitle");
+    const copyEl = document.getElementById("confirmCopy");
+    const okBtn = document.getElementById("confirmOkBtn");
+    if (titleEl) titleEl.textContent = title || "Are you sure?";
+    if (copyEl) copyEl.textContent = copy || "Confirm this action.";
+    if (okBtn) okBtn.textContent = okText || "Confirm";
+    modal?.classList.remove("hidden");
+  });
+}
+
+function resolveAppConfirm(value){
+  document.getElementById("confirmModal")?.classList.add("hidden");
+  if (appConfirmResolve){
+    appConfirmResolve(!!value);
+    appConfirmResolve = null;
+  }
+}
+
+function buildPostgameRecap(game, finalScore){
+  const matchup = game?.opponent && game.opponent !== "Next Game" ? `vs ${game.opponent}` : "Final Result";
+  if (finalScore.w === "Tie"){
+    return {
+      title:`Tie ${finalScore.a}-${finalScore.j}`,
+      copy:`${matchup}. Nobody gets bragging rights, which frankly feels illegal.`
+    };
+  }
+  const loser = finalScore.w === "Aaron" ? "Julie" : "Aaron";
+  return {
+    title:`${finalScore.w} wins ${finalScore.a}-${finalScore.j}`,
+    copy:`${matchup}. ${loser} may file a formal complaint with the Department of Rivalry Affairs.`
+  };
 }
 
 function markUpdated(keys = []){
@@ -3519,7 +3613,7 @@ async function finalizeGame(){
     if (!finalForm.a1 || !finalForm.a2 || !finalForm.j1 || !finalForm.j2) return toast("Pick all 4 players first.");
     const finalPicks = [finalForm.a1, finalForm.a2, finalForm.j1, finalForm.j2];
     if (new Set(finalPicks).size !== finalPicks.length) return toast("Each player can only be picked once for this game.");
-    if (!confirm("Lock this game as final? This will save the result and advance to the next game.")) return;
+    if (!(await appConfirm("Lock final score?", "This saves the result, sends the final push, and advances to the next game.", "Lock Final"))) return;
 
     const aScore =
       pickPoints(finalForm.a1, finalForm.ag1, finalForm.aa1, finalForm.firstGoal) +
@@ -3555,7 +3649,7 @@ async function finalizeGame(){
     await loadAll();
     haptic("success");
     const finalMsg = finalScore.w === "Tie" ? `Final: Tie ${finalScore.a}-${finalScore.j}.` : `Final: ${finalScore.w} wins ${finalScore.a}-${finalScore.j}.`;
-    sendPushNotification("Canes Rivalry Final", finalMsg, `final-${g.id}`);
+    await sendPushNotification("Canes Rivalry Final", finalMsg, `final-${g.id}`);
     toast(S.lastRecap ? S.lastRecap.title : "Game locked. Next game loaded.");
   } catch(e){
     toast(e.message || "Could not finalize.");
