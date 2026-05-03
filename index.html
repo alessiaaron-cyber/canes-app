@@ -2189,6 +2189,8 @@ async function saveDraftPick(key){
     const cleanAssists = cleanPlayer ? assists : 0;
     const points = cleanPlayer ? pickPoints(cleanPlayer, cleanGoals, cleanAssists, S.form.firstGoal) : 0;
     await upsertPick(S.currentGame.id, owner, slot, cleanPlayer, cleanGoals, cleanAssists, points);
+    renderHistory();
+    renderAllTime();
     markUpdated([key]);
     haptic();
   } catch(e){
@@ -3193,33 +3195,46 @@ async function finalizeGame(){
   try{
     const g = S.currentGame;
     if (!g) return toast("No current game.");
-    if (!S.form.a1 || !S.form.a2 || !S.form.j1 || !S.form.j2) return toast("Pick all 4 players first.");
-    const finalPicks = [S.form.a1,S.form.a2,S.form.j1,S.form.j2];
+
+    // Snapshot the visible Game Day state before any async saves/realtime updates can mutate it.
+    const finalForm = {...S.form};
+
+    if (!finalForm.a1 || !finalForm.a2 || !finalForm.j1 || !finalForm.j2) return toast("Pick all 4 players first.");
+    const finalPicks = [finalForm.a1, finalForm.a2, finalForm.j1, finalForm.j2];
     if (new Set(finalPicks).size !== finalPicks.length) return toast("Each player can only be picked once for this game.");
     if (!confirm("Lock this game as final? This will save the result and advance to the next game.")) return;
 
-    const l = liveScore();
-    const recap = l.w === "Tie"
-      ? `Tie ${l.a}-${l.j}. Nobody gets bragging rights.`
-      : `${l.w} wins ${l.a}-${l.j}. Scoreboard never lies.`;
+    const aScore =
+      pickPoints(finalForm.a1, finalForm.ag1, finalForm.aa1, finalForm.firstGoal) +
+      pickPoints(finalForm.a2, finalForm.ag2, finalForm.aa2, finalForm.firstGoal);
+    const jScore =
+      pickPoints(finalForm.j1, finalForm.jg1, finalForm.ja1, finalForm.firstGoal) +
+      pickPoints(finalForm.j2, finalForm.jg2, finalForm.ja2, finalForm.firstGoal);
+    const finalScore = { a:aScore, j:jScore, w:win(aScore, jScore) };
+
+    const recap = finalScore.w === "Tie"
+      ? `Tie ${finalScore.a}-${finalScore.j}. Nobody gets bragging rights.`
+      : `${finalScore.w} wins ${finalScore.a}-${finalScore.j}. Scoreboard never lies.`;
+
+    // Save all four picks from the immutable snapshot before marking the game Final.
+    // This prevents finalization realtime/loading from advancing the app and clearing later pick saves.
+    await upsertPick(g.id,"Aaron",1,finalForm.a1,finalForm.ag1,finalForm.aa1,pickPoints(finalForm.a1,finalForm.ag1,finalForm.aa1,finalForm.firstGoal));
+    await upsertPick(g.id,"Aaron",2,finalForm.a2,finalForm.ag2,finalForm.aa2,pickPoints(finalForm.a2,finalForm.ag2,finalForm.aa2,finalForm.firstGoal));
+    await upsertPick(g.id,"Julie",1,finalForm.j1,finalForm.jg1,finalForm.ja1,pickPoints(finalForm.j1,finalForm.jg1,finalForm.ja1,finalForm.firstGoal));
+    await upsertPick(g.id,"Julie",2,finalForm.j2,finalForm.jg2,finalForm.ja2,pickPoints(finalForm.j2,finalForm.jg2,finalForm.ja2,finalForm.firstGoal));
 
     const upd = await db.from("games").update({
       status:"Final",
-      first_goal_scorer:S.form.firstGoal || null,
-      aaron_points:l.a,
-      julie_points:l.j,
-      winner:l.w,
+      first_goal_scorer:finalForm.firstGoal || null,
+      aaron_points:finalScore.a,
+      julie_points:finalScore.j,
+      winner:finalScore.w,
       recap
     }).eq("id", g.id);
 
     if (upd.error) throw upd.error;
 
-    await upsertPick(g.id,"Aaron",1,S.form.a1,S.form.ag1,S.form.aa1,pickPoints(S.form.a1,S.form.ag1,S.form.aa1,S.form.firstGoal));
-    await upsertPick(g.id,"Aaron",2,S.form.a2,S.form.ag2,S.form.aa2,pickPoints(S.form.a2,S.form.ag2,S.form.aa2,S.form.firstGoal));
-    await upsertPick(g.id,"Julie",1,S.form.j1,S.form.jg1,S.form.ja1,pickPoints(S.form.j1,S.form.jg1,S.form.ja1,S.form.firstGoal));
-    await upsertPick(g.id,"Julie",2,S.form.j2,S.form.jg2,S.form.ja2,pickPoints(S.form.j2,S.form.jg2,S.form.ja2,S.form.firstGoal));
-
-    S.lastRecap = buildPostgameRecap(g, l);
+    S.lastRecap = buildPostgameRecap(g, finalScore);
     await loadAll();
     haptic("success");
     toast(S.lastRecap ? S.lastRecap.title : "Game locked. Next game loaded.");
@@ -3243,6 +3258,10 @@ async function addPlayerFromUI(){
     if (!res.data || res.data.length === 0) throw new Error("No roster row saved. Check sign-in permissions.");
     await loadAll();
     renderRosterScreen();
+    const nameEl = document.getElementById("newPlayerName");
+    const posEl = document.getElementById("newPlayerPos");
+    if (nameEl) nameEl.value = "";
+    if (posEl) posEl.value = "";
     haptic("success");
     toast("Player added.");
   } catch(e){
@@ -3368,10 +3387,23 @@ async function deactivatePlayerById(playerId){
 
 async function addGameFromUI(){
   if (!(await requireAuth('manage schedule'))) return;
-  const date = document.getElementById("newGameDate")?.value || null;
-  const opponent = document.getElementById("newGameOpponent")?.value?.trim() || "TBD";
-  const gameType = document.getElementById("newGameType")?.value || "Regular Season";
-  const firstPicker = document.getElementById("newGameFirstPicker")?.value || "Aaron";
+  const dateEl = document.getElementById("newGameDate");
+  const opponentEl = document.getElementById("newGameOpponent");
+  const typeEl = document.getElementById("newGameType");
+  const firstPickerEl = document.getElementById("newGameFirstPicker");
+
+  const date = dateEl?.value || null;
+  const opponent = opponentEl?.value?.trim() || "TBD";
+  const gameType = typeEl?.value || "Regular Season";
+  const firstPicker = firstPickerEl?.value || "Aaron";
+
+  const clearNewGameForm = () => {
+    if (dateEl) dateEl.value = "";
+    if (opponentEl) opponentEl.value = "";
+    if (typeEl) typeEl.value = "Regular Season";
+    if (firstPickerEl) firstPickerEl.value = "Aaron";
+  };
+
   try{
     const existing = S.games.find(g =>
       Number(g.season_id) === Number(S.activeSeason.id) &&
@@ -3392,6 +3424,8 @@ async function addGameFromUI(){
       }).eq("id", existing.id);
       if (res.error) throw res.error;
       await loadAll();
+      renderScheduleScreen();
+      clearNewGameForm();
       haptic("success");
       toast("Game reactivated.");
       return;
@@ -3411,13 +3445,14 @@ async function addGameFromUI(){
     });
     if (res.error) throw res.error;
     await loadAll();
+    renderScheduleScreen();
+    clearNewGameForm();
     haptic("success");
     toast("Game added.");
   } catch(e){
     toast(e.message || "Could not add game.");
   }
 }
-
 
 async function updateGameField(gameId, field, value){
   if (!(await requireAuth('manage schedule'))) return;
@@ -3427,6 +3462,7 @@ async function updateGameField(gameId, field, value){
     const res = await db.from("games").update(patch).eq("id", gameId).neq("status", "Final");
     if (res.error) throw res.error;
     await loadAll();
+    renderScheduleScreen();
     toast("Game updated.");
   } catch(e){
     toast(e.message || "Could not update game.");
@@ -3440,6 +3476,7 @@ async function hideGame(gameId){
     const res = await db.from("games").update({status:"Hidden"}).eq("id", gameId).neq("status", "Final");
     if (res.error) throw res.error;
     await loadAll();
+    renderScheduleScreen();
     haptic();
     toast("Game removed.");
   } catch(e){
