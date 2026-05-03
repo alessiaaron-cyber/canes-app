@@ -1842,6 +1842,8 @@ let S = {
   savingCount: 0,
   lastUpdated: null,
   justChangedKeys: [],
+  pushEndpoint: "",
+  activePingTimer: null,
   form: {
     a1:"", a2:"", j1:"", j2:"",
     ag1:0, aa1:0, ag2:0, aa2:0,
@@ -2155,7 +2157,8 @@ async function enablePushNotifications(){
       endpoint:jsonSub.endpoint,
       p256dh:jsonSub.keys?.p256dh,
       auth:jsonSub.keys?.auth,
-      last_seen_at:new Date().toISOString()
+      last_seen_at:new Date().toISOString(),
+      last_active_at:new Date().toISOString()
     };
 
     if (!row.user_email || !row.endpoint || !row.p256dh || !row.auth){
@@ -2165,6 +2168,8 @@ async function enablePushNotifications(){
     const res = await db.from("push_subscriptions").upsert(row, { onConflict:"endpoint" });
     if (res.error) throw new Error(friendlyDbError(res.error));
 
+    S.pushEndpoint = row.endpoint;
+    startActiveHeartbeat();
     haptic("success");
     toast("Notifications enabled on this device.");
     renderManage();
@@ -2173,12 +2178,20 @@ async function enablePushNotifications(){
   }
 }
 
-async function sendPushNotification(title, message, tag="canes-rivalry"){
+async function sendPushNotification(title, message, tag="canes-rivalry", options={}){
   try{
     await refreshAuth();
     if (!S.user) return;
     await db.functions.invoke("send-push", {
-      body:{ title, message, tag, url:"/" }
+      body:{
+        title,
+        message,
+        tag,
+        url:"/",
+        game_id: options.game_id ?? S.currentGame?.id ?? null,
+        triggered_by: options.triggered_by ?? S.user?.email ?? null,
+        triggered_by_name: options.triggered_by_name ?? userDisplayName()
+      }
     });
   } catch(e){
     console.warn("Push send failed", e);
@@ -2196,6 +2209,65 @@ function notificationStatusLabel(){
   if (Notification.permission === "granted") return "Enabled";
   if (Notification.permission === "denied") return "Blocked";
   return "Not enabled";
+}
+
+async function cacheCurrentPushEndpoint(){
+  if (!pushSupported()) return "";
+  try{
+    const reg = await navigator.serviceWorker.getRegistration("service-worker.js") || await navigator.serviceWorker.ready;
+    const sub = await reg?.pushManager?.getSubscription?.();
+    S.pushEndpoint = sub?.endpoint || S.pushEndpoint || "";
+    return S.pushEndpoint;
+  } catch(e){
+    return S.pushEndpoint || "";
+  }
+}
+
+async function markDeviceActive(){
+  try{
+    await refreshAuth();
+    if (!S.user?.email) return;
+    const endpoint = S.pushEndpoint || await cacheCurrentPushEndpoint();
+    if (!endpoint) return;
+
+    await db
+      .from("push_subscriptions")
+      .update({
+        last_active_at:new Date().toISOString(),
+        last_seen_at:new Date().toISOString()
+      })
+      .eq("endpoint", endpoint)
+      .eq("user_email", S.user.email);
+  } catch(e){
+    console.warn("Active ping failed", e);
+  }
+}
+
+function startActiveHeartbeat(){
+  if (S.activePingTimer) return;
+  markDeviceActive();
+  S.activePingTimer = setInterval(() => {
+    if (!document.hidden) markDeviceActive();
+  }, 30000);
+}
+
+function stopActiveHeartbeat(){
+  if (S.activePingTimer){
+    clearInterval(S.activePingTimer);
+    S.activePingTimer = null;
+  }
+}
+
+function showInAppRivalryNotification(row){
+  if (!row || row.event_type !== "push_notification") return;
+  if (!S.currentGame || Number(row.game_id) !== Number(S.currentGame.id)) return;
+  const payload = row.payload || {};
+  const triggeredBy = String(payload.triggered_by || "").toLowerCase();
+  const currentEmail = String(S.user?.email || "").toLowerCase();
+  if (triggeredBy && currentEmail && triggeredBy === currentEmail) return;
+  const title = payload.title || "Canes Rivalry";
+  const message = payload.message || "Rivalry update.";
+  toast(`${title}: ${message}`);
 }
 
 function currentPickRow(owner, slot){
@@ -2275,6 +2347,12 @@ function applyRealtimePayload(payload){
 
   if (payload.eventType !== "DELETE" && shouldIgnoreRealtimeEcho(table, row)) return;
 
+  if (table === "rivalry_events"){
+    if (payload.eventType === "DELETE") return;
+    showInAppRivalryNotification(row);
+    return;
+  }
+
   if (table === "games"){
     const targetId = row?.id || oldRow?.id;
     if (targetId !== S.currentGame.id) return;
@@ -2344,6 +2422,7 @@ async function setupRealtime(){
     .channel("current-game-sync")
     .on("postgres_changes", { event:"*", schema:"public", table:"games" }, applyRealtimePayload)
     .on("postgres_changes", { event:"*", schema:"public", table:"picks" }, applyRealtimePayload)
+    .on("postgres_changes", { event:"INSERT", schema:"public", table:"rivalry_events" }, applyRealtimePayload)
     .subscribe((status) => {
       console.log("Realtime status:", status);
     });
@@ -2802,6 +2881,7 @@ async function loadAll(){
 
   hydrateForm();
   await setupRealtime();
+  startActiveHeartbeat();
   renderAll();
 }
 
@@ -4213,18 +4293,27 @@ async function autoRefresh(){
 }
 
 document.addEventListener("visibilitychange", () => {
-  if (!document.hidden) autoRefresh();
+  if (!document.hidden){
+    markDeviceActive();
+    autoRefresh();
+  }
 });
 
-window.addEventListener("focus", autoRefresh);
+window.addEventListener("focus", () => {
+  markDeviceActive();
+  autoRefresh();
+});
 
 window.addEventListener("pageshow", (event) => {
+  markDeviceActive();
   if (event.persisted) autoRefresh();
 });
 
 
 db.auth.onAuthStateChange(async (_event, session) => {
   S.user = session?.user || null;
+  if (S.user) startActiveHeartbeat();
+  else stopActiveHeartbeat();
   renderAll();
 });
 
