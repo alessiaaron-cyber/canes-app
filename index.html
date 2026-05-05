@@ -2184,19 +2184,29 @@ async function sendPushNotification(title, message, tag="canes-rivalry", options
   try{
     await refreshAuth();
     if (!S.user) return;
-    await db.functions.invoke("send-push", {
+
+    const gameId = options.game_id ?? S.currentGame?.id ?? null;
+    if (!gameId){
+      console.warn("Notification skipped: missing game_id");
+      return;
+    }
+
+    const { data, error } = await db.functions.invoke("notify-rivalry-event", {
       body:{
+        game_id: gameId,
         title,
         message,
-        tag,
-        url:"/",
-        game_id: options.game_id ?? S.currentGame?.id ?? null,
-        triggered_by: options.triggered_by ?? S.user?.email ?? null,
-        triggered_by_name: options.triggered_by_name ?? userDisplayName()
+        event_key: tag
       }
     });
+
+    if (error) throw new Error(error.message || "Notification failed.");
+    if (!data?.ok) throw new Error(data?.error || "Notification failed.");
+
+    return data;
   } catch(e){
     console.warn("Push send failed", e);
+    toast(e.message || "Failed to send notification.");
   }
 }
 
