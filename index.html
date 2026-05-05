@@ -2403,6 +2403,8 @@ function applyRealtimePayload(payload){
     if (payload.eventType === "DELETE"){
       removeDeletedRow(S.picks, oldRow);
       removeDeletedRow(S.allPicks, oldRow);
+      hydrateForm();
+      renderAll();
       return;
     }
 
@@ -2413,18 +2415,13 @@ function applyRealtimePayload(payload){
     const statKeys = row.owner === "Aaron"
       ? (Number(row.pick_slot) === 1 ? ["ag1","aa1"] : ["ag2","aa2"])
       : (Number(row.pick_slot) === 1 ? ["jg1","ja1"] : ["jg2","ja2"]);
-    markUpdated([pickKey, ...statKeys]);
 
-    if (!isGameDayEditingActive()){
-      hydrateForm();
-      renderAll();
-    } else {
-      S.needsGameRender = true;
-      S.needsGameHydrate = true;
-      renderHistory();
-      renderAllTime();
-      renderManage();
-    }
+    // Local save echoes are ignored above by shouldIgnoreRealtimeEcho().
+    // Anything that reaches this point is a remote database change, so update Game Day immediately.
+    // This restores live pick/stat updates and the red sync-flash highlight without needing manual refresh.
+    hydrateForm();
+    markUpdated([pickKey, ...statKeys]);
+    renderAll();
   }
 }
 
