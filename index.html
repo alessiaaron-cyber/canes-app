@@ -2159,7 +2159,6 @@ async function enablePushNotifications(){
       endpoint:jsonSub.endpoint,
       p256dh:jsonSub.keys?.p256dh,
       auth:jsonSub.keys?.auth,
-      last_seen_at:new Date().toISOString(),
       last_seen_at:new Date().toISOString()
     };
 
@@ -2246,7 +2245,6 @@ async function markDeviceActive(){
     await db
       .from("push_subscriptions")
       .update({
-        last_seen_at:new Date().toISOString(),
         last_seen_at:new Date().toISOString()
       })
       .eq("endpoint", endpoint)
