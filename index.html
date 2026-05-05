@@ -2196,7 +2196,8 @@ async function sendPushNotification(title, message, tag="canes-rivalry", options
         game_id: gameId,
         title,
         message,
-        event_key: tag
+        event_key: tag,
+        suppress_self: options.suppress_self === true
       }
     });
 
@@ -2312,7 +2313,8 @@ function pushUiPickChange({owner, slot, oldRow, player, goals, assists, points, 
     sendPushNotification(
       "Canes Rivalry Pick",
       `${owner} picked ${lastNameLabel(player)}.`,
-      `ui-pick-${S.currentGame.id}-${owner}-${slot}-${player}`
+      `ui-pick-${S.currentGame.id}-${owner}-${slot}-${player}`,
+      { suppress_self: true }
     );
     return;
   }
@@ -2328,7 +2330,8 @@ function pushUiPickChange({owner, slot, oldRow, player, goals, assists, points, 
   sendPushNotification(
     "Rivalry Stat Update",
     `${owner}'s ${shortPlayerName(player)} updated: ${statBits.join(" ")} (${delta >= 0 ? "+" : ""}${delta}).`,
-    `ui-stat-${S.currentGame.id}-${owner}-${slot}-${Number(goals || 0)}-${Number(assists || 0)}-${Number(points || 0)}`
+    `ui-stat-${S.currentGame.id}-${owner}-${slot}-${Number(goals || 0)}-${Number(assists || 0)}-${Number(points || 0)}`,
+    { suppress_self: true }
   );
 }
 
