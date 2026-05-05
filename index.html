@@ -3720,56 +3720,65 @@ async function upsertPick(gameId, owner, slot, player, goals, assists, points){
 
 async function finalizeGame(){
   if (!(await requireAuth('finalize games'))) return;
+
   try{
     const g = S.currentGame;
-    if (!g) return toast("No current game.");
+    if (!g?.id) return toast("No current game.");
 
-    // Snapshot the visible Game Day state before any async saves/realtime updates can mutate it.
-    const finalForm = {...S.form};
+    if (g.status === "Final"){
+      toast("This game is already final.");
+      await loadAll();
+      return;
+    }
 
-    if (!finalForm.a1 || !finalForm.a2 || !finalForm.j1 || !finalForm.j2) return toast("Pick all 4 players first.");
-    const finalPicks = [finalForm.a1, finalForm.a2, finalForm.j1, finalForm.j2];
-    if (new Set(finalPicks).size !== finalPicks.length) return toast("Each player can only be picked once for this game.");
-    if (!(await appConfirm("Lock final score?", "This saves the result, sends the final push, and advances to the next game.", "Lock Final"))) return;
+    if (!S.form.a1 || !S.form.a2 || !S.form.j1 || !S.form.j2){
+      return toast("Pick all 4 players first.");
+    }
 
-    const aScore =
-      pickPoints(finalForm.a1, finalForm.ag1, finalForm.aa1, finalForm.firstGoal) +
-      pickPoints(finalForm.a2, finalForm.ag2, finalForm.aa2, finalForm.firstGoal);
-    const jScore =
-      pickPoints(finalForm.j1, finalForm.jg1, finalForm.ja1, finalForm.firstGoal) +
-      pickPoints(finalForm.j2, finalForm.jg2, finalForm.ja2, finalForm.firstGoal);
-    const finalScore = { a:aScore, j:jScore, w:win(aScore, jScore) };
+    const finalPicks = [S.form.a1, S.form.a2, S.form.j1, S.form.j2];
+    if (new Set(finalPicks).size !== finalPicks.length){
+      return toast("Each player can only be picked once for this game.");
+    }
 
-    const recap = finalScore.w === "Tie"
-      ? `Tie ${finalScore.a}-${finalScore.j}. Nobody gets bragging rights.`
-      : `${finalScore.w} wins ${finalScore.a}-${finalScore.j}. Scoreboard never lies.`;
+    if (!(await appConfirm(
+      "Lock final score?",
+      "This asks the backend to finalize the game, send the final push once, and advance to the next game.",
+      "Lock Final"
+    ))) return;
 
-    // Save all four picks from the immutable snapshot before marking the game Final.
-    // This prevents finalization realtime/loading from advancing the app and clearing later pick saves.
-    await upsertPick(g.id,"Aaron",1,finalForm.a1,finalForm.ag1,finalForm.aa1,pickPoints(finalForm.a1,finalForm.ag1,finalForm.aa1,finalForm.firstGoal));
-    await upsertPick(g.id,"Aaron",2,finalForm.a2,finalForm.ag2,finalForm.aa2,pickPoints(finalForm.a2,finalForm.ag2,finalForm.aa2,finalForm.firstGoal));
-    await upsertPick(g.id,"Julie",1,finalForm.j1,finalForm.jg1,finalForm.ja1,pickPoints(finalForm.j1,finalForm.jg1,finalForm.ja1,finalForm.firstGoal));
-    await upsertPick(g.id,"Julie",2,finalForm.j2,finalForm.jg2,finalForm.ja2,pickPoints(finalForm.j2,finalForm.jg2,finalForm.ja2,finalForm.firstGoal));
+    beginSave();
 
-    const upd = await db.from("games").update({
-      status:"Final",
-      first_goal_scorer:finalForm.firstGoal || null,
-      aaron_points:finalScore.a,
-      julie_points:finalScore.j,
-      winner:finalScore.w,
-      recap
-    }).eq("id", g.id);
+    const { data, error } = await db.functions.invoke("finalize-game", {
+      body: {
+        game_id: g.id
+      }
+    });
 
-    if (upd.error) throw upd.error;
+    if (error) throw new Error(error.message || "Finalize failed.");
+    if (!data?.ok) throw new Error(data?.error || "Finalize failed.");
 
-    S.lastRecap = buildPostgameRecap(g, finalScore);
+    S.lastRecap = data.recap
+      ? {
+          title: data.winner === "Tie"
+            ? `Tie ${data.score?.Aaron ?? 0}-${data.score?.Julie ?? 0}`
+            : `${data.winner} wins ${data.score?.Aaron ?? 0}-${data.score?.Julie ?? 0}`,
+          copy: data.recap
+        }
+      : null;
+
     await loadAll();
+
     haptic("success");
-    const finalMsg = finalScore.w === "Tie" ? `Final: Tie ${finalScore.a}-${finalScore.j}.` : `Final: ${finalScore.w} wins ${finalScore.a}-${finalScore.j}.`;
-    await sendPushNotification("Canes Rivalry Final", finalMsg, `final-${g.id}`);
-    toast(S.lastRecap ? S.lastRecap.title : "Game locked. Next game loaded.");
+
+    if (data.alreadyFinal){
+      toast("Game was already final. App refreshed.");
+    } else {
+      toast(S.lastRecap?.title || "Game locked. Next game loaded.");
+    }
   } catch(e){
     toast(e.message || "Could not finalize.");
+  } finally {
+    endSave();
   }
 }
 
