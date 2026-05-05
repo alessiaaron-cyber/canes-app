@@ -1,1 +1,1 @@
-# canes-app
+# canes-rivalry-app
