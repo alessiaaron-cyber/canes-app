@@ -1,3 +1,10 @@
+const APP_URL = "/canes-rivalry-app/";
+
+function normalizeUrl(url) {
+  if (!url || url === "/") return APP_URL;
+  return url;
+}
+
 self.addEventListener("push", (event) => {
   let data = {};
   try {
@@ -10,7 +17,7 @@ self.addEventListener("push", (event) => {
   const options = {
     body: data.body || data.message || "Rivalry update.",
     tag: data.tag || "canes-rivalry",
-    data: { url: data.url || "/" },
+    data: { url: normalizeUrl(data.url) },
   };
 
   event.waitUntil(
@@ -20,7 +27,7 @@ self.addEventListener("push", (event) => {
 
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-  const url = event.notification.data?.url || "/";
+  const url = normalizeUrl(event.notification.data?.url);
 
   event.waitUntil(
     clients.matchAll({ type: "window", includeUncontrolled: true }).then((clientList) => {
