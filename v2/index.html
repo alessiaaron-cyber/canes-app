@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Canes Rivalry V2</title>
-  <link rel="stylesheet" href="styles.css?v=pregame-visible-1" />
+  <link rel="stylesheet" href="styles.css?v=compact-picks-1" />
 </head>
 <body>
   <div class="sync-flash" id="syncFlash"></div>
@@ -34,68 +34,84 @@
         <p class="hero-subtitle">Round 2 · Tonight · 7:00 PM</p>
       </section>
 
-      <section class="panel-card pregame-card selector-focus">
+      <section class="panel-card picks-card compact-picks-card">
         <div class="panel-header">
-          <div>
-            <span class="eyebrow">Pregame mock · editable</span>
-            <h2>Pick 2 Canes Each</h2>
-          </div>
-          <span class="panel-tag calm">Not Locked</span>
+          <div><span class="eyebrow">Game picks</span><h2>Aaron vs Julie</h2></div>
+          <span class="panel-tag calm">Editable</span>
         </div>
 
-        <p class="helper-copy">Aaron and Julie each choose 2 unique Canes players. Once a player is picked, that player is unavailable to the other person. Picks stay editable until the first tracked goal, assist, or first-goal event.</p>
+        <div class="pick-flow-note">2 Canes each · no duplicates · locks after first tracked scoring event</div>
 
-        <div class="pregame-slots">
-          <div class="slot-owner aaron-slot-owner">
-            <div class="player-column-header">
-              <div><strong>Aaron</strong><span>2/2 selected</span></div>
-            </div>
-            <div class="slot-list" id="aaronSlots">
-              <button class="pregame-slot selected">Sebastian Aho</button>
-              <button class="pregame-slot selected">Andrei Svechnikov</button>
-            </div>
-          </div>
-
-          <div class="slot-owner julie-slot-owner">
-            <div class="player-column-header">
-              <div><strong>Julie</strong><span>2/2 selected</span></div>
-            </div>
-            <div class="slot-list" id="julieSlots">
-              <button class="pregame-slot selected opponent">Seth Jarvis</button>
-              <button class="pregame-slot selected opponent">Jaccob Slavin</button>
-            </div>
-          </div>
+        <div class="pick-mode-tabs" aria-label="Pick state preview">
+          <button class="active" type="button">Pregame</button>
+          <button type="button">Locked</button>
         </div>
 
-        <div class="roster-picker">
-          <div class="player-column-header">
-            <div><strong>Canes Roster</strong><span>Mock selector: taken players are disabled</span></div>
+        <div class="compact-user-picks">
+          <div class="compact-user-card aaron-owner">
+            <div class="compact-user-head">
+              <div><strong>Aaron</strong><span>2/2 ready</span></div>
+              <span class="owner-score">7</span>
+            </div>
+
+            <div class="compact-pick-row editable-pick-row">
+              <span class="pick-number">1</span>
+              <select aria-label="Aaron first pick">
+                <option>Sebastian Aho</option>
+                <option>Martin Necas</option>
+                <option>Jordan Staal</option>
+              </select>
+              <span class="mini-status">Ready</span>
+            </div>
+
+            <div class="compact-pick-row editable-pick-row">
+              <span class="pick-number">2</span>
+              <select aria-label="Aaron second pick">
+                <option>Andrei Svechnikov</option>
+                <option>Martin Necas</option>
+                <option>Jordan Staal</option>
+              </select>
+              <span class="mini-status">Ready</span>
+            </div>
           </div>
-          <div class="roster-chip-grid" id="rosterChips">
-            <button class="roster-chip locked-chip" disabled>Sebastian Aho</button>
-            <button class="roster-chip locked-chip" disabled>Andrei Svechnikov</button>
-            <button class="roster-chip locked-chip" disabled>Seth Jarvis</button>
-            <button class="roster-chip locked-chip" disabled>Jaccob Slavin</button>
-            <button class="roster-chip">Martin Necas</button>
-            <button class="roster-chip">Jordan Staal</button>
-            <button class="roster-chip">Teuvo Teravainen</button>
-            <button class="roster-chip">Brent Burns</button>
+
+          <div class="compact-user-card julie-owner">
+            <div class="compact-user-head">
+              <div><strong>Julie</strong><span>2/2 ready</span></div>
+              <span class="owner-score">5</span>
+            </div>
+
+            <div class="compact-pick-row editable-pick-row">
+              <span class="pick-number">1</span>
+              <select aria-label="Julie first pick">
+                <option>Seth Jarvis</option>
+                <option>Martin Necas</option>
+                <option>Jordan Staal</option>
+              </select>
+              <span class="mini-status">Ready</span>
+            </div>
+
+            <div class="compact-pick-row editable-pick-row">
+              <span class="pick-number">2</span>
+              <select aria-label="Julie second pick">
+                <option>Jaccob Slavin</option>
+                <option>Brent Burns</option>
+                <option>Jordan Staal</option>
+              </select>
+              <span class="mini-status">Ready</span>
+            </div>
           </div>
         </div>
       </section>
 
       <section class="panel-card picks-card">
         <div class="panel-header">
-          <div><span class="eyebrow">Live state preview</span><h2>Locked Scoring View</h2></div>
+          <div><span class="eyebrow">Same module after lock</span><h2>Live Scoring View</h2></div>
           <span class="panel-tag">Locked</span>
         </div>
 
         <div class="pick-rules-strip" aria-label="Pick scoring rules">
           <span>Goal +2</span><span>Assist +1</span><span>1st Goal +1</span>
-        </div>
-
-        <div class="pick-state-row">
-          <span>✅ Aaron 2/2 submitted</span><span>✅ Julie 2/2 submitted</span><span>🚫 No duplicate players</span>
         </div>
 
         <div class="dual-picks-layout">
@@ -129,7 +145,7 @@
   <nav class="bottom-nav"><button class="active">Game Day</button><button>History</button><button>Manage</button></nav>
   <div class="toast-stack"><div id="toast" class="toast">🚨 Goal sync animation preview</div></div>
 
-  <script src="js/mock-data.js?v=pregame-visible-1"></script>
-  <script src="js/app.js?v=pregame-visible-1"></script>
+  <script src="js/mock-data.js?v=compact-picks-1"></script>
+  <script src="js/app.js?v=compact-picks-1"></script>
 </body>
 </html>
