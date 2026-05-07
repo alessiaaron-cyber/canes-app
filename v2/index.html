@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Canes Rivalry V2</title>
-  <link rel="stylesheet" href="styles.css?v=compact-picks-1" />
+  <link rel="stylesheet" href="styles.css?v=single-picks-1" />
 </head>
 <body>
   <div class="sync-flash" id="syncFlash"></div>
@@ -34,94 +34,67 @@
         <p class="hero-subtitle">Round 2 · Tonight · 7:00 PM</p>
       </section>
 
-      <section class="panel-card picks-card compact-picks-card">
+      <section class="panel-card picks-card single-picks-card" data-state="pregame">
         <div class="panel-header">
-          <div><span class="eyebrow">Game picks</span><h2>Aaron vs Julie</h2></div>
+          <div><span class="eyebrow">Game picks</span><h2>Make Your Picks</h2></div>
           <span class="panel-tag calm">Editable</span>
         </div>
 
-        <div class="pick-flow-note">2 Canes each · no duplicates · locks after first tracked scoring event</div>
+        <div class="pick-flow-note">2 Canes each · no duplicate players · locks when scoring starts</div>
 
-        <div class="pick-mode-tabs" aria-label="Pick state preview">
-          <button class="active" type="button">Pregame</button>
-          <button type="button">Locked</button>
-        </div>
-
-        <div class="compact-user-picks">
-          <div class="compact-user-card aaron-owner">
-            <div class="compact-user-head">
-              <div><strong>Aaron</strong><span>2/2 ready</span></div>
-              <span class="owner-score">7</span>
+        <div class="single-picks-layout">
+          <div class="single-user-card aaron-owner">
+            <div class="single-user-head">
+              <div><strong>Aaron</strong><span>2/2 selected</span></div>
+              <span class="pick-lock-pill">Ready</span>
             </div>
 
-            <div class="compact-pick-row editable-pick-row">
-              <span class="pick-number">1</span>
-              <select aria-label="Aaron first pick">
+            <label class="pick-select-row">
+              <span>Pick 1</span>
+              <select aria-label="Aaron pick one">
                 <option>Sebastian Aho</option>
+                <option disabled>Seth Jarvis — Julie</option>
                 <option>Martin Necas</option>
                 <option>Jordan Staal</option>
               </select>
-              <span class="mini-status">Ready</span>
-            </div>
+            </label>
 
-            <div class="compact-pick-row editable-pick-row">
-              <span class="pick-number">2</span>
-              <select aria-label="Aaron second pick">
+            <label class="pick-select-row">
+              <span>Pick 2</span>
+              <select aria-label="Aaron pick two">
                 <option>Andrei Svechnikov</option>
-                <option>Martin Necas</option>
-                <option>Jordan Staal</option>
-              </select>
-              <span class="mini-status">Ready</span>
-            </div>
-          </div>
-
-          <div class="compact-user-card julie-owner">
-            <div class="compact-user-head">
-              <div><strong>Julie</strong><span>2/2 ready</span></div>
-              <span class="owner-score">5</span>
-            </div>
-
-            <div class="compact-pick-row editable-pick-row">
-              <span class="pick-number">1</span>
-              <select aria-label="Julie first pick">
-                <option>Seth Jarvis</option>
-                <option>Martin Necas</option>
-                <option>Jordan Staal</option>
-              </select>
-              <span class="mini-status">Ready</span>
-            </div>
-
-            <div class="compact-pick-row editable-pick-row">
-              <span class="pick-number">2</span>
-              <select aria-label="Julie second pick">
-                <option>Jaccob Slavin</option>
+                <option disabled>Jaccob Slavin — Julie</option>
                 <option>Brent Burns</option>
                 <option>Jordan Staal</option>
               </select>
-              <span class="mini-status">Ready</span>
+            </label>
+          </div>
+
+          <div class="single-user-card julie-owner">
+            <div class="single-user-head">
+              <div><strong>Julie</strong><span>2/2 selected</span></div>
+              <span class="pick-lock-pill">Ready</span>
             </div>
-          </div>
-        </div>
-      </section>
 
-      <section class="panel-card picks-card">
-        <div class="panel-header">
-          <div><span class="eyebrow">Same module after lock</span><h2>Live Scoring View</h2></div>
-          <span class="panel-tag">Locked</span>
-        </div>
+            <label class="pick-select-row">
+              <span>Pick 1</span>
+              <select aria-label="Julie pick one">
+                <option>Seth Jarvis</option>
+                <option disabled>Sebastian Aho — Aaron</option>
+                <option>Martin Necas</option>
+                <option>Jordan Staal</option>
+              </select>
+            </label>
 
-        <div class="pick-rules-strip" aria-label="Pick scoring rules">
-          <span>Goal +2</span><span>Assist +1</span><span>1st Goal +1</span>
-        </div>
-
-        <div class="dual-picks-layout">
-          <div class="pick-owner-card aaron-owner">
-            <div class="player-column-header"><div><strong>Aaron</strong><span>Tonight: +3</span></div><span class="owner-score">7</span></div>
-            <div class="picks-grid stacked" id="aaronPicks"></div>
-          </div>
-          <div class="pick-owner-card julie-owner">
-            <div class="player-column-header"><div><strong>Julie</strong><span>Tonight: +1</span></div><span class="owner-score">5</span></div>
-            <div class="picks-grid stacked" id="opponentPicks"></div>
+            <label class="pick-select-row">
+              <span>Pick 2</span>
+              <select aria-label="Julie pick two">
+                <option>Jaccob Slavin</option>
+                <option disabled>Andrei Svechnikov — Aaron</option>
+                <option>Brent Burns</option>
+                <option>Jordan Staal</option>
+              </select>
+            </label>
           </div>
         </div>
       </section>
@@ -145,7 +118,7 @@
   <nav class="bottom-nav"><button class="active">Game Day</button><button>History</button><button>Manage</button></nav>
   <div class="toast-stack"><div id="toast" class="toast">🚨 Goal sync animation preview</div></div>
 
-  <script src="js/mock-data.js?v=compact-picks-1"></script>
-  <script src="js/app.js?v=compact-picks-1"></script>
+  <script src="js/mock-data.js?v=single-picks-1"></script>
+  <script src="js/app.js?v=single-picks-1"></script>
 </body>
 </html>
