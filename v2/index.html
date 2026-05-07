@@ -45,43 +45,61 @@
           <div class="score-card leading sync-target">
             <span class="score-name">Aaron</span>
             <span class="score-value">7</span>
-            <span class="score-delta positive">+2 tonight</span>
+            <span class="score-delta positive">+3 tonight</span>
           </div>
 
           <div class="score-card">
-            <span class="score-name">Opponent</span>
+            <span class="score-name">Julie</span>
             <span class="score-value">5</span>
-            <span class="score-delta">Even</span>
+            <span class="score-delta positive">+1 tonight</span>
           </div>
         </div>
 
-        <div class="leader-banner">🚨 Aho first-goal bonus would extend lead to 3</div>
+        <div class="leader-banner">🚨 Aho first-goal bonus gives Aaron a 2-point swing</div>
       </section>
 
       <section class="panel-card picks-card">
         <div class="panel-header">
           <div>
-            <span class="eyebrow">Head-to-head</span>
-            <h2>Player Picks</h2>
+            <span class="eyebrow">2 picks each · no overlap</span>
+            <h2>Aaron vs Julie Picks</h2>
           </div>
           <span class="panel-tag">Locked</span>
         </div>
 
+        <div class="pick-rules-strip" aria-label="Pick scoring rules">
+          <span>Goal +2</span>
+          <span>Assist +1</span>
+          <span>1st Goal +1</span>
+        </div>
+
+        <div class="pick-state-row">
+          <span>✅ Aaron 2/2 submitted</span>
+          <span>✅ Julie 2/2 submitted</span>
+          <span>🚫 No duplicate players</span>
+        </div>
+
         <div class="dual-picks-layout">
-          <div>
+          <div class="pick-owner-card aaron-owner">
             <div class="player-column-header">
-              <strong>Aaron</strong>
-              <span>Leading</span>
+              <div>
+                <strong>Aaron</strong>
+                <span>Tonight: +3</span>
+              </div>
+              <span class="owner-score">7</span>
             </div>
-            <div class="picks-grid" id="aaronPicks"></div>
+            <div class="picks-grid stacked" id="aaronPicks"></div>
           </div>
 
-          <div>
+          <div class="pick-owner-card julie-owner">
             <div class="player-column-header">
-              <strong>Opponent</strong>
-              <span>Chasing</span>
+              <div>
+                <strong>Julie</strong>
+                <span>Tonight: +1</span>
+              </div>
+              <span class="owner-score">5</span>
             </div>
-            <div class="picks-grid" id="opponentPicks"></div>
+            <div class="picks-grid stacked" id="opponentPicks"></div>
           </div>
         </div>
       </section>
@@ -103,7 +121,7 @@
 
           <div class="pulse-tile">
             <span>Tracked Points</span>
-            <strong>6</strong>
+            <strong>4</strong>
           </div>
 
           <div class="pulse-tile wide">
@@ -137,7 +155,7 @@
         <div class="status-list">
           <div><strong>NHL Sync</strong><span>24 sec ago</span></div>
           <div><strong>Realtime</strong><span>Connected</span></div>
-          <div><strong>Push Logic</strong><span>Toast when active</span></div>
+          <div><strong>Pick Lock</strong><span>Locked by first tracked scoring event</span></div>
         </div>
       </section>
     </main>
