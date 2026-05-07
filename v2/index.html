@@ -7,20 +7,22 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <div class="sync-flash" id="syncFlash"></div>
+
   <div class="app-shell">
     <header class="app-header" aria-label="V2 sandbox header">
       <div>
-        <span class="eyebrow">Canes Rivalry</span>
+        <span class="eyebrow">Canes Rivalry V2</span>
         <h1>Game Day</h1>
       </div>
       <button class="icon-button" id="refreshButton" type="button" aria-label="Simulate refresh">↻</button>
     </header>
 
-    <main class="content-stack" aria-label="Game Day mock interface">
-      <section class="hero-card playoff-lite" aria-labelledby="matchupTitle">
+    <main class="content-stack">
+      <section class="hero-card playoff-lite">
         <div class="hero-topline">
-          <span class="status-pill">V2 Sandbox</span>
-          <span class="live-dot"><span aria-hidden="true"></span> Mock realtime</span>
+          <span class="status-pill">Sandbox</span>
+          <span class="live-dot"><span aria-hidden="true"></span> Live mock</span>
         </div>
 
         <div class="matchup-row">
@@ -28,114 +30,128 @@
             <span class="team-abbrev">CAR</span>
             <strong>Hurricanes</strong>
           </div>
+
           <div class="versus-pill">vs</div>
+
           <div class="team-block right">
             <span class="team-abbrev">NYR</span>
             <strong>Rangers</strong>
           </div>
         </div>
 
-        <p class="hero-subtitle" id="matchupTitle">Tonight · 7:00 PM · Playoff intensity preview</p>
+        <p class="hero-subtitle">Round 2 · Tonight · 7:00 PM</p>
 
-        <div class="scoreboard" aria-label="Rivalry score">
-          <div class="score-card leading">
+        <div class="scoreboard rivalry-scoreboard">
+          <div class="score-card leading sync-target">
             <span class="score-name">Aaron</span>
-            <span class="score-value" id="scoreA">7</span>
+            <span class="score-value">7</span>
+            <span class="score-delta positive">+2 tonight</span>
           </div>
+
           <div class="score-card">
             <span class="score-name">Opponent</span>
-            <span class="score-value" id="scoreB">5</span>
+            <span class="score-value">5</span>
+            <span class="score-delta">Even</span>
           </div>
         </div>
 
-        <div class="leader-banner">Aaron leads by 2 · Aho first-goal bonus pending</div>
+        <div class="leader-banner">🚨 Aho first-goal bonus would extend lead to 3</div>
       </section>
 
-      <section class="panel-card picks-card" aria-labelledby="picksTitle">
+      <section class="panel-card picks-card">
         <div class="panel-header">
           <div>
-            <span class="eyebrow">Locked-in picks</span>
-            <h2 id="picksTitle">Player Picks</h2>
+            <span class="eyebrow">Head-to-head</span>
+            <h2>Player Picks</h2>
           </div>
-          <span class="panel-tag">Editable</span>
+          <span class="panel-tag">Locked</span>
         </div>
-        <div class="picks-grid" id="picksGrid"></div>
+
+        <div class="dual-picks-layout">
+          <div>
+            <div class="player-column-header">
+              <strong>Aaron</strong>
+              <span>Leading</span>
+            </div>
+            <div class="picks-grid" id="aaronPicks"></div>
+          </div>
+
+          <div>
+            <div class="player-column-header">
+              <strong>Opponent</strong>
+              <span>Chasing</span>
+            </div>
+            <div class="picks-grid" id="opponentPicks"></div>
+          </div>
+        </div>
       </section>
 
-      <section class="panel-card live-card" aria-labelledby="liveTitle">
+      <section class="panel-card live-card">
         <div class="panel-header">
           <div>
-            <span class="eyebrow">Live game card</span>
-            <h2 id="liveTitle">Scoring Pulse</h2>
+            <span class="eyebrow">Realtime visuals</span>
+            <h2>Scoring Pulse</h2>
           </div>
-          <span class="panel-tag live">Reactive</span>
+          <span class="panel-tag live">Active</span>
         </div>
+
         <div class="pulse-grid">
-          <div class="pulse-tile">
+          <div class="pulse-tile sync-target">
             <span>CAR Goals</span>
             <strong>2</strong>
           </div>
+
           <div class="pulse-tile">
             <span>Tracked Points</span>
             <strong>6</strong>
           </div>
+
           <div class="pulse-tile wide">
-            <span>Latest event</span>
-            <strong>Svechnikov assist · +1 Aaron</strong>
+            <span>Latest Event</span>
+            <strong>Svechnikov assist → Aaron +1</strong>
           </div>
         </div>
       </section>
 
-      <section class="panel-card" aria-labelledby="momentsTitle">
+      <section class="panel-card">
         <div class="panel-header">
           <div>
-            <span class="eyebrow">Rivalry feed</span>
-            <h2 id="momentsTitle">Live Moments</h2>
+            <span class="eyebrow">Realtime feed</span>
+            <h2>Rivalry Moments</h2>
           </div>
-          <button id="toastButton" class="mini-button" type="button">Toast</button>
+          <button id="toastButton" class="mini-button">Toast</button>
         </div>
+
         <div id="momentsFeed" class="moments-feed"></div>
       </section>
 
-      <section class="panel-card sync-card" aria-labelledby="syncTitle">
+      <section class="panel-card sync-card">
         <div class="panel-header">
           <div>
-            <span class="eyebrow">Sync transparency</span>
-            <h2 id="syncTitle">App Status</h2>
+            <span class="eyebrow">Transparency</span>
+            <h2>Sync Status</h2>
           </div>
           <span class="panel-tag calm">Healthy</span>
         </div>
+
         <div class="status-list">
-          <div><strong>NHL Sync</strong><span>Last checked 24 sec ago</span></div>
-          <div><strong>Realtime</strong><span>Connected · listening for changes</span></div>
-          <div><strong>Notifications</strong><span>Toast in-app · push when closed</span></div>
+          <div><strong>NHL Sync</strong><span>24 sec ago</span></div>
+          <div><strong>Realtime</strong><span>Connected</span></div>
+          <div><strong>Push Logic</strong><span>Toast when active</span></div>
         </div>
       </section>
-
-      <details class="panel-card admin-card">
-        <summary>
-          <span>
-            <span class="eyebrow">Secondary</span>
-            <strong>Admin Controls</strong>
-          </span>
-          <span class="chevron">⌄</span>
-        </summary>
-        <div class="admin-actions">
-          <button type="button">Manual NHL Sync</button>
-          <button type="button">Finalize Game</button>
-          <button type="button">Unlock Picks</button>
-        </div>
-      </details>
     </main>
   </div>
 
-  <nav class="bottom-nav" aria-label="Primary navigation">
-    <button class="active" type="button">Game Day</button>
-    <button type="button">History</button>
-    <button type="button">Manage</button>
+  <nav class="bottom-nav">
+    <button class="active">Game Day</button>
+    <button>History</button>
+    <button>Manage</button>
   </nav>
 
-  <div id="toast" class="toast" role="status" aria-live="polite">Realtime goal sync simulated 🚨</div>
+  <div class="toast-stack">
+    <div id="toast" class="toast">🚨 Goal sync animation preview</div>
+  </div>
 
   <script src="js/mock-data.js"></script>
   <script src="js/app.js"></script>
