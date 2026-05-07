@@ -60,14 +60,16 @@ h2 { font-size:22px; letter-spacing:-.04em; }
 .pick-select-row:after { content:"⌄"; color:var(--muted); font-weight:900; }
 .pick-select-row:focus-within { border-color:#98a2b3; box-shadow:0 0 0 4px rgba(152,162,179,.14); }
 .missing-pick-row { border-color:#f97316; background:#fff7ed; }
-.owner-score { display:inline-flex; align-items:center; justify-content:center; min-width:42px; height:30px; padding:0 10px; border-radius:999px; background:#f8fafc; color:#344054; border:1px solid var(--line); font-size:15px; font-weight:950; line-height:1; }
+.owner-score { display:inline-grid; place-items:center; min-width:42px; height:30px; padding:0 10px; border-radius:999px; background:#f8fafc; color:#344054; border:1px solid var(--line); font-size:15px; font-weight:950; line-height:1; font-variant-numeric:tabular-nums; }
 .locked-pick-row { gap:12px; margin-top:9px; padding:12px; background:white; border:1px solid var(--line); border-radius:18px; }
 .locked-pick-row.active-pick { border-color:#d0d5dd; background:#fcfcfd; }
 .locked-pick-main { min-width:0; display:flex; flex-direction:column; gap:7px; }
 .locked-pick-main strong { font-size:16px; line-height:1.15; letter-spacing:-.02em; }
 .locked-pick-main span { color:var(--muted); font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:.04em; }
-.locked-pick-row b { flex:0 0 auto; display:inline-grid; place-items:center; min-width:40px; height:32px; padding:0 10px; text-align:center; background:#f8fafc; color:#344054; border:1px solid var(--line); border-radius:999px; font-size:15px; font-weight:950; line-height:1; align-self:center; font-variant-numeric:tabular-nums; }
-.locked-pick-row.active-pick b { background:var(--positive-bg); color:var(--positive); border-color:#abefc6; }
+.locked-pick-row b,
+.pick-points { flex:0 0 auto; display:grid; place-items:center; min-width:42px; height:32px; padding:0 10px; text-align:center; background:#f8fafc; color:#344054; border:1px solid var(--line); border-radius:999px; font-size:15px; font-weight:950; line-height:32px; align-self:center; font-variant-numeric:tabular-nums; }
+.locked-pick-row.active-pick b,
+.locked-pick-row.active-pick .pick-points { background:var(--positive-bg); color:var(--positive); border-color:#abefc6; }
 .event-card .panel-header { align-items:flex-start; }
 .latest-event-box { margin-top:12px; padding:14px; border:1px solid var(--line); border-radius:20px; background:#fbfcfe; }
 .latest-event-box strong { display:block; font-size:17px; letter-spacing:-.02em; }
