@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Canes Rivalry V2</title>
-  <link rel="stylesheet" href="styles.css?v=pregame-picks-1" />
+  <link rel="stylesheet" href="styles.css?v=pregame-visible-1" />
 </head>
 <body>
   <div class="sync-flash" id="syncFlash"></div>
@@ -22,141 +22,96 @@
       <section class="hero-card playoff-lite">
         <div class="hero-topline">
           <span class="status-pill">Sandbox</span>
-          <span class="live-dot"><span aria-hidden="true"></span> Live mock</span>
+          <span class="live-dot"><span aria-hidden="true"></span> Pregame mock</span>
         </div>
 
         <div class="matchup-row">
-          <div class="team-block">
-            <span class="team-abbrev">CAR</span>
-            <strong>Hurricanes</strong>
-          </div>
-
+          <div class="team-block"><span class="team-abbrev">CAR</span><strong>Hurricanes</strong></div>
           <div class="versus-pill">vs</div>
-
-          <div class="team-block right">
-            <span class="team-abbrev">NYR</span>
-            <strong>Rangers</strong>
-          </div>
+          <div class="team-block right"><span class="team-abbrev">NYR</span><strong>Rangers</strong></div>
         </div>
 
         <p class="hero-subtitle">Round 2 · Tonight · 7:00 PM</p>
-
-        <div class="scoreboard rivalry-scoreboard">
-          <div class="score-card leading sync-target">
-            <span class="score-name">Aaron</span>
-            <span class="score-value">7</span>
-            <span class="score-delta positive">+3 tonight</span>
-          </div>
-
-          <div class="score-card">
-            <span class="score-name">Julie</span>
-            <span class="score-value">5</span>
-            <span class="score-delta positive">+1 tonight</span>
-          </div>
-        </div>
-
-        <div class="leader-banner">🚨 Aho first-goal bonus gives Aaron a 2-point swing</div>
       </section>
 
-      <section class="panel-card pregame-card">
+      <section class="panel-card pregame-card selector-focus">
         <div class="panel-header">
           <div>
-            <span class="eyebrow">Pregame state</span>
-            <h2>Pick Selection</h2>
+            <span class="eyebrow">Pregame mock · editable</span>
+            <h2>Pick 2 Canes Each</h2>
           </div>
-          <span class="panel-tag calm">Editable</span>
+          <span class="panel-tag calm">Not Locked</span>
         </div>
 
-        <p class="helper-copy">Each person picks 2 unique Canes players. Picks stay editable until the first tracked scoring event.</p>
+        <p class="helper-copy">Aaron and Julie each choose 2 unique Canes players. Once a player is picked, that player is unavailable to the other person. Picks stay editable until the first tracked goal, assist, or first-goal event.</p>
 
         <div class="pregame-slots">
-          <div class="slot-owner">
+          <div class="slot-owner aaron-slot-owner">
             <div class="player-column-header">
-              <div>
-                <strong>Aaron</strong>
-                <span id="aaronSlotCount">2/2 selected</span>
-              </div>
+              <div><strong>Aaron</strong><span>2/2 selected</span></div>
             </div>
-            <div class="slot-list" id="aaronSlots"></div>
+            <div class="slot-list" id="aaronSlots">
+              <button class="pregame-slot selected">Sebastian Aho</button>
+              <button class="pregame-slot selected">Andrei Svechnikov</button>
+            </div>
           </div>
 
-          <div class="slot-owner">
+          <div class="slot-owner julie-slot-owner">
             <div class="player-column-header">
-              <div>
-                <strong>Julie</strong>
-                <span id="julieSlotCount">2/2 selected</span>
-              </div>
+              <div><strong>Julie</strong><span>2/2 selected</span></div>
             </div>
-            <div class="slot-list" id="julieSlots"></div>
+            <div class="slot-list" id="julieSlots">
+              <button class="pregame-slot selected opponent">Seth Jarvis</button>
+              <button class="pregame-slot selected opponent">Jaccob Slavin</button>
+            </div>
           </div>
         </div>
 
         <div class="roster-picker">
           <div class="player-column-header">
-            <div>
-              <strong>Available Canes</strong>
-              <span>Tap to mock-select. Already picked players are disabled.</span>
-            </div>
+            <div><strong>Canes Roster</strong><span>Mock selector: taken players are disabled</span></div>
           </div>
-          <div class="roster-chip-grid" id="rosterChips"></div>
+          <div class="roster-chip-grid" id="rosterChips">
+            <button class="roster-chip locked-chip" disabled>Sebastian Aho</button>
+            <button class="roster-chip locked-chip" disabled>Andrei Svechnikov</button>
+            <button class="roster-chip locked-chip" disabled>Seth Jarvis</button>
+            <button class="roster-chip locked-chip" disabled>Jaccob Slavin</button>
+            <button class="roster-chip">Martin Necas</button>
+            <button class="roster-chip">Jordan Staal</button>
+            <button class="roster-chip">Teuvo Teravainen</button>
+            <button class="roster-chip">Brent Burns</button>
+          </div>
         </div>
       </section>
 
       <section class="panel-card picks-card">
         <div class="panel-header">
-          <div>
-            <span class="eyebrow">2 picks each · no overlap</span>
-            <h2>Aaron vs Julie Picks</h2>
-          </div>
+          <div><span class="eyebrow">Live state preview</span><h2>Locked Scoring View</h2></div>
           <span class="panel-tag">Locked</span>
         </div>
 
         <div class="pick-rules-strip" aria-label="Pick scoring rules">
-          <span>Goal +2</span>
-          <span>Assist +1</span>
-          <span>1st Goal +1</span>
+          <span>Goal +2</span><span>Assist +1</span><span>1st Goal +1</span>
         </div>
 
         <div class="pick-state-row">
-          <span>✅ Aaron 2/2 submitted</span>
-          <span>✅ Julie 2/2 submitted</span>
-          <span>🚫 No duplicate players</span>
+          <span>✅ Aaron 2/2 submitted</span><span>✅ Julie 2/2 submitted</span><span>🚫 No duplicate players</span>
         </div>
 
         <div class="dual-picks-layout">
           <div class="pick-owner-card aaron-owner">
-            <div class="player-column-header">
-              <div>
-                <strong>Aaron</strong>
-                <span>Tonight: +3</span>
-              </div>
-              <span class="owner-score">7</span>
-            </div>
+            <div class="player-column-header"><div><strong>Aaron</strong><span>Tonight: +3</span></div><span class="owner-score">7</span></div>
             <div class="picks-grid stacked" id="aaronPicks"></div>
           </div>
-
           <div class="pick-owner-card julie-owner">
-            <div class="player-column-header">
-              <div>
-                <strong>Julie</strong>
-                <span>Tonight: +1</span>
-              </div>
-              <span class="owner-score">5</span>
-            </div>
+            <div class="player-column-header"><div><strong>Julie</strong><span>Tonight: +1</span></div><span class="owner-score">5</span></div>
             <div class="picks-grid stacked" id="opponentPicks"></div>
           </div>
         </div>
       </section>
 
       <section class="panel-card live-card">
-        <div class="panel-header">
-          <div>
-            <span class="eyebrow">Realtime visuals</span>
-            <h2>Scoring Pulse</h2>
-          </div>
-          <span class="panel-tag live">Active</span>
-        </div>
-
+        <div class="panel-header"><div><span class="eyebrow">Realtime visuals</span><h2>Scoring Pulse</h2></div><span class="panel-tag live">Active</span></div>
         <div class="pulse-grid">
           <div class="pulse-tile sync-target"><span>CAR Goals</span><strong>2</strong></div>
           <div class="pulse-tile"><span>Tracked Points</span><strong>4</strong></div>
@@ -165,42 +120,16 @@
       </section>
 
       <section class="panel-card">
-        <div class="panel-header">
-          <div>
-            <span class="eyebrow">Realtime feed</span>
-            <h2>Rivalry Moments</h2>
-          </div>
-          <button id="toastButton" class="mini-button">Toast</button>
-        </div>
+        <div class="panel-header"><div><span class="eyebrow">Realtime feed</span><h2>Rivalry Moments</h2></div><button id="toastButton" class="mini-button">Toast</button></div>
         <div id="momentsFeed" class="moments-feed"></div>
-      </section>
-
-      <section class="panel-card sync-card">
-        <div class="panel-header">
-          <div>
-            <span class="eyebrow">Transparency</span>
-            <h2>Sync Status</h2>
-          </div>
-          <span class="panel-tag calm">Healthy</span>
-        </div>
-        <div class="status-list">
-          <div><strong>NHL Sync</strong><span>24 sec ago</span></div>
-          <div><strong>Realtime</strong><span>Connected</span></div>
-          <div><strong>Pick Lock</strong><span>Locked by first tracked scoring event</span></div>
-        </div>
       </section>
     </main>
   </div>
 
-  <nav class="bottom-nav">
-    <button class="active">Game Day</button>
-    <button>History</button>
-    <button>Manage</button>
-  </nav>
-
+  <nav class="bottom-nav"><button class="active">Game Day</button><button>History</button><button>Manage</button></nav>
   <div class="toast-stack"><div id="toast" class="toast">🚨 Goal sync animation preview</div></div>
 
-  <script src="js/mock-data.js?v=pregame-picks-1"></script>
-  <script src="js/app.js?v=pregame-picks-1"></script>
+  <script src="js/mock-data.js?v=pregame-visible-1"></script>
+  <script src="js/app.js?v=pregame-visible-1"></script>
 </body>
 </html>
