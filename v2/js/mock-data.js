@@ -4,6 +4,20 @@ window.V2_MOCK_DATA = {
     assist: 1,
     firstGoalBonus: 1
   },
+  roster: [
+    'Sebastian Aho',
+    'Andrei Svechnikov',
+    'Seth Jarvis',
+    'Jaccob Slavin',
+    'Martin Necas',
+    'Jordan Staal',
+    'Teuvo Teravainen',
+    'Brent Burns'
+  ],
+  pregameSelections: {
+    aaron: ['Sebastian Aho', 'Andrei Svechnikov'],
+    julie: ['Seth Jarvis', 'Jaccob Slavin']
+  },
   firstGoalScorer: 'Sebastian Aho',
   users: {
     aaron: {
@@ -11,18 +25,8 @@ window.V2_MOCK_DATA = {
       score: 7,
       tonightDelta: 3,
       picks: [
-        {
-          player: 'Sebastian Aho',
-          goals: 1,
-          assists: 0,
-          firstGoal: true
-        },
-        {
-          player: 'Andrei Svechnikov',
-          goals: 0,
-          assists: 1,
-          firstGoal: false
-        }
+        { player: 'Sebastian Aho', goals: 1, assists: 0, firstGoal: true },
+        { player: 'Andrei Svechnikov', goals: 0, assists: 1, firstGoal: false }
       ]
     },
     julie: {
@@ -30,18 +34,8 @@ window.V2_MOCK_DATA = {
       score: 5,
       tonightDelta: 1,
       picks: [
-        {
-          player: 'Seth Jarvis',
-          goals: 0,
-          assists: 1,
-          firstGoal: false
-        },
-        {
-          player: 'Jaccob Slavin',
-          goals: 0,
-          assists: 0,
-          firstGoal: false
-        }
+        { player: 'Seth Jarvis', goals: 0, assists: 1, firstGoal: false },
+        { player: 'Jaccob Slavin', goals: 0, assists: 0, firstGoal: false }
       ]
     }
   },
