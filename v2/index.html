@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Canes Rivalry V2</title>
-  <link rel="stylesheet" href="styles.css?v=layout-cleanup-1" />
+  <link rel="stylesheet" href="styles.css?v=rivalry-hero-1" />
 </head>
 <body>
   <div class="sync-flash" id="syncFlash"></div>
@@ -32,25 +32,28 @@
     </section>
 
     <main class="content-stack">
-      <section class="hero-card playoff-lite">
+      <section class="hero-card rivalry-hero">
         <div class="hero-topline clean-topline">
           <span class="status-pill" id="gameStatusPill">Pregame</span>
-          <span class="game-state-text" id="statusText">Mock state</span>
+          <span class="modern-live-pill" id="statusText"><span aria-hidden="true"></span> Mock state</span>
         </div>
 
-        <div class="game-score-hero">
-          <div class="team-score-side">
-            <span class="team-abbrev">CAR</span>
-            <strong id="canesScore">0</strong>
+        <div class="rivalry-score-hero">
+          <div class="rivalry-side">
+            <span>Aaron</span>
+            <strong id="aaronRivalryScore">0</strong>
           </div>
-          <div class="score-divider">–</div>
-          <div class="team-score-side">
-            <span class="team-abbrev">NYR</span>
-            <strong id="oppScore">0</strong>
+          <div class="rivalry-vs">vs</div>
+          <div class="rivalry-side">
+            <span>Julie</span>
+            <strong id="julieRivalryScore">0</strong>
           </div>
         </div>
 
-        <p class="hero-subtitle centered" id="gameSubline">Tonight · 7:00 PM · Picks open</p>
+        <div class="game-context-row">
+          <span id="gameSubline">Tonight · 7:00 PM · Picks open</span>
+          <b><span id="canesScore">0</span>-<span id="oppScore">0</span> CAR/NYR</b>
+        </div>
       </section>
 
       <section class="panel-card picks-card single-picks-card" id="picksModule">
@@ -84,7 +87,7 @@
   <nav class="bottom-nav"><button class="active">Game Day</button><button>History</button><button>Manage</button></nav>
   <div class="toast-stack"><div id="toast" class="toast">Preview event</div></div>
 
-  <script src="js/mock-data.js?v=layout-cleanup-1"></script>
-  <script src="js/app.js?v=layout-cleanup-1"></script>
+  <script src="js/mock-data.js?v=rivalry-hero-1"></script>
+  <script src="js/app.js?v=rivalry-hero-1"></script>
 </body>
 </html>
