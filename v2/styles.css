@@ -24,31 +24,23 @@ body {
   padding:calc(16px + env(safe-area-inset-top)) 14px 120px;
 }
 
-.app-header,
-.panel-header,
-.hero-topline,
-.matchup-row,
-.status-list div,
-.admin-actions,
-.bottom-nav,
-summary {
-  display:flex;
-  align-items:center;
-}
-
-.app-header,
-.panel-header,
-.hero-topline,
-.matchup-row,
-.status-list div,
-summary {
-  justify-content:space-between;
-}
-
 .content-stack {
   display:flex;
   flex-direction:column;
   gap:16px;
+}
+
+.app-header,
+.panel-header,
+.hero-topline,
+.matchup-row,
+.player-column-header,
+.pick-state-row,
+.status-list div,
+.bottom-nav {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
 }
 
 .hero-card,
@@ -93,7 +85,9 @@ h2 {
 }
 
 .hero-subtitle,
-.status-list span {
+.status-list span,
+.player-column-header span,
+.pick-state-row {
   color:var(--muted);
 }
 
@@ -106,7 +100,10 @@ h2 {
 .live-dot,
 .versus-pill,
 .mini-button,
-.icon-button {
+.icon-button,
+.pick-rules-strip span,
+.bonus-chip,
+.pick-total {
   border-radius:999px;
   font-weight:800;
 }
@@ -121,7 +118,8 @@ h2 {
 .status-pill,
 .panel-tag.live,
 .mini-button,
-.icon-button {
+.icon-button,
+.pick-total {
   background:var(--red);
   color:white;
 }
@@ -169,39 +167,36 @@ h2 {
 }
 
 .scoreboard,
-.picks-grid,
 .pulse-grid {
   display:grid;
+  grid-template-columns:1fr 1fr;
   gap:12px;
-}
-
-.scoreboard,
-.pulse-grid {
-  grid-template-columns:1fr 1fr;
-}
-
-.picks-grid {
-  grid-template-columns:1fr 1fr;
-  margin-top:14px;
 }
 
 .score-card,
 .pick-card,
 .pulse-tile,
-.moment-item {
+.moment-item,
+.pick-owner-card {
   border-radius:22px;
   border:1px solid var(--line);
 }
 
 .score-card,
 .pick-card,
-.pulse-tile {
+.pulse-tile,
+.pick-owner-card {
   background:#fafbfc;
 }
 
-.score-card.leading {
+.score-card.leading,
+.aaron-owner {
   border-color:#f04438;
   box-shadow:0 0 0 4px rgba(240,68,56,.08);
+}
+
+.julie-owner {
+  border-color:#d0d5dd;
 }
 
 .score-card {
@@ -225,6 +220,12 @@ h2 {
   line-height:.9;
 }
 
+.score-delta {
+  display:inline-block;
+  margin-top:10px;
+  font-weight:700;
+}
+
 .leader-banner {
   margin-top:14px;
   padding:12px 14px;
@@ -234,20 +235,82 @@ h2 {
   font-weight:700;
 }
 
-.pick-card,
-.pulse-tile {
+.pick-rules-strip,
+.pick-state-row {
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-top:14px;
+}
+
+.pick-rules-strip span {
+  background:#111827;
+  color:white;
+  padding:8px 12px;
+  font-size:12px;
+}
+
+.dual-picks-layout {
+  display:grid;
+  grid-template-columns:1fr;
+  gap:14px;
+  margin-top:16px;
+}
+
+.pick-owner-card {
   padding:14px;
 }
 
-.pick-card strong,
-.pulse-tile strong {
-  display:block;
-  margin-top:6px;
+.owner-score {
+  font-size:28px;
+  font-weight:900;
 }
 
-.pick-card small,
-.pulse-tile span {
+.picks-grid.stacked {
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  margin-top:12px;
+}
+
+.pick-card {
+  padding:14px;
+  background:white;
+}
+
+.active-pick {
+  border-color:#f04438;
+}
+
+.pick-player-row,
+.pick-stat-row {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+
+.pick-stat-row {
+  margin-top:10px;
+  gap:8px;
+  flex-wrap:wrap;
   color:var(--muted);
+  font-size:13px;
+}
+
+.pick-total {
+  padding:6px 10px;
+  font-size:12px;
+}
+
+.bonus-chip {
+  background:#111827;
+  color:white;
+  padding:6px 10px;
+  font-size:11px;
+}
+
+.pulse-tile {
+  padding:14px;
 }
 
 .pulse-tile.wide {
@@ -264,7 +327,6 @@ h2 {
 .moment-item {
   padding:14px;
   background:#fff;
-  animation:slideIn .3s ease;
 }
 
 .status-list {
@@ -280,31 +342,6 @@ h2 {
 
 .status-list div:last-child {
   border-bottom:none;
-  padding-bottom:0;
-}
-
-.admin-card summary {
-  list-style:none;
-  cursor:pointer;
-}
-
-.admin-card summary::-webkit-details-marker {
-  display:none;
-}
-
-.admin-actions {
-  gap:10px;
-  margin-top:16px;
-  flex-wrap:wrap;
-}
-
-.admin-actions button,
-.bottom-nav button {
-  border:0;
-  background:#f2f4f7;
-  border-radius:16px;
-  padding:12px 14px;
-  font-weight:700;
 }
 
 .bottom-nav {
@@ -320,6 +357,11 @@ h2 {
 
 .bottom-nav button {
   flex:1;
+  border:0;
+  background:#f2f4f7;
+  border-radius:16px;
+  padding:12px 14px;
+  font-weight:700;
 }
 
 .bottom-nav button.active {
@@ -361,9 +403,4 @@ h2 {
   0% { opacity:1; transform:scale(1); }
   50% { opacity:.45; transform:scale(.8); }
   100% { opacity:1; transform:scale(1); }
-}
-
-@keyframes slideIn {
-  from { opacity:0; transform:translateY(6px); }
-  to { opacity:1; transform:translateY(0); }
 }
