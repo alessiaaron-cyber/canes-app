@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Canes Rivalry V2</title>
-  <link rel="stylesheet" href="styles.css?v=single-picks-1" />
+  <link rel="stylesheet" href="styles.css?v=state-lab-1" />
 </head>
 <body>
   <div class="sync-flash" id="syncFlash"></div>
@@ -18,107 +18,66 @@
       <button class="icon-button" id="refreshButton" type="button" aria-label="Simulate refresh">↻</button>
     </header>
 
+    <section class="state-lab panel-card" aria-label="UI state switcher">
+      <div class="panel-header compact-header">
+        <div><span class="eyebrow">UI State Lab</span><h2 id="stateTitle">Pregame Ready</h2></div>
+        <span class="panel-tag calm" id="stateBadge">Editable</span>
+      </div>
+      <div class="state-switcher" id="stateSwitcher">
+        <button class="active" data-mode="missing" type="button">Missing</button>
+        <button data-mode="pregame" type="button">Pregame</button>
+        <button data-mode="live" type="button">Live</button>
+        <button data-mode="final" type="button">Final</button>
+      </div>
+    </section>
+
     <main class="content-stack">
       <section class="hero-card playoff-lite">
         <div class="hero-topline">
-          <span class="status-pill">Sandbox</span>
-          <span class="live-dot"><span aria-hidden="true"></span> Pregame mock</span>
+          <span class="status-pill" id="gameStatusPill">Pregame</span>
+          <span class="live-dot"><span aria-hidden="true"></span> <span id="statusText">Mock state</span></span>
         </div>
-
         <div class="matchup-row">
           <div class="team-block"><span class="team-abbrev">CAR</span><strong>Hurricanes</strong></div>
           <div class="versus-pill">vs</div>
           <div class="team-block right"><span class="team-abbrev">NYR</span><strong>Rangers</strong></div>
         </div>
-
-        <p class="hero-subtitle">Round 2 · Tonight · 7:00 PM</p>
+        <p class="hero-subtitle" id="gameSubline">Tonight · 7:00 PM · Picks open</p>
       </section>
 
-      <section class="panel-card picks-card single-picks-card" data-state="pregame">
+      <section class="panel-card picks-card single-picks-card" id="picksModule">
         <div class="panel-header">
-          <div><span class="eyebrow">Game picks</span><h2>Make Your Picks</h2></div>
-          <span class="panel-tag calm">Editable</span>
+          <div><span class="eyebrow" id="picksEyebrow">Game picks</span><h2 id="picksTitle">Make Your Picks</h2></div>
+          <span class="panel-tag calm" id="picksBadge">Editable</span>
         </div>
-
-        <div class="pick-flow-note">2 Canes each · no duplicate players · locks when scoring starts</div>
-
-        <div class="single-picks-layout">
-          <div class="single-user-card aaron-owner">
-            <div class="single-user-head">
-              <div><strong>Aaron</strong><span>2/2 selected</span></div>
-              <span class="pick-lock-pill">Ready</span>
-            </div>
-
-            <label class="pick-select-row">
-              <span>Pick 1</span>
-              <select aria-label="Aaron pick one">
-                <option>Sebastian Aho</option>
-                <option disabled>Seth Jarvis — Julie</option>
-                <option>Martin Necas</option>
-                <option>Jordan Staal</option>
-              </select>
-            </label>
-
-            <label class="pick-select-row">
-              <span>Pick 2</span>
-              <select aria-label="Aaron pick two">
-                <option>Andrei Svechnikov</option>
-                <option disabled>Jaccob Slavin — Julie</option>
-                <option>Brent Burns</option>
-                <option>Jordan Staal</option>
-              </select>
-            </label>
-          </div>
-
-          <div class="single-user-card julie-owner">
-            <div class="single-user-head">
-              <div><strong>Julie</strong><span>2/2 selected</span></div>
-              <span class="pick-lock-pill">Ready</span>
-            </div>
-
-            <label class="pick-select-row">
-              <span>Pick 1</span>
-              <select aria-label="Julie pick one">
-                <option>Seth Jarvis</option>
-                <option disabled>Sebastian Aho — Aaron</option>
-                <option>Martin Necas</option>
-                <option>Jordan Staal</option>
-              </select>
-            </label>
-
-            <label class="pick-select-row">
-              <span>Pick 2</span>
-              <select aria-label="Julie pick two">
-                <option>Jaccob Slavin</option>
-                <option disabled>Andrei Svechnikov — Aaron</option>
-                <option>Brent Burns</option>
-                <option>Jordan Staal</option>
-              </select>
-            </label>
-          </div>
-        </div>
+        <div class="pick-flow-note" id="picksNote">2 Canes each · no duplicate players · locks when scoring starts</div>
+        <div class="single-picks-layout" id="picksContent"></div>
       </section>
 
-      <section class="panel-card live-card">
-        <div class="panel-header"><div><span class="eyebrow">Realtime visuals</span><h2>Scoring Pulse</h2></div><span class="panel-tag live">Active</span></div>
+      <section class="panel-card live-card" id="pulseCard">
+        <div class="panel-header"><div><span class="eyebrow">Realtime visuals</span><h2>Scoring Pulse</h2></div><span class="panel-tag live" id="pulseBadge">Active</span></div>
         <div class="pulse-grid">
-          <div class="pulse-tile sync-target"><span>CAR Goals</span><strong>2</strong></div>
-          <div class="pulse-tile"><span>Tracked Points</span><strong>4</strong></div>
-          <div class="pulse-tile wide"><span>Latest Event</span><strong>Svechnikov assist → Aaron +1</strong></div>
+          <div class="pulse-tile sync-target"><span>CAR Goals</span><strong id="carGoals">0</strong></div>
+          <div class="pulse-tile"><span>Tracked Points</span><strong id="trackedPoints">0</strong></div>
+          <div class="pulse-tile wide"><span>Latest Event</span><strong id="latestEvent">Waiting for puck drop</strong></div>
+        </div>
+        <div class="event-controls" id="eventControls">
+          <button id="simulateAaronGoal" type="button">Aaron goal swing</button>
+          <button id="simulateJulieAssist" type="button">Julie assist</button>
         </div>
       </section>
 
       <section class="panel-card">
-        <div class="panel-header"><div><span class="eyebrow">Realtime feed</span><h2>Rivalry Moments</h2></div><button id="toastButton" class="mini-button">Toast</button></div>
+        <div class="panel-header"><div><span class="eyebrow">Timeline</span><h2>Rivalry Moments</h2></div><button id="toastButton" class="mini-button">Animate</button></div>
         <div id="momentsFeed" class="moments-feed"></div>
       </section>
     </main>
   </div>
 
   <nav class="bottom-nav"><button class="active">Game Day</button><button>History</button><button>Manage</button></nav>
-  <div class="toast-stack"><div id="toast" class="toast">🚨 Goal sync animation preview</div></div>
+  <div class="toast-stack"><div id="toast" class="toast">Preview event</div></div>
 
-  <script src="js/mock-data.js?v=single-picks-1"></script>
-  <script src="js/app.js?v=single-picks-1"></script>
+  <script src="js/mock-data.js?v=state-lab-1"></script>
+  <script src="js/app.js?v=state-lab-1"></script>
 </body>
 </html>
