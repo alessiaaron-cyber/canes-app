@@ -21,6 +21,8 @@ const statusText = $('#statusText');
 const gameSubline = $('#gameSubline');
 const canesScore = $('#canesScore');
 const oppScore = $('#oppScore');
+const aaronRivalryScore = $('#aaronRivalryScore');
+const julieRivalryScore = $('#julieRivalryScore');
 const latestEvent = $('#latestEvent');
 const eventImpact = $('#eventImpact');
 const pulseBadge = $('#pulseBadge');
@@ -28,16 +30,16 @@ const eventControls = $('#eventControls');
 
 const states = {
   missing: {
-    title: 'Missing Picks', badge: 'Needs Picks', badgeClass: 'warning', gameStatus: 'Pregame', statusText: 'Julie needs 1 pick', subline: 'Tonight · 7:00 PM · Picks still open', score: ['0', '0'], picksTitle: 'Make Your Picks', picksBadge: '1 Missing', picksBadgeClass: 'warning', picksNote: 'Julie still needs one more unique Canes player before puck drop.', mode: 'editable', latest: 'Waiting for all picks', impact: 'No rivalry points yet', moments: ['⏳ Aaron has submitted 2/2 picks', '⚠️ Julie still needs one more pick', '🔓 Picks remain editable until scoring starts'], users: { Aaron: ['Sebastian Aho', 'Andrei Svechnikov'], Julie: ['Seth Jarvis', ''] }
+    title: 'Missing Picks', badge: 'Needs Picks', badgeClass: 'warning', gameStatus: 'Pregame', statusText: 'Julie needs 1 pick', subline: 'Tonight · 7:00 PM · Picks still open', score: ['0', '0'], rivalry: ['0', '0'], picksTitle: 'Make Your Picks', picksBadge: '1 Missing', picksBadgeClass: 'warning', picksNote: 'Julie still needs one more unique Canes player before puck drop.', mode: 'editable', latest: 'Waiting for all picks', impact: 'No rivalry points yet', moments: ['⏳ Aaron has submitted 2/2 picks', '⚠️ Julie still needs one more pick', '🔓 Picks remain editable until scoring starts'], users: { Aaron: ['Sebastian Aho', 'Andrei Svechnikov'], Julie: ['Seth Jarvis', ''] }
   },
   pregame: {
-    title: 'Pregame Ready', badge: 'Editable', badgeClass: 'calm', gameStatus: 'Pregame', statusText: 'All picks in', subline: 'Tonight · 7:00 PM · Picks ready', score: ['0', '0'], picksTitle: 'Make Your Picks', picksBadge: 'Editable', picksBadgeClass: 'calm', picksNote: '2 Canes each · no duplicate players · locks when scoring starts.', mode: 'editable', latest: 'Picks submitted and waiting for puck drop', impact: 'No rivalry points yet', moments: ['✅ Aaron submitted 2/2 picks', '✅ Julie submitted 2/2 picks', '🚫 No overlapping players'], users: { Aaron: ['Sebastian Aho', 'Andrei Svechnikov'], Julie: ['Seth Jarvis', 'Jaccob Slavin'] }
+    title: 'Pregame Ready', badge: 'Editable', badgeClass: 'calm', gameStatus: 'Pregame', statusText: 'All picks in', subline: 'Tonight · 7:00 PM · Picks ready', score: ['0', '0'], rivalry: ['0', '0'], picksTitle: 'Make Your Picks', picksBadge: 'Editable', picksBadgeClass: 'calm', picksNote: '2 Canes each · no duplicate players · locks when scoring starts.', mode: 'editable', latest: 'Picks submitted and waiting for puck drop', impact: 'No rivalry points yet', moments: ['✅ Aaron submitted 2/2 picks', '✅ Julie submitted 2/2 picks', '🚫 No overlapping players'], users: { Aaron: ['Sebastian Aho', 'Andrei Svechnikov'], Julie: ['Seth Jarvis', 'Jaccob Slavin'] }
   },
   live: {
-    title: 'Live Game', badge: 'Locked', badgeClass: 'live', gameStatus: 'Live', statusText: 'Realtime active', subline: '2nd Period · CAR leads 2-1', score: ['2', '1'], picksTitle: 'Picks With Stats', picksBadge: 'Locked', picksBadgeClass: 'live', picksNote: 'Goals, assists, and first-goal bonus update live.', mode: 'locked', latest: 'Svechnikov assist', impact: 'Aaron +1 · lead grows to 4-1 tonight', moments: ['🚨 Sebastian Aho scored first — Aaron +3', '🍎 Andrei Svechnikov assist — Aaron +1', '🍎 Seth Jarvis assist — Julie +1'], users: { Aaron: [{ player: 'Sebastian Aho', g: 1, a: 0, first: true, pts: 3 }, { player: 'Andrei Svechnikov', g: 0, a: 1, first: false, pts: 1 }], Julie: [{ player: 'Seth Jarvis', g: 0, a: 1, first: false, pts: 1 }, { player: 'Jaccob Slavin', g: 0, a: 0, first: false, pts: 0 }] }
+    title: 'Live Game', badge: 'Locked', badgeClass: 'live', gameStatus: 'Live', statusText: 'Live sync', subline: '2nd Period · CAR leads 2-1', score: ['2', '1'], rivalry: ['4', '1'], picksTitle: 'Picks With Stats', picksBadge: 'Locked', picksBadgeClass: 'live', picksNote: 'Goals, assists, and first-goal bonus update live.', mode: 'locked', latest: 'Svechnikov assist', impact: 'Aaron +1 · lead grows to 4-1 tonight', moments: ['🚨 Sebastian Aho scored first — Aaron +3', '🍎 Andrei Svechnikov assist — Aaron +1', '🍎 Seth Jarvis assist — Julie +1'], users: { Aaron: [{ player: 'Sebastian Aho', g: 1, a: 0, first: true, pts: 3 }, { player: 'Andrei Svechnikov', g: 0, a: 1, first: false, pts: 1 }], Julie: [{ player: 'Seth Jarvis', g: 0, a: 1, first: false, pts: 1 }, { player: 'Jaccob Slavin', g: 0, a: 0, first: false, pts: 0 }] }
   },
   final: {
-    title: 'Final Result', badge: 'Final', badgeClass: 'dark', gameStatus: 'Final', statusText: 'Game complete', subline: 'Final · Hurricanes win 3-2', score: ['3', '2'], picksTitle: 'Final Picks Score', picksBadge: 'Aaron Wins', picksBadgeClass: 'dark', picksNote: 'Final scoring locked. Aaron wins this game by 3 points.', mode: 'locked', latest: 'Game finalized', impact: 'Aaron wins 5-2 on player picks', moments: ['🏁 Finalized: Aaron wins 5-2', '🚨 First-goal bonus mattered: Aho +3 total', '📈 Aaron extends the rivalry lead'], users: { Aaron: [{ player: 'Sebastian Aho', g: 1, a: 1, first: true, pts: 4 }, { player: 'Andrei Svechnikov', g: 0, a: 1, first: false, pts: 1 }], Julie: [{ player: 'Seth Jarvis', g: 1, a: 0, first: false, pts: 2 }, { player: 'Jaccob Slavin', g: 0, a: 0, first: false, pts: 0 }] }
+    title: 'Final Result', badge: 'Final', badgeClass: 'dark', gameStatus: 'Final', statusText: 'Complete', subline: 'Final · Hurricanes win 3-2', score: ['3', '2'], rivalry: ['5', '2'], picksTitle: 'Final Picks Score', picksBadge: 'Aaron Wins', picksBadgeClass: 'dark', picksNote: 'Final scoring locked. Aaron wins this game by 3 points.', mode: 'locked', latest: 'Game finalized', impact: 'Aaron wins 5-2 on player picks', moments: ['🏁 Finalized: Aaron wins 5-2', '🚨 First-goal bonus mattered: Aho +3 total', '📈 Aaron extends the rivalry lead'], users: { Aaron: [{ player: 'Sebastian Aho', g: 1, a: 1, first: true, pts: 4 }, { player: 'Andrei Svechnikov', g: 0, a: 1, first: false, pts: 1 }], Julie: [{ player: 'Seth Jarvis', g: 1, a: 0, first: false, pts: 2 }, { player: 'Jaccob Slavin', g: 0, a: 0, first: false, pts: 0 }] }
   }
 };
 
@@ -112,6 +114,8 @@ function renderState(mode) {
   setText(gameSubline, state.subline);
   setText(canesScore, state.score[0]);
   setText(oppScore, state.score[1]);
+  setText(aaronRivalryScore, state.rivalry[0]);
+  setText(julieRivalryScore, state.rivalry[1]);
   setText(picksEyebrow, state.mode === 'editable' ? 'Game picks' : 'Locked picks');
   setText(picksTitle, state.picksTitle);
   setBadge(picksBadge, state.picksBadge, state.picksBadgeClass);
