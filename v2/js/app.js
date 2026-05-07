@@ -4,27 +4,26 @@ const toastButton = document.getElementById('toastButton');
 const refreshButton = document.getElementById('refreshButton');
 const aaronPicks = document.getElementById('aaronPicks');
 const opponentPicks = document.getElementById('opponentPicks');
+const syncFlash = document.getElementById('syncFlash');
 
 function calculatePoints(pick) {
   const rules = window.V2_MOCK_DATA.scoringRules;
 
   let total = 0;
-
   total += pick.goals * rules.goal;
   total += pick.assists * rules.assist;
 
-  if (pick.firstGoal) {
-    total += rules.firstGoalBonus;
-  }
+  if (pick.firstGoal) total += rules.firstGoalBonus;
 
   return total;
 }
 
 function buildPickCard(pick) {
   const total = calculatePoints(pick);
+  const key = pick.player.toLowerCase().replaceAll(' ', '-');
 
   return `
-    <article class="pick-card ${total > 0 ? 'active-pick' : ''}">
+    <article class="pick-card ${total > 0 ? 'active-pick' : ''}" data-player-key="${key}">
       <div class="pick-player-row">
         <strong>${pick.player}</strong>
         <span class="pick-total">+${total}</span>
@@ -42,13 +41,8 @@ function buildPickCard(pick) {
 function renderPicks() {
   const users = window.V2_MOCK_DATA.users;
 
-  aaronPicks.innerHTML = users.aaron.picks
-    .map(buildPickCard)
-    .join('');
-
-  opponentPicks.innerHTML = users.julie.picks
-    .map(buildPickCard)
-    .join('');
+  aaronPicks.innerHTML = users.aaron.picks.map(buildPickCard).join('');
+  opponentPicks.innerHTML = users.julie.picks.map(buildPickCard).join('');
 }
 
 function renderMoments() {
@@ -62,31 +56,64 @@ function renderMoments() {
 function showToast(message) {
   toast.textContent = message;
   toast.classList.add('show');
-
   clearTimeout(window.__toastTimer);
-
-  window.__toastTimer = setTimeout(() => {
-    toast.classList.remove('show');
-  }, 2400);
+  window.__toastTimer = setTimeout(() => toast.classList.remove('show'), 2400);
 }
 
-toastButton?.addEventListener('click', () => {
-  showToast('🚨 Sebastian Aho scored first · Aaron +3');
-});
+function flashSync() {
+  syncFlash?.classList.remove('show');
+  void syncFlash?.offsetWidth;
+  syncFlash?.classList.add('show');
+  setTimeout(() => syncFlash?.classList.remove('show'), 700);
+}
+
+function bumpElement(element) {
+  element?.classList.remove('score-bump');
+  void element?.offsetWidth;
+  element?.classList.add('score-bump');
+}
+
+function highlightPick(playerName) {
+  const key = playerName.toLowerCase().replaceAll(' ', '-');
+  const card = document.querySelector(`[data-player-key="${key}"]`);
+  card?.classList.remove('pick-hit');
+  void card?.offsetWidth;
+  card?.classList.add('pick-hit');
+}
+
+function addMoment(message) {
+  const row = document.createElement('div');
+  row.className = 'moment-item new-moment';
+  row.textContent = message;
+  feed.prepend(row);
+}
+
+function runAaronScoreSwing() {
+  flashSync();
+  bumpElement(document.querySelector('.score-card.leading'));
+  bumpElement(document.querySelector('.aaron-owner'));
+  highlightPick('Sebastian Aho');
+  addMoment('🔥 Score swing: Aho event pushes Aaron further ahead');
+  showToast('🔥 Score swing: Aaron advantage grows');
+}
+
+function runJulieScoreSwing() {
+  flashSync();
+  bumpElement(document.querySelector('.julie-owner'));
+  highlightPick('Seth Jarvis');
+  addMoment('👀 Julie answers with a Jarvis point');
+  showToast('👀 Julie cuts into the lead');
+}
+
+toastButton?.addEventListener('click', runAaronScoreSwing);
 
 refreshButton?.addEventListener('click', () => {
-  document.body.animate(
-    [
-      { opacity: 0.98 },
-      { opacity: 1 }
-    ],
-    {
-      duration: 350
-    }
-  );
-
+  flashSync();
   showToast('✅ Mock realtime refresh complete');
 });
 
 renderMoments();
 renderPicks();
+
+window.runAaronScoreSwing = runAaronScoreSwing;
+window.runJulieScoreSwing = runJulieScoreSwing;
