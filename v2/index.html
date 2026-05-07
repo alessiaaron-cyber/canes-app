@@ -8,74 +8,134 @@
 </head>
 <body>
   <div class="app-shell">
-    <header class="hero-card">
-      <div class="hero-topline">
-        <span class="status-pill">V2 Sandbox</span>
-        <span class="hero-sync">Mock UI Only</span>
+    <header class="app-header" aria-label="V2 sandbox header">
+      <div>
+        <span class="eyebrow">Canes Rivalry</span>
+        <h1>Game Day</h1>
       </div>
-
-      <h1>Canes Rivalry</h1>
-
-      <p class="hero-subtitle">
-        Frontend/UI sandbox for Game Day experience redesign.
-      </p>
-
-      <div class="scoreboard">
-        <div class="score-card">
-          <span class="score-name">Aaron</span>
-          <span class="score-value" id="scoreA">7</span>
-        </div>
-
-        <div class="score-card">
-          <span class="score-name">Opponent</span>
-          <span class="score-value" id="scoreB">5</span>
-        </div>
-      </div>
+      <button class="icon-button" id="refreshButton" type="button" aria-label="Simulate refresh">↻</button>
     </header>
 
-    <main class="content-stack">
-      <section class="panel-card">
-        <div class="panel-header">
-          <h2>Game Day</h2>
-          <span class="panel-tag">Concept</span>
+    <main class="content-stack" aria-label="Game Day mock interface">
+      <section class="hero-card playoff-lite" aria-labelledby="matchupTitle">
+        <div class="hero-topline">
+          <span class="status-pill">V2 Sandbox</span>
+          <span class="live-dot"><span aria-hidden="true"></span> Mock realtime</span>
         </div>
 
-        <div class="mock-matchup">
-          <div>
-            <span class="label">Matchup</span>
-            <strong>CAR vs NYR</strong>
+        <div class="matchup-row">
+          <div class="team-block">
+            <span class="team-abbrev">CAR</span>
+            <strong>Hurricanes</strong>
           </div>
+          <div class="versus-pill">vs</div>
+          <div class="team-block right">
+            <span class="team-abbrev">NYR</span>
+            <strong>Rangers</strong>
+          </div>
+        </div>
 
+        <p class="hero-subtitle" id="matchupTitle">Tonight · 7:00 PM · Playoff intensity preview</p>
+
+        <div class="scoreboard" aria-label="Rivalry score">
+          <div class="score-card leading">
+            <span class="score-name">Aaron</span>
+            <span class="score-value" id="scoreA">7</span>
+          </div>
+          <div class="score-card">
+            <span class="score-name">Opponent</span>
+            <span class="score-value" id="scoreB">5</span>
+          </div>
+        </div>
+
+        <div class="leader-banner">Aaron leads by 2 · Aho first-goal bonus pending</div>
+      </section>
+
+      <section class="panel-card picks-card" aria-labelledby="picksTitle">
+        <div class="panel-header">
           <div>
-            <span class="label">Status</span>
-            <strong>Pregame</strong>
+            <span class="eyebrow">Locked-in picks</span>
+            <h2 id="picksTitle">Player Picks</h2>
+          </div>
+          <span class="panel-tag">Editable</span>
+        </div>
+        <div class="picks-grid" id="picksGrid"></div>
+      </section>
+
+      <section class="panel-card live-card" aria-labelledby="liveTitle">
+        <div class="panel-header">
+          <div>
+            <span class="eyebrow">Live game card</span>
+            <h2 id="liveTitle">Scoring Pulse</h2>
+          </div>
+          <span class="panel-tag live">Reactive</span>
+        </div>
+        <div class="pulse-grid">
+          <div class="pulse-tile">
+            <span>CAR Goals</span>
+            <strong>2</strong>
+          </div>
+          <div class="pulse-tile">
+            <span>Tracked Points</span>
+            <strong>6</strong>
+          </div>
+          <div class="pulse-tile wide">
+            <span>Latest event</span>
+            <strong>Svechnikov assist · +1 Aaron</strong>
           </div>
         </div>
       </section>
 
-      <section class="panel-card">
+      <section class="panel-card" aria-labelledby="momentsTitle">
         <div class="panel-header">
-          <h2>Live Moments</h2>
-          <span class="panel-tag live">Realtime Style</span>
+          <div>
+            <span class="eyebrow">Rivalry feed</span>
+            <h2 id="momentsTitle">Live Moments</h2>
+          </div>
+          <button id="toastButton" class="mini-button" type="button">Toast</button>
         </div>
-
         <div id="momentsFeed" class="moments-feed"></div>
       </section>
 
-      <section class="panel-card">
+      <section class="panel-card sync-card" aria-labelledby="syncTitle">
         <div class="panel-header">
-          <h2>Toast Preview</h2>
-          <button id="toastButton" class="mini-button">Trigger</button>
+          <div>
+            <span class="eyebrow">Sync transparency</span>
+            <h2 id="syncTitle">App Status</h2>
+          </div>
+          <span class="panel-tag calm">Healthy</span>
         </div>
-
-        <p class="helper-copy">
-          Used to prototype grouped notifications, sync pulses, and scoring reactions.
-        </p>
+        <div class="status-list">
+          <div><strong>NHL Sync</strong><span>Last checked 24 sec ago</span></div>
+          <div><strong>Realtime</strong><span>Connected · listening for changes</span></div>
+          <div><strong>Notifications</strong><span>Toast in-app · push when closed</span></div>
+        </div>
       </section>
+
+      <details class="panel-card admin-card">
+        <summary>
+          <span>
+            <span class="eyebrow">Secondary</span>
+            <strong>Admin Controls</strong>
+          </span>
+          <span class="chevron">⌄</span>
+        </summary>
+        <div class="admin-actions">
+          <button type="button">Manual NHL Sync</button>
+          <button type="button">Finalize Game</button>
+          <button type="button">Unlock Picks</button>
+        </div>
+      </details>
     </main>
   </div>
 
-  <div id="toast" class="toast">Sebastian Aho goal 🚨</div>
+  <nav class="bottom-nav" aria-label="Primary navigation">
+    <button class="active" type="button">Game Day</button>
+    <button type="button">History</button>
+    <button type="button">Manage</button>
+  </nav>
+
+  <div id="toast" class="toast" role="status" aria-live="polite">Realtime goal sync simulated 🚨</div>
 
   <script src="js/mock-data.js"></script>
   <script src="js/app.js"></script>
