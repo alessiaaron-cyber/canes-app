@@ -5,16 +5,16 @@ const refreshButton = document.getElementById('refreshButton');
 const aaronPicks = document.getElementById('aaronPicks');
 const opponentPicks = document.getElementById('opponentPicks');
 const syncFlash = document.getElementById('syncFlash');
+const aaronSlots = document.getElementById('aaronSlots');
+const julieSlots = document.getElementById('julieSlots');
+const rosterChips = document.getElementById('rosterChips');
 
 function calculatePoints(pick) {
   const rules = window.V2_MOCK_DATA.scoringRules;
-
   let total = 0;
   total += pick.goals * rules.goal;
   total += pick.assists * rules.assist;
-
   if (pick.firstGoal) total += rules.firstGoalBonus;
-
   return total;
 }
 
@@ -28,7 +28,6 @@ function buildPickCard(pick) {
         <strong>${pick.player}</strong>
         <span class="pick-total">+${total}</span>
       </div>
-
       <div class="pick-stat-row">
         <span>G ${pick.goals}</span>
         <span>A ${pick.assists}</span>
@@ -38,19 +37,42 @@ function buildPickCard(pick) {
   `;
 }
 
+function renderPregameSelections() {
+  const selections = window.V2_MOCK_DATA.pregameSelections;
+  const roster = window.V2_MOCK_DATA.roster;
+
+  aaronSlots.innerHTML = selections.aaron
+    .map(player => `<div class="pregame-slot selected">${player}</div>`)
+    .join('');
+
+  julieSlots.innerHTML = selections.julie
+    .map(player => `<div class="pregame-slot selected opponent">${player}</div>`)
+    .join('');
+
+  const taken = [...selections.aaron, ...selections.julie];
+
+  rosterChips.innerHTML = roster
+    .map(player => {
+      const locked = taken.includes(player);
+
+      return `
+        <button class="roster-chip ${locked ? 'locked-chip' : ''}" ${locked ? 'disabled' : ''}>
+          ${player}
+        </button>
+      `;
+    })
+    .join('');
+}
+
 function renderPicks() {
   const users = window.V2_MOCK_DATA.users;
-
   aaronPicks.innerHTML = users.aaron.picks.map(buildPickCard).join('');
   opponentPicks.innerHTML = users.julie.picks.map(buildPickCard).join('');
 }
 
 function renderMoments() {
   const moments = window.V2_MOCK_DATA?.moments || [];
-
-  feed.innerHTML = moments
-    .map(moment => `<div class="moment-item">${moment}</div>`)
-    .join('');
+  feed.innerHTML = moments.map(moment => `<div class="moment-item">${moment}</div>`).join('');
 }
 
 function showToast(message) {
@@ -97,23 +119,12 @@ function runAaronScoreSwing() {
   showToast('🔥 Score swing: Aaron advantage grows');
 }
 
-function runJulieScoreSwing() {
-  flashSync();
-  bumpElement(document.querySelector('.julie-owner'));
-  highlightPick('Seth Jarvis');
-  addMoment('👀 Julie answers with a Jarvis point');
-  showToast('👀 Julie cuts into the lead');
-}
-
 toastButton?.addEventListener('click', runAaronScoreSwing);
-
 refreshButton?.addEventListener('click', () => {
   flashSync();
   showToast('✅ Mock realtime refresh complete');
 });
 
+renderPregameSelections();
 renderMoments();
 renderPicks();
-
-window.runAaronScoreSwing = runAaronScoreSwing;
-window.runJulieScoreSwing = runJulieScoreSwing;
