@@ -53,6 +53,7 @@ h2 { font-size:22px; letter-spacing:-.04em; }
 .single-user-head { margin-bottom:10px; }
 .single-user-head strong { font-size:18px; }
 .single-user-head span { display:block; margin-top:2px; font-size:12px; font-weight:750; color:var(--muted); }
+.single-user-head .owner-score { box-sizing:border-box; flex:0 0 auto; display:flex; align-items:center; justify-content:center; min-width:48px; height:34px; padding:0 12px; margin:0; border-radius:999px; background:#f8fafc; color:#344054; border:1px solid var(--line); font-size:16px; font-weight:950; line-height:34px; text-align:center; font-variant-numeric:tabular-nums; transform:translateY(0); }
 .pick-lock-pill { padding:6px 10px; font-size:11px; }
 .pick-select-row { gap:10px; background:white; border:1px solid var(--line); border-radius:17px; padding:9px 10px; margin-top:8px; }
 .pick-select-row > span { flex:0 0 46px; color:var(--muted); font-size:11px; font-weight:900; text-transform:uppercase; letter-spacing:.06em; }
@@ -60,7 +61,7 @@ h2 { font-size:22px; letter-spacing:-.04em; }
 .pick-select-row:after { content:"⌄"; color:var(--muted); font-weight:900; }
 .pick-select-row:focus-within { border-color:#98a2b3; box-shadow:0 0 0 4px rgba(152,162,179,.14); }
 .missing-pick-row { border-color:#f97316; background:#fff7ed; }
-.owner-score { box-sizing:border-box; flex:0 0 auto; display:flex; align-items:center; justify-content:center; width:auto; min-width:48px; height:34px; padding:0 12px 1px; margin:0; border-radius:999px; background:#f8fafc; color:#344054; border:1px solid var(--line); font-size:16px; font-weight:950; line-height:1; text-align:center; font-variant-numeric:tabular-nums; vertical-align:middle; }
+.owner-score { box-sizing:border-box; flex:0 0 auto; display:flex; align-items:center; justify-content:center; width:auto; min-width:48px; height:34px; padding:0 12px; margin:0; border-radius:999px; background:#f8fafc; color:#344054; border:1px solid var(--line); font-size:16px; font-weight:950; line-height:34px; text-align:center; font-variant-numeric:tabular-nums; vertical-align:middle; }
 .locked-pick-row { gap:12px; margin-top:9px; padding:12px; background:white; border:1px solid var(--line); border-radius:18px; }
 .locked-pick-row.active-pick { border-color:#d0d5dd; background:#fcfcfd; }
 .locked-pick-main { min-width:0; display:flex; flex-direction:column; gap:7px; }
