@@ -91,7 +91,7 @@ function renderLockedPick(userName, picks) {
   const rows = picks.map((pick) => {
     const tags = [`${pick.g} G`, `${pick.a} A`];
     if (pick.first) tags.push('1st goal');
-    return `<article class="locked-pick-row ${pick.pts > 0 ? 'active-pick' : ''}" data-player="${pick.player}"><div class="locked-pick-main"><strong>${pick.player}</strong><span>${tags.join(' · ')}</span></div><b class="pick-points">+${pick.pts}</b></article>`;
+    return `<article class="locked-pick-row ${pick.pts > 0 ? 'active-pick' : ''}" data-player="${pick.player}"><div class="locked-pick-main"><strong>${pick.player}</strong><span>${tags.join(' · ')}</span></div><span class="pick-points" aria-label="${pick.pts} points"><span>+${pick.pts}</span></span></article>`;
   }).join('');
   return `<div class="single-user-card ${userName === 'Aaron' ? 'aaron-owner' : 'julie-owner'}"><div class="single-user-head"><div><strong>${userName}</strong><span>${picks.length}/2 locked</span></div><span class="owner-score">+${total}</span></div>${rows}</div>`;
 }
