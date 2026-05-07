@@ -9,7 +9,6 @@
 }
 
 * { box-sizing:border-box; }
-
 body {
   margin:0;
   background:linear-gradient(180deg,#f8fafc 0%,#eef2f6 100%);
@@ -17,390 +16,56 @@ body {
   font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",sans-serif;
 }
 
-.app-shell {
-  width:100%;
-  max-width:520px;
-  margin:0 auto;
-  padding:calc(16px + env(safe-area-inset-top)) 14px 120px;
-}
-
-.content-stack {
-  display:flex;
-  flex-direction:column;
-  gap:16px;
-}
-
-.app-header,
-.panel-header,
-.hero-topline,
-.matchup-row,
-.player-column-header,
-.pick-state-row,
-.status-list div,
-.bottom-nav {
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-}
-
-.hero-card,
-.panel-card,
-.bottom-nav {
-  background:var(--card);
-  border:1px solid var(--line);
-  border-radius:28px;
-  box-shadow:var(--shadow);
-}
-
-.hero-card,
-.panel-card {
-  padding:18px;
-}
-
-.playoff-lite {
-  background:linear-gradient(135deg,#ffffff 0%,#fff5f6 100%);
-}
-
-.eyebrow {
-  font-size:11px;
-  font-weight:800;
-  letter-spacing:.08em;
-  text-transform:uppercase;
-  color:var(--muted);
-}
-
-h1,h2 {
-  margin:4px 0 0;
-}
-
-h1 {
-  font-size:42px;
-  line-height:.94;
-  letter-spacing:-.08em;
-}
-
-h2 {
-  font-size:22px;
-  letter-spacing:-.04em;
-}
-
-.hero-subtitle,
-.status-list span,
-.player-column-header span,
-.pick-state-row {
-  color:var(--muted);
-}
-
-.hero-subtitle {
-  margin:12px 0 0;
-}
-
-.status-pill,
-.panel-tag,
-.live-dot,
-.versus-pill,
-.mini-button,
-.icon-button,
-.pick-rules-strip span,
-.bonus-chip,
-.pick-total {
-  border-radius:999px;
-  font-weight:800;
-}
-
-.status-pill,
-.panel-tag {
-  padding:6px 10px;
-  font-size:11px;
-  text-transform:uppercase;
-}
-
-.status-pill,
-.panel-tag.live,
-.mini-button,
-.icon-button,
-.pick-total {
-  background:var(--red);
-  color:white;
-}
-
-.panel-tag.calm {
-  background:#ecfdf3;
-  color:#027a48;
-}
-
-.live-dot {
-  display:flex;
-  gap:8px;
-  align-items:center;
-  color:var(--muted);
-  font-size:13px;
-}
-
-.live-dot span {
-  width:10px;
-  height:10px;
-  border-radius:50%;
-  background:#12b76a;
-  animation:pulse 1.8s infinite;
-}
-
-.team-block {
-  display:flex;
-  flex-direction:column;
-}
-
-.team-block.right {
-  text-align:right;
-}
-
-.team-abbrev {
-  font-size:40px;
-  font-weight:900;
-  letter-spacing:-.08em;
-}
-
-.versus-pill {
-  padding:10px 14px;
-  background:#111827;
-  color:white;
-}
-
-.scoreboard,
-.pulse-grid {
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:12px;
-}
-
-.score-card,
-.pick-card,
-.pulse-tile,
-.moment-item,
-.pick-owner-card {
-  border-radius:22px;
-  border:1px solid var(--line);
-}
-
-.score-card,
-.pick-card,
-.pulse-tile,
-.pick-owner-card {
-  background:#fafbfc;
-}
-
-.score-card.leading,
-.aaron-owner {
-  border-color:#f04438;
-  box-shadow:0 0 0 4px rgba(240,68,56,.08);
-}
-
-.julie-owner {
-  border-color:#d0d5dd;
-}
-
-.score-card {
-  text-align:center;
-  padding:18px 14px;
-}
-
-.score-name {
-  display:block;
-  font-size:12px;
-  color:var(--muted);
-  text-transform:uppercase;
-  font-weight:800;
-}
-
-.score-value {
-  display:block;
-  margin-top:8px;
-  font-size:72px;
-  font-weight:900;
-  line-height:.9;
-}
-
-.score-delta {
-  display:inline-block;
-  margin-top:10px;
-  font-weight:700;
-}
-
-.leader-banner {
-  margin-top:14px;
-  padding:12px 14px;
-  background:#111827;
-  color:white;
-  border-radius:18px;
-  font-weight:700;
-}
-
-.pick-rules-strip,
-.pick-state-row {
-  display:flex;
-  gap:8px;
-  flex-wrap:wrap;
-  margin-top:14px;
-}
-
-.pick-rules-strip span {
-  background:#111827;
-  color:white;
-  padding:8px 12px;
-  font-size:12px;
-}
-
-.dual-picks-layout {
-  display:grid;
-  grid-template-columns:1fr;
-  gap:14px;
-  margin-top:16px;
-}
-
-.pick-owner-card {
-  padding:14px;
-}
-
-.owner-score {
-  font-size:28px;
-  font-weight:900;
-}
-
-.picks-grid.stacked {
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-  margin-top:12px;
-}
-
-.pick-card {
-  padding:14px;
-  background:white;
-}
-
-.active-pick {
-  border-color:#f04438;
-}
-
-.pick-player-row,
-.pick-stat-row {
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-}
-
-.pick-stat-row {
-  margin-top:10px;
-  gap:8px;
-  flex-wrap:wrap;
-  color:var(--muted);
-  font-size:13px;
-}
-
-.pick-total {
-  padding:6px 10px;
-  font-size:12px;
-}
-
-.bonus-chip {
-  background:#111827;
-  color:white;
-  padding:6px 10px;
-  font-size:11px;
-}
-
-.pulse-tile {
-  padding:14px;
-}
-
-.pulse-tile.wide {
-  grid-column:1 / -1;
-}
-
-.moments-feed {
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-  margin-top:14px;
-}
-
-.moment-item {
-  padding:14px;
-  background:#fff;
-}
-
-.status-list {
-  display:flex;
-  flex-direction:column;
-  gap:14px;
-}
-
-.status-list div {
-  padding:12px 0;
-  border-bottom:1px solid var(--line);
-}
-
-.status-list div:last-child {
-  border-bottom:none;
-}
-
-.bottom-nav {
+.sync-flash {
   position:fixed;
-  left:50%;
-  bottom:18px;
-  transform:translateX(-50%);
-  width:calc(100% - 24px);
-  max-width:490px;
-  padding:10px;
-  gap:10px;
-}
-
-.bottom-nav button {
-  flex:1;
-  border:0;
-  background:#f2f4f7;
-  border-radius:16px;
-  padding:12px 14px;
-  font-weight:700;
-}
-
-.bottom-nav button.active {
-  background:#111827;
-  color:white;
-}
-
-.icon-button {
-  border:0;
-  width:42px;
-  height:42px;
-}
-
-.mini-button {
-  border:0;
-  padding:10px 14px;
-}
-
-.toast {
-  position:fixed;
-  left:50%;
-  bottom:96px;
-  transform:translateX(-50%) translateY(20px);
-  background:#111827;
-  color:white;
-  padding:14px 18px;
-  border-radius:999px;
+  inset:0;
+  background:rgba(200,16,46,.14);
   opacity:0;
-  transition:all .25s ease;
-  font-weight:800;
+  pointer-events:none;
+  z-index:999;
 }
 
-.toast.show {
-  opacity:1;
-  transform:translateX(-50%) translateY(0);
+.sync-flash.show {
+  animation:syncFlash .7s ease;
 }
 
-@keyframes pulse {
-  0% { opacity:1; transform:scale(1); }
-  50% { opacity:.45; transform:scale(.8); }
-  100% { opacity:1; transform:scale(1); }
+.score-bump {
+  animation:scoreBump .5s ease;
+}
+
+.pick-hit {
+  animation:pickHit 1s ease;
+}
+
+.new-moment {
+  animation:newMoment .45s ease;
+}
+
+@keyframes syncFlash {
+  0% { opacity:0; }
+  25% { opacity:1; }
+  100% { opacity:0; }
+}
+
+@keyframes scoreBump {
+  0% { transform:scale(1); }
+  35% { transform:scale(1.04); }
+  100% { transform:scale(1); }
+}
+
+@keyframes pickHit {
+  0% { transform:scale(1); box-shadow:0 0 0 rgba(240,68,56,0); }
+  40% { transform:scale(1.03); box-shadow:0 0 0 6px rgba(240,68,56,.18); }
+  100% { transform:scale(1); box-shadow:0 0 0 rgba(240,68,56,0); }
+}
+
+@keyframes newMoment {
+  from {
+    opacity:0;
+    transform:translateY(-10px);
+  }
+  to {
+    opacity:1;
+    transform:translateY(0);
+  }
 }
