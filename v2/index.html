@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Canes Rivalry V2</title>
-  <link rel="stylesheet" href="styles.css?v=picks-ui-2" />
+  <link rel="stylesheet" href="styles.css?v=pregame-picks-1" />
 </head>
 <body>
   <div class="sync-flash" id="syncFlash"></div>
@@ -56,6 +56,50 @@
         </div>
 
         <div class="leader-banner">🚨 Aho first-goal bonus gives Aaron a 2-point swing</div>
+      </section>
+
+      <section class="panel-card pregame-card">
+        <div class="panel-header">
+          <div>
+            <span class="eyebrow">Pregame state</span>
+            <h2>Pick Selection</h2>
+          </div>
+          <span class="panel-tag calm">Editable</span>
+        </div>
+
+        <p class="helper-copy">Each person picks 2 unique Canes players. Picks stay editable until the first tracked scoring event.</p>
+
+        <div class="pregame-slots">
+          <div class="slot-owner">
+            <div class="player-column-header">
+              <div>
+                <strong>Aaron</strong>
+                <span id="aaronSlotCount">2/2 selected</span>
+              </div>
+            </div>
+            <div class="slot-list" id="aaronSlots"></div>
+          </div>
+
+          <div class="slot-owner">
+            <div class="player-column-header">
+              <div>
+                <strong>Julie</strong>
+                <span id="julieSlotCount">2/2 selected</span>
+              </div>
+            </div>
+            <div class="slot-list" id="julieSlots"></div>
+          </div>
+        </div>
+
+        <div class="roster-picker">
+          <div class="player-column-header">
+            <div>
+              <strong>Available Canes</strong>
+              <span>Tap to mock-select. Already picked players are disabled.</span>
+            </div>
+          </div>
+          <div class="roster-chip-grid" id="rosterChips"></div>
+        </div>
       </section>
 
       <section class="panel-card picks-card">
@@ -114,20 +158,9 @@
         </div>
 
         <div class="pulse-grid">
-          <div class="pulse-tile sync-target">
-            <span>CAR Goals</span>
-            <strong>2</strong>
-          </div>
-
-          <div class="pulse-tile">
-            <span>Tracked Points</span>
-            <strong>4</strong>
-          </div>
-
-          <div class="pulse-tile wide">
-            <span>Latest Event</span>
-            <strong>Svechnikov assist → Aaron +1</strong>
-          </div>
+          <div class="pulse-tile sync-target"><span>CAR Goals</span><strong>2</strong></div>
+          <div class="pulse-tile"><span>Tracked Points</span><strong>4</strong></div>
+          <div class="pulse-tile wide"><span>Latest Event</span><strong>Svechnikov assist → Aaron +1</strong></div>
         </div>
       </section>
 
@@ -139,7 +172,6 @@
           </div>
           <button id="toastButton" class="mini-button">Toast</button>
         </div>
-
         <div id="momentsFeed" class="moments-feed"></div>
       </section>
 
@@ -151,7 +183,6 @@
           </div>
           <span class="panel-tag calm">Healthy</span>
         </div>
-
         <div class="status-list">
           <div><strong>NHL Sync</strong><span>24 sec ago</span></div>
           <div><strong>Realtime</strong><span>Connected</span></div>
@@ -167,11 +198,9 @@
     <button>Manage</button>
   </nav>
 
-  <div class="toast-stack">
-    <div id="toast" class="toast">🚨 Goal sync animation preview</div>
-  </div>
+  <div class="toast-stack"><div id="toast" class="toast">🚨 Goal sync animation preview</div></div>
 
-  <script src="js/mock-data.js?v=picks-ui-2"></script>
-  <script src="js/app.js?v=picks-ui-2"></script>
+  <script src="js/mock-data.js?v=pregame-picks-1"></script>
+  <script src="js/app.js?v=pregame-picks-1"></script>
 </body>
 </html>
