@@ -1,30 +1,54 @@
 window.V2_MOCK_DATA = {
-  picks: [
-    {
-      player: 'Sebastian Aho',
-      type: 'Anytime Goal',
-      status: 'Hot streak'
+  scoringRules: {
+    goal: 2,
+    assist: 1,
+    firstGoalBonus: 1
+  },
+  firstGoalScorer: 'Sebastian Aho',
+  users: {
+    aaron: {
+      name: 'Aaron',
+      score: 7,
+      tonightDelta: 3,
+      picks: [
+        {
+          player: 'Sebastian Aho',
+          goals: 1,
+          assists: 0,
+          firstGoal: true
+        },
+        {
+          player: 'Andrei Svechnikov',
+          goals: 0,
+          assists: 1,
+          firstGoal: false
+        }
+      ]
     },
-    {
-      player: 'Svechnikov',
-      type: '2+ Points',
-      status: 'Momentum'
-    },
-    {
-      player: 'Jarvis',
-      type: 'Power Play Point',
-      status: 'Underdog'
-    },
-    {
-      player: 'Slavin',
-      type: 'Blocked Shots',
-      status: 'Defensive lock'
+    julie: {
+      name: 'Julie',
+      score: 5,
+      tonightDelta: 1,
+      picks: [
+        {
+          player: 'Seth Jarvis',
+          goals: 0,
+          assists: 1,
+          firstGoal: false
+        },
+        {
+          player: 'Jaccob Slavin',
+          goals: 0,
+          assists: 0,
+          firstGoal: false
+        }
+      ]
     }
-  ],
+  },
   moments: [
-    '🚨 Aho opens scoring in the 1st',
-    '📈 Svechnikov extends the rivalry lead',
-    '⚡ Jarvis power-play pressure building',
-    '✅ Live sync completed successfully'
+    '🚨 Sebastian Aho scored first — Aaron gets goal + first-goal bonus',
+    '🍎 Andrei Svechnikov assist — Aaron +1',
+    '🍎 Seth Jarvis assist — Julie +1',
+    '✅ No overlapping picks detected'
   ]
 };
