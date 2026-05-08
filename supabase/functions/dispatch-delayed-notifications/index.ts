@@ -41,6 +41,25 @@ function isRecentlyActive(lastSeenAt: unknown) {
   return ageSeconds >= 0 && ageSeconds <= ACTIVE_DEVICE_SKIP_SECONDS;
 }
 
+async function logVisibleEvent(
+  gameId: number,
+  eventKey: string,
+  payload: Record<string, unknown>,
+) {
+  const { error } = await serviceDb.from("rivalry_events").insert({
+    game_id: gameId,
+    event_type: "push_notification",
+    event_key: eventKey,
+    payload,
+  });
+
+  if (!error) return true;
+  if ((error as any).code === "23505") return false;
+
+  console.error("rivalry_events insert failed:", error);
+  throw error;
+}
+
 async function sendPush(
   title: string,
   body: string,
@@ -137,7 +156,7 @@ Deno.serve(async (req) => {
 
     const { data: rows, error } = await serviceDb
       .from("delayed_notifications")
-      .select("id, game_id, event_key, event_type, title, message, payload, triggered_by, suppress_self, visible_after, sent_at, created_at")
+      .select("id, game_id, event_key, title, message, payload, triggered_by, suppress_self, visible_after, sent_at, created_at")
       .is("sent_at", null)
       .lte("visible_after", nowIso)
       .order("visible_after", { ascending: true })
@@ -155,6 +174,7 @@ Deno.serve(async (req) => {
     let processed = 0;
     let skipped = 0;
     let failed = 0;
+    let deduped = 0;
     let pushAttempted = 0;
     let pushSent = 0;
 
@@ -181,18 +201,44 @@ Deno.serve(async (req) => {
       }
 
       try {
-        const payload = (row.payload && typeof row.payload === "object")
+        const title = String(row.title || "").trim();
+        const message = String(row.message || "").trim();
+        const eventKey = String(row.event_key || "").trim();
+        const gameId = Number(row.game_id || 0);
+        const triggeredBy = String(row.triggered_by || "").trim();
+        const suppressSelf = row.suppress_self === true;
+        const storedPayload = (row.payload && typeof row.payload === "object")
           ? row.payload as Record<string, unknown>
           : {};
 
+        const visiblePayload = {
+          title,
+          message,
+          tag: eventKey,
+          url: String(storedPayload.url || "/"),
+          game_id: gameId,
+          triggered_by: triggeredBy,
+          triggered_by_name: String(storedPayload.triggered_by_name || "App"),
+          suppress_self: suppressSelf,
+          ...storedPayload,
+        };
+
+        const insertedVisibleEvent = await logVisibleEvent(gameId, eventKey, visiblePayload);
+
+        if (!insertedVisibleEvent) {
+          deduped += 1;
+          processed += 1;
+          continue;
+        }
+
         const push = await sendPush(
-          String(row.title || "").trim(),
-          String(row.message || "").trim(),
-          String(row.event_key || "").trim(),
-          Number(row.game_id || 0),
-          String(row.triggered_by || "").trim(),
-          row.suppress_self === true,
-          payload,
+          title,
+          message,
+          eventKey,
+          gameId,
+          triggeredBy,
+          suppressSelf,
+          visiblePayload,
         );
 
         processed += 1;
@@ -215,6 +261,7 @@ Deno.serve(async (req) => {
       processed,
       sent: processed,
       skipped,
+      deduped,
       failed,
       push_attempted: pushAttempted,
       push_sent: pushSent,
