@@ -1,18 +1,12 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
-import webpush from "npm:web-push@3.6.7";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
 const CRON_SECRET = Deno.env.get("CRON_SECRET")!;
-const VAPID_PUBLIC_KEY = Deno.env.get("VAPID_PUBLIC_KEY")!;
-const VAPID_PRIVATE_KEY = Deno.env.get("VAPID_PRIVATE_KEY")!;
-const VAPID_SUBJECT = Deno.env.get("VAPID_SUBJECT")!;
 
 const serviceDb = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
 const authDb = createClient(SUPABASE_URL, ANON_KEY);
-
-webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
 
 const SPOILER_DELAY_MS = 90_000;
 
@@ -36,23 +30,45 @@ function json(body: unknown, status = 200) {
 async function isAuthorized(req: Request) {
   const cronSecret = req.headers.get("x-cron-secret");
   if (cronSecret && cronSecret === CRON_SECRET) {
-    return { ok: true, via: "cron", user: null };
+    return { ok: true, via: "cron", user: null, email: "finalize-game" };
   }
 
   const authHeader = req.headers.get("Authorization") || "";
   const token = authHeader.replace(/^Bearer\s+/i, "").trim();
 
   if (!token) {
-    return { ok: false, via: "none", user: null };
+    return { ok: false, via: "none", user: null, email: null, error: "Unauthorized", status: 401 };
   }
 
   const { data, error } = await authDb.auth.getUser(token);
 
   if (error || !data?.user) {
-    return { ok: false, via: "auth", user: null };
+    return { ok: false, via: "auth", user: null, email: null, error: "Unauthorized", status: 401 };
   }
 
-  return { ok: true, via: "auth", user: data.user };
+  const userEmail = String(data.user.email || "").toLowerCase().trim();
+
+  if (!userEmail) {
+    return { ok: false, via: "auth", user: data.user, email: null, error: "Missing user email", status: 401 };
+  }
+
+  const { data: allowedUser, error: allowedError } = await serviceDb
+    .from("allowed_users")
+    .select("email")
+    .ilike("email", userEmail)
+    .maybeSingle();
+
+  if (allowedError) {
+    console.error("allowed_users lookup failed:", allowedError);
+
+    return {ok: false, via: "auth", user: data.user, email: userEmail, error: "Authorization check failed", status: 500 };
+  }
+
+  if (!allowedUser) {
+    return { ok: false, via: "auth", user: data.user, email: userEmail, error: "Forbidden", status: 403 };
+  }
+  
+  return { ok: true, via: "auth", user: data.user, email: userEmail };
 }
 
 function normalizeName(name: any) {
