@@ -13,7 +13,7 @@
   <link rel="icon" type="image/png" href="./assets/app-icon.png?v=finalpng1" />
   <link rel="apple-touch-icon" href="./assets/app-icon.png?v=finalpng1" />
 
-  <link rel="stylesheet" href="styles.css?v=cleanup1" />
+  <link rel="stylesheet" href="styles.css?v=manage1" />
 </head>
 <body>
   <div class="sync-flash" id="syncFlash"></div>
@@ -157,6 +157,50 @@
         </section>
       </main>
     </section>
+
+    <section class="app-view" id="manageView" data-view="manage" aria-label="Manage rivalry settings">
+      <main class="content-stack manage-stack">
+        <section class="hero-card manage-hero">
+          <div class="hero-topline clean-topline">
+            <span class="status-pill">Settings</span>
+            <span class="panel-tag calm">V2 planning</span>
+          </div>
+          <div class="manage-hero-copy">
+            <h2>Control the rivalry experience.</h2>
+            <p>Manage notifications, spoiler timing, picks, and future app preferences from one clean place.</p>
+          </div>
+        </section>
+
+        <section class="panel-card manage-card featured-manage-card">
+          <div class="panel-header">
+            <div><span class="eyebrow">Notifications</span><h2>Stream Mode</h2></div>
+            <span class="panel-tag warning">Planned</span>
+          </div>
+          <p>Delay visible push alerts, in-app toasts, and rivalry moments so fast NHL sync does not spoil streamed broadcasts.</p>
+          <div class="setting-preview-row"><span>Current mock</span><b>90 sec delay</b></div>
+        </section>
+
+        <section class="manage-grid">
+          <article class="panel-card manage-card">
+            <div class="manage-card-icon">🔔</div>
+            <div><span class="eyebrow">Alerts</span><h3>Notification Rules</h3></div>
+            <p>Push vs toast behavior, grouped moments, quiet windows, and live rivalry alerts.</p>
+          </article>
+
+          <article class="panel-card manage-card">
+            <div class="manage-card-icon">🏒</div>
+            <div><span class="eyebrow">Game setup</span><h3>Roster & Picks</h3></div>
+            <p>Future home for pick rules, selected players, lock timing, and roster management.</p>
+          </article>
+
+          <article class="panel-card manage-card">
+            <div class="manage-card-icon">⚙️</div>
+            <div><span class="eyebrow">App</span><h3>Preferences</h3></div>
+            <p>Theme direction, install info, version notes, and future system settings.</p>
+          </article>
+        </section>
+      </main>
+    </section>
   </div>
 
   <nav class="bottom-nav" id="bottomNav">
@@ -166,10 +210,10 @@
   </nav>
   <div class="toast-stack"><div id="toast" class="toast">Preview event</div></div>
 
-  <script src="js/mock-data.js?v=cleanup1"></script>
-  <script src="js/ui.js?v=cleanup1"></script>
-  <script src="js/tabs.js?v=cleanup1"></script>
-  <script src="js/gameday.js?v=cleanup1"></script>
-  <script src="js/app.js?v=cleanup1"></script>
+  <script src="js/mock-data.js?v=manage1"></script>
+  <script src="js/ui.js?v=manage1"></script>
+  <script src="js/tabs.js?v=manage1"></script>
+  <script src="js/gameday.js?v=manage1"></script>
+  <script src="js/app.js?v=manage1"></script>
 </body>
 </html>
