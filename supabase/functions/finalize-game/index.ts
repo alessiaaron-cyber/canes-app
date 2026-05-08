@@ -205,7 +205,7 @@ Deno.serve(async (req) => {
   const auth = await isAuthorized(req);
 
   if (!auth.ok) {
-    return json({ ok: false, error: "Unauthorized" }, 401);
+    return json({ ok: false, error: auth.error || "Unauthorized" }, auth.status || 401);
   }
 
   try {
