@@ -1,18 +1,14 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
-import webpush from "npm:web-push@3.6.7";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
 const CRON_SECRET = Deno.env.get("CRON_SECRET")!;
-const VAPID_PUBLIC_KEY = Deno.env.get("VAPID_PUBLIC_KEY")!;
-const VAPID_PRIVATE_KEY = Deno.env.get("VAPID_PRIVATE_KEY")!;
-const VAPID_SUBJECT = Deno.env.get("VAPID_SUBJECT")!;
 
 const serviceDb = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
 const authDb = createClient(SUPABASE_URL, ANON_KEY);
 
-webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
+const SPOILER_DELAY_MS = 90_000;
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -34,23 +30,44 @@ function json(body: unknown, status = 200) {
 async function isAuthorized(req: Request) {
   const cronSecret = req.headers.get("x-cron-secret");
   if (cronSecret && cronSecret === CRON_SECRET) {
-    return { ok: true, via: "cron", user: null };
+    return { ok: true, via: "cron", user: null, email: "finalize-game" };
   }
 
   const authHeader = req.headers.get("Authorization") || "";
   const token = authHeader.replace(/^Bearer\s+/i, "").trim();
 
   if (!token) {
-    return { ok: false, via: "none", user: null };
+    return { ok: false, via: "none", user: null, email: null, error: "Unauthorized", status: 401 };
   }
 
   const { data, error } = await authDb.auth.getUser(token);
 
   if (error || !data?.user) {
-    return { ok: false, via: "auth", user: null };
+    return { ok: false, via: "auth", user: null, email: null, error: "Unauthorized", status: 401 };
   }
 
-  return { ok: true, via: "auth", user: data.user };
+  const userEmail = String(data.user.email || "").toLowerCase().trim();
+
+  if (!userEmail) {
+    return { ok: false, via: "auth", user: data.user, email: null, error: "Missing user email", status: 401 };
+  }
+
+  const { data: allowedUser, error: allowedError } = await serviceDb
+    .from("allowed_users")
+    .select("email")
+    .ilike("email", userEmail)
+    .maybeSingle();
+
+  if (allowedError) {
+    console.error("allowed_users lookup failed:", allowedError);
+    return { ok: false, via: "auth", user: data.user, email: userEmail, error: "Authorization check failed", status: 500 };
+  }
+
+  if (!allowedUser) {
+    return { ok: false, via: "auth", user: data.user, email: userEmail, error: "Forbidden", status: 403 };
+  }
+
+  return { ok: true, via: "auth", user: data.user, email: userEmail };
 }
 
 function normalizeName(name: any) {
@@ -121,72 +138,9 @@ function buildFinalMessage(a: number, j: number) {
   };
 }
 
-async function logOnce(gameId: number, eventKey: string, payload: Record<string, unknown>) {
-  const { error } = await serviceDb.from("rivalry_events").insert({
-    game_id: gameId,
-    event_type: "push_notification",
-    event_key: eventKey,
-    payload,
-  });
-
-  if (!error) return true;
-  if ((error as any).code === "23505") return false;
-
-  console.error("rivalry_events insert failed:", error);
-  return false;
-}
-
-async function sendPush(title: string, body: string, tag: string, gameId: number) {
-  const { data: subs, error } = await serviceDb.from("push_subscriptions").select("*");
-
-  if (error) {
-    console.error("push_subscriptions lookup failed:", error);
-    return { attempted: 0, sent: 0, removed: 0 };
-  }
-
-  let attempted = 0;
-  let sent = 0;
-  let removed = 0;
-
-  for (const sub of subs || []) {
-    attempted += 1;
-
-    try {
-      await webpush.sendNotification(
-        {
-          endpoint: sub.endpoint,
-          keys: {
-            p256dh: sub.p256dh,
-            auth: sub.auth,
-          },
-        },
-        JSON.stringify({
-          title,
-          body,
-          tag,
-          url: "/",
-          game_id: gameId,
-          triggered_by: "finalize-game",
-          triggered_by_name: "Finalize Game",
-        }),
-      );
-
-      sent += 1;
-    } catch (err: any) {
-      console.error("push send failed:", err?.statusCode || err?.message || err);
-
-      if (err?.statusCode === 404 || err?.statusCode === 410) {
-        await serviceDb.from("push_subscriptions").delete().eq("id", sub.id);
-        removed += 1;
-      }
-    }
-  }
-
-  return { attempted, sent, removed };
-}
-
-async function emitFinalPushOnce(gameId: number, title: string, body: string) {
+async function enqueueFinalNotification(gameId: number, title: string, body: string) {
   const eventKey = `final-${gameId}`;
+  const visibleAfter = new Date(Date.now() + SPOILER_DELAY_MS).toISOString();
 
   const payload = {
     title,
@@ -196,27 +150,47 @@ async function emitFinalPushOnce(gameId: number, title: string, body: string) {
     game_id: gameId,
     triggered_by: "finalize-game",
     triggered_by_name: "Finalize Game",
+    delay_visible: true,
+    suppress_self: false,
   };
 
-  const inserted = await logOnce(gameId, eventKey, payload);
+  const { error } = await serviceDb.from("delayed_notifications").insert({
+    game_id: gameId,
+    event_key: eventKey,
+    title,
+    message: body,
+    payload,
+    triggered_by: "finalize-game",
+    suppress_self: false,
+    visible_after: visibleAfter,
+  });
 
-  if (!inserted) {
+  if (!error) {
     return {
-      deduped: true,
+      delayed: true,
+      deduped: false,
       title,
       body,
+      event_key: eventKey,
+      visible_after: visibleAfter,
       push: { attempted: 0, sent: 0, removed: 0 },
     };
   }
 
-  const push = await sendPush(title, body, eventKey, gameId);
+  if ((error as any).code === "23505") {
+    return {
+      delayed: true,
+      deduped: true,
+      title,
+      body,
+      event_key: eventKey,
+      visible_after: visibleAfter,
+      push: { attempted: 0, sent: 0, removed: 0 },
+    };
+  }
 
-  return {
-    deduped: false,
-    title,
-    body,
-    push,
-  };
+  console.error("delayed final notification insert failed:", error);
+  throw error;
 }
 
 Deno.serve(async (req) => {
@@ -230,7 +204,7 @@ Deno.serve(async (req) => {
   const auth = await isAuthorized(req);
 
   if (!auth.ok) {
-    return json({ ok: false, error: "Unauthorized" }, 401);
+    return json({ ok: false, error: auth.error || "Unauthorized" }, auth.status || 401);
   }
 
   try {
@@ -349,7 +323,7 @@ Deno.serve(async (req) => {
     if (updateError) throw updateError;
 
     const finalMessage = buildFinalMessage(aaronPoints, juliePoints);
-    const notification = await emitFinalPushOnce(
+    const notification = await enqueueFinalNotification(
       gameId,
       finalMessage.title,
       finalMessage.body,
