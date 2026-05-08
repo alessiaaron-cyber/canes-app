@@ -1,7 +1,8 @@
 window.CR = window.CR || {};
 
 window.CR.switchTab = (tabName) => {
-  const targetTab = tabName === 'history' ? 'history' : 'gameday';
+  const validTabs = ['gameday', 'history', 'manage'];
+  const targetTab = validTabs.includes(tabName) ? tabName : 'gameday';
 
   document.querySelectorAll('.app-view').forEach((view) => {
     view.classList.toggle('active-view', view.dataset.view === targetTab);
@@ -16,7 +17,13 @@ window.CR.switchTab = (tabName) => {
   const pageTitle = document.querySelector('#pageTitle');
 
   if (pageTitle) {
-    pageTitle.textContent = targetTab === 'history' ? 'History' : 'Game Day';
+    if (targetTab === 'history') {
+      pageTitle.textContent = 'History';
+    } else if (targetTab === 'manage') {
+      pageTitle.textContent = 'Manage';
+    } else {
+      pageTitle.textContent = 'Game Day';
+    }
   }
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -29,11 +36,6 @@ window.CR.initTabs = () => {
     const button = event.target.closest('button[data-tab]');
 
     if (!button) return;
-
-    if (button.dataset.tab === 'manage') {
-      window.CR.showToast('Manage tab coming next');
-      return;
-    }
 
     window.CR.switchTab(button.dataset.tab);
   });
