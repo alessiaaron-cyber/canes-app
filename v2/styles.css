@@ -23,7 +23,7 @@
   --radius-card:28px;
   --radius-panel:22px;
   --bottom-nav-height:76px;
-  --bottom-nav-offset:18px;
+  --bottom-nav-offset:8px;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -61,7 +61,7 @@ body {
   width:100%;
   max-width:520px;
   margin:0 auto;
-  padding:calc(16px + env(safe-area-inset-top)) 14px calc(var(--bottom-nav-height) + var(--bottom-nav-offset) + env(safe-area-inset-bottom) + 48px);
+  padding:calc(16px + env(safe-area-inset-top)) 14px calc(var(--bottom-nav-height) + var(--bottom-nav-offset) + env(safe-area-inset-bottom) + 40px);
 }
 .content-stack { display:flex; flex-direction:column; gap:16px; }
 .app-view { display:none; }
