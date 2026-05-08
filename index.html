@@ -2330,7 +2330,7 @@ function pushUiPickChange({owner, slot, oldRow, player, goals, assists, points, 
     "Rivalry Stat Update",
     `${owner}'s ${shortPlayerName(player)} updated: ${statBits.join(" ")} (${delta >= 0 ? "+" : ""}${delta}).`,
     `ui-stat-${S.currentGame.id}-${owner}-${slot}-${Number(goals || 0)}-${Number(assists || 0)}-${Number(points || 0)}`,
-    { suppress_self: true, delay_visible: true }
+    { suppress_self: false, delay_visible: true }
   );
 }
 
