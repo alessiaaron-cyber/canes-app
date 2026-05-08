@@ -3,7 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Canes Rivalry V2</title>
+
+  <title>Rivalry Live</title>
+  <meta name="theme-color" content="#111827" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Rivalry" />
+
+  <link rel="icon" type="image/svg+xml" href="assets/rivalry-icon.svg?v=brand1" />
+  <link rel="apple-touch-icon" href="assets/rivalry-icon.svg?v=brand1" />
+
   <link rel="stylesheet" href="styles.css?v=gamedaypolish2" />
 </head>
 <body>
@@ -12,7 +21,7 @@
   <div class="app-shell">
     <header class="app-header" aria-label="V2 sandbox header">
       <div>
-        <span class="eyebrow">Canes Rivalry V2</span>
+        <span class="eyebrow">Rivalry Live Preview</span>
         <h1>Game Day</h1>
       </div>
       <button class="icon-button" id="refreshButton" type="button" aria-label="Simulate refresh">↻</button>
@@ -40,12 +49,12 @@
 
         <div class="rivalry-score-hero">
           <div class="rivalry-side">
-            <span>Aaron</span>
+            <span>Away</span>
             <strong id="aaronRivalryScore">0</strong>
           </div>
           <div class="rivalry-vs">vs</div>
           <div class="rivalry-side">
-            <span>Julie</span>
+            <span>Home</span>
             <strong id="julieRivalryScore">0</strong>
           </div>
         </div>
