@@ -58,68 +58,88 @@ function installPreviewBranding() {
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
 
-  const radius = 42;
-  ctx.fillStyle = '#111827';
+  roundRectPath(ctx, 0, 0, 180, 180, 42);
+  const bg = ctx.createLinearGradient(0, 0, 180, 180);
+  bg.addColorStop(0, '#ffffff');
+  bg.addColorStop(1, '#f5f7fa');
+  ctx.fillStyle = bg;
+  ctx.fill();
+
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+
+  ctx.strokeStyle = '#171717';
+  ctx.lineWidth = 6;
   ctx.beginPath();
-  ctx.moveTo(radius, 0);
-  ctx.lineTo(180 - radius, 0);
-  ctx.quadraticCurveTo(180, 0, 180, radius);
-  ctx.lineTo(180, 180 - radius);
-  ctx.quadraticCurveTo(180, 180, 180 - radius, 180);
-  ctx.lineTo(radius, 180);
-  ctx.quadraticCurveTo(0, 180, 0, 180 - radius);
-  ctx.lineTo(0, radius);
-  ctx.quadraticCurveTo(0, 0, radius, 0);
-  ctx.closePath();
-  ctx.fill();
-
-  ctx.fillStyle = '#ffffff';
-  roundRect(ctx, 22, 26, 136, 94, 18);
-  ctx.fill();
-
-  ctx.fillStyle = '#111827';
-  roundRect(ctx, 34, 38, 42, 58, 10);
-  roundRect(ctx, 104, 38, 42, 58, 10);
-  ctx.fill();
-
-  ctx.fillStyle = '#ffffff';
-  ctx.font = '700 34px -apple-system, Arial';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText('2', 55, 67);
-  ctx.fillText('1', 125, 67);
-
-  ctx.fillStyle = '#c8102e';
+  ctx.moveTo(54, 54);
+  ctx.lineTo(86, 104);
+  ctx.stroke();
   ctx.beginPath();
-  ctx.arc(90, 67, 13, 0, Math.PI * 2);
-  ctx.fill();
-
-  ctx.fillStyle = '#ffffff';
-  ctx.font = '800 10px -apple-system, Arial';
-  ctx.fillText('VS', 90, 68);
+  ctx.moveTo(126, 54);
+  ctx.lineTo(94, 104);
+  ctx.stroke();
 
   ctx.strokeStyle = '#c8102e';
-  ctx.lineWidth = 7;
-  ctx.lineCap = 'round';
+  ctx.lineWidth = 8;
   ctx.beginPath();
-  ctx.arc(90, 132, 24, 0.25 * Math.PI, 0.75 * Math.PI);
+  ctx.moveTo(49, 46);
+  ctx.lineTo(59, 61);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(131, 46);
+  ctx.lineTo(121, 61);
   ctx.stroke();
 
+  ctx.strokeStyle = '#171717';
+  ctx.lineWidth = 8;
+  ctx.beginPath();
+  ctx.moveTo(40, 125);
+  ctx.quadraticCurveTo(56, 114, 76, 118);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(140, 125);
+  ctx.quadraticCurveTo(124, 114, 104, 118);
+  ctx.stroke();
+
+  ctx.strokeStyle = '#50555f';
+  ctx.lineWidth = 3.5;
+  ctx.beginPath();
+  ctx.moveTo(38, 128);
+  ctx.quadraticCurveTo(57, 124, 80, 130);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(142, 128);
+  ctx.quadraticCurveTo(123, 124, 100, 130);
+  ctx.stroke();
+
+  drawStar(ctx, 90, 34, 9, '#c8102e');
+
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = '#c8102e';
+  ctx.font = '800 19px Arial';
+  ctx.fillText('CANES', 90, 82);
   ctx.fillStyle = '#111827';
-  ctx.beginPath();
-  ctx.arc(90, 129, 16, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.lineWidth = 5;
-  ctx.strokeStyle = '#ffffff';
-  ctx.stroke();
+  ctx.font = '800 19px Arial';
+  ctx.fillText('RIVALRY', 90, 103);
 
-  ctx.strokeStyle = '#ffffff';
-  ctx.lineWidth = 5;
+  ctx.fillStyle = 'rgba(210,214,220,.55)';
+  ellipse(ctx, 90, 141, 20, 6);
+  ctx.fill();
+  const puck = ctx.createLinearGradient(74, 126, 106, 148);
+  puck.addColorStop(0, '#1f2937');
+  puck.addColorStop(1, '#111827');
+  ctx.fillStyle = puck;
+  ellipse(ctx, 90, 137, 16, 5);
+  ctx.fill();
+  ctx.fillStyle = '#2d3748';
+  ellipse(ctx, 90, 132, 15, 5);
+  ctx.fill();
+  ctx.strokeStyle = '#c8102e';
+  ctx.lineWidth = 2.5;
   ctx.beginPath();
-  ctx.moveTo(54, 152);
-  ctx.lineTo(72, 143);
-  ctx.moveTo(126, 152);
-  ctx.lineTo(108, 143);
+  ctx.moveTo(72, 148);
+  ctx.quadraticCurveTo(90, 144, 108, 148);
   ctx.stroke();
 
   const dataUrl = canvas.toDataURL('image/png');
@@ -127,7 +147,7 @@ function installPreviewBranding() {
   setHeadLink('apple-touch-icon', dataUrl);
 }
 
-function roundRect(ctx, x, y, width, height, radius) {
+function roundRectPath(ctx, x, y, width, height, radius) {
   ctx.beginPath();
   ctx.moveTo(x + radius, y);
   ctx.lineTo(x + width - radius, y);
@@ -139,6 +159,27 @@ function roundRect(ctx, x, y, width, height, radius) {
   ctx.lineTo(x, y + radius);
   ctx.quadraticCurveTo(x, y, x + radius, y);
   ctx.closePath();
+}
+
+function drawStar(ctx, cx, cy, outerRadius, fill) {
+  const innerRadius = outerRadius * 0.48;
+  ctx.beginPath();
+  for (let i = 0; i < 10; i += 1) {
+    const angle = -Math.PI / 2 + i * Math.PI / 5;
+    const radius = i % 2 === 0 ? outerRadius : innerRadius;
+    const x = cx + Math.cos(angle) * radius;
+    const y = cy + Math.sin(angle) * radius;
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.closePath();
+  ctx.fillStyle = fill;
+  ctx.fill();
+}
+
+function ellipse(ctx, cx, cy, rx, ry) {
+  ctx.beginPath();
+  ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
 }
 
 function setHeadLink(rel, href) {
