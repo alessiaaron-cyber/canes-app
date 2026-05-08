@@ -57,7 +57,9 @@ body {
 }
 .app-shell { width:100%; max-width:520px; margin:0 auto; padding:calc(16px + env(safe-area-inset-top)) 14px 120px; }
 .content-stack { display:flex; flex-direction:column; gap:16px; }
-.app-header,.panel-header,.hero-topline,.bottom-nav,.single-user-head,.pick-select-row,.game-context-row,.locked-pick-row { display:flex; align-items:center; justify-content:space-between; }
+.app-view { display:none; }
+.app-view.active-view { display:block; }
+.app-header,.panel-header,.hero-topline,.bottom-nav,.single-user-head,.pick-select-row,.game-context-row,.locked-pick-row,.history-card-top,.history-context-row { display:flex; align-items:center; justify-content:space-between; }
 .hero-card,.panel-card,.bottom-nav {
   background:var(--surface-primary);
   border:1px solid var(--border-subtle);
@@ -72,9 +74,10 @@ body {
   text-transform:uppercase;
   color:var(--text-tertiary);
 }
-h1,h2 { margin:4px 0 0; }
+h1,h2,h3 { margin:4px 0 0; }
 h1 { font-size:42px; line-height:.94; letter-spacing:-.08em; }
 h2 { font-size:22px; letter-spacing:-.04em; }
+h3 { font-size:18px; letter-spacing:-.035em; }
 .status-pill,.panel-tag,.mini-button,.icon-button,.pick-lock-pill,.modern-live-pill { border-radius:999px; font-weight:850; }
 .status-pill,.panel-tag { padding:6px 10px; font-size:11px; text-transform:uppercase; }
 .status-pill,.mini-button,.icon-button { background:var(--accent-red); color:white; }
@@ -364,6 +367,113 @@ h2 { font-size:22px; letter-spacing:-.04em; }
   border-color:var(--border-strong);
   font-weight:850;
 }
+
+/* History */
+.history-stack { margin-top:14px; }
+.history-hero {
+  background:linear-gradient(135deg,#ffffff 0%,#fbfcfe 100%);
+  border-color:var(--border-strong);
+  box-shadow:var(--shadow-strong);
+}
+.history-season-score {
+  display:grid;
+  grid-template-columns:1fr auto 1fr;
+  align-items:center;
+  gap:12px;
+  margin-top:20px;
+}
+.history-season-score > div:not(.rivalry-vs) {
+  border:1px solid rgba(17,24,39,.08);
+  background:rgba(255,255,255,.94);
+  border-radius:24px;
+  padding:16px 10px;
+  text-align:center;
+}
+.history-season-score span {
+  display:block;
+  color:var(--text-tertiary);
+  font-size:12px;
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+}
+.history-season-score strong {
+  display:block;
+  margin-top:8px;
+  font-size:56px;
+  line-height:.9;
+  letter-spacing:-.08em;
+  font-weight:950;
+}
+.history-list { display:flex; flex-direction:column; gap:12px; margin-top:14px; }
+.history-game-card {
+  border:1px solid var(--border-subtle);
+  background:var(--surface-tertiary);
+  border-radius:22px;
+  padding:14px;
+}
+.history-game-card.featured-history {
+  border-color:var(--border-strong);
+  background:linear-gradient(180deg,#ffffff 0%,#fbfcfe 100%);
+}
+.history-card-top { gap:12px; align-items:flex-start; }
+.history-score-pill {
+  flex:0 0 auto;
+  display:grid;
+  place-items:center;
+  min-width:54px;
+  height:36px;
+  border-radius:999px;
+  background:var(--live-green-soft);
+  color:var(--live-green);
+  border:1px solid #abefc6;
+  font-size:16px;
+  font-weight:950;
+  font-variant-numeric:tabular-nums;
+}
+.history-score-pill.home-win {
+  background:var(--surface-secondary);
+  color:var(--text-secondary);
+  border-color:var(--border-subtle);
+}
+.history-context-row {
+  margin-top:10px;
+  gap:10px;
+  color:var(--text-tertiary);
+  font-size:12px;
+  font-weight:800;
+}
+.history-context-row b {
+  color:var(--text-secondary);
+  background:var(--surface-secondary);
+  border:1px solid var(--border-subtle);
+  border-radius:999px;
+  padding:6px 9px;
+  white-space:nowrap;
+}
+.history-game-card p {
+  margin:12px 0 0;
+  color:var(--text-secondary);
+  font-size:14px;
+  line-height:1.4;
+  font-weight:650;
+}
+.history-pick-grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-top:12px;
+}
+.history-pick-grid span {
+  border:1px solid var(--border-subtle);
+  background:white;
+  border-radius:14px;
+  padding:9px 10px;
+  font-size:12px;
+  font-weight:850;
+  color:var(--text-secondary);
+}
+
 .bottom-nav {
   position:fixed;
   left:50%;
