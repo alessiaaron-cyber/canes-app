@@ -2196,7 +2196,8 @@ async function sendPushNotification(title, message, tag="canes-rivalry", options
         title,
         message,
         event_key: tag,
-        suppress_self: options.suppress_self === true
+        suppress_self: options.suppress_self === true,
+        delay_visible: options.delay_visible === true
       }
     });
 
@@ -2329,7 +2330,7 @@ function pushUiPickChange({owner, slot, oldRow, player, goals, assists, points, 
     "Rivalry Stat Update",
     `${owner}'s ${shortPlayerName(player)} updated: ${statBits.join(" ")} (${delta >= 0 ? "+" : ""}${delta}).`,
     `ui-stat-${S.currentGame.id}-${owner}-${slot}-${Number(goals || 0)}-${Number(assists || 0)}-${Number(points || 0)}`,
-    { suppress_self: true }
+    { suppress_self: true, delay_visible: true }
   );
 }
 
@@ -2465,7 +2466,8 @@ async function saveCurrentGameField(field, value){
       sendPushNotification(
         "First Canes Goal",
         `${lastNameLabel(newValue)} gets the first-goal bonus. Absolutely disgusting behavior.`,
-        `ui-first-goal-${S.currentGame.id}-${newValue}`
+        `ui-first-goal-${S.currentGame.id}-${newValue}`,
+        { delay_visible: true }
       );
     }
     haptic();
