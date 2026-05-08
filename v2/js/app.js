@@ -32,6 +32,8 @@ const eventImpact = $('#eventImpact');
 const pulseBadge = $('#pulseBadge');
 const eventControls = $('#eventControls');
 const picksModule = $('#picksModule');
+const bottomNav = $('#bottomNav');
+const pageTitle = $('#pageTitle');
 
 const states = {
   missing: {
@@ -74,6 +76,18 @@ function flashSync() {
   void syncFlash?.offsetWidth;
   syncFlash?.classList.add('show');
   setTimeout(() => syncFlash?.classList.remove('show'), 720);
+}
+
+function switchTab(tabName) {
+  const targetTab = tabName === 'history' ? 'history' : 'gameday';
+  document.querySelectorAll('.app-view').forEach((view) => {
+    view.classList.toggle('active-view', view.dataset.view === targetTab);
+  });
+  bottomNav?.querySelectorAll('button[data-tab]').forEach((button) => {
+    button.classList.toggle('active', button.dataset.tab === targetTab);
+  });
+  setText(pageTitle, targetTab === 'history' ? 'History' : 'Game Day');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function getUserCardClass(userName, state, picks) {
@@ -180,6 +194,16 @@ stateSwitcher?.addEventListener('click', (event) => {
   if (button) renderState(button.dataset.mode);
 });
 
+bottomNav?.addEventListener('click', (event) => {
+  const button = event.target.closest('button[data-tab]');
+  if (!button) return;
+  if (button.dataset.tab === 'manage') {
+    showToast('Manage tab coming next');
+    return;
+  }
+  switchTab(button.dataset.tab);
+});
+
 toastButton?.addEventListener('click', runAaronScoreSwing);
 refreshButton?.addEventListener('click', () => { flashSync(); showToast('Mock realtime refresh complete'); });
 $('#simulateAaronGoal')?.addEventListener('click', runAaronScoreSwing);
@@ -188,6 +212,7 @@ $('#simulateJulieAssist')?.addEventListener('click', runJulieAssist);
 try {
   installPreviewBranding();
   renderState('pregame');
+  switchTab('gameday');
 } catch (error) {
   console.error('V2 render failed', error);
   document.body.insertAdjacentHTML('afterbegin', '<div style="padding:16px;background:#fee;color:#900;font-weight:800">V2 preview render failed. Check console.</div>');
