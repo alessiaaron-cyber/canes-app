@@ -109,6 +109,7 @@ async function sendPush(
           },
         },
         JSON.stringify({
+          ...payload,
           title,
           body,
           tag,
@@ -116,7 +117,6 @@ async function sendPush(
           game_id: gameId,
           triggered_by: triggeredBy,
           triggered_by_name: String(payload.triggered_by_name || "App"),
-          ...payload,
         }),
       );
 
@@ -212,6 +212,7 @@ Deno.serve(async (req) => {
           : {};
 
         const visiblePayload = {
+          ...storedPayload,
           title,
           message,
           tag: eventKey,
@@ -220,7 +221,6 @@ Deno.serve(async (req) => {
           triggered_by: triggeredBy,
           triggered_by_name: String(storedPayload.triggered_by_name || "App"),
           suppress_self: suppressSelf,
-          ...storedPayload,
         };
 
         const insertedVisibleEvent = await logVisibleEvent(gameId, eventKey, visiblePayload);
