@@ -14,6 +14,7 @@ const authDb = createClient(SUPABASE_URL, ANON_KEY);
 webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
 
 const ACTIVE_DEVICE_SKIP_SECONDS = 75;
+const SPOILER_DELAY_MS = 90_000;
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -78,6 +79,35 @@ async function logOnce(gameId: number, eventKey: string, payload: Record<string,
 
   console.error("rivalry_events insert failed:", error);
   return false;
+}
+
+async function enqueueDelayedNotification(
+  gameId: number,
+  eventKey: string,
+  title: string,
+  message: string,
+  payload: Record<string, unknown>,
+  triggeredBy: string,
+  suppressSelf: boolean,
+) {
+  const visibleAfter = new Date(Date.now() + SPOILER_DELAY_MS).toISOString();
+
+  const { error } = await serviceDb.from("delayed_notifications").insert({
+    game_id: gameId,
+    event_key: eventKey,
+    title,
+    message,
+    payload,
+    triggered_by: triggeredBy,
+    suppress_self: suppressSelf,
+    visible_after: visibleAfter,
+  });
+
+  if (!error) return { inserted: true, visible_after: visibleAfter };
+  if ((error as any).code === "23505") return { inserted: false, visible_after: visibleAfter };
+
+  console.error("delayed_notifications insert failed:", error);
+  throw error;
 }
 
 function isRecentlyActive(lastSeenAt: unknown) {
@@ -188,6 +218,7 @@ Deno.serve(async (req) => {
     const message = String(body?.message || "").trim();
     const eventKey = String(body?.event_key || "").trim();
     const suppressSelf = body?.suppress_self === true;
+    const delayVisible = body?.delay_visible === true;
 
     if (!gameId) return json({ ok: false, error: "Missing game_id" }, 400);
     if (!title) return json({ ok: false, error: "Missing title" }, 400);
@@ -203,13 +234,40 @@ Deno.serve(async (req) => {
       triggered_by: allowed.email,
       triggered_by_name: "App",
       suppress_self: suppressSelf,
+      delay_visible: delayVisible,
     };
+
+    if (delayVisible) {
+      const queued = await enqueueDelayedNotification(
+        gameId,
+        eventKey,
+        title,
+        message,
+        payload,
+        allowed.email as string,
+        suppressSelf,
+      );
+
+      return json({
+        ok: true,
+        delayed: true,
+        deduped: !queued.inserted,
+        notification: {
+          title,
+          message,
+          event_key: eventKey,
+          visible_after: queued.visible_after,
+          push: { attempted: 0, sent: 0, skipped_self: 0, skipped_active: 0, removed: 0 },
+        },
+      });
+    }
 
     const inserted = await logOnce(gameId, eventKey, payload);
 
     if (!inserted) {
       return json({
         ok: true,
+        delayed: false,
         deduped: true,
         notification: {
           title,
@@ -231,6 +289,7 @@ Deno.serve(async (req) => {
 
     return json({
       ok: true,
+      delayed: false,
       deduped: false,
       notification: {
         title,
