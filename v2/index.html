@@ -13,7 +13,7 @@
   <link rel="icon" type="image/png" href="./assets/app-icon.png?v=finalpng1" />
   <link rel="apple-touch-icon" href="./assets/app-icon.png?v=finalpng1" />
 
-  <link rel="stylesheet" href="styles.css?v=brandfoundation1" />
+  <link rel="stylesheet" href="styles.css?v=history1" />
 </head>
 <body>
   <div class="sync-flash" id="syncFlash"></div>
@@ -22,81 +22,151 @@
     <header class="app-header" aria-label="V2 sandbox header">
       <div>
         <span class="eyebrow">Canes Rivalry V2</span>
-        <h1>Game Day</h1>
+        <h1 id="pageTitle">Game Day</h1>
       </div>
       <button class="icon-button" id="refreshButton" type="button" aria-label="Simulate refresh">↻</button>
     </header>
 
-    <section class="state-lab panel-card" aria-label="UI state switcher">
-      <div class="panel-header compact-header">
-        <div><span class="eyebrow">UI State Lab</span><h2 id="stateTitle">Pregame Ready</h2></div>
-        <span class="panel-tag calm" id="stateBadge">Editable</span>
-      </div>
-      <div class="state-switcher" id="stateSwitcher">
-        <button class="active" data-mode="pregame" type="button">Pregame</button>
-        <button data-mode="missing" type="button">Missing</button>
-        <button data-mode="live" type="button">Live</button>
-        <button data-mode="final" type="button">Final</button>
-      </div>
+    <section class="app-view active-view" id="gameDayView" data-view="gameday">
+      <section class="state-lab panel-card" aria-label="UI state switcher">
+        <div class="panel-header compact-header">
+          <div><span class="eyebrow">UI State Lab</span><h2 id="stateTitle">Pregame Ready</h2></div>
+          <span class="panel-tag calm" id="stateBadge">Editable</span>
+        </div>
+        <div class="state-switcher" id="stateSwitcher">
+          <button class="active" data-mode="pregame" type="button">Pregame</button>
+          <button data-mode="missing" type="button">Missing</button>
+          <button data-mode="live" type="button">Live</button>
+          <button data-mode="final" type="button">Final</button>
+        </div>
+      </section>
+
+      <main class="content-stack">
+        <section class="hero-card rivalry-hero">
+          <div class="hero-topline clean-topline">
+            <span class="status-pill" id="gameStatusPill">Pregame</span>
+            <span class="modern-live-pill" id="statusText"><span aria-hidden="true"></span> Ready</span>
+          </div>
+
+          <div class="rivalry-score-hero">
+            <div class="rivalry-side">
+              <span>Away</span>
+              <strong id="aaronRivalryScore">0</strong>
+            </div>
+            <div class="rivalry-vs">vs</div>
+            <div class="rivalry-side">
+              <span>Home</span>
+              <strong id="julieRivalryScore">0</strong>
+            </div>
+          </div>
+
+          <div class="game-context-row">
+            <span id="gameSubline">Tonight · 7:00 PM · Picks open</span>
+            <b><span id="canesScore">0</span>-<span id="oppScore">0</span> CAR/NYR</b>
+          </div>
+        </section>
+
+        <section class="panel-card picks-card single-picks-card" id="picksModule">
+          <div class="panel-header">
+            <div><span class="eyebrow" id="picksEyebrow">Game picks</span><h2 id="picksTitle">Make Your Picks</h2></div>
+            <span class="panel-tag calm" id="picksBadge">Editable</span>
+          </div>
+          <div class="pick-flow-note" id="picksNote">2 Canes each · no duplicate players · locks when scoring starts</div>
+          <div class="single-picks-layout" id="picksContent"></div>
+        </section>
+
+        <section class="panel-card event-card" id="pulseCard">
+          <div class="panel-header"><div><span class="eyebrow">Game event</span><h2>Latest Event</h2></div><span class="panel-tag live" id="pulseBadge">Active</span></div>
+          <div class="latest-event-box">
+            <strong id="latestEvent">Waiting for puck drop</strong>
+            <span id="eventImpact">No rivalry points yet</span>
+          </div>
+          <div class="event-controls" id="eventControls">
+            <button id="simulateAaronGoal" type="button">Aaron goal swing</button>
+            <button id="simulateJulieAssist" type="button">Julie assist</button>
+          </div>
+        </section>
+
+        <section class="panel-card">
+          <div class="panel-header"><div><span class="eyebrow">Timeline</span><h2>Rivalry Moments</h2></div><button id="toastButton" class="mini-button">Animate</button></div>
+          <div id="momentsFeed" class="moments-feed"></div>
+        </section>
+      </main>
     </section>
 
-    <main class="content-stack">
-      <section class="hero-card rivalry-hero">
-        <div class="hero-topline clean-topline">
-          <span class="status-pill" id="gameStatusPill">Pregame</span>
-          <span class="modern-live-pill" id="statusText"><span aria-hidden="true"></span> Ready</span>
-        </div>
-
-        <div class="rivalry-score-hero">
-          <div class="rivalry-side">
-            <span>Away</span>
-            <strong id="aaronRivalryScore">0</strong>
+    <section class="app-view" id="historyView" data-view="history" aria-label="Past games history">
+      <main class="content-stack history-stack">
+        <section class="hero-card history-hero">
+          <div class="hero-topline clean-topline">
+            <span class="status-pill">Season</span>
+            <span class="panel-tag calm">3 game sample</span>
           </div>
-          <div class="rivalry-vs">vs</div>
-          <div class="rivalry-side">
-            <span>Home</span>
-            <strong id="julieRivalryScore">0</strong>
+          <div class="history-season-score">
+            <div><span>Away</span><strong>2</strong></div>
+            <div class="rivalry-vs">vs</div>
+            <div><span>Home</span><strong>1</strong></div>
           </div>
-        </div>
+          <div class="game-context-row">
+            <span>Past rivalry nights · newest first</span>
+            <b>CAR context included</b>
+          </div>
+        </section>
 
-        <div class="game-context-row">
-          <span id="gameSubline">Tonight · 7:00 PM · Picks open</span>
-          <b><span id="canesScore">0</span>-<span id="oppScore">0</span> CAR/NYR</b>
-        </div>
-      </section>
+        <section class="panel-card history-summary-card">
+          <div class="panel-header">
+            <div><span class="eyebrow">Rivalry archive</span><h2>Past Games</h2></div>
+            <span class="panel-tag dark">Mock</span>
+          </div>
+          <div class="history-list">
+            <article class="history-game-card featured-history">
+              <div class="history-card-top">
+                <div><span class="eyebrow">May 8 · Final</span><h3>Away wins the night</h3></div>
+                <span class="history-score-pill">5-2</span>
+              </div>
+              <div class="history-context-row"><span>CAR 3 · NYR 2</span><b>First-goal bonus</b></div>
+              <p>Sebastian Aho’s first goal created the swing, and Svechnikov added the insurance assist.</p>
+              <div class="history-pick-grid">
+                <span>Aho +4</span><span>Svechnikov +1</span><span>Jarvis +2</span><span>Slavin +0</span>
+              </div>
+            </article>
 
-      <section class="panel-card picks-card single-picks-card" id="picksModule">
-        <div class="panel-header">
-          <div><span class="eyebrow" id="picksEyebrow">Game picks</span><h2 id="picksTitle">Make Your Picks</h2></div>
-          <span class="panel-tag calm" id="picksBadge">Editable</span>
-        </div>
-        <div class="pick-flow-note" id="picksNote">2 Canes each · no duplicate players · locks when scoring starts</div>
-        <div class="single-picks-layout" id="picksContent"></div>
-      </section>
+            <article class="history-game-card">
+              <div class="history-card-top">
+                <div><span class="eyebrow">May 5 · Final</span><h3>Home answers late</h3></div>
+                <span class="history-score-pill home-win">3-4</span>
+              </div>
+              <div class="history-context-row"><span>CAR 2 · NJD 4</span><b>Late assist swing</b></div>
+              <p>A quiet first period turned into a one-point finish after a third-period assist.</p>
+              <div class="history-pick-grid">
+                <span>Aho +1</span><span>Burns +2</span><span>Jarvis +3</span><span>Slavin +1</span>
+              </div>
+            </article>
 
-      <section class="panel-card event-card" id="pulseCard">
-        <div class="panel-header"><div><span class="eyebrow">Game event</span><h2>Latest Event</h2></div><span class="panel-tag live" id="pulseBadge">Active</span></div>
-        <div class="latest-event-box">
-          <strong id="latestEvent">Waiting for puck drop</strong>
-          <span id="eventImpact">No rivalry points yet</span>
-        </div>
-        <div class="event-controls" id="eventControls">
-          <button id="simulateAaronGoal" type="button">Aaron goal swing</button>
-          <button id="simulateJulieAssist" type="button">Julie assist</button>
-        </div>
-      </section>
-
-      <section class="panel-card">
-        <div class="panel-header"><div><span class="eyebrow">Timeline</span><h2>Rivalry Moments</h2></div><button id="toastButton" class="mini-button">Animate</button></div>
-        <div id="momentsFeed" class="moments-feed"></div>
-      </section>
-    </main>
+            <article class="history-game-card">
+              <div class="history-card-top">
+                <div><span class="eyebrow">May 2 · Final</span><h3>Away controls early</h3></div>
+                <span class="history-score-pill">6-1</span>
+              </div>
+              <div class="history-context-row"><span>CAR 5 · WSH 1</span><b>Goal-heavy picks</b></div>
+              <p>Two picked players hit the scoresheet early, making the rest of the game a chase.</p>
+              <div class="history-pick-grid">
+                <span>Necas +3</span><span>Aho +3</span><span>Staal +1</span><span>Burns +0</span>
+              </div>
+            </article>
+          </div>
+        </section>
+      </main>
+    </section>
   </div>
 
-  <nav class="bottom-nav"><button class="active">Game Day</button><button>History</button><button>Manage</button></nav>
+  <nav class="bottom-nav" id="bottomNav">
+    <button class="active" data-tab="gameday" type="button">Game Day</button>
+    <button data-tab="history" type="button">History</button>
+    <button data-tab="manage" type="button">Manage</button>
+  </nav>
   <div class="toast-stack"><div id="toast" class="toast">Preview event</div></div>
 
   <script src="js/mock-data.js?v=1dbrand3"></script>
-  <script src="js/app.js?v=1dbrand3"></script>
+  <script src="js/app.js?v=history1"></script>
 </body>
 </html>
