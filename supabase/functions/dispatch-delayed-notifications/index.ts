@@ -168,7 +168,7 @@ Deno.serve(async (req) => {
     }
 
     if (!rows || rows.length === 0) {
-      return json({ ok: true, processed: 0, sent: 0, skipped: 0, failed: 0, push_attempted: 0, push_sent: 0 });
+      return json({ ok: true, processed: 0, skipped: 0, deduped: 0, failed: 0, push_attempted: 0, push_sent: 0 });
     }
 
     let processed = 0;
@@ -259,7 +259,6 @@ Deno.serve(async (req) => {
     return json({
       ok: true,
       processed,
-      sent: processed,
       skipped,
       deduped,
       failed,
