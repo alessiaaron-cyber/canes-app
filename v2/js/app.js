@@ -9,12 +9,16 @@ const toast = document.querySelector('#toast');
 
 function switchTab(tabName) {
   document.querySelectorAll('.app-view').forEach((view) => {
-    view.classList.toggle('is-active', view.dataset.view === tabName);
+    const isActive = view.dataset.view === tabName;
+    view.classList.toggle('is-active', isActive);
   });
 
   document.querySelectorAll('.nav-button').forEach((button) => {
-    const active = button.dataset.tab === tabName;
-    button.classList.toggle('is-active', active);
+    const isActive = button.dataset.tab === tabName;
+    button.classList.toggle('is-active', isActive);
+
+    if (isActive) button.setAttribute('aria-current', 'page');
+    else button.removeAttribute('aria-current');
   });
 
   if (!pageTitle) return;
@@ -37,26 +41,24 @@ function showToast(message) {
   }, 1800);
 }
 
-window.addEventListener('DOMContentLoaded', () => {
-  initGameDayStateLab();
+initGameDayStateLab();
 
-  if (historyRoot) {
-    historyRoot.innerHTML = renderHistoryPage();
-  }
+if (historyRoot) {
+  historyRoot.innerHTML = renderHistoryPage();
+}
 
-  if (manageRoot) {
-    manageRoot.innerHTML = renderManagePage();
-  }
+if (manageRoot) {
+  manageRoot.innerHTML = renderManagePage();
+}
 
-  document.querySelectorAll('.nav-button').forEach((button) => {
-    button.addEventListener('click', () => {
-      switchTab(button.dataset.tab);
-    });
+document.querySelectorAll('.nav-button').forEach((button) => {
+  button.addEventListener('click', () => {
+    switchTab(button.dataset.tab);
   });
-
-  document.querySelector('#refreshButton')?.addEventListener('click', () => {
-    showToast('Preview refreshed');
-  });
-
-  switchTab('gameday');
 });
+
+document.querySelector('#refreshButton')?.addEventListener('click', () => {
+  showToast('Preview refreshed');
+});
+
+switchTab('gameday');
