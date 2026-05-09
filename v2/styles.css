@@ -144,6 +144,9 @@ p { margin:0; }
   animation:livePulse 1.9s infinite;
   flex:0 0 auto;
 }
+.hero-copy-row { margin-top:14px; }
+.hero-kicker { color:var(--accent-red); }
+.hero-title { margin-top:6px; }
 .rivalry-score-hero { display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:12px; margin-top:22px; }
 .rivalry-side {
   min-width:0;
@@ -153,6 +156,15 @@ p { margin:0; }
   padding:18px 10px 16px;
   text-align:center;
   box-shadow:0 1px 0 rgba(255,255,255,.8) inset;
+}
+.rivalry-team-card { position:relative; overflow:hidden; }
+.rivalry-team-card::after {
+  content:"";
+  position:absolute;
+  inset:auto -20% -35% -20%;
+  height:56%;
+  background:linear-gradient(180deg,rgba(200,16,46,0),rgba(200,16,46,.06));
+  pointer-events:none;
 }
 .rivalry-side span {
   display:block;
@@ -183,12 +195,100 @@ p { margin:0; }
   text-transform:uppercase;
   box-shadow:0 8px 18px rgba(17,24,39,.16);
 }
+.rivalry-swing-module {
+  margin-top:16px;
+  padding:14px 14px 12px;
+  border:1px solid var(--border-subtle);
+  border-radius:20px;
+  background:linear-gradient(180deg,rgba(255,255,255,.96) 0%,rgba(246,247,249,.96) 100%);
+  box-shadow:0 1px 0 rgba(255,255,255,.85) inset;
+}
+.rivalry-swing-copy {
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+}
+.rivalry-swing-copy strong {
+  display:block;
+  font-size:15px;
+  line-height:1.2;
+  letter-spacing:-.02em;
+}
+.rivalry-swing-copy span {
+  display:block;
+  margin-top:4px;
+  color:var(--text-tertiary);
+  font-size:12px;
+  font-weight:700;
+  line-height:1.3;
+}
+.rivalry-momentum-track {
+  position:relative;
+  height:10px;
+  margin-top:14px;
+  border-radius:999px;
+  background:linear-gradient(90deg, rgba(200,16,46,.22) 0%, rgba(200,16,46,.7) 34%, #eef1f4 50%, rgba(17,24,39,.35) 68%, rgba(17,24,39,.18) 100%);
+  overflow:visible;
+}
+.rivalry-momentum-track::before {
+  content:"";
+  position:absolute;
+  left:50%;
+  top:-4px;
+  bottom:-4px;
+  width:1px;
+  background:rgba(102,112,133,.45);
+  transform:translateX(-50%);
+}
+.rivalry-momentum-fill {
+  position:absolute;
+  top:0;
+  bottom:0;
+  left:50%;
+  width:0;
+  border-radius:999px;
+  background:linear-gradient(90deg,rgba(200,16,46,.92),rgba(255,59,48,.92));
+  box-shadow:0 0 16px rgba(200,16,46,.22);
+  transition:left .28s ease,width .28s ease,background .28s ease,box-shadow .28s ease;
+}
+.rivalry-swing-module[data-variant="home"] .rivalry-momentum-fill {
+  background:linear-gradient(90deg,rgba(17,24,39,.8),rgba(71,84,103,.92));
+  box-shadow:0 0 16px rgba(17,24,39,.12);
+}
+.rivalry-swing-module[data-variant="neutral"] .rivalry-momentum-fill {
+  width:0 !important;
+  box-shadow:none;
+}
+.rivalry-momentum-marker {
+  position:absolute;
+  top:50%;
+  left:50%;
+  width:18px;
+  height:18px;
+  border-radius:50%;
+  background:#ffffff;
+  border:2px solid var(--accent-red);
+  box-shadow:0 4px 12px rgba(200,16,46,.18);
+  transform:translate(-50%,-50%);
+  transition:left .28s ease,border-color .28s ease,box-shadow .28s ease;
+}
+.rivalry-swing-module[data-variant="home"] .rivalry-momentum-marker {
+  border-color:var(--ink-strong);
+  box-shadow:0 4px 12px rgba(17,24,39,.14);
+}
+.rivalry-swing-module[data-variant="neutral"] .rivalry-momentum-marker {
+  border-color:#cfd4dc;
+  box-shadow:0 3px 8px rgba(16,24,40,.08);
+}
+.hero-support-row { margin-top:14px; }
 .game-context-row {
   margin-top:14px;
   gap:12px;
   color:var(--text-tertiary);
   font-size:13px;
 }
+.game-context-primary { margin-top:0; }
 .game-context-row span { min-width:0; }
 .game-context-row b {
   white-space:nowrap;
@@ -202,6 +302,8 @@ p { margin:0; }
 }
 
 .single-picks-card { padding-bottom:16px; }
+.apple-panel-card { background:linear-gradient(180deg,#ffffff 0%,#fbfbfc 100%); }
+.section-header-lg { align-items:flex-start; }
 .pick-flow-note {
   margin-top:10px;
   font-size:12px;
@@ -358,6 +460,9 @@ p { margin:0; }
   border:1px solid var(--border-subtle);
   border-radius:20px;
   background:var(--surface-tertiary);
+}
+.apple-highlight-box {
+  background:linear-gradient(180deg,#ffffff 0%,#f8f9fb 100%);
 }
 .latest-event-box strong { display:block; font-size:17px; letter-spacing:-.02em; }
 .latest-event-box span { display:block; margin-top:5px; color:var(--text-tertiary); font-size:13px; font-weight:750; }
