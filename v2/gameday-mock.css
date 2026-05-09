@@ -1,0 +1,117 @@
+/* Focused Game Day mockup overrides */
+#gameDayView[data-mode="pregame"] .live-panel,
+#gameDayView[data-mode="missing"] .live-panel {
+  opacity: .94;
+}
+
+#gameDayView[data-mode="final"] .rivalry-broadcast-card {
+  background: linear-gradient(180deg,#ffffff 0%,#f7f7f8 100%);
+}
+
+#gameDayView[data-mode="final"] .hero-event-icon {
+  background: radial-gradient(circle at center,#fff 0%,#f1f5f9 56%,rgba(203,213,225,.8) 100%);
+  color: #111827;
+}
+
+.hero-delta,
+.hero-momentum-module::after,
+.hero-momentum-module .rivalry-swing-copy,
+.hero-momentum-module .rivalry-momentum-track::after {
+  display: none !important;
+}
+
+.hero-momentum-row {
+  display: block !important;
+  margin-top: 14px !important;
+}
+
+.hero-momentum-row::before {
+  content: "Momentum";
+  display: block;
+  margin-bottom: 8px;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: #667085;
+}
+
+.hero-momentum-module {
+  margin-top: 0 !important;
+}
+
+.hero-momentum-module .rivalry-momentum-track {
+  margin-top: 0 !important;
+  height: 10px !important;
+  border-radius: 999px !important;
+  background: linear-gradient(90deg, rgba(200,16,46,.82) 0%, rgba(200,16,46,.28) 46%, rgba(17,24,39,.18) 54%, rgba(17,24,39,.78) 100%) !important;
+  overflow: hidden !important;
+}
+
+.hero-momentum-module .rivalry-momentum-track::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: -4px;
+  bottom: -4px;
+  width: 1px;
+  background: rgba(255,255,255,.9);
+  transform: translateX(-50%);
+}
+
+.hero-momentum-module .rivalry-momentum-fill {
+  display: none !important;
+}
+
+.hero-momentum-module .rivalry-momentum-marker {
+  width: 16px !important;
+  height: 16px !important;
+  border: 2px solid #ffffff !important;
+  background: #111827 !important;
+  box-shadow: 0 4px 12px rgba(16,24,40,.18) !important;
+}
+
+.hero-event-copy strong,
+.feed-row-body strong {
+  letter-spacing: -.03em;
+}
+
+.hero-event-copy span,
+.feed-row-body span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pick-owner-card {
+  border-radius: 22px !important;
+  box-shadow: 0 4px 12px rgba(16,24,40,.04) !important;
+}
+
+.pick-row-item {
+  min-height: 70px !important;
+}
+
+.pick-owner-footer {
+  background: #fbfbfc;
+}
+
+.feed-row {
+  border-radius: 20px !important;
+  box-shadow: 0 4px 12px rgba(16,24,40,.04) !important;
+}
+
+.feed-row.featured {
+  box-shadow: 0 8px 18px rgba(200,16,46,.08) !important;
+}
+
+@media (max-width: 420px) {
+  .hero-event-card {
+    grid-template-columns: auto 1fr !important;
+  }
+
+  .hero-event-time {
+    grid-column: 2 / 3;
+    text-align: left !important;
+  }
+}
