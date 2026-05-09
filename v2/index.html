@@ -12,25 +12,9 @@
 
   <link rel="icon" type="image/png" href="./assets/app-icon.png?v=finalpng1" />
   <link rel="apple-touch-icon" href="./assets/app-icon.png?v=finalpng1" />
-  <link rel="stylesheet" href="styles.css?v=player6" />
+  <link rel="stylesheet" href="styles.css?v=player8" />
+  <link rel="stylesheet" href="gameday-mock.css?v=player8" />
   <style>
-    .rivalry-broadcast-card{padding:16px;background:linear-gradient(180deg,#ffffff 0%,#fafbfc 100%);border-color:#d9dde5;box-shadow:0 14px 30px rgba(16,24,40,.08)}
-    .hero-status-bar{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px}
-    .hero-live-pill{display:inline-flex;align-items:center;gap:7px;color:#c8102e;font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.04em}
-    .hero-live-pill::before{content:"";width:9px;height:9px;border-radius:50%;background:#c8102e;box-shadow:0 0 0 0 rgba(200,16,46,.28);animation:livePulse 1.9s infinite}
-    .hero-phase,.hero-sync{font-size:12px;font-weight:850;color:#475467}.hero-phase{text-align:center;letter-spacing:.06em;text-transform:uppercase}.hero-sync{justify-self:end;color:#667085}
-    .hero-divider{height:1px;margin:12px 0 14px;background:linear-gradient(90deg,rgba(217,221,229,0) 0%,rgba(217,221,229,1) 18%,rgba(217,221,229,1) 82%,rgba(217,221,229,0) 100%)}
-    .rivalry-score-shell{display:grid;grid-template-columns:1fr auto 1fr;align-items:start;gap:14px}.rivalry-person{text-align:center}.rivalry-person strong{display:block;margin-top:6px;font-size:62px;line-height:.88;font-weight:950;letter-spacing:-.08em}.rivalry-person-left strong{color:#c8102e}
-    .rivalry-avatar{width:48px;height:48px;border-radius:999px;display:grid;place-items:center;margin:0 auto 10px;font-size:26px;font-weight:950;border:4px solid #d0d5dd;background:#fff;color:#111827}.rivalry-avatar-red{border-color:#ef4444}.rivalry-avatar-dark{border-color:#d0d5dd}
-    .rivalry-name{display:block;font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.05em;color:#475467}
-    .rivalry-center-mark{display:flex;flex-direction:column;align-items:center;gap:8px;padding-top:6px}.rivalry-logo-wrap{width:56px;height:56px;border-radius:16px;overflow:hidden;background:#fff;border:1px solid #e7e9ee;box-shadow:0 8px 18px rgba(16,24,40,.08)}.rivalry-logo{display:block;width:100%;height:100%;object-fit:cover}.rivalry-center-label{font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:#667085}
-    .hero-momentum-row{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;margin-top:16px}.hero-delta{min-width:24px;font-size:16px;font-weight:950;letter-spacing:-.04em}.hero-delta-left{color:#c8102e}.hero-delta-right{text-align:right;color:#475467}.hero-momentum-module{margin-top:0!important}.hero-momentum-module::after,.hero-momentum-module .rivalry-swing-copy{display:none!important}.hero-momentum-module .rivalry-momentum-track{margin-top:0;height:8px}
-    .hero-event-card{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;margin-top:16px;padding:14px;border:1px solid #e7e9ee;border-radius:18px;background:linear-gradient(180deg,#fff 0%,#f8f9fb 100%)}.hero-event-icon{width:34px;height:34px;border-radius:999px;display:grid;place-items:center;background:radial-gradient(circle at center,#fff 0%,#fdecef 56%,rgba(248,179,190,.72) 100%);color:#c8102e;font-size:16px;font-weight:900}.hero-event-copy strong{display:block;font-size:17px;letter-spacing:-.03em}.hero-event-copy span{display:block;margin-top:3px;font-size:13px;color:#475467;font-weight:700}.hero-event-time{font-size:11px;font-weight:850;color:#667085;text-align:right}
-    .hero-context-strip{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px}.hero-context-label{font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:#667085}.hero-context-strip b{padding:8px 10px;border-radius:999px;background:#f6f7f9;border:1px solid #e7e9ee;font-size:12px;color:#475467}
-    .picks-panel,.live-panel{padding:16px}.rivalry-picks-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}.pick-owner-card{border:1px solid #e7e9ee;border-radius:20px;background:#fff;overflow:hidden}.pick-owner-card.owner-aaron{border-color:#f2b8c0}.pick-owner-card.owner-julie{border-color:#d0d5dd}.pick-owner-head{display:flex;align-items:center;justify-content:space-between;padding:12px 12px 11px;color:#fff;font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.05em}.owner-aaron .pick-owner-head{background:linear-gradient(180deg,#e11d2e 0%,#c8102e 100%)}.owner-julie .pick-owner-head{background:linear-gradient(180deg,#374151 0%,#111827 100%)}.pick-owner-count{font-size:11px;opacity:.95}.pick-owner-list{display:flex;flex-direction:column}.pick-owner-footer{padding:10px 12px;border-top:1px solid #e7e9ee;font-size:12px;font-weight:850;color:#667085;display:flex;justify-content:space-between}
-    .pick-row-item{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:11px 12px;border-top:1px solid #e7e9ee;min-height:66px}.pick-player-icon{width:28px;height:28px;border-radius:999px;display:grid;place-items:center;font-size:14px;font-weight:900;background:#f6f7f9;color:#475467}.owner-aaron .pick-player-icon.active{background:#fdecef;color:#c8102e}.owner-julie .pick-player-icon.active{background:#eef1f4;color:#111827}.pick-main{min-width:0}.pick-main strong{display:block;font-size:15px;letter-spacing:-.02em;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pick-main span{display:block;margin-top:3px;font-size:12px;color:#667085;font-weight:700;text-transform:uppercase;letter-spacing:.04em}.pick-side-meta{text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:5px}.pick-side-meta em{font-style:normal;font-size:11px;font-weight:800;color:#667085}.pick-side-meta b{font-size:14px;font-weight:950;color:#475467}.pick-add-btn{width:28px;height:28px;border-radius:999px;border:1.5px solid currentColor;display:grid;place-items:center;font-size:16px;font-weight:700}.owner-aaron .pick-add-btn{color:#c8102e}.owner-julie .pick-add-btn{color:#6b7280}
-    .live-panel .latest-event-box{border-radius:18px;background:#fff}.rivalry-feed{margin-top:14px}.feed-row{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;padding:14px;border:1px solid #e7e9ee;border-radius:18px;background:#fff}.feed-row.featured{background:linear-gradient(180deg,#fff 0%,#fdf6f7 100%);border-color:#f0c9d0}.feed-row-icon{width:36px;height:36px;border-radius:999px;display:grid;place-items:center;font-size:16px;font-weight:900;background:#f6f7f9;color:#475467}.feed-row.featured .feed-row-icon{background:radial-gradient(circle at center,#fff 0%,#fdecef 56%,rgba(248,179,190,.72) 100%);color:#c8102e}.feed-row-body{min-width:0}.feed-row-top{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:850;color:#667085;text-transform:uppercase;letter-spacing:.05em}.feed-row-body strong{display:block;margin-top:3px;font-size:16px;letter-spacing:-.03em;line-height:1.15}.feed-row-body span{display:block;margin-top:4px;font-size:13px;color:#475467;font-weight:700}.feed-row-score{font-size:15px;font-weight:950;letter-spacing:-.03em;color:#475467}.feed-row.featured .feed-row-score{color:#c8102e}
-    @media (max-width:420px){.rivalry-picks-grid{grid-template-columns:1fr}.rivalry-logo-wrap{width:48px;height:48px}.rivalry-person strong{font-size:54px}}
   </style>
 </head>
 <body>
@@ -60,190 +44,6 @@
       </section>
 
       <main class="content-stack">
-        <section class="hero-card rivalry-broadcast-card">
-          <div class="hero-status-bar">
-            <span class="hero-live-pill" id="gameStatusPill">Pregame</span>
-            <span class="hero-phase" id="heroPhase">TONIGHT 7:00 PM</span>
-            <span class="hero-sync" id="statusText">Ready</span>
-          </div>
-          <div class="hero-divider"></div>
-          <div class="rivalry-score-shell">
-            <div class="rivalry-person rivalry-person-left">
-              <div class="rivalry-avatar rivalry-avatar-red" id="aaronBadge">A</div>
-              <span class="rivalry-name">Aaron</span>
-              <strong id="aaronRivalryScore">0</strong>
-            </div>
-            <div class="rivalry-center-mark">
-              <div class="rivalry-logo-wrap">
-                <img src="./assets/app-icon.png?v=finalpng1" alt="Canes Rivalry" class="rivalry-logo" />
-              </div>
-              <span class="rivalry-center-label">Rivalry Score</span>
-            </div>
-            <div class="rivalry-person rivalry-person-right">
-              <div class="rivalry-avatar rivalry-avatar-dark" id="julieBadge">J</div>
-              <span class="rivalry-name">Julie</span>
-              <strong id="julieRivalryScore">0</strong>
-            </div>
-          </div>
-          <div class="hero-momentum-row" aria-label="Rivalry momentum">
-            <span class="hero-delta hero-delta-left" id="swingDeltaLeft">0</span>
-            <div class="rivalry-swing-module hero-momentum-module" data-variant="neutral">
-              <div class="rivalry-momentum-track" aria-hidden="true">
-                <span class="rivalry-momentum-fill" id="swingFill"></span>
-                <span class="rivalry-momentum-marker" id="swingMarker"></span>
-              </div>
-            </div>
-            <span class="hero-delta hero-delta-right" id="swingDeltaRight">0</span>
-          </div>
-          <article class="hero-event-card">
-            <div class="hero-event-icon" aria-hidden="true">✦</div>
-            <div class="hero-event-copy">
-              <strong id="heroEventTitle">Rivalry ready</strong>
-              <span id="heroEventMeta">Waiting for puck drop</span>
-            </div>
-            <span class="hero-event-time" id="gameSubline">Tonight · 7:00 PM · Picks open</span>
-          </article>
-          <div class="hero-context-strip">
-            <span class="hero-context-label">Canes game</span>
-            <b><span id="canesScore">0</span>-<span id="oppScore">0</span> CAR/NYR</b>
-          </div>
-        </section>
-
-        <section class="panel-card picks-panel" id="picksModule">
-          <div class="panel-header section-header-lg">
-            <div>
-              <span class="eyebrow" id="picksEyebrow">Game picks</span>
-              <h2 id="picksTitle">Select 2 Players Each</h2>
-            </div>
-            <span class="panel-tag calm" id="picksBadge">Editable</span>
-          </div>
-          <div class="pick-flow-note" id="picksNote">2 Canes each · no duplicate players · locks when scoring starts</div>
-          <div class="rivalry-picks-grid" id="picksContent"></div>
-        </section>
-
-        <section class="panel-card live-panel" id="pulseCard">
-          <div class="panel-header section-header-lg">
-            <div><span class="eyebrow">Live rivalry feed</span><h2>Latest Event</h2></div>
-            <span class="panel-tag live" id="pulseBadge">Active</span>
-          </div>
-          <div class="latest-event-box apple-highlight-box">
-            <strong id="latestEvent">Waiting for puck drop</strong>
-            <span id="eventImpact">No rivalry points yet</span>
-          </div>
-          <div class="event-controls" id="eventControls">
-            <button id="simulateAaronGoal" type="button">Aaron goal swing</button>
-            <button id="simulateJulieAssist" type="button">Julie assist</button>
-          </div>
-          <div id="momentsFeed" class="moments-feed rivalry-feed"></div>
-        </section>
-      </main>
-    </section>
-
-    <section class="app-view" id="historyView" data-view="history" aria-label="Past games history">
-      <main class="content-stack history-stack">
-        <section class="hero-card history-hero">
-          <div class="hero-topline clean-topline">
-            <span class="status-pill">Season</span>
-            <span class="panel-tag calm">3 game sample</span>
-          </div>
-          <div class="history-season-score">
-            <div><span>Away</span><strong>2</strong></div>
-            <div class="rivalry-vs">vs</div>
-            <div><span>Home</span><strong>1</strong></div>
-          </div>
-          <div class="game-context-row">
-            <span>Past rivalry nights · newest first</span>
-            <b>CAR context included</b>
-          </div>
-        </section>
-
-        <section class="panel-card history-summary-card">
-          <div class="panel-header">
-            <div><span class="eyebrow">Rivalry archive</span><h2>Past Games</h2></div>
-            <span class="panel-tag dark">Mock</span>
-          </div>
-          <div class="history-list">
-            <article class="history-game-card featured-history">
-              <div class="history-card-top">
-                <div><span class="eyebrow">May 8 · Final</span><h3>Away wins the night</h3></div>
-                <span class="history-score-pill">5-2</span>
-              </div>
-              <div class="history-context-row"><span>CAR 3 · NYR 2</span><b>First-goal bonus</b></div>
-              <p>Sebastian Aho’s first goal created the swing, and Svechnikov added the insurance assist.</p>
-              <div class="history-pick-grid">
-                <span>Aho +4</span><span>Svechnikov +1</span><span>Jarvis +2</span><span>Slavin +0</span>
-              </div>
-            </article>
-
-            <article class="history-game-card">
-              <div class="history-card-top">
-                <div><span class="eyebrow">May 5 · Final</span><h3>Home answers late</h3></div>
-                <span class="history-score-pill home-win">3-4</span>
-              </div>
-              <div class="history-context-row"><span>CAR 2 · NJD 4</span><b>Late assist swing</b></div>
-              <p>A quiet first period turned into a one-point finish after a third-period assist.</p>
-              <div class="history-pick-grid">
-                <span>Aho +1</span><span>Burns +2</span><span>Jarvis +3</span><span>Slavin +1</span>
-              </div>
-            </article>
-
-            <article class="history-game-card">
-              <div class="history-card-top">
-                <div><span class="eyebrow">May 2 · Final</span><h3>Away controls early</h3></div>
-                <span class="history-score-pill">6-1</span>
-              </div>
-              <div class="history-context-row"><span>CAR 5 · WSH 1</span><b>Goal-heavy picks</b></div>
-              <p>Two picked players hit the scoresheet early, making the rest of the game a chase.</p>
-              <div class="history-pick-grid">
-                <span>Necas +3</span><span>Aho +3</span><span>Staal +1</span><span>Burns +0</span>
-              </div>
-            </article>
-          </div>
-        </section>
-      </main>
-    </section>
-
-    <section class="app-view" id="manageView" data-view="manage" aria-label="Manage rivalry settings">
-      <main class="content-stack manage-stack">
-        <section class="hero-card manage-hero">
-          <div class="hero-topline clean-topline">
-            <span class="status-pill">Settings</span>
-            <span class="panel-tag calm">V2 planning</span>
-          </div>
-          <div class="manage-hero-copy">
-            <h2>Control the rivalry experience.</h2>
-            <p>Manage notifications, spoiler timing, picks, and future app preferences from one clean place.</p>
-          </div>
-        </section>
-
-        <section class="panel-card manage-card featured-manage-card">
-          <div class="panel-header">
-            <div><span class="eyebrow">Notifications</span><h2>Stream Mode</h2></div>
-            <span class="panel-tag warning">Planned</span>
-          </div>
-          <p>Delay visible push alerts, in-app toasts, and rivalry moments so fast NHL sync does not spoil streamed broadcasts.</p>
-          <div class="setting-preview-row"><span>Current mock</span><b>90 sec delay</b></div>
-        </section>
-
-        <section class="manage-grid">
-          <article class="panel-card manage-card">
-            <div class="manage-card-icon">🔔</div>
-            <div><span class="eyebrow">Alerts</span><h3>Notification Rules</h3></div>
-            <p>Push vs toast behavior, grouped moments, quiet windows, and live rivalry alerts.</p>
-          </article>
-
-          <article class="panel-card manage-card">
-            <div class="manage-card-icon">🏒</div>
-            <div><span class="eyebrow">Game setup</span><h3>Roster & Picks</h3></div>
-            <p>Future home for pick rules, selected players, lock timing, and roster management.</p>
-          </article>
-
-          <article class="panel-card manage-card">
-            <div class="manage-card-icon">⚙️</div>
-            <div><span class="eyebrow">App</span><h3>Preferences</h3></div>
-            <p>Theme direction, install info, version notes, and future system settings.</p>
-          </article>
-        </section>
       </main>
     </section>
   </div>
@@ -255,10 +55,10 @@
   </nav>
   <div class="toast-stack"><div id="toast" class="toast">Preview event</div></div>
 
-  <script src="js/mock-data.js?v=player6"></script>
-  <script src="js/ui.js?v=player6"></script>
-  <script src="js/tabs.js?v=player6"></script>
-  <script src="js/gameday.js?v=player6"></script>
-  <script src="js/app.js?v=player6"></script>
+  <script src="js/mock-data.js?v=player8"></script>
+  <script src="js/ui.js?v=player8"></script>
+  <script src="js/tabs.js?v=player8"></script>
+  <script src="js/gameday.js?v=player8"></script>
+  <script src="js/app.js?v=player8"></script>
 </body>
 </html>
