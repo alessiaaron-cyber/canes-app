@@ -12,161 +12,7 @@
 
   <link rel="icon" type="image/png" href="./assets/app-icon.png?v=finalpng1" />
   <link rel="apple-touch-icon" href="./assets/app-icon.png?v=finalpng1" />
-
-  <link rel="stylesheet" href="styles.css?v=hero1" />
-  <style>
-    .broadcast-hero-card {
-      background: linear-gradient(180deg,#ffffff 0%,#fafbfc 100%);
-      border-color: #d9dde5;
-      box-shadow: 0 14px 30px rgba(16,24,40,.08);
-      padding: 16px 16px 16px;
-    }
-    .broadcast-hero-topline {
-      display:grid;
-      grid-template-columns:auto 1fr auto;
-      align-items:center;
-      gap:10px;
-    }
-    .broadcast-live-pill {
-      display:inline-flex;
-      align-items:center;
-      gap:7px;
-      color:#c8102e;
-      font-size:13px;
-      font-weight:900;
-      letter-spacing:.02em;
-      text-transform:uppercase;
-    }
-    .broadcast-live-pill::before {
-      content:"";
-      width:10px;
-      height:10px;
-      border-radius:50%;
-      background:#c8102e;
-      box-shadow:0 0 0 0 rgba(200,16,46,.28);
-      animation:livePulse 1.9s infinite;
-    }
-    .broadcast-phase {
-      text-align:center;
-      color:#475467;
-      font-size:13px;
-      font-weight:850;
-      letter-spacing:.05em;
-      text-transform:uppercase;
-    }
-    .broadcast-sync {
-      justify-self:end;
-      color:#667085;
-      font-size:12px;
-      font-weight:800;
-    }
-    .broadcast-divider {
-      height:1px;
-      margin:12px 0 14px;
-      background:linear-gradient(90deg,rgba(217,221,229,0) 0%,rgba(217,221,229,1) 16%,rgba(217,221,229,1) 84%,rgba(217,221,229,0) 100%);
-    }
-    .broadcast-scoreboard {
-      display:grid;
-      grid-template-columns:1fr auto 1fr;
-      align-items:start;
-      gap:12px;
-    }
-    .broadcast-side {
-      text-align:center;
-      padding-top:4px;
-    }
-    .broadcast-side span {
-      display:block;
-      color:#111827;
-      font-size:13px;
-      font-weight:900;
-      letter-spacing:.04em;
-      text-transform:uppercase;
-    }
-    .broadcast-side strong {
-      display:block;
-      margin-top:6px;
-      font-size:64px;
-      line-height:.9;
-      letter-spacing:-.08em;
-      font-weight:950;
-    }
-    .broadcast-side:not(.home-side) strong { color:#c8102e; }
-    .broadcast-center-stack {
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      gap:8px;
-      padding-top:2px;
-    }
-    .broadcast-crest {
-      width:78px;
-      height:78px;
-      border-radius:20px;
-      display:grid;
-      place-items:center;
-      background:#ffffff;
-      box-shadow:0 10px 24px rgba(17,24,39,.10);
-      border:1px solid #e7e9ee;
-      overflow:hidden;
-    }
-    .broadcast-crest img {
-      display:block;
-      width:100%;
-      height:100%;
-      object-fit:cover;
-    }
-    .broadcast-center-label {
-      color:#667085;
-      font-size:12px;
-      font-weight:900;
-      letter-spacing:.08em;
-      text-transform:uppercase;
-    }
-    .broadcast-momentum-row {
-      display:grid;
-      grid-template-columns:auto 1fr auto;
-      align-items:center;
-      gap:12px;
-      margin-top:18px;
-    }
-    .broadcast-delta { min-width:28px; font-size:14px; font-weight:950; letter-spacing:-.03em; }
-    .broadcast-delta.left { color:#c8102e; text-align:left; }
-    .broadcast-delta.right { color:#475467; text-align:right; }
-    .broadcast-meter-inline { margin-top:0 !important; }
-    .broadcast-meter-inline::after { display:none !important; }
-    .broadcast-meter-inline .rivalry-swing-copy { display:none !important; }
-    .broadcast-event-card {
-      display:grid;
-      grid-template-columns:auto 1fr auto;
-      align-items:center;
-      gap:12px;
-      margin-top:22px;
-      padding:14px 14px;
-      border-radius:18px;
-      background:linear-gradient(180deg,#ffffff 0%,#f8f9fb 100%);
-      border:1px solid #e7e9ee;
-      box-shadow:0 10px 24px rgba(16,24,40,.06);
-    }
-    .broadcast-event-icon {
-      width:34px;
-      height:34px;
-      border-radius:50%;
-      display:grid;
-      place-items:center;
-      background:radial-gradient(circle at center,rgba(255,255,255,1) 0%,rgba(253,236,239,1) 56%,rgba(248,179,190,.72) 100%);
-      color:#c8102e;
-      font-size:18px;
-      box-shadow:0 0 18px rgba(200,16,46,.14);
-    }
-    .broadcast-event-copy strong { display:block; font-size:16px; line-height:1.15; letter-spacing:-.02em; }
-    .broadcast-event-copy span { display:block; margin-top:4px; color:#475467; font-size:14px; font-weight:700; }
-    .broadcast-event-chevron { color:#98a2b3; font-size:28px; line-height:1; }
-    @media (max-width:420px) {
-      .broadcast-side strong { font-size:56px; }
-      .broadcast-crest { width:66px; height:66px; }
-    }
-  </style>
+  <link rel="stylesheet" href="styles.css?v=player1" />
 </head>
 <body>
   <div class="sync-flash" id="syncFlash"></div>
@@ -195,71 +41,79 @@
       </section>
 
       <main class="content-stack">
-        <section class="hero-card rivalry-hero broadcast-hero-card">
-          <div class="broadcast-hero-topline">
-            <span class="broadcast-live-pill" id="gameStatusPill">Pregame</span>
-            <span class="broadcast-phase" id="heroPhase">TONIGHT 7:00 PM</span>
-            <span class="broadcast-sync" id="statusText">Ready</span>
+        <section class="hero-card rivalry-broadcast-card">
+          <div class="hero-status-bar">
+            <span class="hero-live-pill" id="gameStatusPill">Pregame</span>
+            <span class="hero-phase" id="heroPhase">TONIGHT 7:00 PM</span>
+            <span class="hero-sync" id="statusText">Ready</span>
           </div>
 
-          <div class="broadcast-divider"></div>
+          <div class="hero-divider"></div>
 
-          <div class="broadcast-scoreboard">
-            <div class="broadcast-side">
-              <span>Away</span>
+          <div class="rivalry-score-shell">
+            <div class="rivalry-person rivalry-person-left">
+              <div class="rivalry-avatar rivalry-avatar-red" id="aaronBadge">A</div>
+              <span class="rivalry-name">Aaron</span>
               <strong id="aaronRivalryScore">0</strong>
             </div>
 
-            <div class="broadcast-center-stack">
-              <div class="broadcast-crest" aria-hidden="true"><img src="./assets/app-icon.png?v=finalpng1" alt="" /></div>
-              <span class="broadcast-center-label">Rivalry Score</span>
+            <div class="rivalry-center-mark">
+              <div class="rivalry-logo-wrap">
+                <img src="./assets/app-icon.png?v=finalpng1" alt="Canes Rivalry" class="rivalry-logo" />
+              </div>
+              <span class="rivalry-center-label">Rivalry Score</span>
             </div>
 
-            <div class="broadcast-side home-side">
-              <span>Home</span>
+            <div class="rivalry-person rivalry-person-right">
+              <div class="rivalry-avatar rivalry-avatar-dark" id="julieBadge">J</div>
+              <span class="rivalry-name">Julie</span>
               <strong id="julieRivalryScore">0</strong>
             </div>
           </div>
 
-          <div class="broadcast-momentum-row" aria-label="Rivalry momentum">
-            <span class="broadcast-delta left" id="swingDeltaLeft">0</span>
-            <div class="rivalry-swing-module broadcast-meter-inline" data-variant="neutral">
+          <div class="hero-momentum-row" aria-label="Rivalry momentum">
+            <span class="hero-delta hero-delta-left" id="swingDeltaLeft">0</span>
+            <div class="rivalry-swing-module hero-momentum-module" data-variant="neutral">
               <div class="rivalry-momentum-track" aria-hidden="true">
                 <span class="rivalry-momentum-fill" id="swingFill"></span>
                 <span class="rivalry-momentum-marker" id="swingMarker"></span>
               </div>
             </div>
-            <span class="broadcast-delta right" id="swingDeltaRight">0</span>
+            <span class="hero-delta hero-delta-right" id="swingDeltaRight">0</span>
           </div>
 
-          <article class="broadcast-event-card">
-            <div class="broadcast-event-icon" aria-hidden="true">★</div>
-            <div class="broadcast-event-copy">
+          <article class="hero-event-card">
+            <div class="hero-event-icon" aria-hidden="true">✦</div>
+            <div class="hero-event-copy">
               <strong id="heroEventTitle">Rivalry ready</strong>
               <span id="heroEventMeta">Waiting for puck drop</span>
             </div>
-            <span class="broadcast-event-chevron" aria-hidden="true">›</span>
+            <span class="hero-event-time" id="gameSubline">Tonight · 7:00 PM · Picks open</span>
           </article>
 
-          <div class="hero-support-row">
-            <div class="game-context-row game-context-primary">
-              <span id="gameSubline">Tonight · 7:00 PM · Picks open</span>
-              <b><span id="canesScore">0</span>-<span id="oppScore">0</span> CAR/NYR</b>
-            </div>
+          <div class="hero-context-strip">
+            <span class="hero-context-label">Canes game</span>
+            <b><span id="canesScore">0</span>-<span id="oppScore">0</span> CAR/NYR</b>
           </div>
         </section>
 
-        <section class="panel-card picks-card single-picks-card apple-panel-card" id="picksModule">
+        <section class="panel-card picks-panel" id="picksModule">
           <div class="panel-header section-header-lg">
-            <div><span class="eyebrow" id="picksEyebrow">Game picks</span><h2 id="picksTitle">Make Your Picks</h2></div>
+            <div>
+              <span class="eyebrow" id="picksEyebrow">Game picks</span>
+              <h2 id="picksTitle">Select 2 Players Each</h2>
+            </div>
             <span class="panel-tag calm" id="picksBadge">Editable</span>
           </div>
           <div class="pick-flow-note" id="picksNote">2 Canes each · no duplicate players · locks when scoring starts</div>
-          <div class="single-picks-layout" id="picksContent"></div>
+          <div class="rivalry-picks-grid" id="picksContent"></div>
         </section>
 
-        <section class="panel-card event-card apple-panel-card" id="pulseCard">
-          <div class="panel-header section-header-lg"><div><span class="eyebrow">Game event</span><h2>Latest Event</h2></div><span class="panel-tag live" id="pulseBadge">Active</span></div>
+        <section class="panel-card live-panel" id="pulseCard">
+          <div class="panel-header section-header-lg">
+            <div><span class="eyebrow">Live rivalry feed</span><h2>Latest Event</h2></div>
+            <span class="panel-tag live" id="pulseBadge">Active</span>
+          </div>
           <div class="latest-event-box apple-highlight-box">
             <strong id="latestEvent">Waiting for puck drop</strong>
             <span id="eventImpact">No rivalry points yet</span>
@@ -268,11 +122,7 @@
             <button id="simulateAaronGoal" type="button">Aaron goal swing</button>
             <button id="simulateJulieAssist" type="button">Julie assist</button>
           </div>
-        </section>
-
-        <section class="panel-card apple-panel-card moments-panel">
-          <div class="panel-header section-header-lg"><div><span class="eyebrow">Timeline</span><h2>Rivalry Moments</h2></div><button id="toastButton" class="mini-button">Animate</button></div>
-          <div id="momentsFeed" class="moments-feed"></div>
+          <div id="momentsFeed" class="moments-feed rivalry-feed"></div>
         </section>
       </main>
     </section>
@@ -393,10 +243,10 @@
   </nav>
   <div class="toast-stack"><div id="toast" class="toast">Preview event</div></div>
 
-  <script src="js/mock-data.js?v=hero3"></script>
-  <script src="js/ui.js?v=hero3"></script>
-  <script src="js/tabs.js?v=hero3"></script>
-  <script src="js/gameday.js?v=hero3"></script>
-  <script src="js/app.js?v=hero3"></script>
+  <script src="js/mock-data.js?v=player1"></script>
+  <script src="js/ui.js?v=player1"></script>
+  <script src="js/tabs.js?v=player1"></script>
+  <script src="js/gameday.js?v=player1"></script>
+  <script src="js/app.js?v=player1"></script>
 </body>
 </html>
