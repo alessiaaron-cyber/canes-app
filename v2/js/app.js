@@ -1,4 +1,4 @@
-import './gameday-render.js';
+import { initGameDayStateLab } from './gameday-render.js';
 import { renderHistoryPage } from './history-render.js';
 import { renderManagePage } from './manage-render.js';
 
@@ -7,14 +7,6 @@ const manageRoot = document.querySelector('#manageContent');
 const pageTitle = document.querySelector('#pageTitle');
 const toast = document.querySelector('#toast');
 
-if (historyRoot) {
-  historyRoot.innerHTML = renderHistoryPage();
-}
-
-if (manageRoot) {
-  manageRoot.innerHTML = renderManagePage();
-}
-
 function switchTab(tabName) {
   document.querySelectorAll('.app-view').forEach((view) => {
     view.classList.toggle('is-active', view.dataset.view === tabName);
@@ -22,21 +14,14 @@ function switchTab(tabName) {
 
   document.querySelectorAll('.nav-button').forEach((button) => {
     const active = button.dataset.tab === tabName;
-
     button.classList.toggle('is-active', active);
-
-    if (active) {
-      button.setAttribute('aria-current', 'page');
-    } else {
-      button.removeAttribute('aria-current');
-    }
   });
 
-  if (pageTitle) {
-    if (tabName === 'history') pageTitle.textContent = 'History';
-    else if (tabName === 'manage') pageTitle.textContent = 'Manage';
-    else pageTitle.textContent = 'Game Day';
-  }
+  if (!pageTitle) return;
+
+  if (tabName === 'history') pageTitle.textContent = 'History';
+  else if (tabName === 'manage') pageTitle.textContent = 'Manage';
+  else pageTitle.textContent = 'Game Day';
 }
 
 function showToast(message) {
@@ -52,14 +37,26 @@ function showToast(message) {
   }, 1800);
 }
 
-document.querySelectorAll('.nav-button').forEach((button) => {
-  button.addEventListener('click', () => {
-    switchTab(button.dataset.tab);
+window.addEventListener('DOMContentLoaded', () => {
+  initGameDayStateLab();
+
+  if (historyRoot) {
+    historyRoot.innerHTML = renderHistoryPage();
+  }
+
+  if (manageRoot) {
+    manageRoot.innerHTML = renderManagePage();
+  }
+
+  document.querySelectorAll('.nav-button').forEach((button) => {
+    button.addEventListener('click', () => {
+      switchTab(button.dataset.tab);
+    });
   });
-});
 
-document.querySelector('#refreshButton')?.addEventListener('click', () => {
-  showToast('Preview refreshed');
-});
+  document.querySelector('#refreshButton')?.addEventListener('click', () => {
+    showToast('Preview refreshed');
+  });
 
-switchTab('gameday');
+  switchTab('gameday');
+});
