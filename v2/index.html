@@ -3,77 +3,71 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Canes Rivalry V2</title>
 
-  <link rel="stylesheet" href="./css/base.css?v=shell2" />
+  <title>Canes Rivalry</title>
+
+  <meta name="theme-color" content="#111827" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Canes Rivalry" />
+
+  <link rel="icon" type="image/png" href="./assets/app-icon.png?v=player8" />
+  <link rel="apple-touch-icon" href="./assets/app-icon.png?v=player8" />
+
+  <link rel="stylesheet" href="styles.css?v=player8" />
+  <link rel="stylesheet" href="gameday-mock.css?v=player8" />
 </head>
 <body>
+  <div class="sync-flash" id="syncFlash"></div>
+
   <div class="app-shell">
     <header class="app-header">
       <div>
-        <div class="eyebrow">Canes Rivalry V2</div>
-        <h1 class="page-title" id="pageTitle">Game Day</h1>
+        <span class="eyebrow">Canes Rivalry V2</span>
+        <h1 id="pageTitle">Game Day</h1>
       </div>
 
       <button class="icon-button" id="refreshButton" type="button">↻</button>
     </header>
 
-    <main>
-      <section class="app-view is-active" data-view="gameday">
-        <div class="page-stack">
-          <section class="surface-card section-card">
-            <div class="section-heading section-heading--tight">
-              <div>
-                <div class="eyebrow">Shell Recovery</div>
-                <h2 class="section-title">Game Day</h2>
-              </div>
-              <span class="status-chip status-chip--soft">Static</span>
-            </div>
-            <p>Minimal Game Day placeholder.</p>
-          </section>
+    <section class="app-view active-view" id="gameDayView" data-view="gameday">
+      <section class="state-lab panel-card">
+        <div class="panel-header compact-header">
+          <div>
+            <span class="eyebrow">UI State Lab</span>
+            <h2 id="stateTitle">Pregame Ready</h2>
+          </div>
+
+          <span class="panel-tag calm" id="stateBadge">Editable</span>
+        </div>
+
+        <div class="state-switcher" id="stateSwitcher">
+          <button class="active" data-mode="pregame" type="button">Pregame</button>
+          <button data-mode="missing" type="button">Missing</button>
+          <button data-mode="live" type="button">Live</button>
+          <button data-mode="final" type="button">Final</button>
         </div>
       </section>
 
-      <section class="app-view" data-view="history">
-        <div class="page-stack">
-          <section class="surface-card section-card">
-            <div class="section-heading section-heading--tight">
-              <div>
-                <div class="eyebrow">Shell Recovery</div>
-                <h2 class="section-title">History</h2>
-              </div>
-              <span class="status-chip status-chip--soft">Static</span>
-            </div>
-            <p>Minimal History placeholder.</p>
-          </section>
-        </div>
-      </section>
-
-      <section class="app-view" data-view="manage">
-        <div class="page-stack">
-          <section class="surface-card section-card">
-            <div class="section-heading section-heading--tight">
-              <div>
-                <div class="eyebrow">Shell Recovery</div>
-                <h2 class="section-title">Manage</h2>
-              </div>
-              <span class="status-chip status-chip--soft">Static</span>
-            </div>
-            <p>Minimal Manage placeholder.</p>
-          </section>
-        </div>
-      </section>
-    </main>
+      <main class="content-stack">
+      </main>
+    </section>
   </div>
 
-  <nav class="bottom-nav">
-    <div class="bottom-nav__inner">
-      <button class="nav-button is-active" data-tab="gameday" type="button">Game Day</button>
-      <button class="nav-button" data-tab="history" type="button">History</button>
-      <button class="nav-button" data-tab="manage" type="button">Manage</button>
-    </div>
+  <nav class="bottom-nav" id="bottomNav">
+    <button class="active" data-tab="gameday" type="button">Game Day</button>
+    <button data-tab="history" type="button">History</button>
+    <button data-tab="manage" type="button">Manage</button>
   </nav>
 
-  <script src="./js/app.js?v=shell2"></script>
+  <div class="toast-stack">
+    <div id="toast" class="toast">Preview event</div>
+  </div>
+
+  <script src="js/mock-data.js?v=player8"></script>
+  <script src="js/ui.js?v=player8"></script>
+  <script src="js/tabs.js?v=player8"></script>
+  <script src="js/gameday.js?v=player8"></script>
+  <script src="js/app.js?v=player8"></script>
 </body>
 </html>
