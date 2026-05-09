@@ -4,61 +4,79 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
-  <title>Canes Rivalry</title>
-  <meta name="theme-color" content="#111827" />
+  <title>Canes Rivalry V2</title>
+
+  <meta name="theme-color" content="#f6f7f9" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="Canes Rivalry" />
 
-  <link rel="icon" type="image/png" href="./assets/app-icon.png?v=finalpng1" />
-  <link rel="apple-touch-icon" href="./assets/app-icon.png?v=finalpng1" />
-  <link rel="stylesheet" href="styles.css?v=player8" />
-  <link rel="stylesheet" href="gameday-mock.css?v=player8" />
-  <style>
-  </style>
+  <link rel="icon" type="image/png" href="./assets/app-icon.png" />
+  <link rel="apple-touch-icon" href="./assets/app-icon.png" />
+
+  <link rel="stylesheet" href="./css/base.css" />
+  <link rel="stylesheet" href="./css/gameday.css" />
 </head>
 <body>
-  <div class="sync-flash" id="syncFlash"></div>
-
   <div class="app-shell">
-    <header class="app-header" aria-label="V2 sandbox header">
-      <div>
-        <span class="eyebrow">Canes Rivalry V2</span>
-        <h1 id="pageTitle">Game Day</h1>
-      </div>
-      <button class="icon-button" id="refreshButton" type="button" aria-label="Simulate refresh">↻</button>
-    </header>
-
-    <section class="app-view active-view" id="gameDayView" data-view="gameday">
-      <section class="state-lab panel-card" aria-label="UI state switcher">
-        <div class="panel-header compact-header">
-          <div><span class="eyebrow">UI State Lab</span><h2 id="stateTitle">Pregame Ready</h2></div>
-          <span class="panel-tag calm" id="stateBadge">Editable</span>
+    <main class="screen">
+      <header class="topbar">
+        <div class="topbar__side">
+          <button class="icon-button" aria-label="Menu">☰</button>
         </div>
-        <div class="state-switcher" id="stateSwitcher">
-          <button class="active" data-mode="pregame" type="button">Pregame</button>
-          <button data-mode="missing" type="button">Missing</button>
-          <button data-mode="live" type="button">Live</button>
-          <button data-mode="final" type="button">Final</button>
+
+        <img class="wordmark" src="./assets/app-icon.png" alt="Canes Rivalry" />
+
+        <div class="topbar__side">
+          <button class="icon-button" aria-label="Notifications">🔔</button>
+        </div>
+      </header>
+
+      <section class="card section-card stack">
+        <div class="card-title-row">
+          <div>
+            <div class="card-meta">V2 Game Day Lab</div>
+            <h1 class="card-title">State Preview</h1>
+          </div>
+
+          <span class="pill pill--soft">Static UI</span>
+        </div>
+
+        <div class="state-switcher">
+          <button class="state-switcher__button is-active" data-state="pregame" type="button">Pregame</button>
+          <button class="state-switcher__button" data-state="live" type="button">Live</button>
+          <button class="state-switcher__button" data-state="final" type="button">Final</button>
         </div>
       </section>
 
-      <main class="content-stack">
-      </main>
-    </section>
+      <div id="app" class="stack"></div>
+    </main>
   </div>
 
-  <nav class="bottom-nav" id="bottomNav">
-    <button class="active" data-tab="gameday" type="button">Game Day</button>
-    <button data-tab="history" type="button">History</button>
-    <button data-tab="manage" type="button">Manage</button>
-  </nav>
-  <div class="toast-stack"><div id="toast" class="toast">Preview event</div></div>
+  <nav class="bottom-nav" aria-label="Primary">
+    <div class="bottom-nav__inner">
+      <button class="nav-item is-active" type="button">
+        <span class="nav-item__icon">🏒</span>
+        <span>Game Day</span>
+      </button>
 
-  <script src="js/mock-data.js?v=player8"></script>
-  <script src="js/ui.js?v=player8"></script>
-  <script src="js/tabs.js?v=player8"></script>
-  <script src="js/gameday.js?v=player8"></script>
-  <script src="js/app.js?v=player8"></script>
+      <button class="nav-item" type="button">
+        <span class="nav-item__icon">🕘</span>
+        <span>History</span>
+      </button>
+
+      <button class="nav-item" type="button">
+        <span class="nav-item__icon">📊</span>
+        <span>Standings</span>
+      </button>
+
+      <button class="nav-item" type="button">
+        <span class="nav-item__icon">👤</span>
+        <span>You</span>
+      </button>
+    </div>
+  </nav>
+
+  <script type="module" src="./js/app.js"></script>
 </body>
 </html>
