@@ -24,36 +24,67 @@ Canes Rivalry V2 is a premium live rivalry tracker built around Hurricanes game-
 The rivalry is the hero.
 The Canes game is the context.
 
+### Primary Visual North Star
+Premium Apple Sports-style rivalry experience.
+
+This means:
+- clean, light, iPhone-native presentation
+- readable hierarchy first
+- calm premium surfaces most of the time
+- subtle sports atmosphere
+- emotional UI spikes only when moments deserve it
+- rivalry tension expressed through motion, hierarchy, and selective emphasis
+
 ### Product Feel
 - premium
-- energetic
-- emotionally reactive
-- playful
 - modern
 - mobile-first
+- emotionally reactive
+- smooth
+- readable
+- energetic in key moments only
 - never cluttered
 - never sportsbook/gamer UI
 
 ### Visual Direction
 - light-first design
-- modern iOS-native styling
+- Apple Sports-inspired hierarchy and restraint
 - layered white cards
 - restrained Canes red accents
 - black/charcoal typography
-- subtle hockey branding
-- premium sports-broadcast energy
+- subtle hockey atmosphere
+- premium sports energy without broadcast clutter
 - rounded, clean, tactile card UI
 
 ### Motion Philosophy
-- calm in passive states
-- stronger motion during live rivalry moments
-- subtle live indicators
-- quick, emotional score-swing reactions
-- avoid constant flashy animation
+Base state should feel:
+- calm
+- smooth
+- premium
+- Apple-like
+
+Event state should feel:
+- more reactive
+- more emotional
+- score-change aware
+- momentum-aware
+- still restrained
+
+Animation should create payoff, not noise.
+
+### Emotional Peaks
+Stronger visual/motion emphasis is reserved for moments like:
+- goals
+- lead changes
+- close rivalry swings
+- first goal bonus
+- final results
+- comeback moments
 
 ### Voice / Terminology
 Prefer rivalry-first language such as:
 - Rivalry Moments
+- Goal Swing
 - Make Your Picks
 - Picks Locked
 - Latest Event
@@ -61,7 +92,7 @@ Prefer rivalry-first language such as:
 - Tonight
 - Stream Mode
 
-Avoid overly technical or fantasy/gambling-heavy language.
+Avoid overly technical, enterprise, fantasy-heavy, or gambling-heavy language.
 
 ### Team / Expansion Direction
 - Canes-first branding for now
@@ -81,14 +112,19 @@ Avoid overly technical or fantasy/gambling-heavy language.
 Frontend work in V2 should follow these principles by default:
 - rivalry score gets visual priority over the NHL game score
 - Canes game state supports the rivalry experience rather than dominating it
-- animation should create tension and payoff, not noise
+- calm layout should contrast with live emotional moments
 - red should be meaningful, not used for everything
+- typography and spacing should do most of the work before decoration does
 - future tabs should inherit the same visual system instead of inventing their own style
+- the app should feel closer to Apple Sports than to a fantasy dashboard
 
 ## Files
 
 - `index.html` — static V2 shell
 - `styles.css` — V2-only styling and design tokens
-- `js/app.js` — V2-only UI behavior
+- `js/app.js` — V2 bootstrap
+- `js/gameday.js` — Game Day behavior
+- `js/tabs.js` — tab/view navigation
+- `js/ui.js` — shared UI helpers
 - `js/mock-data.js` — static demo data
 - `assets/app-icon.png` — approved V2 app icon
