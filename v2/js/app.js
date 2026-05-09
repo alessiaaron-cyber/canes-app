@@ -1,50 +1,65 @@
 import './gameday-render.js';
+import { renderHistoryPage } from './history-render.js';
+import { renderManagePage } from './manage-render.js';
 
-window.CR = window.CR || {};
+const historyRoot = document.querySelector('#historyContent');
+const manageRoot = document.querySelector('#manageContent');
+const pageTitle = document.querySelector('#pageTitle');
+const toast = document.querySelector('#toast');
 
-function switchTabFallback(tabName) {
-  const validTabs = ['gameday', 'history', 'manage'];
-  const targetTab = validTabs.includes(tabName) ? tabName : 'gameday';
+if (historyRoot) {
+  historyRoot.innerHTML = renderHistoryPage();
+}
 
+if (manageRoot) {
+  manageRoot.innerHTML = renderManagePage();
+}
+
+function switchTab(tabName) {
   document.querySelectorAll('.app-view').forEach((view) => {
-    view.classList.toggle('active-view', view.dataset.view === targetTab);
+    view.classList.toggle('is-active', view.dataset.view === tabName);
   });
 
-  document.querySelectorAll('#bottomNav button[data-tab]').forEach((button) => {
-    button.classList.toggle('active', button.dataset.tab === targetTab);
-  });
+  document.querySelectorAll('.nav-button').forEach((button) => {
+    const active = button.dataset.tab === tabName;
 
-  const pageTitle = document.querySelector('#pageTitle');
+    button.classList.toggle('is-active', active);
+
+    if (active) {
+      button.setAttribute('aria-current', 'page');
+    } else {
+      button.removeAttribute('aria-current');
+    }
+  });
 
   if (pageTitle) {
-    if (targetTab === 'history') pageTitle.textContent = 'History';
-    else if (targetTab === 'manage') pageTitle.textContent = 'Manage';
+    if (tabName === 'history') pageTitle.textContent = 'History';
+    else if (tabName === 'manage') pageTitle.textContent = 'Manage';
     else pageTitle.textContent = 'Game Day';
   }
 }
 
-window.CR.forceSwitchTab = (tabName) => {
-  if (typeof window.CR.switchTab === 'function') {
-    window.CR.switchTab(tabName);
-    return;
-  }
+function showToast(message) {
+  if (!toast) return;
 
-  switchTabFallback(tabName);
-};
+  toast.textContent = message;
+  toast.classList.add('is-visible');
 
-try {
-  document.querySelectorAll('#bottomNav button[data-tab]').forEach((button) => {
-    button.addEventListener('click', () => {
-      window.CR.forceSwitchTab(button.dataset.tab);
-    });
-  });
+  clearTimeout(window.__crToastTimer);
 
-  window.CR.forceSwitchTab('gameday');
-
-  document.querySelector('#refreshButton')?.addEventListener('click', () => {
-    window.CR.flashSync?.();
-    window.CR.showToast?.('Mock realtime refresh complete');
-  });
-} catch (error) {
-  console.error('V2 bootstrap failed', error);
+  window.__crToastTimer = setTimeout(() => {
+    toast.classList.remove('is-visible');
+  }, 1800);
 }
+
+document.querySelectorAll('.nav-button').forEach((button) => {
+  button.addEventListener('click', () => {
+    switchTab(button.dataset.tab);
+  });
+});
+
+document.querySelector('#refreshButton')?.addEventListener('click', () => {
+  showToast('Preview refreshed');
+});
+
+switchTab('gameday');
