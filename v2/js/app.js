@@ -23,18 +23,23 @@ function switchTabFallback(tabName) {
   }
 }
 
-try {
-  const switchTab = typeof window.CR.switchTab === 'function'
-    ? window.CR.switchTab
-    : switchTabFallback;
+window.CR.forceSwitchTab = (tabName) => {
+  if (typeof window.CR.switchTab === 'function') {
+    window.CR.switchTab(tabName);
+    return;
+  }
 
+  switchTabFallback(tabName);
+};
+
+try {
   document.querySelectorAll('#bottomNav button[data-tab]').forEach((button) => {
     button.addEventListener('click', () => {
-      switchTab(button.dataset.tab);
+      window.CR.forceSwitchTab(button.dataset.tab);
     });
   });
 
-  switchTab('gameday');
+  window.CR.forceSwitchTab('gameday');
 
   document.querySelector('#refreshButton')?.addEventListener('click', () => {
     window.CR.flashSync?.();
