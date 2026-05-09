@@ -62,20 +62,20 @@ img {
   display: block;
 }
 
-.app-shell {
+.v2-modern-shell .app-shell {
   width: min(100%, var(--cr-max-width));
   margin: 0 auto;
   min-height: 100vh;
   padding: calc(14px + env(safe-area-inset-top)) 14px calc(var(--cr-nav-height) + 18px + env(safe-area-inset-bottom));
 }
 
-.screen {
+.v2-modern-shell .screen {
   display: flex;
   flex-direction: column;
   gap: 14px;
 }
 
-.topbar {
+.v2-modern-shell .topbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -84,7 +84,7 @@ img {
   padding: 0 2px;
 }
 
-.topbar__side {
+.v2-modern-shell .topbar__side {
   width: 44px;
   display: flex;
   align-items: center;
@@ -104,7 +104,7 @@ img {
   cursor: pointer;
 }
 
-.wordmark {
+.v2-modern-shell .wordmark {
   height: 34px;
   width: auto;
 }
@@ -199,7 +199,7 @@ img {
   background: linear-gradient(90deg, transparent, rgba(20, 23, 29, 0.08), transparent);
 }
 
-.bottom-nav {
+.v2-modern-shell .bottom-nav {
   position: fixed;
   left: 0;
   right: 0;
@@ -211,7 +211,7 @@ img {
   border-top: 1px solid rgba(20, 23, 29, 0.06);
 }
 
-.bottom-nav__inner {
+.v2-modern-shell .bottom-nav__inner {
   width: min(100%, var(--cr-max-width));
   margin: 0 auto;
   display: grid;
@@ -219,7 +219,7 @@ img {
   gap: 8px;
 }
 
-.nav-item {
+.v2-modern-shell .nav-item {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -232,24 +232,24 @@ img {
   font-weight: 800;
 }
 
-.nav-item.is-active {
+.v2-modern-shell .nav-item.is-active {
   background: #fff;
   color: var(--cr-red);
   box-shadow: var(--cr-shadow-soft);
 }
 
-.nav-item__icon {
+.v2-modern-shell .nav-item__icon {
   font-size: 1.15rem;
   line-height: 1;
 }
 
-.state-switcher {
+.v2-modern-shell .state-switcher {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 8px;
 }
 
-.state-switcher__button {
+.v2-modern-shell .state-switcher__button {
   min-height: 42px;
   border-radius: 16px;
   border: 1px solid var(--cr-line);
@@ -261,14 +261,14 @@ img {
   cursor: pointer;
 }
 
-.state-switcher__button.is-active {
+.v2-modern-shell .state-switcher__button.is-active {
   background: var(--cr-ink);
   color: #fff;
   border-color: var(--cr-ink);
 }
 
 @media (max-width: 360px) {
-  .app-shell {
+  .v2-modern-shell .app-shell {
     padding-left: 10px;
     padding-right: 10px;
   }
