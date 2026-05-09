@@ -5,18 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Canes Rivalry V2</title>
 
-  <meta name="theme-color" content="#f6f7f9" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="apple-mobile-web-app-title" content="Canes Rivalry" />
-
-  <link rel="icon" type="image/png" href="./assets/app-icon.png" />
-  <link rel="apple-touch-icon" href="./assets/app-icon.png" />
-
-  <link rel="stylesheet" href="./css/base.css?v=reset4" />
-  <link rel="stylesheet" href="./css/gameday.css?v=reset4" />
-  <link rel="stylesheet" href="./css/history.css?v=reset4" />
-  <link rel="stylesheet" href="./css/manage.css?v=reset4" />
+  <link rel="stylesheet" href="./css/base.css?v=shell2" />
 </head>
 <body>
   <div class="app-shell">
@@ -25,52 +14,66 @@
         <div class="eyebrow">Canes Rivalry V2</div>
         <h1 class="page-title" id="pageTitle">Game Day</h1>
       </div>
-      <button class="icon-button" id="refreshButton" type="button" aria-label="Refresh preview">↻</button>
+
+      <button class="icon-button" id="refreshButton" type="button">↻</button>
     </header>
 
-    <main class="app-main">
+    <main>
       <section class="app-view is-active" data-view="gameday">
         <div class="page-stack">
           <section class="surface-card section-card">
             <div class="section-heading section-heading--tight">
               <div>
-                <div class="eyebrow">State Preview</div>
-                <h2 class="section-title" id="stateTitle">Pregame Ready</h2>
+                <div class="eyebrow">Shell Recovery</div>
+                <h2 class="section-title">Game Day</h2>
               </div>
-              <span class="status-chip status-chip--soft" id="stateBadge">Editable</span>
+              <span class="status-chip status-chip--soft">Static</span>
             </div>
-
-            <div class="state-switcher" id="stateSwitcher">
-              <button class="state-switcher__button is-active" data-mode="pregame" type="button">Pregame</button>
-              <button class="state-switcher__button" data-mode="live" type="button">Live</button>
-              <button class="state-switcher__button" data-mode="final" type="button">Final</button>
-            </div>
+            <p>Minimal Game Day placeholder.</p>
           </section>
-
-          <div id="gameDayContent"></div>
         </div>
       </section>
 
       <section class="app-view" data-view="history">
-        <div id="historyContent"></div>
+        <div class="page-stack">
+          <section class="surface-card section-card">
+            <div class="section-heading section-heading--tight">
+              <div>
+                <div class="eyebrow">Shell Recovery</div>
+                <h2 class="section-title">History</h2>
+              </div>
+              <span class="status-chip status-chip--soft">Static</span>
+            </div>
+            <p>Minimal History placeholder.</p>
+          </section>
+        </div>
       </section>
 
       <section class="app-view" data-view="manage">
-        <div id="manageContent"></div>
+        <div class="page-stack">
+          <section class="surface-card section-card">
+            <div class="section-heading section-heading--tight">
+              <div>
+                <div class="eyebrow">Shell Recovery</div>
+                <h2 class="section-title">Manage</h2>
+              </div>
+              <span class="status-chip status-chip--soft">Static</span>
+            </div>
+            <p>Minimal Manage placeholder.</p>
+          </section>
+        </div>
       </section>
     </main>
   </div>
 
-  <nav class="bottom-nav" aria-label="Primary">
+  <nav class="bottom-nav">
     <div class="bottom-nav__inner">
-      <button class="nav-button is-active" data-tab="gameday" type="button" aria-current="page">Game Day</button>
+      <button class="nav-button is-active" data-tab="gameday" type="button">Game Day</button>
       <button class="nav-button" data-tab="history" type="button">History</button>
       <button class="nav-button" data-tab="manage" type="button">Manage</button>
     </div>
   </nav>
 
-  <div class="toast" id="toast" role="status" aria-live="polite"></div>
-
-  <script type="module" src="./js/app.js?v=reset4"></script>
+  <script src="./js/app.js?v=shell2"></script>
 </body>
 </html>
