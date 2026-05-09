@@ -13,7 +13,7 @@
   <link rel="icon" type="image/png" href="./assets/app-icon.png?v=finalpng1" />
   <link rel="apple-touch-icon" href="./assets/app-icon.png?v=finalpng1" />
 
-  <link rel="stylesheet" href="styles.css?v=apple9" />
+  <link rel="stylesheet" href="styles.css?v=hero1" />
 </head>
 <body>
   <div class="sync-flash" id="syncFlash"></div>
@@ -42,41 +42,51 @@
       </section>
 
       <main class="content-stack">
-        <section class="hero-card rivalry-hero apple-hero-card">
-          <div class="hero-topline clean-topline">
-            <span class="status-pill" id="gameStatusPill">Pregame</span>
-            <span class="modern-live-pill" id="statusText"><span aria-hidden="true"></span> Ready</span>
+        <section class="hero-card rivalry-hero broadcast-hero-card">
+          <div class="broadcast-hero-topline">
+            <span class="broadcast-live-pill" id="gameStatusPill">Pregame</span>
+            <span class="broadcast-phase" id="heroPhase">TONIGHT 7:00 PM</span>
+            <span class="broadcast-sync" id="statusText">Ready</span>
           </div>
 
-          <div class="hero-copy-row">
-            <div>
-              <span class="eyebrow hero-kicker">Tonight’s Rivalry</span>
-              <h2 class="hero-title">Head-to-head live score</h2>
-            </div>
-          </div>
+          <div class="broadcast-divider"></div>
 
-          <div class="rivalry-score-hero">
-            <div class="rivalry-side rivalry-team-card">
+          <div class="broadcast-scoreboard">
+            <div class="broadcast-side">
               <span>Away</span>
               <strong id="aaronRivalryScore">0</strong>
             </div>
-            <div class="rivalry-vs">vs</div>
-            <div class="rivalry-side rivalry-team-card">
+
+            <div class="broadcast-center-stack">
+              <div class="broadcast-crest" aria-hidden="true">CAR</div>
+              <span class="broadcast-center-label">Rivalry Score</span>
+            </div>
+
+            <div class="broadcast-side home-side">
               <span>Home</span>
               <strong id="julieRivalryScore">0</strong>
             </div>
           </div>
 
-          <div class="rivalry-swing-module" aria-label="Rivalry swing">
-            <div class="rivalry-swing-copy">
-              <strong id="swingLabel">Picks are locked in</strong>
-              <span id="swingMeta">No rivalry momentum until puck drop</span>
+          <div class="broadcast-momentum-row" aria-label="Rivalry momentum">
+            <span class="broadcast-delta left" id="swingDeltaLeft">0</span>
+            <div class="rivalry-swing-module broadcast-meter-inline" data-variant="neutral">
+              <div class="rivalry-momentum-track" aria-hidden="true">
+                <span class="rivalry-momentum-fill" id="swingFill"></span>
+                <span class="rivalry-momentum-marker" id="swingMarker"></span>
+              </div>
             </div>
-            <div class="rivalry-momentum-track" aria-hidden="true">
-              <span class="rivalry-momentum-fill" id="swingFill"></span>
-              <span class="rivalry-momentum-marker" id="swingMarker"></span>
-            </div>
+            <span class="broadcast-delta right" id="swingDeltaRight">0</span>
           </div>
+
+          <article class="broadcast-event-card">
+            <div class="broadcast-event-icon" aria-hidden="true">★</div>
+            <div class="broadcast-event-copy">
+              <strong id="heroEventTitle">Rivalry ready</strong>
+              <span id="heroEventMeta">Waiting for puck drop</span>
+            </div>
+            <span class="broadcast-event-chevron" aria-hidden="true">›</span>
+          </article>
 
           <div class="hero-support-row">
             <div class="game-context-row game-context-primary">
@@ -230,10 +240,10 @@
   </nav>
   <div class="toast-stack"><div id="toast" class="toast">Preview event</div></div>
 
-  <script src="js/mock-data.js?v=apple9"></script>
-  <script src="js/ui.js?v=apple9"></script>
-  <script src="js/tabs.js?v=apple9"></script>
-  <script src="js/gameday.js?v=apple9"></script>
-  <script src="js/app.js?v=apple9"></script>
+  <script src="js/mock-data.js?v=hero1"></script>
+  <script src="js/ui.js?v=hero1"></script>
+  <script src="js/tabs.js?v=hero1"></script>
+  <script src="js/gameday.js?v=hero1"></script>
+  <script src="js/app.js?v=hero1"></script>
 </body>
 </html>
