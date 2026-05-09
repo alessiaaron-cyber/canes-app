@@ -13,7 +13,7 @@
   <link rel="icon" type="image/png" href="./assets/app-icon.png?v=finalpng1" />
   <link rel="apple-touch-icon" href="./assets/app-icon.png?v=finalpng1" />
 
-  <link rel="stylesheet" href="styles.css?v=manage3" />
+  <link rel="stylesheet" href="styles.css?v=apple2" />
 </head>
 <body>
   <div class="sync-flash" id="syncFlash"></div>
@@ -42,32 +42,41 @@
       </section>
 
       <main class="content-stack">
-        <section class="hero-card rivalry-hero">
+        <section class="hero-card rivalry-hero apple-hero-card">
           <div class="hero-topline clean-topline">
             <span class="status-pill" id="gameStatusPill">Pregame</span>
             <span class="modern-live-pill" id="statusText"><span aria-hidden="true"></span> Ready</span>
           </div>
 
+          <div class="hero-copy-row">
+            <div>
+              <span class="eyebrow hero-kicker">Tonight’s Rivalry</span>
+              <h2 class="hero-title">Head-to-head live score</h2>
+            </div>
+          </div>
+
           <div class="rivalry-score-hero">
-            <div class="rivalry-side">
+            <div class="rivalry-side rivalry-team-card">
               <span>Away</span>
               <strong id="aaronRivalryScore">0</strong>
             </div>
             <div class="rivalry-vs">vs</div>
-            <div class="rivalry-side">
+            <div class="rivalry-side rivalry-team-card">
               <span>Home</span>
               <strong id="julieRivalryScore">0</strong>
             </div>
           </div>
 
-          <div class="game-context-row">
-            <span id="gameSubline">Tonight · 7:00 PM · Picks open</span>
-            <b><span id="canesScore">0</span>-<span id="oppScore">0</span> CAR/NYR</b>
+          <div class="hero-support-row">
+            <div class="game-context-row game-context-primary">
+              <span id="gameSubline">Tonight · 7:00 PM · Picks open</span>
+              <b><span id="canesScore">0</span>-<span id="oppScore">0</span> CAR/NYR</b>
+            </div>
           </div>
         </section>
 
-        <section class="panel-card picks-card single-picks-card" id="picksModule">
-          <div class="panel-header">
+        <section class="panel-card picks-card single-picks-card apple-panel-card" id="picksModule">
+          <div class="panel-header section-header-lg">
             <div><span class="eyebrow" id="picksEyebrow">Game picks</span><h2 id="picksTitle">Make Your Picks</h2></div>
             <span class="panel-tag calm" id="picksBadge">Editable</span>
           </div>
@@ -75,9 +84,9 @@
           <div class="single-picks-layout" id="picksContent"></div>
         </section>
 
-        <section class="panel-card event-card" id="pulseCard">
-          <div class="panel-header"><div><span class="eyebrow">Game event</span><h2>Latest Event</h2></div><span class="panel-tag live" id="pulseBadge">Active</span></div>
-          <div class="latest-event-box">
+        <section class="panel-card event-card apple-panel-card" id="pulseCard">
+          <div class="panel-header section-header-lg"><div><span class="eyebrow">Game event</span><h2>Latest Event</h2></div><span class="panel-tag live" id="pulseBadge">Active</span></div>
+          <div class="latest-event-box apple-highlight-box">
             <strong id="latestEvent">Waiting for puck drop</strong>
             <span id="eventImpact">No rivalry points yet</span>
           </div>
@@ -87,8 +96,8 @@
           </div>
         </section>
 
-        <section class="panel-card">
-          <div class="panel-header"><div><span class="eyebrow">Timeline</span><h2>Rivalry Moments</h2></div><button id="toastButton" class="mini-button">Animate</button></div>
+        <section class="panel-card apple-panel-card moments-panel">
+          <div class="panel-header section-header-lg"><div><span class="eyebrow">Timeline</span><h2>Rivalry Moments</h2></div><button id="toastButton" class="mini-button">Animate</button></div>
           <div id="momentsFeed" class="moments-feed"></div>
         </section>
       </main>
@@ -210,10 +219,10 @@
   </nav>
   <div class="toast-stack"><div id="toast" class="toast">Preview event</div></div>
 
-  <script src="js/mock-data.js?v=manage3"></script>
-  <script src="js/ui.js?v=manage3"></script>
-  <script src="js/tabs.js?v=manage3"></script>
-  <script src="js/gameday.js?v=manage3"></script>
-  <script src="js/app.js?v=manage3"></script>
+  <script src="js/mock-data.js?v=apple2"></script>
+  <script src="js/ui.js?v=apple2"></script>
+  <script src="js/tabs.js?v=apple2"></script>
+  <script src="js/gameday.js?v=apple2"></script>
+  <script src="js/app.js?v=apple2"></script>
 </body>
 </html>
