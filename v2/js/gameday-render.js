@@ -1,26 +1,48 @@
 import { GAME_STATES, PICKS, FEED_ITEMS } from './gameday-state.js';
 
-const app = document.querySelector('#app');
-const buttons = document.querySelectorAll('[data-state]');
+const app = document.querySelector('#gameDayContent');
+const buttons = document.querySelectorAll('#stateSwitcher button[data-mode]');
 
 let currentState = 'pregame';
+
+function updateHeader(stateKey) {
+  const labelMap = {
+    pregame: ['Pregame Ready', 'Editable', 'calm'],
+    missing: ['Missing Picks', 'Needs Picks', 'warning'],
+    live: ['Live Game', 'Live', 'live'],
+    final: ['Final Result', 'Final', 'dark']
+  };
+
+  const [title, badge, badgeClass] = labelMap[stateKey] || labelMap.pregame;
+
+  const titleEl = document.querySelector('#stateTitle');
+  const badgeEl = document.querySelector('#stateBadge');
+
+  if (titleEl) titleEl.textContent = title;
+
+  if (badgeEl) {
+    badgeEl.textContent = badge;
+    badgeEl.className = `panel-tag ${badgeClass}`;
+  }
+}
 
 function renderPicks() {
   return `
     <section class="card section-card stack">
       <div class="card-title-row">
         <div>
-          <div class="card-meta">Select 2 players each</div>
+          <div class="card-meta">2 players each</div>
           <h2 class="card-title">Rivalry Picks</h2>
         </div>
+
         <button class="pill-button">Stats</button>
       </div>
 
       <div class="picks-grid">
         <article class="pick-panel pick-panel--red">
           <header class="pick-panel__header">
-            <span>Aaron's Picks</span>
-            <span>0/2</span>
+            <span>Aaron</span>
+            <span>2 Picks</span>
           </header>
 
           <div class="pick-list">
@@ -29,6 +51,7 @@ function renderPicks() {
                 <div>
                   <div class="pick-player">${player.name}<small>${player.detail}</small></div>
                 </div>
+
                 <div class="pick-value">${player.value}</div>
               </div>
             `).join('')}
@@ -37,8 +60,8 @@ function renderPicks() {
 
         <article class="pick-panel pick-panel--dark">
           <header class="pick-panel__header">
-            <span>Julie's Picks</span>
-            <span>0/2</span>
+            <span>Julie</span>
+            <span>2 Picks</span>
           </header>
 
           <div class="pick-list">
@@ -47,6 +70,7 @@ function renderPicks() {
                 <div>
                   <div class="pick-player">${player.name}<small>${player.detail}</small></div>
                 </div>
+
                 <div class="pick-value">${player.value}</div>
               </div>
             `).join('')}
@@ -135,14 +159,14 @@ function renderLive() {
       </div>
     </section>
 
+    ${renderPicks()}
+
     <section class="card section-card stack">
       <div class="card-title-row">
         <div>
           <div class="card-meta">Live rivalry feed</div>
           <h2 class="card-title">Big Moments</h2>
         </div>
-
-        <button class="pill-button">Filter</button>
       </div>
 
       <div class="feed-list">
@@ -234,22 +258,34 @@ function renderFinal() {
 }
 
 function render() {
+  if (!app) return;
+
   let content = '';
 
-  if (currentState === 'pregame') content = renderPregame();
-  if (currentState === 'live') content = renderLive();
-  if (currentState === 'final') content = renderFinal();
+  if (currentState === 'pregame' || currentState === 'missing') {
+    content = renderPregame();
+  }
+
+  if (currentState === 'live') {
+    content = renderLive();
+  }
+
+  if (currentState === 'final') {
+    content = renderFinal();
+  }
 
   app.innerHTML = content;
 
   buttons.forEach(button => {
-    button.classList.toggle('is-active', button.dataset.state === currentState);
+    button.classList.toggle('active', button.dataset.mode === currentState);
   });
+
+  updateHeader(currentState);
 }
 
 buttons.forEach(button => {
   button.addEventListener('click', () => {
-    currentState = button.dataset.state;
+    currentState = button.dataset.mode;
     render();
   });
 });
