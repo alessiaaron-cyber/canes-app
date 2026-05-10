@@ -36,6 +36,12 @@
   outline-offset: 2px;
 }
 
+.placeholder-copy {
+  margin-top: 10px;
+  color: #475467;
+  line-height: 1.45;
+}
+
 body.modal-open,
 html.modal-open {
   overflow: hidden;
