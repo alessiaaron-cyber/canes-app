@@ -91,12 +91,7 @@ window.CR = window.CR || {};
     return 'Goals and assists landed evenly';
   };
 
-  const renderPlayerCard = ({ side, picks, score, red }) => {
-    if (render.renderPlayerCard) {
-      return render.renderPlayerCard({ side, picks, score, red, pointsFor });
-    }
-    return `<article class="gd-card"><div class="gd-pick-card-head"><strong class="${red ? 'red' : ''}">${side}</strong><span>${score} pts</span></div>${picks.map((pick) => `<div class="gd-player-card"><div class="gd-player-main"><strong>${pick.player}</strong><div class="gd-player-stats"><span class="gd-stat ${pick.goals ? 'live' : ''}">G ${pick.goals}</span><span class="gd-stat ${pick.assists ? 'live' : ''}">A ${pick.assists}</span><span class="gd-stat ${pick.firstGoal ? 'live' : ''}">FG</span></div></div><div class="gd-player-total">+${pointsFor(pick)}</div></div>`).join('')}</article>`;
-  };
+  const renderPlayerCard = ({ side, picks, score, red }) => render.renderPlayerCard({ side, picks, score, red, pointsFor });
 
   function setModalOpen(isOpen) {
     const modal = $('#manageSheet');
@@ -111,64 +106,43 @@ window.CR = window.CR || {};
     const pregameUsers = getPregameStructured();
     const live = CR.gameDay.live;
     const final = getFinalData();
-    const nextSide = nextDraftSide();
-    if (render.renderHeroSection) {
-      return render.renderHeroSection({
-        mode,
-        pregameUsers,
-        live,
-        final,
-        isPlayoffs: isPlayoffs(),
-        winnerText,
-        nextDraftSide: nextSide
-      });
-    }
-    const pregame = mode === 'pregame';
-    const liveMode = mode === 'live';
-    const finalMode = mode === 'final';
-    const scores = pregame ? { Aaron: 0, Julie: 0 } : (finalMode ? final.scores : live.scores);
-    const period = pregame ? (isPlayoffs() ? 'Playoff Night • 7:00 PM' : 'Tonight • 7:00 PM') : (liveMode ? live.period : '');
-    const delta = scores.Aaron - scores.Julie;
-    const momentum = Math.min(Math.abs(delta) * 12, 48);
-    const subline = pregame ? (nextSide ? `${nextSide} on the clock • Pick ${pregameUsers.Aaron.length + pregameUsers.Julie.length + 1} of 4` : 'Picks ready for puck drop') : (liveMode ? (isPlayoffs() ? 'Playoff rivalry scoring live' : 'Rivalry scoring live') : '');
-    return `<section class="gd-hero ${finalMode ? 'gd-hero-final' : ''}"><div class="gd-status-row"><span class="gd-pill ${finalMode ? 'final' : 'live'}">${finalMode ? 'Final' : (liveMode ? 'Live' : 'Pregame')}</span>${period ? `<span class="gd-period">${period}</span>` : ''}${liveMode ? '<span class="gd-pill synced">Synced</span>' : ''}${isPlayoffs() ? '<span class="gd-pill gd-pill-playoff">Playoffs</span>' : ''}</div><div class="gd-score-grid"><div class="gd-side"><div class="gd-side-label red">Aaron</div>${pregame ? `<div class="gd-pick-meta"><span class="gd-pick-chip ${pregameUsers.Aaron.length === 2 ? 'active' : ''}">${pregameUsers.Aaron.length} of 2 locked</span></div>` : `<div class="gd-side-value">${scores.Aaron}</div>`}</div><div class="gd-center"><img class="gd-logo" src="./assets/app-icon.png" alt="Canes Rivalry"></div><div class="gd-side"><div class="gd-side-label">Julie</div>${pregame ? `<div class="gd-pick-meta"><span class="gd-pick-chip ${pregameUsers.Julie.length === 2 ? 'active' : ''}">${pregameUsers.Julie.length} of 2 locked</span></div>` : `<div class="gd-side-value">${scores.Julie}</div>`}</div></div>${subline ? `<div class="gd-subline">${subline}</div>` : ''}${finalMode ? `<div class="gd-final-banner">${winnerText(scores)}</div>` : ''}${liveMode ? `<div class="gd-momentum-label">Momentum</div><div class="gd-track"><div class="gd-track-fill" style="left:${scores.Aaron >= scores.Julie ? '50%' : `calc(50% - ${momentum}%)`};width:${momentum}%"></div></div>` : ''}</section>`;
+    return render.renderHeroSection({
+      mode,
+      pregameUsers,
+      live,
+      final,
+      isPlayoffs: isPlayoffs(),
+      winnerText,
+      nextDraftSide: nextDraftSide()
+    });
   }
 
   function renderPregame() {
-    const users = getPregameStructured();
-    if (render.renderPregameSection) {
-      return render.renderPregameSection({ users, roster, claimedOwner });
-    }
-    const renderOwner = (side, red) => `<article class="gd-panel"><div class="gd-panel-head ${red ? 'red' : 'dark'}"><span>${side}</span><span>${users[side].length}/2</span></div>${[0, 1].map((index) => { const pick = users[side][index]; return pick ? `<div class="gd-pick-row"><div class="gd-pick-icon">✓</div><div class="gd-pick-main"><strong>${pick.player}</strong><small>Locked pick</small><div class="gd-lock-actions"><button class="gd-small-action" data-side="${side}" data-player="${pick.player}" type="button">Change</button></div></div></div>` : `<div class="gd-pick-row is-empty"><div class="gd-pick-icon">…</div><div class="gd-pick-main"><strong>Open slot</strong><small>Waiting for next pick</small></div></div>`; }).join('')}</article>`;
-    return `<div class="gd-label-row"><div class="gd-label">Live Picks</div><div class="gd-filter">Updates instantly</div></div><section class="gd-picks-grid">${renderOwner('Aaron', true)}${renderOwner('Julie', false)}</section><div class="gd-label-row"><div class="gd-label">Current Canes Roster</div><div class="gd-filter">Tap Draft only</div></div><section class="gd-panel gd-roster gd-scroll">${roster.map((entry) => { const owner = claimedOwner(entry.name); return `<div class="gd-roster-row ${owner ? 'claimed' : ''}"><div class="gd-pick-main"><strong>${entry.name}</strong><small>${entry.detail}</small></div>${owner ? `<span class="gd-tag">${owner}</span>` : `<button class="gd-draft-btn" data-player="${entry.name}" type="button">Draft</button>`}</div>`; }).join('')}</section>`;
+    return render.renderPregameSection({
+      users: getPregameStructured(),
+      roster,
+      claimedOwner
+    });
   }
 
   function renderLive() {
-    const state = CR.gameDay.live;
-    if (render.renderLiveSection) {
-      return render.renderLiveSection({ state, renderPlayerCard });
-    }
-    return `<div class="gd-label-row"><div class="gd-label">Picked Players</div><button class="gd-manage-tiny" data-action="open-manage" type="button">Manage</button></div><section class="gd-picks-grid">${renderPlayerCard({ side: 'Aaron', picks: state.users.Aaron, score: state.scores.Aaron, red: true })}${renderPlayerCard({ side: 'Julie', picks: state.users.Julie, score: state.scores.Julie, red: false })}</section><div class="gd-label-row"><div class="gd-label">Simulate Updates</div><div class="gd-filter">Goal / Assist / Bonus</div></div><div class="gd-sim-grid"><button class="gd-sim-button red" data-side="Aaron" data-kind="goal" type="button">Aaron Goal</button><button class="gd-sim-button" data-side="Julie" data-kind="goal" type="button">Julie Goal</button><button class="gd-sim-button red" data-side="Aaron" data-kind="assist" type="button">Aaron Assist</button><button class="gd-sim-button" data-side="Julie" data-kind="assist" type="button">Julie Assist</button><button class="gd-sim-button red" data-side="Aaron" data-kind="first" type="button">Aaron First Goal</button><button class="gd-sim-button" data-side="Julie" data-kind="first" type="button">Julie First Goal</button></div><div class="gd-label-row"><div class="gd-label">Rivalry Feed</div><div class="gd-filter">Live</div></div><section class="gd-feed-list">${state.feed.map((item) => `<article class="gd-card gd-feed-item"><div class="gd-feed-icon">${item.icon}</div><div><div><strong>${item.title}</strong></div><div class="gd-feed-sub">${item.detail}</div></div><div><strong>+${item.points}</strong></div></article>`).join('')}</section>`;
+    return render.renderLiveSection({
+      state: CR.gameDay.live,
+      renderPlayerCard
+    });
   }
 
   function renderFinal() {
     const state = getFinalData();
     const bonus = firstGoalHit(state.users);
-    const bonusText = bonus ? `${bonus.player} hit first goal bonus` : 'First goal bonus not hit';
-    const edgeText = leadingStatType(state.users);
-    const mvpSummary = mvpText(state.users);
-    const totalEventsText = `${totalGoals(state.users)} goals • ${totalAssists(state.users)} assists`;
-    if (render.renderFinalSection) {
-      return render.renderFinalSection({
-        state,
-        bonusText,
-        mvpText: mvpSummary,
-        edgeText,
-        totalEventsText,
-        renderPlayerCard
-      });
-    }
-    return `<section class="gd-card gd-postgame-card"><div class="gd-postgame-top"><div class="gd-postgame-icon">⭐</div><div><div class="gd-postgame-title">Postgame Summary</div><div class="gd-postgame-sub">How the night was won.</div></div></div><div class="gd-postgame-grid"><div class="gd-postgame-pill"><strong>MVP</strong><span>${mvpSummary}</span></div><div class="gd-postgame-pill"><strong>Edge</strong><span>${edgeText}</span></div><div class="gd-postgame-pill"><strong>Bonus</strong><span>${bonusText}</span></div><div class="gd-postgame-pill"><strong>Total Events</strong><span>${totalEventsText}</span></div></div></section><div class="gd-label-row"><div class="gd-label">Final Pick Breakdown</div><button class="gd-manage-tiny" data-action="open-manage" type="button">Manage</button></div><section class="gd-final-picks">${renderPlayerCard({ side: 'Aaron', picks: state.users.Aaron, score: state.scores.Aaron, red: true })}${renderPlayerCard({ side: 'Julie', picks: state.users.Julie, score: state.scores.Julie, red: false })}</section>`;
+    return render.renderFinalSection({
+      state,
+      bonusText: bonus ? `${bonus.player} hit first goal bonus` : 'First goal bonus not hit',
+      mvpText: mvpText(state.users),
+      edgeText: leadingStatType(state.users),
+      totalEventsText: `${totalGoals(state.users)} goals • ${totalAssists(state.users)} assists`,
+      renderPlayerCard
+    });
   }
 
   function renderManageSheet() {
@@ -199,61 +173,7 @@ window.CR = window.CR || {};
   function bindInteractions() {
     if (events.bind) {
       events.bind({ claimedOwner, draftOrder, renderManageSheet, setModalOpen, rerender: CR.renderGameDayState });
-      return;
     }
-    document.querySelectorAll('.gd-small-action').forEach((button) => {
-      button.addEventListener('click', () => {
-        const side = button.dataset.side;
-        const player = button.dataset.player;
-        CR.gameDay.pregame[side] = CR.gameDay.pregame[side].filter((name) => name !== player);
-        CR.renderGameDayState('pregame');
-      });
-    });
-    document.querySelectorAll('.gd-draft-btn').forEach((button) => {
-      button.addEventListener('click', (event) => {
-        event.preventDefault();
-        event.stopPropagation();
-        const player = button.dataset.player;
-        if (claimedOwner(player)) return;
-        const total = CR.gameDay.pregame.Aaron.length + CR.gameDay.pregame.Julie.length;
-        if (total >= 4) return;
-        const side = draftOrder[total];
-        CR.gameDay.pregame[side].push(player);
-        CR.renderGameDayState('pregame');
-      });
-    });
-    document.querySelectorAll('[data-action="open-manage"]').forEach((button) => {
-      button.addEventListener('click', () => {
-        renderManageSheet();
-        setModalOpen(true);
-      });
-    });
-    document.querySelectorAll('.gd-sim-button').forEach((button) => {
-      button.addEventListener('click', () => {
-        const side = button.dataset.side;
-        const kind = button.dataset.kind;
-        const pick = CR.gameDay.live.users[side][0];
-        if (!pick) return;
-        if (kind === 'goal') {
-          pick.goals += 1;
-          CR.gameDay.live.scores[side] += 2;
-          CR.gameDay.live.feed.unshift({ icon: '🚨', title: `${pick.player} goal`, detail: `${side} scores through a picked player`, points: 2 });
-        }
-        if (kind === 'assist') {
-          pick.assists += 1;
-          CR.gameDay.live.scores[side] += 1;
-          CR.gameDay.live.feed.unshift({ icon: '🍎', title: `${pick.player} assist`, detail: `${side} adds an assist point`, points: 1 });
-        }
-        if (kind === 'first' && !pick.firstGoal) {
-          pick.firstGoal = true;
-          CR.gameDay.live.scores[side] += 2;
-          CR.gameDay.live.feed.unshift({ icon: '⭐', title: `${pick.player} first Canes goal`, detail: `${side} gets the first goal bonus`, points: 2 });
-        }
-        CR.flashSync?.();
-        CR.showToast?.(`${side} ${kind} update`);
-        CR.renderGameDayState('live');
-      });
-    });
   }
 
   CR.renderGameDayState = (mode = CR.gameDay.mode) => {
