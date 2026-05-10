@@ -2,6 +2,7 @@ window.CR = window.CR || {};
 (() => {
   const CR = window.CR;
   const model = CR.gameDayModel || {};
+  const helpers = CR.gameDayHelpers || {};
   const roster = model.roster || [
     { name: 'Sebastian Aho', detail: 'C • Top line' },
     { name: 'Andrei Svechnikov', detail: 'RW • PP1' },
@@ -46,28 +47,23 @@ window.CR = window.CR || {};
   const pointsFor = (pick) => model.pointsFor ? model.pointsFor(pick) : ((pick.goals * 2) + pick.assists + (pick.firstGoal ? 2 : 0));
   const clone = (value) => model.clone ? model.clone(value) : JSON.parse(JSON.stringify(value));
   const isPlayoffs = () => CR.gameDay.playoffMode === 'playoffs';
-
-  const getPregameStructured = () => ({
+  const getPregameStructured = () => helpers.getPregameStructured ? helpers.getPregameStructured(CR.gameDay) : ({
     Aaron: CR.gameDay.pregame.Aaron.map((player) => ({ player })),
     Julie: CR.gameDay.pregame.Julie.map((player) => ({ player }))
   });
-
   const getFinalData = () => ({
     scores: clone(CR.gameDay.live.scores),
     users: clone(CR.gameDay.live.users)
   });
-
-  const winnerText = (scores) => scores.Aaron > scores.Julie ? 'Aaron Wins' : scores.Julie > scores.Aaron ? 'Julie Wins' : 'Rivalry Tie';
-
-  const nextDraftSide = () => {
+  const winnerText = (scores) => helpers.winnerText ? helpers.winnerText(scores) : (scores.Aaron > scores.Julie ? 'Aaron Wins' : scores.Julie > scores.Aaron ? 'Julie Wins' : 'Rivalry Tie');
+  const nextDraftSide = () => helpers.nextDraftSide ? helpers.nextDraftSide(CR.gameDay, draftOrder) : (() => {
     const total = CR.gameDay.pregame.Aaron.length + CR.gameDay.pregame.Julie.length;
     return total >= 4 ? null : draftOrder[total];
-  };
-
-  const claimedOwner = (name) => CR.gameDay.pregame.Aaron.includes(name) ? 'Aaron' : CR.gameDay.pregame.Julie.includes(name) ? 'Julie' : '';
-  const totalGoals = (users) => Object.values(users).flat().reduce((n, p) => n + (p.goals || 0), 0);
-  const totalAssists = (users) => Object.values(users).flat().reduce((n, p) => n + (p.assists || 0), 0);
-  const firstGoalHit = (users) => Object.values(users).flat().find((p) => p.firstGoal);
+  })();
+  const claimedOwner = (name) => helpers.claimedOwner ? helpers.claimedOwner(CR.gameDay, name) : (CR.gameDay.pregame.Aaron.includes(name) ? 'Aaron' : CR.gameDay.pregame.Julie.includes(name) ? 'Julie' : '');
+  const totalGoals = (users) => helpers.totalGoals ? helpers.totalGoals(users) : Object.values(users).flat().reduce((n, p) => n + (p.goals || 0), 0);
+  const totalAssists = (users) => helpers.totalAssists ? helpers.totalAssists(users) : Object.values(users).flat().reduce((n, p) => n + (p.assists || 0), 0);
+  const firstGoalHit = (users) => helpers.firstGoalHit ? helpers.firstGoalHit(users) : Object.values(users).flat().find((p) => p.firstGoal);
 
   const mvpText = (users) => {
     const all = Object.values(users).flat();
@@ -113,7 +109,8 @@ window.CR = window.CR || {};
     const period = pregame ? (isPlayoffs() ? 'Playoff Night • 7:00 PM' : 'Tonight • 7:00 PM') : (liveMode ? live.period : '');
     const delta = scores.Aaron - scores.Julie;
     const momentum = Math.min(Math.abs(delta) * 12, 48);
-    const subline = pregame ? (nextDraftSide() ? `${nextDraftSide()} on the clock • Pick ${pregameUsers.Aaron.length + pregameUsers.Julie.length + 1} of 4` : 'Picks ready for puck drop') : (liveMode ? (isPlayoffs() ? 'Playoff rivalry scoring live' : 'Rivalry scoring live') : '');
+    const nextSide = nextDraftSide();
+    const subline = pregame ? (nextSide ? `${nextSide} on the clock • Pick ${pregameUsers.Aaron.length + pregameUsers.Julie.length + 1} of 4` : 'Picks ready for puck drop') : (liveMode ? (isPlayoffs() ? 'Playoff rivalry scoring live' : 'Rivalry scoring live') : '');
     return `<section class="gd-hero ${finalMode ? 'gd-hero-final' : ''}"><div class="gd-status-row"><span class="gd-pill ${finalMode ? 'final' : 'live'}">${finalMode ? 'Final' : (liveMode ? 'Live' : 'Pregame')}</span>${period ? `<span class="gd-period">${period}</span>` : ''}${liveMode ? '<span class="gd-pill synced">Synced</span>' : ''}${isPlayoffs() ? '<span class="gd-pill gd-pill-playoff">Playoffs</span>' : ''}</div><div class="gd-score-grid"><div class="gd-side"><div class="gd-side-label red">Aaron</div>${pregame ? `<div class="gd-pick-meta"><span class="gd-pick-chip ${pregameUsers.Aaron.length === 2 ? 'active' : ''}">${pregameUsers.Aaron.length} of 2 locked</span></div>` : `<div class="gd-side-value">${scores.Aaron}</div>`}</div><div class="gd-center"><img class="gd-logo" src="./assets/app-icon.png" alt="Canes Rivalry"></div><div class="gd-side"><div class="gd-side-label">Julie</div>${pregame ? `<div class="gd-pick-meta"><span class="gd-pick-chip ${pregameUsers.Julie.length === 2 ? 'active' : ''}">${pregameUsers.Julie.length} of 2 locked</span></div>` : `<div class="gd-side-value">${scores.Julie}</div>`}</div></div>${subline ? `<div class="gd-subline">${subline}</div>` : ''}${finalMode ? `<div class="gd-final-banner">${winnerText(scores)}</div>` : ''}${liveMode ? `<div class="gd-momentum-label">Momentum</div><div class="gd-track"><div class="gd-track-fill" style="left:${scores.Aaron >= scores.Julie ? '50%' : `calc(50% - ${momentum}%)`};width:${momentum}%"></div></div>` : ''}</section>`;
   }
 
