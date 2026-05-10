@@ -115,6 +115,9 @@ img { display: block; max-width: 100%; }
   height: 28px;
   width: auto;
 }
+.gd-wordmark--board {
+  height: 58px;
+}
 
 .gd-main {
   padding: 12px;
@@ -253,15 +256,6 @@ img { display: block; max-width: 100%; }
 }
 .gd-center-score .gd-wordmark {
   margin: 0 auto;
-  height: 48px;
-}
-.gd-center-label {
-  margin-top: 8px;
-  color: var(--gd-muted);
-  font-size: .76rem;
-  font-weight: 700;
-  letter-spacing: .04em;
-  text-transform: uppercase;
 }
 .gd-summary-line {
   margin-top: 10px;
@@ -296,21 +290,18 @@ img { display: block; max-width: 100%; }
   position: relative;
   height: 10px;
   border-radius: 999px;
-  background: linear-gradient(90deg, rgba(200,16,46,.12), rgba(200,16,46,.45) 42%, rgba(17,21,31,.08) 58%, rgba(17,21,31,.18));
+  background: linear-gradient(90deg, rgba(17,21,31,.12), rgba(17,21,31,.06) 48%, rgba(17,21,31,.06) 52%, rgba(200,16,46,.12));
 }
 .gd-track-fill {
   position: absolute;
-  left: 0;
   top: 0;
   bottom: 0;
-  width: var(--gd-momentum, 50%);
   border-radius: inherit;
   background: linear-gradient(90deg, var(--gd-red), #ff8c9e);
 }
 .gd-track-puck {
   position: absolute;
   top: 50%;
-  left: var(--gd-momentum, 50%);
   transform: translate(-50%, -50%);
   width: 18px;
   height: 18px;
@@ -321,8 +312,7 @@ img { display: block; max-width: 100%; }
 
 .gd-event-card,
 .gd-game-strip,
-.gd-summary-grid,
-.gd-panel {
+.gd-roster-panel {
   border: 1px solid var(--gd-border);
   border-radius: var(--gd-radius-card);
   background: #fff;
@@ -333,7 +323,7 @@ img { display: block; max-width: 100%; }
 }
 .gd-event-card {
   display: grid;
-  grid-template-columns: auto 1fr auto auto;
+  grid-template-columns: auto 1fr auto;
   gap: 12px;
   align-items: center;
 }
@@ -406,6 +396,20 @@ img { display: block; max-width: 100%; }
   letter-spacing: .06em;
   text-transform: uppercase;
 }
+
+.gd-roster-panel {
+  padding: 0;
+  overflow: hidden;
+}
+.gd-roster-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 10px;
+  align-items: center;
+  padding: 12px 14px;
+  border-top: 1px solid var(--gd-border);
+}
+.gd-roster-row:first-child { border-top: 0; }
 
 .gd-feed-list,
 .gd-recap-list {
@@ -532,7 +536,7 @@ img { display: block; max-width: 100%; }
 .gd-pick-panel-head.dark { background: linear-gradient(135deg, #202530, #434b57); }
 .gd-pick-row {
   display: grid;
-  grid-template-columns: auto 1fr auto auto;
+  grid-template-columns: auto 1fr auto;
   gap: 10px;
   align-items: center;
   padding: 11px 12px;
@@ -587,21 +591,10 @@ img { display: block; max-width: 100%; }
   color: var(--gd-muted);
   font-weight: 900;
 }
-
-.gd-wide-button {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  height: 44px;
-  border: 1px solid var(--gd-border);
-  border-radius: 14px;
-  background: #fff;
-  color: var(--gd-ink);
-  font-size: .84rem;
-  font-weight: 900;
-  letter-spacing: .03em;
+.gd-add--solid {
+  background: var(--gd-red);
+  border-color: var(--gd-red);
+  color: #fff;
 }
 
 .gd-headtohead {
@@ -661,35 +654,6 @@ img { display: block; max-width: 100%; }
   line-height: .9;
   font-weight: 1000;
 }
-
-.gd-summary-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0;
-  overflow: hidden;
-}
-.gd-summary-cell {
-  padding: 14px 10px;
-  text-align: center;
-  border-right: 1px solid var(--gd-border);
-}
-.gd-summary-cell:last-child { border-right: 0; }
-.gd-summary-cell small {
-  display: block;
-  color: var(--gd-muted);
-  font-size: .68rem;
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: .08em;
-}
-.gd-summary-cell strong {
-  display: block;
-  margin-top: 8px;
-  font-size: 1.18rem;
-  font-weight: 1000;
-  letter-spacing: -.04em;
-}
-.red-text { color: var(--gd-red); }
 
 .gd-recap-item {
   display: grid;
@@ -765,16 +729,12 @@ img { display: block; max-width: 100%; }
   letter-spacing: -.05em;
 }
 
+.red-text { color: var(--gd-red); }
+
 @media (max-width: 390px) {
   .gd-side-score-value { font-size: 3.1rem; }
   .gd-picks-grid,
-  .gd-picks-summary,
-  .gd-summary-grid {
+  .gd-picks-summary {
     grid-template-columns: 1fr;
   }
-  .gd-summary-cell {
-    border-right: 0;
-    border-top: 1px solid var(--gd-border);
-  }
-  .gd-summary-cell:first-child { border-top: 0; }
 }
