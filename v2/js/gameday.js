@@ -67,13 +67,12 @@ window.CR = window.CR || {};
   CR.currentGameDayMode = 'pregame';
   CR.currentPlayoffMode = 'regular';
   CR.manageDraft = null;
+  CR.pregameSearch = '';
 
+  const draftOrder = ['Aaron', 'Julie', 'Aaron', 'Julie'];
   const pointsFor = (pick) => ((pick?.goals || 0) * 2) + (pick?.assists || 0) + (pick?.firstGoal ? 2 : 0);
-
   const cloneState = (mode) => JSON.parse(JSON.stringify(CR.gameDayStates[mode]));
-
   const getCurrentState = () => cloneState(CR.currentGameDayMode);
-
   const isPlayoffs = () => CR.currentPlayoffMode === 'playoffs';
 
   const ensureStructuredUsers = (state) => {
@@ -141,6 +140,22 @@ window.CR = window.CR || {};
     `;
   };
 
+  const getPregameCounts = () => {
+    const pre = CR.gameDayStates.pregame.users;
+    return { Aaron: pre.Aaron.length, Julie: pre.Julie.length };
+  };
+
+  const nextDraftSide = () => {
+    const total = CR.gameDayStates.pregame.users.Aaron.length + CR.gameDayStates.pregame.users.Julie.length;
+    return draftOrder[Math.min(total, draftOrder.length - 1)];
+  };
+
+  const claimedOwner = (name) => {
+    if (CR.gameDayStates.pregame.users.Aaron.includes(name)) return 'Aaron';
+    if (CR.gameDayStates.pregame.users.Julie.includes(name)) return 'Julie';
+    return '';
+  };
+
   const renderHero = (state, users) => {
     const pregame = CR.currentGameDayMode === 'pregame';
     const live = CR.currentGameDayMode === 'live';
@@ -160,7 +175,7 @@ window.CR = window.CR || {};
       ? `<div class="gd-pick-meta"><span class="gd-pick-chip ${users.Julie.length === 2 ? 'active' : ''}">${users.Julie.length} of 2 locked</span></div>`
       : `<div class="gd-side-value">${scores.Julie}</div>`;
     const subline = pregame
-      ? `<div class="gd-subline">Picks ready for puck drop</div>`
+      ? `<div class="gd-subline">${users.Aaron.length + users.Julie.length >= 4 ? 'Picks ready for puck drop' : `${nextDraftSide()} on the clock • Pick ${users.Aaron.length + users.Julie.length + 1} of 4`}</div>`
       : live
         ? `<div class="gd-subline">${isPlayoffs() ? 'Playoff rivalry scoring live' : 'Rivalry scoring live'}</div>`
         : '';
@@ -176,6 +191,7 @@ window.CR = window.CR || {};
           <span class="gd-pill ${final ? 'final' : 'live'}">${final ? 'Final' : state.title}</span>
           ${period ? `<span class="gd-period">${period}</span>` : ''}
           ${live ? `<span class="gd-pill synced">Synced</span>` : ''}
+          ${isPlayoffs() ? `<span class="gd-pill gd-pill-playoff">Playoffs</span>` : ''}
         </div>
         <div class="gd-score-grid">
           <div class="gd-side"><div class="gd-side-label red">Aaron</div>${left}</div>
@@ -193,25 +209,26 @@ window.CR = window.CR || {};
     const renderOwner = (name, picks, red) => `
       <article class="gd-panel">
         <div class="gd-panel-head ${red ? 'red' : 'dark'}"><span>${name}</span><span>${picks.length}/2</span></div>
-        ${[0,1].map((index) => {
+        ${[0, 1].map((index) => {
           const pick = picks[index];
           return pick
-            ? `<div class="gd-pick-row"><div class="gd-pick-icon">✓</div><div class="gd-pick-main"><strong>${pick.player}</strong><small>Locked pick</small></div></div>`
+            ? `<div class="gd-pick-row"><div class="gd-pick-icon">✓</div><div class="gd-pick-main"><strong>${pick.player}</strong><small>Locked pick</small><div class="gd-lock-actions"><button class="gd-small-action" data-side="${name}" data-player="${pick.player}" type="button">Change</button></div></div></div>`
             : `<div class="gd-pick-row is-empty"><div class="gd-pick-icon">…</div><div class="gd-pick-main"><strong>Open slot</strong><small>Waiting for next pick</small></div></div>`;
         }).join('')}
       </article>
     `;
 
-    const claimed = new Set([...users.Aaron, ...users.Julie].map((p) => p.player));
-    const rosterRows = CR.roster.map((entry) => {
-      const owner = users.Aaron.find((p) => p.player === entry.name) ? 'Aaron' : users.Julie.find((p) => p.player === entry.name) ? 'Julie' : '';
-      return `
-        <div class="gd-roster-row ${owner ? 'claimed' : ''}">
-          <div class="gd-pick-main"><strong>${entry.name}</strong><small>${entry.detail}</small></div>
-          ${owner ? `<span class="gd-tag">${owner}</span>` : `<span class="gd-draft-btn">Draft</span>`}
-        </div>
-      `;
-    }).join('');
+    const rosterRows = CR.roster
+      .filter((entry) => entry.name.toLowerCase().includes((CR.pregameSearch || '').toLowerCase()))
+      .map((entry) => {
+        const owner = claimedOwner(entry.name);
+        return `
+          <button class="gd-roster-row ${owner ? 'claimed' : 'clickable'}" data-player="${entry.name}" type="button">
+            <div class="gd-pick-main"><strong>${entry.name}</strong><small>${entry.detail}</small></div>
+            ${owner ? `<span class="gd-tag">${owner}</span>` : `<span class="gd-draft-btn">Draft</span>`}
+          </button>
+        `;
+      }).join('');
 
     return `
       <div class="gd-label-row"><div class="gd-label">Live Picks</div><div class="gd-filter">Updates instantly</div></div>
@@ -219,7 +236,7 @@ window.CR = window.CR || {};
         ${renderOwner('Aaron', users.Aaron, true)}
         ${renderOwner('Julie', users.Julie, false)}
       </section>
-      <section class="gd-search"><input class="gd-search-input" placeholder="Search current Canes roster..." /></section>
+      <section class="gd-search"><input class="gd-search-input" id="pregameSearch" placeholder="Search current Canes roster..." value="${CR.pregameSearch || ''}" /></section>
       <div class="gd-label-row"><div class="gd-label">Current Canes Roster</div><div class="gd-filter">Tap to draft</div></div>
       <section class="gd-panel gd-roster gd-scroll">${rosterRows}</section>
     `;
@@ -253,12 +270,12 @@ window.CR = window.CR || {};
     </section>
     <div class="gd-label-row"><div class="gd-label">Simulate Updates</div><div class="gd-filter">Goal / Assist / Bonus</div></div>
     <div class="gd-sim-grid">
-      <button class="gd-sim-button red" data-side="Aaron" data-kind="goal">Aaron Goal</button>
-      <button class="gd-sim-button" data-side="Julie" data-kind="goal">Julie Goal</button>
-      <button class="gd-sim-button red" data-side="Aaron" data-kind="assist">Aaron Assist</button>
-      <button class="gd-sim-button" data-side="Julie" data-kind="assist">Julie Assist</button>
-      <button class="gd-sim-button red" data-side="Aaron" data-kind="first">Aaron First Goal</button>
-      <button class="gd-sim-button" data-side="Julie" data-kind="first">Julie First Goal</button>
+      <button class="gd-sim-button red" data-side="Aaron" data-kind="goal" type="button">Aaron Goal</button>
+      <button class="gd-sim-button" data-side="Julie" data-kind="goal" type="button">Julie Goal</button>
+      <button class="gd-sim-button red" data-side="Aaron" data-kind="assist" type="button">Aaron Assist</button>
+      <button class="gd-sim-button" data-side="Julie" data-kind="assist" type="button">Julie Assist</button>
+      <button class="gd-sim-button red" data-side="Aaron" data-kind="first" type="button">Aaron First Goal</button>
+      <button class="gd-sim-button" data-side="Julie" data-kind="first" type="button">Julie First Goal</button>
     </div>
     <div class="gd-label-row"><div class="gd-label">Rivalry Feed</div><div class="gd-filter">Live</div></div>
     <section class="gd-feed-list">
@@ -281,12 +298,27 @@ window.CR = window.CR || {};
     </section>
   `;
 
+  CR.removePregamePick = (side, player) => {
+    CR.gameDayStates.pregame.users[side] = CR.gameDayStates.pregame.users[side].filter((name) => name !== player);
+    CR.renderGameDayState('pregame');
+  };
+
+  CR.assignPregamePick = (player) => {
+    if (claimedOwner(player)) return;
+    const total = CR.gameDayStates.pregame.users.Aaron.length + CR.gameDayStates.pregame.users.Julie.length;
+    if (total >= 4) return;
+    const side = draftOrder[total];
+    CR.gameDayStates.pregame.users[side].push(player);
+    CR.renderGameDayState('pregame');
+  };
+
   CR.renderGameDayState = (mode = 'pregame') => {
     CR.currentGameDayMode = mode;
     const state = getCurrentState();
     const users = ensureStructuredUsers(state);
     const content = CR.$('#gameDayContent');
-    if (!content) return;
+    const view = CR.$('#gameDayView');
+    if (!content || !view) return;
 
     content.innerHTML = `
       ${renderHero(state, users)}
@@ -295,6 +327,7 @@ window.CR = window.CR || {};
       ${mode === 'final' ? renderFinalSection(state, users) : ''}
     `;
 
+    view.classList.toggle('mode-playoffs', isPlayoffs());
     CR.setText(CR.$('#stateTitle'), state.title);
     CR.setBadge(CR.$('#stateBadge'), CR.currentPlayoffMode === 'playoffs' ? 'Playoffs' : state.badge, CR.currentPlayoffMode === 'playoffs' ? 'live' : state.badgeClass);
 
@@ -309,6 +342,19 @@ window.CR = window.CR || {};
       button.addEventListener('click', () => CR.simulateGameDayEvent(button.dataset.side, button.dataset.kind));
     });
     content.querySelector('#openManage')?.addEventListener('click', CR.openManageSheet);
+
+    if (mode === 'pregame') {
+      content.querySelectorAll('.gd-small-action').forEach((button) => {
+        button.addEventListener('click', () => CR.removePregamePick(button.dataset.side, button.dataset.player));
+      });
+      content.querySelectorAll('.gd-roster-row.clickable').forEach((row) => {
+        row.addEventListener('click', () => CR.assignPregamePick(row.dataset.player));
+      });
+      content.querySelector('#pregameSearch')?.addEventListener('input', (event) => {
+        CR.pregameSearch = event.target.value;
+        CR.renderGameDayState('pregame');
+      });
+    }
   };
 
   CR.simulateGameDayEvent = (side, kind) => {
@@ -353,21 +399,20 @@ window.CR = window.CR || {};
     while (CR.manageDraft.Aaron.length < 2) CR.manageDraft.Aaron.push('');
     while (CR.manageDraft.Julie.length < 2) CR.manageDraft.Julie.push('');
 
-    const options = (selected, exclude) => [''].concat(CR.roster.map((r) => r.name)).map((name) => `
-      <option value="${name}" ${selected === name ? 'selected' : ''} ${(name && exclude === name) ? 'disabled' : ''}>${name || 'Open slot'}</option>
-    `).join('');
+    const allSelections = () => [...CR.manageDraft.Aaron, ...CR.manageDraft.Julie].filter(Boolean);
+    const options = (selected) => [''].concat(CR.roster.map((r) => r.name)).map((name) => {
+      const selectedElsewhere = name && allSelections().includes(name) && name !== selected;
+      return `<option value="${name}" ${selected === name ? 'selected' : ''} ${selectedElsewhere ? 'disabled' : ''}>${name || 'Open slot'}</option>`;
+    }).join('');
 
     const renderActions = () => {
-      actions.innerHTML = ['Aaron','Julie'].flatMap((side) => [0,1].map((index) => {
-        const other = [...CR.manageDraft.Aaron, ...CR.manageDraft.Julie].filter((_, i) => `${side}-${index}` !== `${i < 2 ? 'Aaron' : 'Julie'}-${i % 2}`);
-        return `
-          <div class="gd-sheet-pick">
-            <strong>${side} Pick ${index + 1}</strong>
-            <small>Swap locked player</small>
-            <select class="gd-sheet-select" data-side="${side}" data-index="${index}">${options(CR.manageDraft[side][index], other.find(Boolean) || '')}</select>
-          </div>
-        `;
-      })).join('');
+      actions.innerHTML = ['Aaron', 'Julie'].flatMap((side) => [0, 1].map((index) => `
+        <div class="gd-sheet-pick">
+          <strong>${side} Pick ${index + 1}</strong>
+          <small>Swap locked player</small>
+          <select class="gd-sheet-select" data-side="${side}" data-index="${index}">${options(CR.manageDraft[side][index])}</select>
+        </div>
+      `)).join('');
       actions.querySelectorAll('.gd-sheet-select').forEach((select) => {
         select.addEventListener('change', (event) => {
           const { side, index } = event.target.dataset;
