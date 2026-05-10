@@ -4,6 +4,7 @@ window.CR = window.CR || {};
   const model = CR.gameDayModel || {};
   const helpers = CR.gameDayHelpers || {};
   const render = CR.gameDayRender || {};
+  const events = CR.gameDayEvents || {};
   const roster = model.roster || [
     { name: 'Sebastian Aho', detail: 'C • Top line' },
     { name: 'Andrei Svechnikov', detail: 'RW • PP1' },
@@ -165,6 +166,10 @@ window.CR = window.CR || {};
   }
 
   function bindInteractions() {
+    if (events.bind) {
+      events.bind({ claimedOwner, draftOrder, renderManageSheet, setModalOpen, rerender: CR.renderGameDayState });
+      return;
+    }
     document.querySelectorAll('.gd-small-action').forEach((button) => {
       button.addEventListener('click', () => {
         const side = button.dataset.side;
