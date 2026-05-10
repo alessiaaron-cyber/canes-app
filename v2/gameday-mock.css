@@ -639,11 +639,12 @@
   inset: 0;
   background: rgba(17,21,31,.48);
   display: none;
-  align-items: center;
+  align-items: flex-end;
   justify-content: center;
-  padding: 16px;
+  padding: 16px 16px calc(88px + env(safe-area-inset-bottom));
   z-index: 2000;
   overscroll-behavior: contain;
+  touch-action: none;
 }
 
 .gd-sheet.is-open {
@@ -652,13 +653,14 @@
 
 .gd-sheet-card {
   width: min(100%, 430px);
-  max-height: min(82vh, 720px);
+  max-height: min(72vh, 720px);
   overflow: auto;
   border-radius: 24px;
   border: 1px solid var(--gd-border);
   background: #fff;
-  box-shadow: 0 24px 50px rgba(17,21,31,.18);
+  box-shadow: 0 28px 56px rgba(17, 21, 31, 0.24);
   padding: 16px;
+  touch-action: auto;
 }
 
 .gd-sheet-handle {
