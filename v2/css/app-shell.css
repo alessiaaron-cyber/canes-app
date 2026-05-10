@@ -14,8 +14,8 @@
   --warning-soft: #fff7ed;
   --shadow-soft: 0 8px 24px rgba(16, 24, 40, 0.06);
   --radius-card: 26px;
-  --bottom-nav-height: 76px;
-  --bottom-nav-offset: 8px;
+  --bottom-nav-height: 64px;
+  --bottom-nav-offset: 4px;
 }
 
 * {
@@ -35,7 +35,7 @@ body {
   width: 100%;
   max-width: 520px;
   margin: 0 auto;
-  padding: calc(16px + env(safe-area-inset-top)) 14px calc(var(--bottom-nav-height) + var(--bottom-nav-offset) + env(safe-area-inset-bottom) + 40px);
+  padding: calc(16px + env(safe-area-inset-top)) 14px calc(var(--bottom-nav-height) + var(--bottom-nav-offset) + env(safe-area-inset-bottom) + 34px);
 }
 
 .app-view {
@@ -190,11 +190,11 @@ h3 {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  width: calc(100% - 24px);
-  max-width: 490px;
+  width: calc(100% - 28px);
+  max-width: 470px;
   min-height: var(--bottom-nav-height);
-  padding: 10px;
-  gap: 10px;
+  padding: 7px;
+  gap: 8px;
   z-index: 5000;
 }
 
@@ -203,10 +203,12 @@ h3 {
   z-index: 1;
   flex: 1;
   border: 0;
-  border-radius: 16px;
-  padding: 12px 14px;
+  border-radius: 999px;
+  padding: 10px 12px;
   background: #f2f4f7;
-  font-weight: 700;
+  font-size: 0.98rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
   pointer-events: auto;
   touch-action: manipulation;
 }
