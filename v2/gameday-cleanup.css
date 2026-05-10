@@ -1,0 +1,36 @@
+/* Cleanup overrides while Game Day styles are being decomposed */
+
+/* Shared app foundation owns bottom-nav appearance */
+.bottom-nav button,
+.bottom-nav button:visited,
+.bottom-nav button:hover,
+.bottom-nav button:active {
+  color: var(--app-nav-text);
+  background: var(--app-nav-button-bg);
+  text-decoration: none;
+}
+
+.bottom-nav button.active {
+  color: var(--app-nav-text-active);
+  background: var(--app-nav-button-bg-active);
+}
+
+/* Shared modal-open class owns scroll lock */
+html.modal-open,
+body.modal-open {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+/* Keep Game Day modal clear of the dock and feel like a floating admin dialog */
+.gd-sheet {
+  align-items: flex-end;
+  padding: 16px 16px calc(88px + env(safe-area-inset-bottom));
+  touch-action: none;
+}
+
+.gd-sheet-card {
+  max-height: min(72vh, 720px);
+  box-shadow: 0 28px 56px rgba(17, 21, 31, 0.24);
+  touch-action: auto;
+}
