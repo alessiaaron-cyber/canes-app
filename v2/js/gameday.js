@@ -1,203 +1,424 @@
 window.CR = window.CR || {};
 
-window.CR.gameDayStates = {
-  missing: {
-    title: 'Missing Picks', badge: 'Needs Picks', badgeClass: 'warning',
-    gameStatus: 'Pregame', statusText: 'Set picks', heroPhase: 'TONIGHT · 7:00 PM',
-    subline: 'Tonight · 7:00 PM · Picks open', score: ['0', '0'], rivalry: ['0', '0'],
-    picksTitle: 'Draft Your Rivalry Squad', picksBadge: '1 Missing', picksBadgeClass: 'warning',
-    picksNote: 'Julie still needs one pick.', mode: 'editable', latest: 'Waiting on final pick',
-    impact: 'No rivalry points yet', winner: null, swingDelta: 0, swingVariant: 'neutral',
-    momentumText: 'Even', heroEventTitle: 'One more pick needed', heroEventMeta: 'Locks at puck drop',
-    feedTitle: 'Rivalry Notes', feed: [
-      { icon: '⏳', time: 'Pregame', title: 'Aaron is set', text: '2 of 2 selected', score: '' },
-      { icon: '⚠️', time: 'Pregame', title: 'Julie needs one more', text: 'Still editable', score: '' }
-    ],
-    users: { Aaron: ['Sebastian Aho', 'Andrei Svechnikov'], Julie: ['Seth Jarvis', ''] }
-  },
-  pregame: {
-    title: 'Pregame Ready', badge: 'Editable', badgeClass: 'calm',
-    gameStatus: 'Pregame', statusText: 'Ready', heroPhase: 'TONIGHT · 7:00 PM',
-    subline: 'Tonight · 7:00 PM · Picks ready', score: ['0', '0'], rivalry: ['0', '0'],
-    picksTitle: 'Draft Your Rivalry Squad', picksBadge: 'Editable', picksBadgeClass: 'calm',
-    picksNote: '2 Canes each · no duplicates.', mode: 'editable', latest: 'Picks are locked in',
-    impact: 'Waiting for puck drop', winner: null, swingDelta: 0, swingVariant: 'neutral',
-    momentumText: 'Even', heroEventTitle: 'Rivalry ready', heroEventMeta: 'Puck drop next',
-    feedTitle: 'Rivalry Notes', feed: [
-      { icon: '✅', time: 'Pregame', title: 'Picks submitted', text: 'Aaron and Julie are in', score: '' },
-      { icon: '🚫', time: 'Pregame', title: 'No duplicate players', text: 'Board is clean', score: '' }
-    ],
-    users: { Aaron: ['Sebastian Aho', 'Andrei Svechnikov'], Julie: ['Seth Jarvis', 'Jaccob Slavin'] }
-  },
-  live: {
-    title: 'Live Game', badge: 'Live', badgeClass: 'live',
-    gameStatus: 'Live', statusText: 'Synced', heroPhase: '2ND · 7:42',
-    subline: '2nd Period · CAR 2-1', score: ['2', '1'], rivalry: ['4', '3'],
-    picksTitle: 'Tonight’s Picks', picksBadge: 'Live', picksBadgeClass: 'live',
-    picksNote: 'Live stats update instantly.', mode: 'locked', latest: 'Aho puts Aaron ahead',
-    impact: 'Aaron leads 4-3', winner: 'Aaron', swingDelta: 1, swingVariant: 'away',
-    momentumText: 'Aaron edge', heroEventTitle: 'Aho puts Aaron ahead', heroEventMeta: '7:42 · 2nd',
-    feedTitle: 'Rivalry Feed', feed: [
-      { icon: '🚨', time: '7:42 2nd', title: 'Aho goal', text: 'Aaron jumps ahead', score: '4-3', featured: true },
-      { icon: '🍎', time: '6:15 2nd', title: 'Jarvis assist', text: 'Julie cuts it close', score: '3-3' },
-      { icon: '📈', time: '4:02 2nd', title: 'Momentum shift', text: 'Aaron taking control', score: '' },
-      { icon: '👀', time: '1:18 1st', title: 'Svechnikov point', text: 'Early swing for Aaron', score: '1-0' }
-    ],
-    users: { Aaron: [{ player: 'Sebastian Aho', pos: 'C', proj: '+3.2', g: 1, a: 0, first: true, pts: 3 }, { player: 'Andrei Svechnikov', pos: 'RW', proj: '+2.1', g: 0, a: 1, first: false, pts: 1 }], Julie: [{ player: 'Seth Jarvis', pos: 'RW', proj: '+2.0', g: 0, a: 1, first: false, pts: 2 }, { player: 'Jaccob Slavin', pos: 'D', proj: '+1.2', g: 0, a: 1, first: false, pts: 1 }] }
-  },
-  final: {
-    title: 'Final Result', badge: 'Final', badgeClass: 'dark',
-    gameStatus: 'Final', statusText: 'Complete', heroPhase: 'FINAL',
-    subline: 'Final · Hurricanes win 3-2', score: ['3', '2'], rivalry: ['5', '2'],
-    picksTitle: 'Final Picks', picksBadge: 'Aaron Wins', picksBadgeClass: 'dark',
-    picksNote: 'Aho’s first goal made the difference.', mode: 'locked', latest: 'Aaron wins the night',
-    impact: 'Final rivalry score 5-2', winner: 'Aaron', swingDelta: 3, swingVariant: 'away',
-    momentumText: 'Aaron wins', heroEventTitle: 'Aaron wins the night', heroEventMeta: 'Aho first goal sealed it',
-    feedTitle: 'Rivalry Recap', feed: [
-      { icon: '🏁', time: 'Final', title: 'Aaron wins', text: 'Final rivalry score 5-2', score: '5-2', featured: true },
-      { icon: '🚨', time: '2nd', title: 'Aho scores first', text: 'Bonus swing', score: '3-0' },
-      { icon: '🍎', time: '2nd', title: 'Jarvis assist', text: 'Julie stays close', score: '3-1' },
-      { icon: '🥅', time: '3rd', title: 'Empty-net finish', text: 'Aaron seals it', score: '5-2' }
-    ],
-    users: { Aaron: [{ player: 'Sebastian Aho', pos: 'C', proj: '+3.2', g: 1, a: 1, first: true, pts: 4 }, { player: 'Andrei Svechnikov', pos: 'RW', proj: '+2.1', g: 0, a: 1, first: false, pts: 1 }], Julie: [{ player: 'Seth Jarvis', pos: 'RW', proj: '+2.0', g: 1, a: 0, first: false, pts: 2 }, { player: 'Jaccob Slavin', pos: 'D', proj: '+1.2', g: 0, a: 0, first: false, pts: 0 }] }
-  }
-};
+(() => {
+  const CR = window.CR;
 
-window.CR.roster = [
-  { name: 'Sebastian Aho', pos: 'C', proj: '+3.2' },
-  { name: 'Andrei Svechnikov', pos: 'RW', proj: '+2.1' },
-  { name: 'Seth Jarvis', pos: 'RW', proj: '+2.0' },
-  { name: 'Jaccob Slavin', pos: 'D', proj: '+1.2' },
-  { name: 'Jordan Staal', pos: 'C', proj: '+1.6' },
-  { name: 'Jesperi Kotkaniemi', pos: 'C', proj: '+0.8' },
-  { name: 'Brent Burns', pos: 'D', proj: '+1.0' }
-];
-window.CR.currentGameDayMode = 'pregame';
+  CR.gameDayStates = {
+    pregame: {
+      title: 'Pregame',
+      badge: 'Regular',
+      badgeClass: 'calm',
+      users: {
+        Aaron: ['Sebastian Aho', 'Andrei Svechnikov'],
+        Julie: ['Seth Jarvis', 'Jaccob Slavin']
+      }
+    },
+    live: {
+      title: 'Live',
+      badge: 'Live',
+      badgeClass: 'live',
+      period: '2nd • 8:14',
+      scores: { Aaron: 4, Julie: 3 },
+      users: {
+        Aaron: [
+          { player: 'Sebastian Aho', goals: 1, assists: 0, firstGoal: true },
+          { player: 'Andrei Svechnikov', goals: 0, assists: 1, firstGoal: false }
+        ],
+        Julie: [
+          { player: 'Seth Jarvis', goals: 0, assists: 1, firstGoal: false },
+          { player: 'Jaccob Slavin', goals: 0, assists: 1, firstGoal: false }
+        ]
+      },
+      feed: [
+        { icon: '🚨', title: 'Sebastian Aho goal', detail: 'Aaron scores through a picked player', points: 2 },
+        { icon: '🍎', title: 'Seth Jarvis assist', detail: 'Julie adds an assist point', points: 1 },
+        { icon: '⭐', title: 'First goal bonus', detail: 'Aho hit the first Canes goal bonus', points: 2 }
+      ]
+    },
+    final: {
+      title: 'Final',
+      badge: 'Final',
+      badgeClass: 'dark',
+      scores: { Aaron: 5, Julie: 2 },
+      users: {
+        Aaron: [
+          { player: 'Sebastian Aho', goals: 1, assists: 1, firstGoal: true },
+          { player: 'Andrei Svechnikov', goals: 0, assists: 1, firstGoal: false }
+        ],
+        Julie: [
+          { player: 'Seth Jarvis', goals: 1, assists: 0, firstGoal: false },
+          { player: 'Jaccob Slavin', goals: 0, assists: 0, firstGoal: false }
+        ]
+      }
+    }
+  };
 
-window.CR.renderEditableOwner = (userName, picks) => {
-  const isAaron = userName === 'Aaron';
-  const ownerClass = isAaron ? 'owner-aaron' : 'owner-julie';
-  const rows = [0, 1].map((index) => {
-    const current = picks[index] || '';
-    const rosterEntry = window.CR.roster.find((p) => p.name === current) || window.CR.roster[index + (isAaron ? 0 : 2)] || window.CR.roster[0];
-    return `<div class="pick-row-item"><div class="pick-player-icon ${current ? 'active' : ''}">${current ? (index + 1) : '+'}</div><div class="pick-main"><strong>${current || rosterEntry.name}</strong><span>${rosterEntry.pos}</span></div><div class="pick-side-meta"><em>Proj</em><b>${rosterEntry.proj}</b><span class="pick-add-btn">+</span></div></div>`;
-  }).join('');
-  return `<div class="pick-owner-card ${ownerClass}"><div class="pick-owner-head"><span>${userName}</span><span class="pick-owner-count">${picks.filter(Boolean).length}/2</span></div><div class="pick-owner-list">${rows}</div><div class="pick-owner-footer"><span>${isAaron ? 'Rivalry side A' : 'Rivalry side B'}</span><span>${picks.filter(Boolean).length}/2 picks</span></div></div>`;
-};
+  CR.roster = [
+    { name: 'Sebastian Aho', detail: 'C • Top line' },
+    { name: 'Andrei Svechnikov', detail: 'RW • PP1' },
+    { name: 'Seth Jarvis', detail: 'RW • Hot streak' },
+    { name: 'Jaccob Slavin', detail: 'D • Defensive anchor' },
+    { name: 'Jordan Staal', detail: 'C • Two-way center' },
+    { name: 'Jesperi Kotkaniemi', detail: 'C • Middle six' },
+    { name: 'Brent Burns', detail: 'D • PP2' },
+    { name: 'Jackson Blake', detail: 'RW • Rookie spark' }
+  ];
 
-window.CR.renderLockedOwner = (userName, picks) => {
-  const isAaron = userName === 'Aaron';
-  const ownerClass = isAaron ? 'owner-aaron' : 'owner-julie';
-  const total = picks.reduce((sum, pick) => sum + pick.pts, 0);
-  const rows = picks.map((pick) => `<div class="pick-row-item"><div class="pick-player-icon active">${pick.pts > 0 ? '+' : '•'}</div><div class="pick-main"><strong>${pick.player}</strong><span>${pick.pos || ''}</span></div><div class="pick-side-meta"><em>${pick.g}G · ${pick.a}A</em><b>+${pick.pts}</b></div></div>`).join('');
-  return `<div class="pick-owner-card ${ownerClass}"><div class="pick-owner-head"><span>${userName}</span><span class="pick-owner-count">${total} pts</span></div><div class="pick-owner-list">${rows}</div><div class="pick-owner-footer"><span>${userName}</span><span>Total +${total}</span></div></div>`;
-};
+  CR.currentGameDayMode = 'pregame';
+  CR.currentPlayoffMode = 'regular';
+  CR.manageDraft = null;
 
-window.CR.renderPicks = (state) => {
-  const picksContent = window.CR.$('#picksContent');
-  if (!picksContent) return;
-  picksContent.innerHTML = Object.entries(state.users).map(([userName, picks]) => state.mode === 'editable' ? window.CR.renderEditableOwner(userName, picks) : window.CR.renderLockedOwner(userName, picks)).join('');
-};
+  const pointsFor = (pick) => ((pick?.goals || 0) * 2) + (pick?.assists || 0) + (pick?.firstGoal ? 2 : 0);
 
-window.CR.renderMoments = (items) => {
-  const feed = window.CR.$('#momentsFeed');
-  if (!feed) return;
-  feed.innerHTML = (items || []).map((item) => `<div class="feed-row ${item.featured ? 'featured' : ''}"><div class="feed-row-icon">${item.icon || '•'}</div><div class="feed-row-body"><div class="feed-row-top"><span>${item.time || ''}</span></div><strong>${item.title || ''}</strong><span>${item.text || ''}</span></div><div class="feed-row-score">${item.score || ''}</div></div>`).join('');
-};
+  const cloneState = (mode) => JSON.parse(JSON.stringify(CR.gameDayStates[mode]));
 
-window.CR.renderSwing = (state) => {
-  const module = window.CR.$('.rivalry-swing-module');
-  const fill = window.CR.$('#swingFill');
-  const marker = window.CR.$('#swingMarker');
-  const momentumText = window.CR.$('#momentumText');
-  if (!module || !fill || !marker) return;
-  const delta = Number(state.swingDelta || 0);
-  const percent = 50 + (delta * 10);
-  const clampedPercent = Math.max(12, Math.min(88, percent));
-  module.dataset.variant = state.swingVariant || 'neutral';
-  fill.style.width = '0%';
-  fill.style.left = '50%';
-  marker.style.left = `${clampedPercent}%`;
-  if (momentumText) momentumText.textContent = state.momentumText || 'Even';
-};
+  const getCurrentState = () => cloneState(CR.currentGameDayMode);
 
-window.CR.renderGameDayState = (mode) => {
-  const state = window.CR.gameDayStates[mode] || window.CR.gameDayStates.pregame;
-  window.CR.currentGameDayMode = mode;
-  const view = window.CR.$('#gameDayView');
-  if (view) view.dataset.mode = mode;
-  window.CR.setText(window.CR.$('#stateTitle'), state.title);
-  window.CR.setBadge(window.CR.$('#stateBadge'), state.badge, state.badgeClass);
-  window.CR.setText(window.CR.$('#gameStatusPill'), state.gameStatus);
-  window.CR.setText(window.CR.$('#heroPhase'), state.heroPhase || state.gameStatus);
-  window.CR.setText(window.CR.$('#statusText'), state.statusText);
-  window.CR.setText(window.CR.$('#gameSubline'), state.subline);
-  window.CR.setText(window.CR.$('#canesScore'), state.score[0]);
-  window.CR.setText(window.CR.$('#oppScore'), state.score[1]);
-  window.CR.setText(window.CR.$('#aaronRivalryScore'), state.rivalry[0]);
-  window.CR.setText(window.CR.$('#julieRivalryScore'), state.rivalry[1]);
-  window.CR.setText(window.CR.$('#heroEventTitle'), state.heroEventTitle || state.latest);
-  window.CR.setText(window.CR.$('#heroEventMeta'), state.heroEventMeta || state.impact);
-  window.CR.setText(window.CR.$('#picksEyebrow'), state.mode === 'editable' ? 'Draft board' : 'Tonight’s picks');
-  window.CR.setText(window.CR.$('#picksTitle'), state.picksTitle);
-  window.CR.setBadge(window.CR.$('#picksBadge'), state.picksBadge, state.picksBadgeClass);
-  window.CR.setText(window.CR.$('#picksNote'), state.picksNote);
-  window.CR.setText(window.CR.$('#latestEvent'), state.latest);
-  window.CR.setText(window.CR.$('#eventImpact'), state.impact);
-  window.CR.setText(window.CR.$('#feedTitle'), state.feedTitle || 'Rivalry Feed');
-  window.CR.setText(window.CR.$('#pulseBadge'), state.mode === 'editable' ? 'Preview' : state.gameStatus);
-  const eventControls = window.CR.$('#eventControls');
-  if (eventControls) eventControls.style.display = mode === 'live' ? 'grid' : 'none';
-  window.CR.renderSwing(state);
-  window.CR.renderPicks(state);
-  window.CR.renderMoments(state.feed);
-  window.CR.$('#stateSwitcher')?.querySelectorAll('button').forEach((button) => button.classList.toggle('active', button.dataset.mode === mode));
-};
+  const isPlayoffs = () => CR.currentPlayoffMode === 'playoffs';
 
-window.CR.addMoment = (message) => {
-  const feed = window.CR.$('#momentsFeed');
-  if (!feed) return;
-  const row = document.createElement('div');
-  row.className = 'feed-row featured new-moment';
-  row.innerHTML = `<div class="feed-row-icon">🔥</div><div class="feed-row-body"><div class="feed-row-top"><span>Now</span></div><strong>${message}</strong><span>Live rivalry update</span></div><div class="feed-row-score"></div>`;
-  feed.prepend(row);
-};
+  const ensureStructuredUsers = (state) => {
+    if (CR.currentGameDayMode === 'pregame') {
+      return {
+        Aaron: state.users.Aaron.map((player) => ({ player })),
+        Julie: state.users.Julie.map((player) => ({ player }))
+      };
+    }
+    return state.users;
+  };
 
-window.CR.runAaronScoreSwing = () => {
-  if (window.CR.currentGameDayMode === 'missing' || window.CR.currentGameDayMode === 'pregame') window.CR.renderGameDayState('live');
-  window.CR.flashSync();
-  window.CR.addMoment('Aaron swing lands');
-  window.CR.showToast('Aaron swing · +3');
-};
+  const winnerText = (scores) => {
+    if (scores.Aaron > scores.Julie) return 'Aaron Wins';
+    if (scores.Julie > scores.Aaron) return 'Julie Wins';
+    return 'Rivalry Tie';
+  };
 
-window.CR.runJulieAssist = () => {
-  if (window.CR.currentGameDayMode === 'missing' || window.CR.currentGameDayMode === 'pregame') {
-    const custom = JSON.parse(JSON.stringify(window.CR.gameDayStates.live));
-    custom.rivalry = ['3', '4'];
-    custom.winner = 'Julie';
-    custom.swingDelta = -1;
-    custom.swingVariant = 'home';
-    custom.momentumText = 'Julie edge';
-    custom.latest = 'Jarvis keeps Julie ahead';
-    custom.impact = 'Julie leads 4-3';
-    custom.heroEventTitle = 'Jarvis keeps Julie ahead';
-    custom.heroEventMeta = '6:15 · 2nd';
-    custom.feed[0] = { icon: '🍎', time: '6:15 2nd', title: 'Jarvis assist', text: 'Julie moves ahead', score: '3-4', featured: true };
-    window.CR.gameDayStates.temp_home_swing = custom;
-    window.CR.renderGameDayState('temp_home_swing');
-  }
-  window.CR.flashSync();
-  window.CR.addMoment('Julie answer keeps it tight');
-  window.CR.showToast('Julie assist · +1');
-};
+  const totalGoals = (users) => Object.values(users).flat().reduce((n, p) => n + (p.goals || 0), 0);
+  const totalAssists = (users) => Object.values(users).flat().reduce((n, p) => n + (p.assists || 0), 0);
+  const firstGoalHit = (users) => Object.values(users).flat().find((p) => p.firstGoal);
 
-window.CR.initGameDay = () => {
-  window.CR.$('#stateSwitcher')?.addEventListener('click', (event) => {
-    const button = event.target.closest('button[data-mode]');
-    if (button) window.CR.renderGameDayState(button.dataset.mode);
-  });
-  window.CR.$('#refreshButton')?.addEventListener('click', () => { window.CR.flashSync(); window.CR.showToast('Mock realtime refresh complete'); });
-  window.CR.$('#simulateAaronGoal')?.addEventListener('click', window.CR.runAaronScoreSwing);
-  window.CR.$('#simulateJulieAssist')?.addEventListener('click', window.CR.runJulieAssist);
-  window.CR.renderGameDayState('pregame');
-};
+  const leadingStatType = (users) => {
+    const goals = totalGoals(users);
+    const assists = totalAssists(users);
+    if (goals === 0 && assists === 0) return 'No scoring events yet';
+    if (goals > assists) return `${goals} goal points drove the night`;
+    if (assists > goals) return `${assists} assist points drove the night`;
+    return 'Goals and assists landed evenly';
+  };
+
+  const mvpText = (users) => {
+    const all = Object.values(users).flat();
+    if (!all.length) return 'No MVP yet';
+    let best = all[0];
+    let bestPts = pointsFor(best);
+    all.forEach((pick) => {
+      const pts = pointsFor(pick);
+      if (pts > bestPts) {
+        best = pick;
+        bestPts = pts;
+      }
+    });
+    return `${best.player} • ${bestPts} pts`;
+  };
+
+  const postgameSummaryHtml = (users) => {
+    const bonus = firstGoalHit(users);
+    return `
+      <section class="gd-card gd-postgame-card">
+        <div class="gd-postgame-top">
+          <div class="gd-postgame-icon">⭐</div>
+          <div>
+            <div class="gd-postgame-title">Postgame Summary</div>
+            <div class="gd-postgame-sub">How the night was won.</div>
+          </div>
+        </div>
+        <div class="gd-postgame-grid">
+          <div class="gd-postgame-pill"><strong>MVP</strong><span>${mvpText(users)}</span></div>
+          <div class="gd-postgame-pill"><strong>Edge</strong><span>${leadingStatType(users)}</span></div>
+          <div class="gd-postgame-pill"><strong>Bonus</strong><span>${bonus ? `${bonus.player} hit first goal bonus` : 'First goal bonus not hit'}</span></div>
+          <div class="gd-postgame-pill"><strong>Total Events</strong><span>${totalGoals(users)} goals • ${totalAssists(users)} assists</span></div>
+        </div>
+      </section>
+    `;
+  };
+
+  const renderHero = (state, users) => {
+    const pregame = CR.currentGameDayMode === 'pregame';
+    const live = CR.currentGameDayMode === 'live';
+    const final = CR.currentGameDayMode === 'final';
+    const scores = state.scores || { Aaron: 0, Julie: 0 };
+    const period = pregame
+      ? (isPlayoffs() ? 'Playoff Night • 7:00 PM' : 'Tonight • 7:00 PM')
+      : live
+        ? (state.period || '2nd • 8:14')
+        : '';
+    const delta = (scores.Aaron || 0) - (scores.Julie || 0);
+    const momentum = Math.min(Math.abs(delta) * 12, 48);
+    const left = pregame
+      ? `<div class="gd-pick-meta"><span class="gd-pick-chip ${users.Aaron.length === 2 ? 'active' : ''}">${users.Aaron.length} of 2 locked</span></div>`
+      : `<div class="gd-side-value">${scores.Aaron}</div>`;
+    const right = pregame
+      ? `<div class="gd-pick-meta"><span class="gd-pick-chip ${users.Julie.length === 2 ? 'active' : ''}">${users.Julie.length} of 2 locked</span></div>`
+      : `<div class="gd-side-value">${scores.Julie}</div>`;
+    const subline = pregame
+      ? `<div class="gd-subline">Picks ready for puck drop</div>`
+      : live
+        ? `<div class="gd-subline">${isPlayoffs() ? 'Playoff rivalry scoring live' : 'Rivalry scoring live'}</div>`
+        : '';
+    const finalBanner = final ? `<div class="gd-final-banner">${winnerText(scores)}</div>` : '';
+    const liveMomentum = live ? `
+      <div class="gd-momentum-label">Momentum</div>
+      <div class="gd-track"><div class="gd-track-fill" style="left:${scores.Aaron >= scores.Julie ? '50%' : `calc(50% - ${momentum}%)`};width:${momentum}%"></div></div>
+    ` : '';
+
+    return `
+      <section class="gd-hero ${final ? 'gd-hero-final' : ''}">
+        <div class="gd-status-row">
+          <span class="gd-pill ${final ? 'final' : 'live'}">${final ? 'Final' : state.title}</span>
+          ${period ? `<span class="gd-period">${period}</span>` : ''}
+          ${live ? `<span class="gd-pill synced">Synced</span>` : ''}
+        </div>
+        <div class="gd-score-grid">
+          <div class="gd-side"><div class="gd-side-label red">Aaron</div>${left}</div>
+          <div class="gd-center"><img class="gd-logo" src="./assets/app-icon.png" alt="Canes Rivalry"></div>
+          <div class="gd-side"><div class="gd-side-label">Julie</div>${right}</div>
+        </div>
+        ${subline}
+        ${finalBanner}
+        ${liveMomentum}
+      </section>
+    `;
+  };
+
+  const renderPregameCards = (users) => {
+    const renderOwner = (name, picks, red) => `
+      <article class="gd-panel">
+        <div class="gd-panel-head ${red ? 'red' : 'dark'}"><span>${name}</span><span>${picks.length}/2</span></div>
+        ${[0,1].map((index) => {
+          const pick = picks[index];
+          return pick
+            ? `<div class="gd-pick-row"><div class="gd-pick-icon">✓</div><div class="gd-pick-main"><strong>${pick.player}</strong><small>Locked pick</small></div></div>`
+            : `<div class="gd-pick-row is-empty"><div class="gd-pick-icon">…</div><div class="gd-pick-main"><strong>Open slot</strong><small>Waiting for next pick</small></div></div>`;
+        }).join('')}
+      </article>
+    `;
+
+    const claimed = new Set([...users.Aaron, ...users.Julie].map((p) => p.player));
+    const rosterRows = CR.roster.map((entry) => {
+      const owner = users.Aaron.find((p) => p.player === entry.name) ? 'Aaron' : users.Julie.find((p) => p.player === entry.name) ? 'Julie' : '';
+      return `
+        <div class="gd-roster-row ${owner ? 'claimed' : ''}">
+          <div class="gd-pick-main"><strong>${entry.name}</strong><small>${entry.detail}</small></div>
+          ${owner ? `<span class="gd-tag">${owner}</span>` : `<span class="gd-draft-btn">Draft</span>`}
+        </div>
+      `;
+    }).join('');
+
+    return `
+      <div class="gd-label-row"><div class="gd-label">Live Picks</div><div class="gd-filter">Updates instantly</div></div>
+      <section class="gd-picks-grid">
+        ${renderOwner('Aaron', users.Aaron, true)}
+        ${renderOwner('Julie', users.Julie, false)}
+      </section>
+      <section class="gd-search"><input class="gd-search-input" placeholder="Search current Canes roster..." /></section>
+      <div class="gd-label-row"><div class="gd-label">Current Canes Roster</div><div class="gd-filter">Tap to draft</div></div>
+      <section class="gd-panel gd-roster gd-scroll">${rosterRows}</section>
+    `;
+  };
+
+  const renderStatChips = (pick) => `
+    <div class="gd-player-stats">
+      <span class="gd-stat ${pick.goals ? 'live' : ''}">G ${pick.goals || 0}</span>
+      <span class="gd-stat ${pick.assists ? 'live' : ''}">A ${pick.assists || 0}</span>
+      <span class="gd-stat ${pick.firstGoal ? 'live' : ''}">FG</span>
+    </div>
+  `;
+
+  const renderPlayerBreakdownCard = (name, picks, score, red) => `
+    <article class="gd-card">
+      <div class="gd-pick-card-head"><strong class="${red ? 'red' : ''}">${name}</strong><span>${score} pts</span></div>
+      ${picks.length ? picks.map((pick) => `
+        <div class="gd-player-card">
+          <div class="gd-player-main"><strong>${pick.player}</strong>${renderStatChips(pick)}</div>
+          <div class="gd-player-total">+${pointsFor(pick)}</div>
+        </div>
+      `).join('') : `<div class="gd-player-card"><div class="gd-player-main"><strong>No pick</strong></div><div class="gd-player-total">+0</div></div>`}
+    </article>
+  `;
+
+  const renderLiveSection = (state, users) => `
+    <div class="gd-label-row"><div class="gd-label">Picked Players</div><button class="gd-manage-tiny" type="button" id="openManage">Manage</button></div>
+    <section class="gd-picks-grid">
+      ${renderPlayerBreakdownCard('Aaron', users.Aaron, state.scores.Aaron, true)}
+      ${renderPlayerBreakdownCard('Julie', users.Julie, state.scores.Julie, false)}
+    </section>
+    <div class="gd-label-row"><div class="gd-label">Simulate Updates</div><div class="gd-filter">Goal / Assist / Bonus</div></div>
+    <div class="gd-sim-grid">
+      <button class="gd-sim-button red" data-side="Aaron" data-kind="goal">Aaron Goal</button>
+      <button class="gd-sim-button" data-side="Julie" data-kind="goal">Julie Goal</button>
+      <button class="gd-sim-button red" data-side="Aaron" data-kind="assist">Aaron Assist</button>
+      <button class="gd-sim-button" data-side="Julie" data-kind="assist">Julie Assist</button>
+      <button class="gd-sim-button red" data-side="Aaron" data-kind="first">Aaron First Goal</button>
+      <button class="gd-sim-button" data-side="Julie" data-kind="first">Julie First Goal</button>
+    </div>
+    <div class="gd-label-row"><div class="gd-label">Rivalry Feed</div><div class="gd-filter">Live</div></div>
+    <section class="gd-feed-list">
+      ${(state.feed || []).map((item) => `
+        <article class="gd-card gd-feed-item">
+          <div class="gd-feed-icon">${item.icon}</div>
+          <div><div><strong>${item.title}</strong></div><div class="gd-feed-sub">${item.detail}</div></div>
+          <div><strong>+${item.points}</strong></div>
+        </article>
+      `).join('')}
+    </section>
+  `;
+
+  const renderFinalSection = (state, users) => `
+    ${postgameSummaryHtml(users)}
+    <div class="gd-label-row"><div class="gd-label">Final Pick Breakdown</div><button class="gd-manage-tiny" type="button" id="openManage">Manage</button></div>
+    <section class="gd-final-picks">
+      ${renderPlayerBreakdownCard('Aaron', users.Aaron, state.scores.Aaron, true)}
+      ${renderPlayerBreakdownCard('Julie', users.Julie, state.scores.Julie, false)}
+    </section>
+  `;
+
+  CR.renderGameDayState = (mode = 'pregame') => {
+    CR.currentGameDayMode = mode;
+    const state = getCurrentState();
+    const users = ensureStructuredUsers(state);
+    const content = CR.$('#gameDayContent');
+    if (!content) return;
+
+    content.innerHTML = `
+      ${renderHero(state, users)}
+      ${mode === 'pregame' ? renderPregameCards(users) : ''}
+      ${mode === 'live' ? renderLiveSection(state, users) : ''}
+      ${mode === 'final' ? renderFinalSection(state, users) : ''}
+    `;
+
+    CR.setText(CR.$('#stateTitle'), state.title);
+    CR.setBadge(CR.$('#stateBadge'), CR.currentPlayoffMode === 'playoffs' ? 'Playoffs' : state.badge, CR.currentPlayoffMode === 'playoffs' ? 'live' : state.badgeClass);
+
+    CR.$('#stateSwitcher')?.querySelectorAll('button').forEach((button) => {
+      button.classList.toggle('active', button.dataset.mode === mode);
+    });
+    CR.$('#modeSwitcher')?.querySelectorAll('button').forEach((button) => {
+      button.classList.toggle('active', button.dataset.playoffMode === CR.currentPlayoffMode);
+    });
+
+    content.querySelectorAll('.gd-sim-button').forEach((button) => {
+      button.addEventListener('click', () => CR.simulateGameDayEvent(button.dataset.side, button.dataset.kind));
+    });
+    content.querySelector('#openManage')?.addEventListener('click', CR.openManageSheet);
+  };
+
+  CR.simulateGameDayEvent = (side, kind) => {
+    const state = cloneState('live');
+    const key = side;
+    const pick = state.users[key][0];
+    if (!pick) return;
+    if (kind === 'goal') {
+      pick.goals += 1;
+      state.scores[key] += 2;
+      state.feed.unshift({ icon: '🚨', title: `${pick.player} goal`, detail: `${side} scores through a picked player`, points: 2 });
+    }
+    if (kind === 'assist') {
+      pick.assists += 1;
+      state.scores[key] += 1;
+      state.feed.unshift({ icon: '🍎', title: `${pick.player} assist`, detail: `${side} adds an assist point`, points: 1 });
+    }
+    if (kind === 'first' && !pick.firstGoal) {
+      pick.firstGoal = true;
+      state.scores[key] += 2;
+      state.feed.unshift({ icon: '⭐', title: `${pick.player} first Canes goal`, detail: `${side} gets the first goal bonus`, points: 2 });
+    }
+    CR.gameDayStates.live = state;
+    if (CR.currentGameDayMode === 'final') {
+      CR.gameDayStates.final = JSON.parse(JSON.stringify(state));
+      CR.gameDayStates.final.title = 'Final';
+    }
+    CR.flashSync?.();
+    CR.showToast?.(`${side} ${kind} update`);
+    CR.renderGameDayState('live');
+  };
+
+  CR.openManageSheet = () => {
+    const modal = document.getElementById('manageSheet');
+    const actions = document.getElementById('manageSheetActions');
+    const state = getCurrentState();
+    const users = ensureStructuredUsers(state);
+    CR.manageDraft = {
+      Aaron: [...users.Aaron.map((p) => p.player)],
+      Julie: [...users.Julie.map((p) => p.player)]
+    };
+    while (CR.manageDraft.Aaron.length < 2) CR.manageDraft.Aaron.push('');
+    while (CR.manageDraft.Julie.length < 2) CR.manageDraft.Julie.push('');
+
+    const options = (selected, exclude) => [''].concat(CR.roster.map((r) => r.name)).map((name) => `
+      <option value="${name}" ${selected === name ? 'selected' : ''} ${(name && exclude === name) ? 'disabled' : ''}>${name || 'Open slot'}</option>
+    `).join('');
+
+    const renderActions = () => {
+      actions.innerHTML = ['Aaron','Julie'].flatMap((side) => [0,1].map((index) => {
+        const other = [...CR.manageDraft.Aaron, ...CR.manageDraft.Julie].filter((_, i) => `${side}-${index}` !== `${i < 2 ? 'Aaron' : 'Julie'}-${i % 2}`);
+        return `
+          <div class="gd-sheet-pick">
+            <strong>${side} Pick ${index + 1}</strong>
+            <small>Swap locked player</small>
+            <select class="gd-sheet-select" data-side="${side}" data-index="${index}">${options(CR.manageDraft[side][index], other.find(Boolean) || '')}</select>
+          </div>
+        `;
+      })).join('');
+      actions.querySelectorAll('.gd-sheet-select').forEach((select) => {
+        select.addEventListener('change', (event) => {
+          const { side, index } = event.target.dataset;
+          CR.manageDraft[side][Number(index)] = event.target.value;
+          renderActions();
+        });
+      });
+    };
+
+    renderActions();
+    modal.classList.add('is-open');
+  };
+
+  CR.saveManageSheet = () => {
+    const liveUsers = {
+      Aaron: CR.manageDraft.Aaron.filter(Boolean).map((player) => ({ player, goals: 0, assists: 0, firstGoal: false })),
+      Julie: CR.manageDraft.Julie.filter(Boolean).map((player) => ({ player, goals: 0, assists: 0, firstGoal: false }))
+    };
+    CR.gameDayStates.pregame.users = {
+      Aaron: [...CR.manageDraft.Aaron.filter(Boolean)],
+      Julie: [...CR.manageDraft.Julie.filter(Boolean)]
+    };
+    CR.gameDayStates.live.users = JSON.parse(JSON.stringify(liveUsers));
+    CR.gameDayStates.live.scores = { Aaron: 0, Julie: 0 };
+    CR.gameDayStates.live.feed = [];
+    CR.gameDayStates.final.users = JSON.parse(JSON.stringify(liveUsers));
+    CR.gameDayStates.final.scores = { Aaron: 0, Julie: 0 };
+    document.getElementById('manageSheet')?.classList.remove('is-open');
+    CR.renderGameDayState(CR.currentGameDayMode);
+  };
+
+  CR.initGameDay = () => {
+    CR.$('#stateSwitcher')?.addEventListener('click', (event) => {
+      const button = event.target.closest('button[data-mode]');
+      if (button) CR.renderGameDayState(button.dataset.mode);
+    });
+    CR.$('#modeSwitcher')?.addEventListener('click', (event) => {
+      const button = event.target.closest('button[data-playoff-mode]');
+      if (!button) return;
+      CR.currentPlayoffMode = button.dataset.playoffMode;
+      CR.renderGameDayState(CR.currentGameDayMode);
+    });
+    CR.$('#refreshButton')?.addEventListener('click', () => {
+      CR.flashSync?.();
+      CR.showToast?.('Mock realtime refresh complete');
+    });
+    document.getElementById('closeSheet')?.addEventListener('click', () => document.getElementById('manageSheet')?.classList.remove('is-open'));
+    document.getElementById('saveSheet')?.addEventListener('click', CR.saveManageSheet);
+    document.getElementById('manageSheet')?.addEventListener('click', (event) => {
+      if (event.target.id === 'manageSheet') event.target.classList.remove('is-open');
+    });
+    CR.renderGameDayState('pregame');
+  };
+})();
