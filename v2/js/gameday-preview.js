@@ -2,17 +2,24 @@ const states = {
   pregame: {
     type: 'pregame',
     gameLine: 'Tonight • 7:00 PM',
-    statusLine: 'Picks lock at puck drop',
-    eventTitle: 'Rivalry ready',
-    eventMeta: 'Both lineups set. No duplicate players.',
-    projections: 'View projections',
-    aaron: [
+    statusLine: 'Pick 2 Canes players each before puck drop',
+    eventTitle: 'Roster open',
+    eventMeta: 'Tap available players below to lock in picks for Aaron and Julie.',
+    available: [
       { name: 'Sebastian Aho', detail: 'C • Top line', proj: '+3.2' },
-      { name: 'Andrei Svechnikov', detail: 'RW • PP1', proj: '+2.1' }
+      { name: 'Andrei Svechnikov', detail: 'RW • PP1', proj: '+2.1' },
+      { name: 'Seth Jarvis', detail: 'RW • Hot streak', proj: '+2.0' },
+      { name: 'Jaccob Slavin', detail: 'D • Defensive anchor', proj: '+1.2' },
+      { name: 'Jordan Staal', detail: 'C • Two-way center', proj: '+1.4' },
+      { name: 'Brent Burns', detail: 'D • PP2', proj: '+1.1' }
+    ],
+    aaron: [
+      { name: 'Sebastian Aho', detail: 'Locked pick', proj: '+3.2' },
+      { name: 'Andrei Svechnikov', detail: 'Locked pick', proj: '+2.1' }
     ],
     julie: [
-      { name: 'Seth Jarvis', detail: 'RW • Hot streak', proj: '+2.0' },
-      { name: 'Jaccob Slavin', detail: 'D • Defensive anchor', proj: '+1.2' }
+      { name: 'Seth Jarvis', detail: 'Locked pick', proj: '+2.0' },
+      { name: 'Jaccob Slavin', detail: 'Locked pick', proj: '+1.2' }
     ],
     h2h: { aaron: 12, ties: 3, julie: 9 }
   },
@@ -21,7 +28,7 @@ const states = {
     period: '2nd • 7:42',
     score: { aaron: 4, julie: 3 },
     statusLine: 'Aaron leading the rivalry',
-    momentum: '72%',
+    momentum: 22,
     eventTitle: 'Aho puts Aaron ahead',
     eventMeta: 'Goal + assist swing in the second period',
     gameStrip: 'Hurricanes 2 – 1 Rangers',
@@ -33,12 +40,12 @@ const states = {
     ],
     picks: {
       aaron: [
-        { icon: 'A', name: 'Sebastian Aho', detail: '1 Goal • 1 Assist', proj: '+3' },
-        { icon: 'S', name: 'Andrei Svechnikov', detail: '3 Shots', proj: '+1' }
+        { name: 'Sebastian Aho', detail: '1 Goal • 1 Assist', proj: '+3' },
+        { name: 'Andrei Svechnikov', detail: '3 Shots', proj: '+1' }
       ],
       julie: [
-        { icon: 'J', name: 'Seth Jarvis', detail: 'Goal scored', proj: '+2' },
-        { icon: 'S', name: 'Jaccob Slavin', detail: '3 Blocks', proj: '+1' }
+        { name: 'Seth Jarvis', detail: 'Goal scored', proj: '+2' },
+        { name: 'Jaccob Slavin', detail: '3 Blocks', proj: '+1' }
       ]
     }
   },
@@ -46,11 +53,6 @@ const states = {
     type: 'final',
     winner: 'Aaron wins the night',
     score: { aaron: 5, julie: 2 },
-    summary: [
-      { label: 'Final Score', value: '5–2', red: false },
-      { label: 'Rivalry Points', value: 'Aaron +5', red: true },
-      { label: 'Winner', value: 'Aaron', red: false }
-    ],
     recap: [
       { icon: '🏁', time: 'Final', title: 'Aaron wins rivalry night', subtitle: 'Aho MVP performance seals it', score: '5–2' },
       { icon: '🚨', time: '2nd', title: 'Aho first goal bonus', subtitle: 'Biggest swing of the night', score: '+3' },
@@ -71,8 +73,8 @@ function renderPregame(state) {
   return `
     <section class="gd-phone">
       <div class="gd-topbar">
-        <button class="gd-icon-button" type="button">←</button>
-        <div class="gd-topbar-center"><img class="gd-wordmark" src="./assets/app-icon.png?v=gdp5" alt="Canes Rivalry" /></div>
+        <button class="gd-icon-button" type="button">☰</button>
+        <div class="gd-topbar-center"><img class="gd-wordmark" src="./assets/app-icon.png?v=gdp6" alt="Canes Rivalry" /></div>
         <button class="gd-icon-button" type="button">↻</button>
       </div>
 
@@ -87,7 +89,7 @@ function renderPregame(state) {
                 <span class="gd-name">Julie</span>
               </div>
               <div class="gd-submeta">${state.gameLine}<br>${state.statusLine}</div>
-              <div class="gd-lock-pill">🔒 Picks lock at puck drop</div>
+              <div class="gd-lock-pill">Picks lock at puck drop</div>
             </div>
             <div class="gd-avatar-ring">J</div>
           </div>
@@ -99,13 +101,27 @@ function renderPregame(state) {
             <div class="gd-event-title">${state.eventTitle}</div>
             <div class="gd-event-meta">${state.eventMeta}</div>
           </div>
-          <div class="gd-event-side">Preview</div>
-          <div class="gd-add">›</div>
+          <div class="gd-event-side">Draft</div>
         </section>
 
         <div class="gd-section-label-row">
-          <div class="gd-section-label">Your Picks</div>
-          <div class="gd-filter">Forwards / Defense</div>
+          <div class="gd-section-label">Available Players</div>
+          <div class="gd-filter">Tap to add</div>
+        </div>
+
+        <section class="gd-roster-panel">
+          ${state.available.map((player) => `
+            <div class="gd-roster-row">
+              <div class="gd-pick-row-main"><strong>${player.name}</strong><small>${player.detail}</small></div>
+              <div class="gd-proj">Proj<strong>${player.proj}</strong></div>
+              <div class="gd-add gd-add--solid">+</div>
+            </div>
+          `).join('')}
+        </section>
+
+        <div class="gd-section-label-row">
+          <div class="gd-section-label">Locked Picks</div>
+          <div class="gd-filter">2 each</div>
         </div>
 
         <section class="gd-picks-grid">
@@ -113,10 +129,9 @@ function renderPregame(state) {
             <div class="gd-pick-panel-head red"><span>Aaron</span><span>2/2</span></div>
             ${state.aaron.map((player) => `
               <div class="gd-pick-row">
-                <div class="gd-pick-row-icon">•</div>
+                <div class="gd-pick-row-icon">✓</div>
                 <div class="gd-pick-row-main"><strong>${player.name}</strong><small>${player.detail}</small></div>
                 <div class="gd-proj">Proj<strong>${player.proj}</strong></div>
-                <div class="gd-add">+</div>
               </div>
             `).join('')}
           </article>
@@ -125,16 +140,13 @@ function renderPregame(state) {
             <div class="gd-pick-panel-head dark"><span>Julie</span><span>2/2</span></div>
             ${state.julie.map((player) => `
               <div class="gd-pick-row">
-                <div class="gd-pick-row-icon">•</div>
+                <div class="gd-pick-row-icon">✓</div>
                 <div class="gd-pick-row-main"><strong>${player.name}</strong><small>${player.detail}</small></div>
                 <div class="gd-proj">Proj<strong>${player.proj}</strong></div>
-                <div class="gd-add">+</div>
               </div>
             `).join('')}
           </article>
         </section>
-
-        <button class="gd-wide-button" type="button">📊 ${state.projections}</button>
 
         <section class="gd-headtohead">
           <div class="gd-section-label">Head to Head</div>
@@ -149,17 +161,25 @@ function renderPregame(state) {
   `;
 }
 
+function renderMomentum(momentum) {
+  const abs = Math.min(Math.abs(momentum), 50);
+  const left = momentum < 0 ? `calc(50% - ${abs}%)` : '50%';
+  const width = `${abs}%`;
+  const puck = `calc(50% ${momentum >= 0 ? '+' : '-'} ${abs}%)`;
+  return `<div class="gd-track"><div class="gd-track-fill" style="left:${left};width:${width}"></div><div class="gd-track-puck" style="left:${puck}"></div></div>`;
+}
+
 function renderLive(state) {
   return `
     <section class="gd-phone">
       <div class="gd-topbar">
-        <button class="gd-icon-button" type="button">←</button>
-        <div class="gd-topbar-center"><img class="gd-wordmark" src="./assets/app-icon.png?v=gdp5" alt="Canes Rivalry" /></div>
+        <button class="gd-icon-button" type="button">☰</button>
+        <div class="gd-topbar-center"><img class="gd-wordmark gd-wordmark--score" src="./assets/app-icon.png?v=gdp6" alt="Canes Rivalry" /></div>
         <button class="gd-icon-button" type="button">↻</button>
       </div>
 
       <div class="gd-main">
-        <section class="gd-live-score-card" style="--gd-momentum:${state.momentum}">
+        <section class="gd-live-score-card">
           <div class="gd-status-row">
             <span class="gd-pill live">Live</span>
             <span class="gd-period">${state.period}</span>
@@ -172,8 +192,7 @@ function renderLive(state) {
               <div class="gd-side-score-value">${state.score.aaron}</div>
             </div>
             <div class="gd-center-score">
-              <img class="gd-wordmark" src="./assets/app-icon.png?v=gdp5" alt="Canes Rivalry" />
-              <div class="gd-center-label">Rivalry Score</div>
+              <img class="gd-wordmark gd-wordmark--board" src="./assets/app-icon.png?v=gdp6" alt="Canes Rivalry" />
             </div>
             <div class="gd-side-score-wrap">
               <div class="gd-side-score-label dark">Julie</div>
@@ -185,7 +204,7 @@ function renderLive(state) {
 
           <div class="gd-momentum-block">
             <div class="gd-momentum-label">Momentum</div>
-            <div class="gd-track"><div class="gd-track-fill"></div><div class="gd-track-puck"></div></div>
+            ${renderMomentum(state.momentum)}
           </div>
         </section>
 
@@ -196,7 +215,6 @@ function renderLive(state) {
             <div class="gd-event-meta">${state.eventMeta}</div>
           </div>
           <div class="gd-event-side red">Now</div>
-          <div class="gd-add">+</div>
         </section>
 
         <section class="gd-game-strip">
@@ -253,8 +271,8 @@ function renderFinal(state) {
   return `
     <section class="gd-phone">
       <div class="gd-topbar">
-        <button class="gd-icon-button" type="button">←</button>
-        <div class="gd-topbar-center"><img class="gd-wordmark" src="./assets/app-icon.png?v=gdp5" alt="Canes Rivalry" /></div>
+        <button class="gd-icon-button" type="button">☰</button>
+        <div class="gd-topbar-center"><img class="gd-wordmark" src="./assets/app-icon.png?v=gdp6" alt="Canes Rivalry" /></div>
         <button class="gd-icon-button" type="button">↻</button>
       </div>
 
@@ -271,23 +289,13 @@ function renderFinal(state) {
               <div class="gd-side-score-value">${state.score.aaron}</div>
             </div>
             <div class="gd-center-score">
-              <img class="gd-wordmark" src="./assets/app-icon.png?v=gdp5" alt="Canes Rivalry" />
-              <div class="gd-center-label">Final</div>
+              <img class="gd-wordmark gd-wordmark--board" src="./assets/app-icon.png?v=gdp6" alt="Canes Rivalry" />
             </div>
             <div class="gd-side-score-wrap">
               <div class="gd-side-score-label dark">Julie</div>
               <div class="gd-side-score-value">${state.score.julie}</div>
             </div>
           </div>
-        </section>
-
-        <section class="gd-summary-grid">
-          ${state.summary.map((item) => `
-            <div class="gd-summary-cell">
-              <small>${item.label}</small>
-              <strong class="${item.red ? 'red-text' : ''}">${item.value}</strong>
-            </div>
-          `).join('')}
         </section>
 
         <div class="gd-section-label-row">
@@ -323,27 +331,15 @@ function renderFinal(state) {
 function render(stateKey) {
   const state = states[stateKey];
   if (!state) return;
-
-  if (state.type === 'live') {
-    root.innerHTML = renderLive(state);
-    return;
-  }
-
-  if (state.type === 'final') {
-    root.innerHTML = renderFinal(state);
-    return;
-  }
-
+  if (state.type === 'live') return (root.innerHTML = renderLive(state));
+  if (state.type === 'final') return (root.innerHTML = renderFinal(state));
   root.innerHTML = renderPregame(state);
 }
 
 render('pregame');
-
 document.querySelectorAll('.gd-state-button').forEach((button) => {
   button.addEventListener('click', () => {
-    document.querySelectorAll('.gd-state-button').forEach((b) => {
-      b.classList.toggle('is-active', b === button);
-    });
+    document.querySelectorAll('.gd-state-button').forEach((b) => b.classList.toggle('is-active', b === button));
     render(button.dataset.state);
   });
 });
