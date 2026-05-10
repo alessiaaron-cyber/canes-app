@@ -111,6 +111,18 @@ window.CR = window.CR || {};
     const pregameUsers = getPregameStructured();
     const live = CR.gameDay.live;
     const final = getFinalData();
+    const nextSide = nextDraftSide();
+    if (render.renderHeroSection) {
+      return render.renderHeroSection({
+        mode,
+        pregameUsers,
+        live,
+        final,
+        isPlayoffs: isPlayoffs(),
+        winnerText,
+        nextDraftSide: nextSide
+      });
+    }
     const pregame = mode === 'pregame';
     const liveMode = mode === 'live';
     const finalMode = mode === 'final';
@@ -118,7 +130,6 @@ window.CR = window.CR || {};
     const period = pregame ? (isPlayoffs() ? 'Playoff Night • 7:00 PM' : 'Tonight • 7:00 PM') : (liveMode ? live.period : '');
     const delta = scores.Aaron - scores.Julie;
     const momentum = Math.min(Math.abs(delta) * 12, 48);
-    const nextSide = nextDraftSide();
     const subline = pregame ? (nextSide ? `${nextSide} on the clock • Pick ${pregameUsers.Aaron.length + pregameUsers.Julie.length + 1} of 4` : 'Picks ready for puck drop') : (liveMode ? (isPlayoffs() ? 'Playoff rivalry scoring live' : 'Rivalry scoring live') : '');
     return `<section class="gd-hero ${finalMode ? 'gd-hero-final' : ''}"><div class="gd-status-row"><span class="gd-pill ${finalMode ? 'final' : 'live'}">${finalMode ? 'Final' : (liveMode ? 'Live' : 'Pregame')}</span>${period ? `<span class="gd-period">${period}</span>` : ''}${liveMode ? '<span class="gd-pill synced">Synced</span>' : ''}${isPlayoffs() ? '<span class="gd-pill gd-pill-playoff">Playoffs</span>' : ''}</div><div class="gd-score-grid"><div class="gd-side"><div class="gd-side-label red">Aaron</div>${pregame ? `<div class="gd-pick-meta"><span class="gd-pick-chip ${pregameUsers.Aaron.length === 2 ? 'active' : ''}">${pregameUsers.Aaron.length} of 2 locked</span></div>` : `<div class="gd-side-value">${scores.Aaron}</div>`}</div><div class="gd-center"><img class="gd-logo" src="./assets/app-icon.png" alt="Canes Rivalry"></div><div class="gd-side"><div class="gd-side-label">Julie</div>${pregame ? `<div class="gd-pick-meta"><span class="gd-pick-chip ${pregameUsers.Julie.length === 2 ? 'active' : ''}">${pregameUsers.Julie.length} of 2 locked</span></div>` : `<div class="gd-side-value">${scores.Julie}</div>`}</div></div>${subline ? `<div class="gd-subline">${subline}</div>` : ''}${finalMode ? `<div class="gd-final-banner">${winnerText(scores)}</div>` : ''}${liveMode ? `<div class="gd-momentum-label">Momentum</div><div class="gd-track"><div class="gd-track-fill" style="left:${scores.Aaron >= scores.Julie ? '50%' : `calc(50% - ${momentum}%)`};width:${momentum}%"></div></div>` : ''}</section>`;
   }
