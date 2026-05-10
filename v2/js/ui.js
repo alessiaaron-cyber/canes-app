@@ -2,21 +2,6 @@ window.CR = window.CR || {};
 
 window.CR.$ = (selector) => document.querySelector(selector);
 
-window.CR.setText = (element, value) => {
-  if (element) element.textContent = value;
-};
-
-window.CR.setLiveStatus = (element, value) => {
-  if (!element) return;
-  element.innerHTML = `<span aria-hidden="true"></span>${value}`;
-};
-
-window.CR.setBadge = (element, text, variant) => {
-  if (!element) return;
-  element.textContent = text;
-  element.className = `panel-tag ${variant || ''}`.trim();
-};
-
 window.CR.showToast = (message) => {
   const toast = window.CR.$('#toast');
   if (!toast) return;
