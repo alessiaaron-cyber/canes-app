@@ -11,11 +11,11 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Canes Rivalry" />
 
-  <link rel="icon" type="image/png" href="./assets/app-icon.png?v=v2gameday1" />
-  <link rel="apple-touch-icon" href="./assets/app-icon.png?v=v2gameday1" />
+  <link rel="icon" type="image/png" href="./assets/app-icon.png?v=v2gameday2" />
+  <link rel="apple-touch-icon" href="./assets/app-icon.png?v=v2gameday2" />
 
   <link rel="stylesheet" href="styles.css?v=navrestore3" />
-  <link rel="stylesheet" href="gameday-mock.css?v=v2gameday1" />
+  <link rel="stylesheet" href="gameday-mock.css?v=v2gameday2" />
 </head>
 <body>
   <div class="sync-flash" id="syncFlash"></div>
@@ -82,6 +82,19 @@
     <button data-tab="manage" type="button">Manage</button>
   </nav>
 
+  <div class="gd-sheet" id="manageSheet">
+    <div class="gd-sheet-card">
+      <div class="gd-sheet-handle"></div>
+      <div class="gd-sheet-title">Manage Picks</div>
+      <div class="gd-sheet-copy">Admin-only quick swap for locked picks.</div>
+      <div class="gd-sheet-actions" id="manageSheetActions"></div>
+      <div class="gd-sheet-footer">
+        <button class="gd-sheet-close" type="button" id="closeSheet">Cancel</button>
+        <button class="gd-sheet-save" type="button" id="saveSheet">Save Picks</button>
+      </div>
+    </div>
+  </div>
+
   <div class="toast-stack">
     <div id="toast" class="toast">Preview event</div>
   </div>
@@ -89,7 +102,7 @@
   <script src="js/mock-data.js?v=navrestore3"></script>
   <script src="js/ui.js?v=navrestore3"></script>
   <script src="js/tabs.js?v=navrestore3"></script>
-  <script src="js/gameday.js?v=v2gameday1"></script>
+  <script src="js/gameday.js?v=v2gameday2"></script>
   <script src="js/app.js?v=navrestore3"></script>
 </body>
 </html>
