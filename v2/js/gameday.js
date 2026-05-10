@@ -136,6 +136,9 @@ window.CR = window.CR || {};
 
   function renderPregame() {
     const users = getPregameStructured();
+    if (render.renderPregameSection) {
+      return render.renderPregameSection({ users, roster, claimedOwner });
+    }
     const renderOwner = (side, red) => `<article class="gd-panel"><div class="gd-panel-head ${red ? 'red' : 'dark'}"><span>${side}</span><span>${users[side].length}/2</span></div>${[0, 1].map((index) => { const pick = users[side][index]; return pick ? `<div class="gd-pick-row"><div class="gd-pick-icon">✓</div><div class="gd-pick-main"><strong>${pick.player}</strong><small>Locked pick</small><div class="gd-lock-actions"><button class="gd-small-action" data-side="${side}" data-player="${pick.player}" type="button">Change</button></div></div></div>` : `<div class="gd-pick-row is-empty"><div class="gd-pick-icon">…</div><div class="gd-pick-main"><strong>Open slot</strong><small>Waiting for next pick</small></div></div>`; }).join('')}</article>`;
     return `<div class="gd-label-row"><div class="gd-label">Live Picks</div><div class="gd-filter">Updates instantly</div></div><section class="gd-picks-grid">${renderOwner('Aaron', true)}${renderOwner('Julie', false)}</section><div class="gd-label-row"><div class="gd-label">Current Canes Roster</div><div class="gd-filter">Tap Draft only</div></div><section class="gd-panel gd-roster gd-scroll">${roster.map((entry) => { const owner = claimedOwner(entry.name); return `<div class="gd-roster-row ${owner ? 'claimed' : ''}"><div class="gd-pick-main"><strong>${entry.name}</strong><small>${entry.detail}</small></div>${owner ? `<span class="gd-tag">${owner}</span>` : `<button class="gd-draft-btn" data-player="${entry.name}" type="button">Draft</button>`}</div>`; }).join('')}</section>`;
   }
