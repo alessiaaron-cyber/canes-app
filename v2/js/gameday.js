@@ -14,7 +14,7 @@ window.CR = window.CR || {};
   ];
   const draftOrder = model.draftOrder || ['Aaron', 'Julie', 'Aaron', 'Julie'];
 
-  CR.gameDay = {
+  CR.gameDay = model.createInitialState ? model.createInitialState() : {
     mode: 'pregame',
     playoffMode: 'regular',
     pregame: {
