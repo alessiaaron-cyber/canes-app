@@ -4,7 +4,7 @@ window.CR = window.CR || {};
   const CR = window.CR;
 
   CR.gameDayEvents = {
-    bind({ claimedOwner, draftOrder, renderManageSheet, setModalOpen, rerender }) {
+    bind({ claimedOwner, draftOrder, nextDraftSide, renderManageSheet, setModalOpen, rerender }) {
       document.querySelectorAll('.gd-small-action').forEach((button) => {
         button.addEventListener('click', () => {
           const side = button.dataset.side;
@@ -20,9 +20,8 @@ window.CR = window.CR || {};
           event.stopPropagation();
           const player = button.dataset.player;
           if (claimedOwner(player)) return;
-          const total = CR.gameDay.pregame.Aaron.length + CR.gameDay.pregame.Julie.length;
-          if (total >= 4) return;
-          const side = draftOrder[total];
+          const side = typeof nextDraftSide === 'function' ? nextDraftSide() : null;
+          if (!side) return;
           CR.gameDay.pregame[side].push(player);
           rerender('pregame');
         });
