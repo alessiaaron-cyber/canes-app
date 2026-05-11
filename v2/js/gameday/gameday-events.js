@@ -40,26 +40,7 @@ window.CR = window.CR || {};
         button.addEventListener('click', () => {
           const side = button.dataset.side;
           const kind = button.dataset.kind;
-          const pick = CR.gameDay.live.users[side][0];
-          if (!pick) return;
-          if (kind === 'goal') {
-            pick.goals += 1;
-            CR.gameDay.live.scores[side] += 2;
-            CR.gameDay.live.feed.unshift({ icon: '🚨', title: `${pick.player} goal`, detail: `${side} scores through a picked player`, points: 2 });
-          }
-          if (kind === 'assist') {
-            pick.assists += 1;
-            CR.gameDay.live.scores[side] += 1;
-            CR.gameDay.live.feed.unshift({ icon: '🎯', title: `${pick.player} assist`, detail: `${side} adds an assist point`, points: 1 });
-          }
-          if (kind === 'first' && !pick.firstGoal) {
-            pick.firstGoal = true;
-            CR.gameDay.live.scores[side] += 2;
-            CR.gameDay.live.feed.unshift({ icon: '👑', title: `${pick.player} first Canes goal`, detail: `${side} gets the first goal bonus`, points: 2 });
-          }
-          CR.flashSync?.();
-          CR.showToast?.(`${side} ${kind} update`);
-          rerender('live');
+          CR.applyMockLiveBatch?.([{ side, kind }]);
         });
       });
     }
