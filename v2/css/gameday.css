@@ -156,7 +156,7 @@
 
 .gd-score-grid {
   display: grid;
-  grid-template-columns: 92px 1fr 92px;
+  grid-template-columns: 92px minmax(0, 1fr) 92px;
   gap: 8px;
   align-items: center;
 }
@@ -165,7 +165,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   text-align: center;
   min-width: 0;
 }
@@ -194,18 +194,20 @@
   justify-content: center;
   align-items: center;
   width: 100%;
+  max-width: 100%;
   margin-top: 8px;
+  overflow: hidden;
 }
 
 .gd-pick-chip {
   min-height: 28px;
   max-width: 100%;
-  padding: 0 12px;
+  padding: 0 10px;
   border-radius: 999px;
   border: 1px solid #e5e7eb;
   background: #f8fafc;
   color: #5b6472;
-  font-size: .69rem;
+  font-size: .64rem;
   font-weight: 850;
   letter-spacing: .01em;
   display: inline-flex;
@@ -805,6 +807,15 @@
   .gd-status-side-right,
   .gd-status-center {
     justify-content: center;
+  }
+
+  .gd-score-grid {
+    grid-template-columns: 84px minmax(0, 1fr) 84px;
+  }
+
+  .gd-pick-chip {
+    font-size: .58rem;
+    padding: 0 8px;
   }
 
   .gd-side-value {
