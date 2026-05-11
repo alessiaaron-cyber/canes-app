@@ -39,9 +39,9 @@ window.CR = window.CR || {};
         ]
       },
       feed: [
-        { icon: '🚨', title: 'Sebastian Aho goal', detail: 'Aaron scores through a picked player', points: 2 },
-        { icon: '🎯', title: 'Seth Jarvis assist', detail: 'Julie adds an assist point', points: 1 },
-        { icon: '👑', title: 'First goal bonus', detail: 'Aho hit the first Canes goal bonus', points: 2 }
+        { icon: '🚨', title: 'Sebastian Aho goal', detail: 'Aaron scores through a picked player', points: 2, tier: 'medium' },
+        { icon: '🎯', title: 'Seth Jarvis assist', detail: 'Julie adds an assist point', points: 1, tier: 'light' },
+        { icon: '👑', title: 'First goal bonus', detail: 'Aho hit the first Canes goal bonus', points: 2, tier: 'heavy' }
       ]
     }
   };
@@ -73,9 +73,24 @@ window.CR = window.CR || {};
   const firstGoalHit = (users) => helpers.firstGoalHit ? helpers.firstGoalHit(users) : Object.values(users).flat().find((p) => p.firstGoal);
 
   const liveEventCatalog = {
-    goal: { icon: '🚨', points: 2, summary: (pick) => `${pick.player} scored` },
-    assist: { icon: '🎯', points: 1, summary: (pick) => `${pick.player} assisted` },
-    first: { icon: '👑', points: 2, summary: (pick) => `${pick.player} hit the first-goal bonus` }
+    goal: {
+      icon: '🚨',
+      points: 2,
+      tier: model.momentTier ? model.momentTier('goal') : 'medium',
+      summary: (pick) => `${pick.player} scored`
+    },
+    assist: {
+      icon: '🎯',
+      points: 1,
+      tier: model.momentTier ? model.momentTier('assist') : 'light',
+      summary: (pick) => `${pick.player} assisted`
+    },
+    first: {
+      icon: '👑',
+      points: 2,
+      tier: model.momentTier ? model.momentTier('first') : 'heavy',
+      summary: (pick) => `${pick.player} hit the first-goal bonus`
+    }
   };
 
   const mvpText = (users) => {
@@ -114,12 +129,32 @@ window.CR = window.CR || {};
     };
   };
 
+  const rankTier = (tier) => {
+    if (tier === 'heavy') return 3;
+    if (tier === 'medium') return 2;
+    return 1;
+  };
+
+  const batchTier = (appliedEvents) => {
+    if (!appliedEvents.length) return 'light';
+    return appliedEvents.reduce((highest, event) => rankTier(event.tier) > rankTier(highest) ? event.tier : highest, 'light');
+  };
+
   const buildBatchToast = (appliedEvents) => {
     if (!appliedEvents.length) return '';
     const summaries = appliedEvents.map((event) => event.summary);
     if (summaries.length === 1) return summaries[0];
     if (summaries.length === 2) return `${summaries[0]} and ${summaries[1]}`;
     return `${summaries.slice(0, -1).join(', ')}, and ${summaries[summaries.length - 1]}`;
+  };
+
+  const buildTierToast = (appliedEvents) => {
+    const tier = batchTier(appliedEvents);
+    const base = buildBatchToast(appliedEvents);
+    if (!base) return '';
+    if (tier === 'heavy') return `Big rivalry swing: ${base}`;
+    if (tier === 'medium') return `Rivalry update: ${base}`;
+    return base;
   };
 
   CR.applyMockLiveBatch = (batch = []) => {
@@ -142,12 +177,14 @@ window.CR = window.CR || {};
         icon: meta.icon,
         title: kind === 'first' ? `${pick.player} first Canes goal` : `${pick.player} ${kind}`,
         detail: kind === 'first' ? `${side} gets the first goal bonus` : `${side} ${kind === 'goal' ? 'scores through a picked player' : 'adds an assist point'}`,
-        points: meta.points
+        points: meta.points,
+        tier: meta.tier
       });
 
       appliedEvents.push({
         side,
         kind,
+        tier: meta.tier,
         summary: `${side}: ${meta.summary(pick)}`
       });
     });
@@ -156,7 +193,7 @@ window.CR = window.CR || {};
 
     recalculateLiveScores();
     CR.flashSync?.();
-    CR.showToast?.(buildBatchToast(appliedEvents));
+    CR.showToast?.(buildTierToast(appliedEvents));
     CR.renderGameDayState('live');
   };
 
