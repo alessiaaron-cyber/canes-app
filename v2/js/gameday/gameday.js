@@ -20,6 +20,7 @@ window.CR = window.CR || {};
   CR.gameDay = model.createInitialState ? model.createInitialState() : {
     mode: 'pregame',
     playoffMode: 'regular',
+    carryover: { active: false },
     pregame: {
       Aaron: ['Sebastian Aho', 'Andrei Svechnikov'],
       Julie: ['Seth Jarvis', 'Jaccob Slavin']
@@ -45,7 +46,9 @@ window.CR = window.CR || {};
     }
   };
 
-  CR.gameDayScenario = 'pregame_default';
+  if (!CR.gameDay.carryover) {
+    CR.gameDay.carryover = { active: false };
+  }
 
   const $ = (s) => document.querySelector(s);
   const pointsFor = (pick) => model.pointsFor ? model.pointsFor(pick) : ((pick.goals * 2) + pick.assists + (pick.firstGoal ? 2 : 0));
@@ -117,15 +120,6 @@ window.CR = window.CR || {};
     if (summaries.length === 1) return summaries[0];
     if (summaries.length === 2) return `${summaries[0]} and ${summaries[1]}`;
     return `${summaries.slice(0, -1).join(', ')}, and ${summaries[summaries.length - 1]}`;
-  };
-
-  const applyScenario = (scenarioKey) => {
-    const nextState = model.createScenarioState ? model.createScenarioState(scenarioKey) : null;
-    if (!nextState) return;
-    CR.gameDayScenario = scenarioKey;
-    CR.gameDay = nextState;
-    recalculateLiveScores();
-    CR.renderGameDayState(CR.gameDay.mode);
   };
 
   CR.applyMockLiveBatch = (batch = []) => {
@@ -269,24 +263,31 @@ window.CR = window.CR || {};
     container.innerHTML = `${renderHero()}${mode === 'pregame' ? renderPregame() : ''}${mode === 'live' ? renderLive() : ''}${mode === 'final' ? renderFinal() : ''}`;
     $('#stateTitle').textContent = mode === 'pregame' ? 'Pregame' : mode === 'live' ? 'Live' : 'Final';
     $('#stateBadge').textContent = isPlayoffs() ? 'Playoffs' : (mode === 'pregame' ? 'Regular' : mode === 'live' ? 'Live' : 'Final');
+    $('#phaseSwitcher')?.querySelectorAll('button').forEach((button) => button.classList.toggle('active', button.dataset.phase === mode));
     $('#modeSwitcher')?.querySelectorAll('button').forEach((button) => button.classList.toggle('active', button.dataset.playoffMode === CR.gameDay.playoffMode));
-    $('#scenarioSwitcher')?.querySelectorAll('button').forEach((button) => button.classList.toggle('active', button.dataset.scenario === CR.gameDayScenario));
+    $('#carryoverSwitcher')?.querySelectorAll('button').forEach((button) => button.classList.toggle('active', (button.dataset.carryover === 'on') === Boolean(CR.gameDay.carryover?.active)));
     updateGlobalLiveIndicator();
     bindInteractions();
   };
 
   CR.initGameDay = () => {
     recalculateLiveScores();
+    $('#phaseSwitcher')?.addEventListener('click', (event) => {
+      const button = event.target.closest('button[data-phase]');
+      if (!button) return;
+      CR.renderGameDayState(button.dataset.phase);
+    });
     $('#modeSwitcher')?.addEventListener('click', (event) => {
       const button = event.target.closest('button[data-playoff-mode]');
       if (!button) return;
       CR.gameDay.playoffMode = button.dataset.playoffMode;
       CR.renderGameDayState();
     });
-    $('#scenarioSwitcher')?.addEventListener('click', (event) => {
-      const button = event.target.closest('button[data-scenario]');
+    $('#carryoverSwitcher')?.addEventListener('click', (event) => {
+      const button = event.target.closest('button[data-carryover]');
       if (!button) return;
-      applyScenario(button.dataset.scenario);
+      CR.gameDay.carryover = { active: button.dataset.carryover === 'on' };
+      CR.renderGameDayState();
     });
     $('#refreshButton')?.addEventListener('click', () => {
       CR.flashSync?.();
