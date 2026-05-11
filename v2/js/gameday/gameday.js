@@ -194,8 +194,7 @@ window.CR = window.CR || {};
       final,
       isPlayoffs: isPlayoffs(),
       winnerText,
-      nextDraftSide: nextDraftSide(),
-      carryover: CR.gameDay.carryover
+      nextDraftSide: nextDraftSide()
     });
   }
 
@@ -203,15 +202,15 @@ window.CR = window.CR || {};
     return render.renderPregameSection({
       users: getPregameStructured(),
       roster,
-      claimedOwner,
-      carryover: CR.gameDay.carryover
+      claimedOwner
     });
   }
 
   function renderLive() {
     return render.renderLiveSection({
       state: CR.gameDay.live,
-      renderPlayerCard
+      renderPlayerCard,
+      carryover: CR.gameDay.carryover
     });
   }
 
@@ -224,7 +223,8 @@ window.CR = window.CR || {};
       mvpText: mvpText(state.users),
       edgeText: leadingStatType(state.users),
       totalEventsText: `${totalGoals(state.users)} goals • ${totalAssists(state.users)} assists`,
-      renderPlayerCard
+      renderPlayerCard,
+      carryover: CR.gameDay.carryover
     });
   }
 
@@ -248,6 +248,7 @@ window.CR = window.CR || {};
         const updated = CR.gameDay.pregame[side].slice();
         updated[index] = next;
         CR.gameDay.pregame[side] = updated.filter(Boolean);
+        if (CR.gameDay.carryover?.active) CR.gameDay.carryover.active = false;
         renderManageSheet();
       });
     });
