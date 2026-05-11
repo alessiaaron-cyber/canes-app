@@ -20,7 +20,7 @@
 
   <link rel="stylesheet" href="css/app-shell.css?v=shell1" />
   <link rel="stylesheet" href="css/app-foundation.css?v=foundation1" />
-  <link rel="stylesheet" href="css/gameday.css?v=v2gameday6" />
+  <link rel="stylesheet" href="css/gameday.css?v=v2gameday7" />
 </head>
 <body>
   <div class="sync-flash" id="syncFlash"></div>
@@ -48,18 +48,28 @@
           <span class="panel-tag calm" id="stateBadge">Regular</span>
         </div>
 
-        <div class="playoff-switcher" id="modeSwitcher">
-          <button class="active" data-playoff-mode="regular" type="button">Regular</button>
-          <button data-playoff-mode="playoffs" type="button">Playoffs</button>
+        <div class="gd-toolbar-group">
+          <div class="gd-toolbar-label">Phase</div>
+          <div class="state-switcher" id="phaseSwitcher">
+            <button class="active" data-phase="pregame" type="button">Pregame</button>
+            <button data-phase="live" type="button">Live</button>
+            <button data-phase="final" type="button">Final</button>
+          </div>
         </div>
 
         <div class="gd-toolbar-group">
-          <div class="gd-toolbar-label">Mock Scenario</div>
-          <div class="scenario-switcher" id="scenarioSwitcher">
-            <button class="active" data-scenario="pregame_default" type="button">Pregame</button>
-            <button data-scenario="pregame_carryover" type="button">Carryover</button>
-            <button data-scenario="live_tight" type="button">Live</button>
-            <button data-scenario="final_comeback" type="button">Final</button>
+          <div class="gd-toolbar-label">Playoffs</div>
+          <div class="playoff-switcher" id="modeSwitcher">
+            <button class="active" data-playoff-mode="regular" type="button">Off</button>
+            <button data-playoff-mode="playoffs" type="button">On</button>
+          </div>
+        </div>
+
+        <div class="gd-toolbar-group">
+          <div class="gd-toolbar-label">Carryover</div>
+          <div class="carryover-switcher" id="carryoverSwitcher">
+            <button class="active" data-carryover="off" type="button">Off</button>
+            <button data-carryover="on" type="button">On</button>
           </div>
         </div>
       </section>
@@ -115,9 +125,9 @@
   <script src="js/tabs.js?v=navrestore3"></script>
   <script src="js/gameday/gameday-model.js?v=model3"></script>
   <script src="js/gameday/gameday-helpers.js?v=helpers2"></script>
-  <script src="js/gameday/gameday-render.js?v=render4"></script>
+  <script src="js/gameday/gameday-render.js?v=render5"></script>
   <script src="js/gameday/gameday-events.js?v=events2"></script>
-  <script src="js/gameday/gameday.js?v=v2gameday6"></script>
+  <script src="js/gameday/gameday.js?v=v2gameday7"></script>
   <script src="js/app.js?v=navrestore3"></script>
 </body>
 </html>
