@@ -45,16 +45,16 @@ window.CR = window.CR || {};
       }
     },
     pregame_carryover: {
-      mode: 'pregame',
+      mode: 'live',
       playoffMode: 'regular',
       pregame: sharedPregame,
       carryover: {
         active: true,
-        sourceLabel: 'Last game picks carried over'
+        sourceLabel: 'Last complete draft reused'
       },
       live: {
         scores: { Aaron: 4, Julie: 3 },
-        period: '2nd • 8:14',
+        period: '1st • 16:41',
         users: {
           Aaron: [
             { player: 'Sebastian Aho', goals: 1, assists: 0, firstGoal: true },
