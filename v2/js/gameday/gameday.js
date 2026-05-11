@@ -67,6 +67,24 @@ window.CR = window.CR || {};
   const totalAssists = (users) => helpers.totalAssists ? helpers.totalAssists(users) : Object.values(users).flat().reduce((n, p) => n + (p.assists || 0), 0);
   const firstGoalHit = (users) => helpers.firstGoalHit ? helpers.firstGoalHit(users) : Object.values(users).flat().find((p) => p.firstGoal);
 
+  const liveEventCatalog = {
+    goal: {
+      icon: '🚨',
+      points: 2,
+      summary: (pick) => `${pick.player} scored`
+    },
+    assist: {
+      icon: '🎯',
+      points: 1,
+      summary: (pick) => `${pick.player} assisted`
+    },
+    first: {
+      icon: '👑',
+      points: 2,
+      summary: (pick) => `${pick.player} hit the first-goal bonus`
+    }
+  };
+
   const mvpText = (users) => {
     const all = Object.values(users).flat();
     if (!all.length) return 'No MVP yet';
@@ -89,6 +107,70 @@ window.CR = window.CR || {};
     if (goals > assists) return `${goals} goal points drove the night`;
     if (assists > goals) return `${assists} assist points drove the night`;
     return 'Goals and assists landed evenly';
+  };
+
+  const calculateSideScore = (side) => {
+    const picks = CR.gameDay.live.users[side] || [];
+    return picks.reduce((sum, pick) => sum + pointsFor(pick), 0);
+  };
+
+  const recalculateLiveScores = () => {
+    CR.gameDay.live.scores = {
+      Aaron: calculateSideScore('Aaron'),
+      Julie: calculateSideScore('Julie')
+    };
+  };
+
+  const buildBatchToast = (appliedEvents) => {
+    if (!appliedEvents.length) return '';
+    const summaries = appliedEvents.map((event) => event.summary);
+    if (summaries.length === 1) return summaries[0];
+    if (summaries.length === 2) return `${summaries[0]} and ${summaries[1]}`;
+    return `${summaries.slice(0, -1).join(', ')}, and ${summaries[summaries.length - 1]}`;
+  };
+
+  CR.applyMockLiveBatch = (batch = []) => {
+    const appliedEvents = [];
+
+    batch.forEach((entry) => {
+      const { side, kind, pickIndex = 0 } = entry;
+      const pick = CR.gameDay.live.users?.[side]?.[pickIndex];
+      const meta = liveEventCatalog[kind];
+      if (!pick || !meta) return;
+
+      if (kind === 'goal') {
+        pick.goals += 1;
+      }
+
+      if (kind === 'assist') {
+        pick.assists += 1;
+      }
+
+      if (kind === 'first') {
+        if (pick.firstGoal) return;
+        pick.firstGoal = true;
+      }
+
+      CR.gameDay.live.feed.unshift({
+        icon: meta.icon,
+        title: kind === 'first' ? `${pick.player} first Canes goal` : `${pick.player} ${kind}`,
+        detail: kind === 'first' ? `${side} gets the first goal bonus` : `${side} ${kind === 'goal' ? 'scores through a picked player' : 'adds an assist point'}`,
+        points: meta.points
+      });
+
+      appliedEvents.push({
+        side,
+        kind,
+        summary: `${side}: ${meta.summary(pick)}`
+      });
+    });
+
+    if (!appliedEvents.length) return;
+
+    recalculateLiveScores();
+    CR.flashSync?.();
+    CR.showToast?.(buildBatchToast(appliedEvents));
+    CR.renderGameDayState('live');
   };
 
   const renderPlayerCard = ({ side, picks, score, red }) => render.renderPlayerCard({ side, picks, score, red, pointsFor });
@@ -198,6 +280,7 @@ window.CR = window.CR || {};
   };
 
   CR.initGameDay = () => {
+    recalculateLiveScores();
     $('#stateSwitcher')?.addEventListener('click', (event) => {
       const button = event.target.closest('button[data-mode]');
       if (button) CR.renderGameDayState(button.dataset.mode);
