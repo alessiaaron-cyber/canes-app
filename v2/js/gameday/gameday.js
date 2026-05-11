@@ -45,6 +45,8 @@ window.CR = window.CR || {};
     }
   };
 
+  CR.gameDayScenario = 'pregame_default';
+
   const $ = (s) => document.querySelector(s);
   const pointsFor = (pick) => model.pointsFor ? model.pointsFor(pick) : ((pick.goals * 2) + pick.assists + (pick.firstGoal ? 2 : 0));
   const clone = (value) => model.clone ? model.clone(value) : JSON.parse(JSON.stringify(value));
@@ -127,6 +129,15 @@ window.CR = window.CR || {};
     if (summaries.length === 1) return summaries[0];
     if (summaries.length === 2) return `${summaries[0]} and ${summaries[1]}`;
     return `${summaries.slice(0, -1).join(', ')}, and ${summaries[summaries.length - 1]}`;
+  };
+
+  const applyScenario = (scenarioKey) => {
+    const nextState = model.createScenarioState ? model.createScenarioState(scenarioKey) : null;
+    if (!nextState) return;
+    CR.gameDayScenario = scenarioKey;
+    CR.gameDay = nextState;
+    recalculateLiveScores();
+    CR.renderGameDayState(CR.gameDay.mode);
   };
 
   CR.applyMockLiveBatch = (batch = []) => {
@@ -275,6 +286,7 @@ window.CR = window.CR || {};
     $('#stateBadge').textContent = isPlayoffs() ? 'Playoffs' : (mode === 'pregame' ? 'Regular' : mode === 'live' ? 'Live' : 'Final');
     $('#stateSwitcher')?.querySelectorAll('button').forEach((button) => button.classList.toggle('active', button.dataset.mode === mode));
     $('#modeSwitcher')?.querySelectorAll('button').forEach((button) => button.classList.toggle('active', button.dataset.playoffMode === CR.gameDay.playoffMode));
+    $('#scenarioSwitcher')?.querySelectorAll('button').forEach((button) => button.classList.toggle('active', button.dataset.scenario === CR.gameDayScenario));
     updateGlobalLiveIndicator();
     bindInteractions();
   };
@@ -291,6 +303,11 @@ window.CR = window.CR || {};
       CR.gameDay.playoffMode = button.dataset.playoffMode;
       CR.renderGameDayState();
     });
+    $('#scenarioSwitcher')?.addEventListener('click', (event) => {
+      const button = event.target.closest('button[data-scenario]');
+      if (!button) return;
+      applyScenario(button.dataset.scenario);
+    });
     $('#refreshButton')?.addEventListener('click', () => {
       CR.flashSync?.();
       CR.showToast?.('Mock realtime refresh complete');
@@ -303,6 +320,6 @@ window.CR = window.CR || {};
     $('#manageSheet')?.addEventListener('click', (event) => {
       if (event.target.id === 'manageSheet') setModalOpen(false);
     });
-    CR.renderGameDayState('pregame');
+    CR.renderGameDayState(CR.gameDay.mode || 'pregame');
   };
 })();
