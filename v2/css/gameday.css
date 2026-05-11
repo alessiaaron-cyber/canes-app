@@ -156,8 +156,8 @@
 
 .gd-score-grid {
   display: grid;
-  grid-template-columns: 108px minmax(0, 1fr) 108px;
-  gap: 8px;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: 14px;
   align-items: center;
 }
 
@@ -168,6 +168,7 @@
   justify-content: flex-start;
   text-align: center;
   min-width: 0;
+  width: 100%;
 }
 
 .gd-side-label {
@@ -248,6 +249,8 @@
 
 .gd-center {
   text-align: center;
+  width: 60px;
+  flex: 0 0 60px;
 }
 
 .gd-logo {
@@ -834,7 +837,8 @@
   }
 
   .gd-score-grid {
-    grid-template-columns: 92px minmax(0, 1fr) 92px;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    gap: 10px;
   }
 
   .gd-pregame-count {
