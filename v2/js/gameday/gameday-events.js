@@ -5,23 +5,11 @@ window.CR = window.CR || {};
 
   function focusPregamePicks() {
     const anchor = document.querySelector('#gdPregamePicksAnchor');
-    const grid = document.querySelector('#gdPregamePicksGrid');
 
     anchor?.scrollIntoView({
       behavior: 'smooth',
       block: 'start'
     });
-
-    if (grid) {
-      grid.classList.remove('gd-picks-focus');
-      void grid.offsetWidth;
-      grid.classList.add('gd-picks-focus');
-
-      clearTimeout(window.__gdPicksFocusTimer);
-      window.__gdPicksFocusTimer = setTimeout(() => {
-        grid.classList.remove('gd-picks-focus');
-      }, 900);
-    }
   }
 
   CR.gameDayEvents = {
@@ -31,6 +19,7 @@ window.CR = window.CR || {};
           const side = button.dataset.side;
           const player = button.dataset.player;
           CR.gameDay.pregame[side] = CR.gameDay.pregame[side].filter((name) => name !== player);
+          CR.gameDay.lastDraftedPlayer = '';
           rerender('pregame');
         });
       });
@@ -47,11 +36,18 @@ window.CR = window.CR || {};
           if (!side) return;
 
           CR.gameDay.pregame[side].push(player);
+          CR.gameDay.lastDraftedPlayer = player;
           rerender('pregame');
 
           requestAnimationFrame(() => {
             focusPregamePicks();
           });
+
+          clearTimeout(window.__gdLastDraftedTimer);
+          window.__gdLastDraftedTimer = setTimeout(() => {
+            CR.gameDay.lastDraftedPlayer = '';
+            if (CR.gameDay.mode === 'pregame') rerender('pregame');
+          }, 950);
         });
       });
 
