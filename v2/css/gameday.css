@@ -211,21 +211,25 @@
 }
 
 .gd-pick-chip {
-  min-height: 24px;
-  padding: 0 10px;
+  min-height: 28px;
+  padding: 0 12px;
   border-radius: 999px;
-  background: #f3f5f8;
-  color: var(--gd-muted);
-  font-size: .72rem;
-  font-weight: 900;
+  border: 1px solid #e5e7eb;
+  background: #f8fafc;
+  color: #5b6472;
+  font-size: .69rem;
+  font-weight: 850;
+  letter-spacing: .01em;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  white-space: nowrap;
 }
 
 .gd-pick-chip.active {
-  background: var(--gd-green-soft);
-  color: var(--gd-green);
+  border-color: #d6eadf;
+  background: #f3faf6;
+  color: #166534;
 }
 
 .gd-center {
@@ -625,8 +629,8 @@
 
 .gd-postgame-card {
   padding: 15px 14px;
-  border-color: #efc5cf;
-  background: linear-gradient(180deg,#fff7f9 0%,#fff 100%);
+  border-color: #e7e9ee;
+  background: linear-gradient(180deg,#ffffff 0%,#fbfcfd 100%);
 }
 
 .gd-postgame-top {
@@ -639,9 +643,9 @@
 }
 
 .gd-postgame-icon {
-  background: linear-gradient(135deg, #fff1f4, #ffe1e8);
-  color: var(--gd-red-dark);
-  box-shadow: 0 0 0 4px rgba(200,16,46,.08);
+  background: linear-gradient(135deg, #f8fafc, #eef2f6);
+  color: #374151;
+  box-shadow: 0 0 0 4px rgba(17,21,31,.04);
 }
 
 .gd-postgame-title {
@@ -657,7 +661,7 @@
 .gd-postgame-pill {
   padding: 10px 11px;
   border-radius: 14px;
-  background: #fff1f4;
+  background: #f7f8fa;
 }
 
 .gd-postgame-pill strong {
@@ -690,12 +694,12 @@
 }
 
 #gameDayView.mode-playoffs .gd-postgame-card {
-  border-color: #efc5cf;
-  background: linear-gradient(180deg,#fff7f9 0%,#fff 100%);
+  border-color: #e5d7dc;
+  background: linear-gradient(180deg,#ffffff 0%,#fcf7f9 100%);
 }
 
 #gameDayView.mode-playoffs .gd-postgame-pill {
-  background: #fff1f4;
+  background: #faf4f6;
 }
 
 #gameDayView.mode-playoffs .gd-draft-btn,
