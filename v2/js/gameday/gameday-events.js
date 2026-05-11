@@ -3,6 +3,27 @@ window.CR = window.CR || {};
 (() => {
   const CR = window.CR;
 
+  function focusPregamePicks() {
+    const anchor = document.querySelector('#gdPregamePicksAnchor');
+    const grid = document.querySelector('#gdPregamePicksGrid');
+
+    anchor?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start'
+    });
+
+    if (grid) {
+      grid.classList.remove('gd-picks-focus');
+      void grid.offsetWidth;
+      grid.classList.add('gd-picks-focus');
+
+      clearTimeout(window.__gdPicksFocusTimer);
+      window.__gdPicksFocusTimer = setTimeout(() => {
+        grid.classList.remove('gd-picks-focus');
+      }, 900);
+    }
+  }
+
   CR.gameDayEvents = {
     bind({ claimedOwner, draftOrder, nextDraftSide, renderManageSheet, setModalOpen, rerender }) {
       document.querySelectorAll('.gd-small-action').forEach((button) => {
@@ -18,12 +39,19 @@ window.CR = window.CR || {};
         button.addEventListener('click', (event) => {
           event.preventDefault();
           event.stopPropagation();
+
           const player = button.dataset.player;
           if (claimedOwner(player)) return;
+
           const side = typeof nextDraftSide === 'function' ? nextDraftSide() : null;
           if (!side) return;
+
           CR.gameDay.pregame[side].push(player);
           rerender('pregame');
+
+          requestAnimationFrame(() => {
+            focusPregamePicks();
+          });
         });
       });
 
