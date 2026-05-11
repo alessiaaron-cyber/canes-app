@@ -70,21 +70,9 @@ window.CR = window.CR || {};
   const firstGoalHit = (users) => helpers.firstGoalHit ? helpers.firstGoalHit(users) : Object.values(users).flat().find((p) => p.firstGoal);
 
   const liveEventCatalog = {
-    goal: {
-      icon: '🚨',
-      points: 2,
-      summary: (pick) => `${pick.player} scored`
-    },
-    assist: {
-      icon: '🎯',
-      points: 1,
-      summary: (pick) => `${pick.player} assisted`
-    },
-    first: {
-      icon: '👑',
-      points: 2,
-      summary: (pick) => `${pick.player} hit the first-goal bonus`
-    }
+    goal: { icon: '🚨', points: 2, summary: (pick) => `${pick.player} scored` },
+    assist: { icon: '🎯', points: 1, summary: (pick) => `${pick.player} assisted` },
+    first: { icon: '👑', points: 2, summary: (pick) => `${pick.player} hit the first-goal bonus` }
   };
 
   const mvpText = (users) => {
@@ -149,14 +137,8 @@ window.CR = window.CR || {};
       const meta = liveEventCatalog[kind];
       if (!pick || !meta) return;
 
-      if (kind === 'goal') {
-        pick.goals += 1;
-      }
-
-      if (kind === 'assist') {
-        pick.assists += 1;
-      }
-
+      if (kind === 'goal') pick.goals += 1;
+      if (kind === 'assist') pick.assists += 1;
       if (kind === 'first') {
         if (pick.firstGoal) return;
         pick.firstGoal = true;
@@ -212,7 +194,8 @@ window.CR = window.CR || {};
       final,
       isPlayoffs: isPlayoffs(),
       winnerText,
-      nextDraftSide: nextDraftSide()
+      nextDraftSide: nextDraftSide(),
+      carryover: CR.gameDay.carryover
     });
   }
 
@@ -220,7 +203,8 @@ window.CR = window.CR || {};
     return render.renderPregameSection({
       users: getPregameStructured(),
       roster,
-      claimedOwner
+      claimedOwner,
+      carryover: CR.gameDay.carryover
     });
   }
 
@@ -284,7 +268,6 @@ window.CR = window.CR || {};
     container.innerHTML = `${renderHero()}${mode === 'pregame' ? renderPregame() : ''}${mode === 'live' ? renderLive() : ''}${mode === 'final' ? renderFinal() : ''}`;
     $('#stateTitle').textContent = mode === 'pregame' ? 'Pregame' : mode === 'live' ? 'Live' : 'Final';
     $('#stateBadge').textContent = isPlayoffs() ? 'Playoffs' : (mode === 'pregame' ? 'Regular' : mode === 'live' ? 'Live' : 'Final');
-    $('#stateSwitcher')?.querySelectorAll('button').forEach((button) => button.classList.toggle('active', button.dataset.mode === mode));
     $('#modeSwitcher')?.querySelectorAll('button').forEach((button) => button.classList.toggle('active', button.dataset.playoffMode === CR.gameDay.playoffMode));
     $('#scenarioSwitcher')?.querySelectorAll('button').forEach((button) => button.classList.toggle('active', button.dataset.scenario === CR.gameDayScenario));
     updateGlobalLiveIndicator();
@@ -293,10 +276,6 @@ window.CR = window.CR || {};
 
   CR.initGameDay = () => {
     recalculateLiveScores();
-    $('#stateSwitcher')?.addEventListener('click', (event) => {
-      const button = event.target.closest('button[data-mode]');
-      if (button) CR.renderGameDayState(button.dataset.mode);
-    });
     $('#modeSwitcher')?.addEventListener('click', (event) => {
       const button = event.target.closest('button[data-playoff-mode]');
       if (!button) return;
