@@ -1,0 +1,13 @@
+/* Targeted Game Day overrides for playoff/carryover state pills */
+:root {
+  --gd-carryover-slate: #5f6b7a;
+  --gd-carryover-slate-soft: #eef2f6;
+  --gd-carryover-slate-border: #cfd7e1;
+}
+
+.gd-pill,
+.gd-inline-note {
+  white-space: nowrap;
+}
+
+.gd-pill
