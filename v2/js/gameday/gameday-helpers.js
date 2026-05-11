@@ -18,8 +18,26 @@ window.CR = window.CR || {};
     },
 
     nextDraftSide(state, draftOrder) {
-      const total = state.pregame.Aaron.length + state.pregame.Julie.length;
-      return total >= 4 ? null : draftOrder[total];
+      const counts = {
+        Aaron: state.pregame.Aaron.length,
+        Julie: state.pregame.Julie.length
+      };
+
+      const filledBySide = {
+        Aaron: 0,
+        Julie: 0
+      };
+
+      for (const side of draftOrder) {
+        if (filledBySide[side] < counts[side]) {
+          filledBySide[side] += 1;
+          continue;
+        }
+
+        return side;
+      }
+
+      return null;
     },
 
     claimedOwner(state, name) {
