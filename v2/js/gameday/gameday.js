@@ -178,7 +178,7 @@ window.CR = window.CR || {};
 
   function bindInteractions() {
     if (events.bind) {
-      events.bind({ claimedOwner, draftOrder, renderManageSheet, setModalOpen, rerender: CR.renderGameDayState });
+      events.bind({ claimedOwner, draftOrder, nextDraftSide, renderManageSheet, setModalOpen, rerender: CR.renderGameDayState });
     }
   }
 
