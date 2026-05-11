@@ -148,6 +148,12 @@
   background: #2b3442;
 }
 
+.gd-pill-soft {
+  border: 1px solid #ebeef3;
+  background: #f8fafc;
+  color: var(--gd-muted);
+}
+
 .gd-period {
   font-size: .9rem;
   font-weight: 900;
@@ -329,6 +335,22 @@
   text-transform: uppercase;
 }
 
+.gd-inline-note {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 9px;
+  border-radius: 999px;
+  background: #f8fafc;
+  border: 1px solid #ebeef3;
+  color: var(--gd-muted);
+  font-size: .68rem;
+  font-weight: 900;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
 .gd-picks-grid,
 .gd-sim-grid,
 .gd-final-picks,
@@ -376,6 +398,10 @@
   background: #fafbfc;
 }
 
+.gd-pick-row.is-carryover {
+  background: linear-gradient(180deg,#ffffff 0%,#fbfcfd 100%);
+}
+
 .gd-pick-icon {
   width: 24px;
   height: 24px;
@@ -400,6 +426,22 @@
   font-weight: 900;
   color: var(--gd-ink);
   text-align: left;
+}
+
+.gd-pick-badge {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 8px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: #f8fafc;
+  border: 1px solid #ebeef3;
+  color: var(--gd-muted);
+  font-size: .58rem;
+  font-weight: 900;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  vertical-align: middle;
 }
 
 .gd-pick-main small,
