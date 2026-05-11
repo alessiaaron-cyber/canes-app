@@ -29,7 +29,9 @@ window.CR = window.CR || {};
       });
 
       document.querySelectorAll('[data-action="open-manage"]').forEach((button) => {
-        button.addEventListener('click', () => {
+        button.addEventListener('click', (event) => {
+          event.preventDefault();
+          event.stopPropagation();
           renderManageSheet();
           setModalOpen(true);
         });
@@ -49,12 +51,12 @@ window.CR = window.CR || {};
           if (kind === 'assist') {
             pick.assists += 1;
             CR.gameDay.live.scores[side] += 1;
-            CR.gameDay.live.feed.unshift({ icon: '🍎', title: `${pick.player} assist`, detail: `${side} adds an assist point`, points: 1 });
+            CR.gameDay.live.feed.unshift({ icon: '🎯', title: `${pick.player} assist`, detail: `${side} adds an assist point`, points: 1 });
           }
           if (kind === 'first' && !pick.firstGoal) {
             pick.firstGoal = true;
             CR.gameDay.live.scores[side] += 2;
-            CR.gameDay.live.feed.unshift({ icon: '⭐', title: `${pick.player} first Canes goal`, detail: `${side} gets the first goal bonus`, points: 2 });
+            CR.gameDay.live.feed.unshift({ icon: '👑', title: `${pick.player} first Canes goal`, detail: `${side} gets the first goal bonus`, points: 2 });
           }
           CR.flashSync?.();
           CR.showToast?.(`${side} ${kind} update`);
