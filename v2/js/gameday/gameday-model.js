@@ -38,8 +38,8 @@ window.CR = window.CR || {};
           },
           feed: [
             { icon: '🚨', title: 'Sebastian Aho goal', detail: 'Aaron scores through a picked player', points: 2 },
-            { icon: '🍎', title: 'Seth Jarvis assist', detail: 'Julie adds an assist point', points: 1 },
-            { icon: '⭐', title: 'First goal bonus', detail: 'Aho hit the first Canes goal bonus', points: 2 }
+            { icon: '🎯', title: 'Seth Jarvis assist', detail: 'Julie adds an assist point', points: 1 },
+            { icon: '👑', title: 'First goal bonus', detail: 'Aho hit the first Canes goal bonus', points: 2 }
           ]
         }
       };
