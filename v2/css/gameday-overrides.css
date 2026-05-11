@@ -31,6 +31,7 @@
   grid-template-columns: 1fr 1fr;
   align-items: center;
   gap: 8px;
+  margin-bottom: 10px;
 }
 
 .gd-hero-top-left {
@@ -46,7 +47,7 @@
 .gd-hero-time-row {
   display: flex;
   justify-content: center;
-  margin: 8px 0 14px;
+  margin: -2px 0 14px;
 }
 
 @keyframes gd-playoff-heartbeat {
