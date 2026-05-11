@@ -156,7 +156,7 @@
 
 .gd-score-grid {
   display: grid;
-  grid-template-columns: 92px minmax(0, 1fr) 92px;
+  grid-template-columns: 108px minmax(0, 1fr) 108px;
   gap: 8px;
   align-items: center;
 }
@@ -182,7 +182,9 @@
 }
 
 .gd-side-value {
-  margin-top: 4px;
+  margin-top: 6px;
+  width: 100%;
+  text-align: center;
   font-size: 3.5rem;
   line-height: .85;
   letter-spacing: -.08em;
@@ -214,6 +216,28 @@
   align-items: center;
   justify-content: center;
   white-space: nowrap;
+}
+
+.gd-pregame-count {
+  margin-top: 8px;
+  font-size: 1.5rem;
+  line-height: 1;
+  font-weight: 1000;
+  letter-spacing: -.05em;
+  color: var(--gd-ink);
+}
+
+.gd-pregame-total {
+  color: var(--gd-muted);
+}
+
+.gd-pregame-meta {
+  margin-top: 6px;
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--gd-muted);
 }
 
 .gd-pick-chip.active {
@@ -810,12 +834,15 @@
   }
 
   .gd-score-grid {
-    grid-template-columns: 84px minmax(0, 1fr) 84px;
+    grid-template-columns: 92px minmax(0, 1fr) 92px;
   }
 
-  .gd-pick-chip {
-    font-size: .58rem;
-    padding: 0 8px;
+  .gd-pregame-count {
+    font-size: 1.28rem;
+  }
+
+  .gd-pregame-meta {
+    font-size: .64rem;
   }
 
   .gd-side-value {
