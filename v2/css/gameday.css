@@ -137,14 +137,22 @@
   text-transform: uppercase;
 }
 
-.gd-pill.live {
-  background: var(--gd-red);
+.gd-pill-state {
+  min-width: 74px;
   color: #fff;
+  background: var(--gd-ink);
 }
 
-.gd-pill.final {
-  color: var(--gd-red);
-  background: var(--gd-red-soft);
+.gd-pill-state.live {
+  background: var(--gd-red);
+}
+
+.gd-pill-state.pregame {
+  background: var(--gd-ink);
+}
+
+.gd-pill-state.final {
+  background: #2b3442;
 }
 
 .gd-pill.synced,
@@ -611,7 +619,7 @@
 .gd-feed-points {
   font-size: .86rem;
   font-weight: 1000;
-  color: var(--gd-red);
+  color: var(--gd-ink);
   white-space: nowrap;
 }
 
@@ -677,7 +685,7 @@
   background: linear-gradient(135deg, #fff3f6, #ffe4ea);
 }
 
-#gameDayView.mode-playoffs .gd-pill.live {
+#gameDayView.mode-playoffs .gd-pill-state.live {
   box-shadow: 0 0 0 4px rgba(200,16,46,.10);
 }
 
