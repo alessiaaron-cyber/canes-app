@@ -20,7 +20,7 @@
 
   <link rel="stylesheet" href="css/app-shell.css?v=shell1" />
   <link rel="stylesheet" href="css/app-foundation.css?v=foundation1" />
-  <link rel="stylesheet" href="css/gameday.css?v=v2gameday3" />
+  <link rel="stylesheet" href="css/gameday.css?v=v2gameday4" />
 </head>
 <body>
   <div class="sync-flash" id="syncFlash"></div>
@@ -57,6 +57,16 @@
         <div class="playoff-switcher" id="modeSwitcher">
           <button class="active" data-playoff-mode="regular" type="button">Regular</button>
           <button data-playoff-mode="playoffs" type="button">Playoffs</button>
+        </div>
+
+        <div class="gd-toolbar-group">
+          <div class="gd-toolbar-label">Mock Scenario</div>
+          <div class="scenario-switcher" id="scenarioSwitcher">
+            <button class="active" data-scenario="pregame_default" type="button">Pregame</button>
+            <button data-scenario="pregame_carryover" type="button">Carryover</button>
+            <button data-scenario="live_tight" type="button">Live</button>
+            <button data-scenario="final_comeback" type="button">Final</button>
+          </div>
         </div>
       </section>
 
@@ -109,11 +119,11 @@
 
   <script src="js/ui.js?v=navrestore3"></script>
   <script src="js/tabs.js?v=navrestore3"></script>
-  <script src="js/gameday/gameday-model.js?v=model1"></script>
+  <script src="js/gameday/gameday-model.js?v=model2"></script>
   <script src="js/gameday/gameday-helpers.js?v=helpers2"></script>
   <script src="js/gameday/gameday-render.js?v=render2"></script>
   <script src="js/gameday/gameday-events.js?v=events2"></script>
-  <script src="js/gameday/gameday.js?v=v2gameday3"></script>
+  <script src="js/gameday/gameday.js?v=v2gameday4"></script>
   <script src="js/app.js?v=navrestore3"></script>
 </body>
 </html>
