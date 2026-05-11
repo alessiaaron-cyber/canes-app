@@ -39,8 +39,8 @@ window.CR = window.CR || {};
       },
       feed: [
         { icon: '🚨', title: 'Sebastian Aho goal', detail: 'Aaron scores through a picked player', points: 2 },
-        { icon: '🍎', title: 'Seth Jarvis assist', detail: 'Julie adds an assist point', points: 1 },
-        { icon: '⭐', title: 'First goal bonus', detail: 'Aho hit the first Canes goal bonus', points: 2 }
+        { icon: '🎯', title: 'Seth Jarvis assist', detail: 'Julie adds an assist point', points: 1 },
+        { icon: '👑', title: 'First goal bonus', detail: 'Aho hit the first Canes goal bonus', points: 2 }
       ]
     }
   };
@@ -99,6 +99,12 @@ window.CR = window.CR || {};
     modal.classList.toggle('is-open', isOpen);
     document.body.classList.toggle('modal-open', isOpen);
     document.documentElement.classList.toggle('modal-open', isOpen);
+  }
+
+  function updateGlobalLiveIndicator() {
+    const indicator = $('#globalLiveIndicator');
+    if (!indicator) return;
+    indicator.classList.toggle('is-hidden', CR.gameDay.mode !== 'live');
   }
 
   function renderHero() {
@@ -187,6 +193,7 @@ window.CR = window.CR || {};
     $('#stateBadge').textContent = isPlayoffs() ? 'Playoffs' : (mode === 'pregame' ? 'Regular' : mode === 'live' ? 'Live' : 'Final');
     $('#stateSwitcher')?.querySelectorAll('button').forEach((button) => button.classList.toggle('active', button.dataset.mode === mode));
     $('#modeSwitcher')?.querySelectorAll('button').forEach((button) => button.classList.toggle('active', button.dataset.playoffMode === CR.gameDay.playoffMode));
+    updateGlobalLiveIndicator();
     bindInteractions();
   };
 
