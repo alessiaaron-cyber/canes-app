@@ -26,30 +26,27 @@
   color: var(--gd-carryover-slate) !important;
 }
 
-.gd-status-row {
-  grid-template-columns: 1fr 1fr !important;
-  grid-template-areas:
-    'left right'
-    'center center';
-  row-gap: 8px;
-  column-gap: 8px;
+.gd-hero-topline {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   align-items: center;
+  gap: 8px;
 }
 
-.gd-status-side-left {
-  grid-area: left;
+.gd-hero-top-left {
+  display: flex;
   justify-content: flex-start;
 }
 
-.gd-status-side-right {
-  grid-area: right;
+.gd-hero-top-right {
+  display: flex;
   justify-content: flex-end;
 }
 
-.gd-status-center {
-  grid-area: center;
+.gd-hero-time-row {
+  display: flex;
   justify-content: center;
-  min-width: 0;
+  margin: 8px 0 14px;
 }
 
 @keyframes gd-playoff-heartbeat {
