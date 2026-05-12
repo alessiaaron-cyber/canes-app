@@ -1,12 +1,28 @@
 .auth-screen {
+  position: relative;
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: max(28px, env(safe-area-inset-top)) 24px max(36px, env(safe-area-inset-bottom));
+  padding: calc(28px + env(safe-area-inset-top)) 24px max(36px, env(safe-area-inset-bottom));
   background:
     radial-gradient(circle at top, rgba(204, 0, 28, 0.10), transparent 38%),
     linear-gradient(to bottom, #f8fafc 0%, #eef2f7 100%);
+}
+
+.auth-screen::before {
+  content: "";
+  position: fixed;
+  top: calc(-1 * env(safe-area-inset-top));
+  left: 0;
+  right: 0;
+  height: calc(100% + env(safe-area-inset-top));
+  background:
+    radial-gradient(circle at top, rgba(204, 0, 28, 0.10), transparent 38%),
+    linear-gradient(to bottom, #f8fafc 0%, #eef2f7 100%);
+  z-index: -1;
+  pointer-events: none;
 }
 
 .auth-card {
