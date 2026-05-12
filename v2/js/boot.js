@@ -32,6 +32,24 @@ window.CR = window.CR || {};
     CR.startApp?.();
   }
 
+  function genericSignInSuccessMessage() {
+    return 'If this email is approved, a sign-in code has been sent.';
+  }
+
+  function genericSignInErrorMessage(error) {
+    const message = String(error?.message || '').toLowerCase();
+
+    if (message.includes('rate limit')) {
+      return 'Too many sign-in attempts. Please wait a bit and try again.';
+    }
+
+    if (message.includes('invalid email')) {
+      return 'Enter a valid email address.';
+    }
+
+    return 'Unable to send a sign-in code right now. Please try again.';
+  }
+
   async function resolveSessionState() {
     const session = await CR.auth.getSession();
 
@@ -88,10 +106,10 @@ window.CR = window.CR || {};
     try {
       const { error } = await CR.auth.signIn(email);
       if (error) throw error;
-      if (status) status.textContent = 'Check your email for the sign-in code.';
+      if (status) status.textContent = genericSignInSuccessMessage();
     } catch (error) {
       console.error(error);
-      if (status) status.textContent = error?.message || 'Unable to send sign-in code.';
+      if (status) status.textContent = genericSignInErrorMessage(error);
     } finally {
       if (button) button.disabled = false;
     }
