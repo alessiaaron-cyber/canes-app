@@ -16,31 +16,43 @@ window.CR = window.CR || {};
     return `
       <div class="auth-screen">
         <div class="auth-card">
-          <div class="auth-mark">🏒</div>
-          <div class="auth-kicker">Canes Rivalry V2</div>
+          <div class="auth-brand">
+            <div class="auth-brand-mark">
+              <img class="auth-brand-icon" src="./assets/app-icon.png" alt="Canes Rivalry app icon" />
+            </div>
+
+            <div>
+              <div class="auth-kicker">Canes Rivalry</div>
+              <div class="auth-brand-subtitle">Aaron vs Julie</div>
+            </div>
+          </div>
+
           <h1 class="auth-title">${message}</h1>
           <p class="auth-copy">${body}</p>
+
           ${actions ? `<div class="auth-actions">${actions}</div>` : ''}
-          <div class="auth-footnote">Private rivalry tracker • protected preview</div>
+
+          <div class="auth-footnote">Game day picks, rivalry tracking, and season history.</div>
         </div>
       </div>
     `;
   }
 
   function renderBoot(message = 'Loading Canes Rivalry') {
-    return shell(message, 'Checking your session and account access.');
+    return shell(message, 'Getting your rivalry session ready.');
   }
 
   function renderSignedOut(email = '') {
     return shell(
       'Sign in',
-      'Use your approved email to request a one-time sign-in code.',
+      'Enter your approved email to request a one-time sign-in code.',
       `
         <form class="auth-form" id="authSignInForm">
-          <label class="auth-label" for="authEmailInput">Approved email</label>
+          <label class="auth-label" for="authEmailInput">Email</label>
           <input class="auth-input" id="authEmailInput" type="email" inputmode="email" autocomplete="email" placeholder="you@example.com" value="${escapeHtml(email)}" required />
-          <button class="auth-button" type="submit" id="authSubmitButton">Send sign-in code</button>
+          <button class="auth-button" type="submit" id="authSubmitButton">Send code</button>
         </form>
+
         <div class="auth-status" id="authStatus"></div>
       `
     );
@@ -48,15 +60,16 @@ window.CR = window.CR || {};
 
   function renderTokenStep(email = '') {
     return shell(
-      'Enter sign-in code',
-      `Enter the code sent to ${escapeHtml(email || 'your email')}.`,
+      'Enter code',
+      `Type the sign-in code sent to ${escapeHtml(email || 'your email')}.`,
       `
         <form class="auth-form" id="authVerifyForm">
-          <label class="auth-label" for="authTokenInput">Email code</label>
-          <input class="auth-input" id="authTokenInput" type="text" inputmode="numeric" autocomplete="one-time-code" placeholder="123456" required />
+          <label class="auth-label" for="authTokenInput">Sign-in code</label>
+          <input class="auth-input auth-input-code" id="authTokenInput" type="text" inputmode="numeric" autocomplete="one-time-code" placeholder="123456" required />
           <button class="auth-button" type="submit" id="authVerifyButton">Verify code</button>
           <button class="auth-button auth-button-secondary" type="button" id="authBackButton">Back</button>
         </form>
+
         <div class="auth-status" id="authStatus"></div>
       `
     );
@@ -64,23 +77,23 @@ window.CR = window.CR || {};
 
   function renderUnauthorized(email = '') {
     return shell(
-      'Not approved yet',
-      `${escapeHtml(email || 'This account')} is signed in, but it is not currently allowed to use Canes Rivalry V2.`,
+      'Access not enabled',
+      `${escapeHtml(email || 'This account')} is signed in, but it is not currently enabled for Canes Rivalry.`,
       '<button class="auth-button auth-button-secondary" type="button" id="authSignOutButton">Sign out</button>'
     );
   }
 
   function renderProfileMissing(email = '') {
     return shell(
-      'Account setup missing',
-      `${escapeHtml(email || 'This account')} is approved, but no active V2 profile was found yet.`,
+      'Account still needs setup',
+      `${escapeHtml(email || 'This account')} is approved, but the rivalry profile is not ready yet.`,
       '<button class="auth-button auth-button-secondary" type="button" id="authSignOutButton">Sign out</button>'
     );
   }
 
   function renderAuthError(message = 'Something went sideways during sign-in.') {
     return shell(
-      'Auth issue',
+      'Sign-in issue',
       escapeHtml(message),
       '<button class="auth-button auth-button-secondary" type="button" id="retryBootButton">Try again</button>'
     );
