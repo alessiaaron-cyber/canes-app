@@ -1,8 +1,6 @@
 window.CR = window.CR || {};
 
 (() => {
-  let started = false;
-
   function safeText(value, fallback = '—') {
     const text = String(value || '').trim();
     return text || fallback;
@@ -81,9 +79,6 @@ window.CR = window.CR || {};
   }
 
   window.CR.startApp = () => {
-    if (started) return;
-    started = true;
-
     try {
       renderAccountIdentity();
       bindAccountUi();
