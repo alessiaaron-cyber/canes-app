@@ -78,12 +78,19 @@ window.CR = window.CR || {};
     document.querySelector('#manageSignOutButton')?.addEventListener('click', handleManageSignOut);
   }
 
+  window.CR.refreshApp = async () => {
+    window.CR.flashSync?.();
+    window.CR.showToast?.('Rivalry refresh complete');
+    window.CR.renderGameDayState?.();
+  };
+
   window.CR.startApp = () => {
     try {
       renderAccountIdentity();
       bindAccountUi();
       window.CR.initTabs?.();
       window.CR.initGameDay?.();
+      window.CR.initPullRefresh?.();
       window.CR.switchTab?.('gameday');
     } catch (error) {
       console.error('V2 bootstrap failed', error);
