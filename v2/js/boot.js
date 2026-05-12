@@ -158,11 +158,12 @@ window.CR = window.CR || {};
   window.CR.renderBootScreen = render;
   window.CR.boot = boot;
 
-  document.addEventListener('DOMContentLoaded', () => {
-    boot();
+  document.addEventListener('DOMContentLoaded', async () => {
+    await boot();
 
     try {
-      const supabase = CR.getSupabase();
+      const supabase = await CR.getSupabase();
+
       supabase.auth.onAuthStateChange(() => {
         const hasShell = !!document.querySelector('#bottomNav');
         if (!hasShell) return;
