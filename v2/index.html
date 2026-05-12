@@ -18,7 +18,7 @@
   <link rel="icon" type="image/png" href="./assets/app-icon.png?v=v2gameday2" />
   <link rel="apple-touch-icon" href="./assets/app-icon.png?v=v2gameday2" />
 
-  <link rel="stylesheet" href="css/app-shell.css?v=shell2" />
+  <link rel="stylesheet" href="css/app-shell.css?v=shell3" />
   <link rel="stylesheet" href="css/app-foundation.css?v=foundation1" />
   <link rel="stylesheet" href="css/auth.css?v=auth2" />
   <link rel="stylesheet" href="css/gameday.css?v=v2gameday12" />
@@ -34,13 +34,23 @@
       <header class="app-header">
         <div>
           <div class="app-header-topline">
-            <span class="eyebrow">Canes Rivalry V2</span>
+            <span class="eyebrow">Canes Rivalry</span>
             <span class="global-live-indicator is-hidden" id="globalLiveIndicator"><span class="global-live-dot"></span>Live</span>
           </div>
           <h1 id="pageTitle">Game Day</h1>
         </div>
 
-        <button class="icon-button" id="refreshButton" type="button">↻</button>
+        <div class="app-header-actions">
+          <div class="account-chip" id="accountChip">
+            <div class="account-chip-avatar" id="accountChipAvatar">C</div>
+            <div class="account-chip-copy">
+              <div class="account-chip-name" id="accountChipName">Canes Rivalry</div>
+              <div class="account-chip-meta" id="accountChipMeta">Signed in</div>
+            </div>
+          </div>
+
+          <button class="icon-button" id="refreshButton" type="button">↻</button>
+        </div>
       </header>
 
       <section class="app-view active-view" id="gameDayView" data-view="gameday">
@@ -94,6 +104,30 @@
 
       <section class="app-view" id="manageView" data-view="manage">
         <main class="content-stack">
+          <section class="panel-card account-panel">
+            <div class="panel-header compact-header">
+              <div>
+                <div class="eyebrow">Account</div>
+                <h2 id="manageAccountTitle">Signed in</h2>
+              </div>
+              <span class="panel-tag dark" id="manageAccountRole">Admin</span>
+            </div>
+
+            <div class="account-panel-body">
+              <div class="account-panel-avatar" id="manageAccountAvatar">C</div>
+
+              <div class="account-panel-copy">
+                <div class="account-panel-name" id="manageAccountName">Canes Rivalry</div>
+                <div class="account-panel-meta" id="manageAccountMeta">Authenticated session active</div>
+                <div class="account-panel-email" id="manageAccountEmail">—</div>
+              </div>
+            </div>
+
+            <div class="account-panel-actions">
+              <button class="mini-button" id="manageSignOutButton" type="button">Sign out</button>
+            </div>
+          </section>
+
           <section class="panel-card">
             <div class="eyebrow">Manage</div>
             <h2>Settings and controls</h2>
@@ -147,7 +181,7 @@
   <script src="js/gameday/gameday-render.js?v=render8"></script>
   <script src="js/gameday/gameday-events.js?v=events3"></script>
   <script src="js/gameday/gameday.js?v=v2gameday8"></script>
-  <script src="js/app.js?v=authboot1"></script>
+  <script src="js/app.js?v=authboot2"></script>
   <script src="js/boot.js?v=authboot5"></script>
 </body>
 </html>
