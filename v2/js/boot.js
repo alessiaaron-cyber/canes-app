@@ -13,6 +13,8 @@ window.CR = window.CR || {};
     AUTH_ERROR: 'AUTH_ERROR'
   };
 
+  CR.pendingAuthEmail = CR.pendingAuthEmail || '';
+
   function root() {
     return document.querySelector('#appRoot');
   }
@@ -49,6 +51,10 @@ window.CR = window.CR || {};
     }
 
     return 'Unable to send a sign-in code right now. Please try again.';
+  }
+
+  function genericVerifyErrorMessage() {
+    return 'Invalid or expired sign-in code. Please try again.';
   }
 
   function cooldownEndsAt() {
@@ -153,6 +159,12 @@ window.CR = window.CR || {};
     };
   }
 
+  function renderTokenStep(email) {
+    CR.pendingAuthEmail = email;
+    render(CR.authUi.renderTokenStep(email));
+    bindTokenUi();
+  }
+
   async function handleSignIn(event) {
     event.preventDefault();
 
@@ -182,17 +194,59 @@ window.CR = window.CR || {};
     if (status) status.textContent = 'Sending sign-in code...';
 
     try {
-      const { error } = await CR.auth.signIn(email);
+      const { error } = await CR.auth.requestOtp(email);
       if (error) throw error;
+
       setCooldown();
-      applyCooldownUi();
+      renderTokenStep(email);
+
+      const tokenStatus = document.querySelector('#authStatus');
+      if (tokenStatus) {
+        tokenStatus.textContent = genericSignInSuccessMessage();
+      }
+
       startCooldownTicker();
-      if (status) status.textContent = genericSignInSuccessMessage();
     } catch (error) {
       console.error(error);
       if (status) status.textContent = genericSignInErrorMessage(error);
       if (button) button.disabled = false;
     }
+  }
+
+  async function handleVerify(event) {
+    event.preventDefault();
+
+    const tokenInput = document.querySelector('#authTokenInput');
+    const status = document.querySelector('#authStatus');
+    const button = document.querySelector('#authVerifyButton');
+
+    const token = String(tokenInput?.value || '').trim();
+    const email = String(CR.pendingAuthEmail || '').trim();
+
+    if (!token || !email) {
+      if (status) status.textContent = 'Enter the sign-in code from your email.';
+      return;
+    }
+
+    if (button) button.disabled = true;
+    if (status) status.textContent = 'Verifying sign-in code...';
+
+    try {
+      const { error } = await CR.auth.verifyOtp(email, token);
+      if (error) throw error;
+
+      CR.pendingAuthEmail = '';
+      await boot();
+    } catch (error) {
+      console.error(error);
+      if (status) status.textContent = genericVerifyErrorMessage();
+      if (button) button.disabled = false;
+    }
+  }
+
+  function handleBackToEmail() {
+    render(CR.authUi.renderSignedOut(CR.pendingAuthEmail));
+    bindAuthUi();
   }
 
   async function handleSignOut() {
@@ -203,6 +257,11 @@ window.CR = window.CR || {};
     }
 
     await boot();
+  }
+
+  function bindTokenUi() {
+    document.querySelector('#authVerifyForm')?.addEventListener('submit', handleVerify);
+    document.querySelector('#authBackButton')?.addEventListener('click', handleBackToEmail);
   }
 
   function bindAuthUi() {
