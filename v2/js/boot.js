@@ -15,6 +15,7 @@ window.CR = window.CR || {};
   };
 
   CR.pendingAuthEmail = CR.pendingAuthEmail || '';
+  CR.__bootInFlight = false;
 
   function root() {
     return document.querySelector('#appRoot');
@@ -318,6 +319,9 @@ window.CR = window.CR || {};
   }
 
   async function boot() {
+    if (CR.__bootInFlight) return;
+    CR.__bootInFlight = true;
+
     try {
       if (!root()?.firstElementChild) {
         render(CR.authUi.renderBoot(), 'boot-stage auth-stage');
@@ -357,6 +361,8 @@ window.CR = window.CR || {};
       console.error('Boot failed', error);
       await swapStage(CR.authUi.renderAuthError(error?.message || 'Unable to load Canes Rivalry V2.'), 'boot-stage auth-stage');
       bindAuthUi();
+    } finally {
+      CR.__bootInFlight = false;
     }
   }
 
@@ -371,10 +377,20 @@ window.CR = window.CR || {};
 
     try {
       const supabase = await CR.getSupabase();
+      let sawInitialAuthCallback = false;
 
-      supabase.auth.onAuthStateChange(() => {
+      supabase.auth.onAuthStateChange((event) => {
+        if (!sawInitialAuthCallback) {
+          sawInitialAuthCallback = true;
+          if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN') {
+            return;
+          }
+        }
+
         const hasShell = !!document.querySelector('#bottomNav');
-        if (!hasShell) return;
+        const hasAuthScreen = !!document.querySelector('#authSignInForm') || !!document.querySelector('#authVerifyForm');
+
+        if (!hasShell && !hasAuthScreen) return;
         boot();
       });
     } catch (error) {
