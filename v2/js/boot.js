@@ -2,6 +2,7 @@ window.CR = window.CR || {};
 
 (() => {
   const CR = window.CR;
+  const SIGN_IN_COOLDOWN_MS = 90 * 1000;
 
   const STATES = {
     BOOTING: 'BOOTING',
@@ -48,6 +49,71 @@ window.CR = window.CR || {};
     }
 
     return 'Unable to send a sign-in code right now. Please try again.';
+  }
+
+  function cooldownEndsAt() {
+    return Number(window.localStorage?.getItem('cr_v2_signin_cooldown_until') || 0);
+  }
+
+  function setCooldown(msFromNow = SIGN_IN_COOLDOWN_MS) {
+    const until = Date.now() + msFromNow;
+    window.localStorage?.setItem('cr_v2_signin_cooldown_until', String(until));
+    return until;
+  }
+
+  function clearCooldown() {
+    window.localStorage?.removeItem('cr_v2_signin_cooldown_until');
+  }
+
+  function cooldownRemainingMs() {
+    return Math.max(0, cooldownEndsAt() - Date.now());
+  }
+
+  function formatCooldownMessage(ms) {
+    const seconds = Math.max(1, Math.ceil(ms / 1000));
+    return `Code recently requested. Try again in ${seconds}s.`;
+  }
+
+  function applyCooldownUi() {
+    const button = document.querySelector('#authSubmitButton');
+    const status = document.querySelector('#authStatus');
+    const remaining = cooldownRemainingMs();
+
+    if (!button) return;
+
+    if (remaining > 0) {
+      button.disabled = true;
+      button.textContent = 'Code requested';
+      if (status && !status.textContent) {
+        status.textContent = formatCooldownMessage(remaining);
+      }
+      return true;
+    }
+
+    button.disabled = false;
+    button.textContent = 'Send sign-in code';
+    return false;
+  }
+
+  function startCooldownTicker() {
+    window.clearInterval(window.CR.__signInCooldownTimer);
+
+    window.CR.__signInCooldownTimer = window.setInterval(() => {
+      const status = document.querySelector('#authStatus');
+      const active = applyCooldownUi();
+      const remaining = cooldownRemainingMs();
+
+      if (active) {
+        if (status) status.textContent = formatCooldownMessage(remaining);
+        return;
+      }
+
+      window.clearInterval(window.CR.__signInCooldownTimer);
+      if (status && status.textContent.startsWith('Code recently requested.')) {
+        status.textContent = '';
+      }
+      clearCooldown();
+    }, 1000);
   }
 
   async function resolveSessionState() {
@@ -105,17 +171,26 @@ window.CR = window.CR || {};
       return;
     }
 
+    if (cooldownRemainingMs() > 0) {
+      if (status) status.textContent = formatCooldownMessage(cooldownRemainingMs());
+      applyCooldownUi();
+      startCooldownTicker();
+      return;
+    }
+
     if (button) button.disabled = true;
     if (status) status.textContent = 'Sending sign-in code...';
 
     try {
       const { error } = await CR.auth.signIn(email);
       if (error) throw error;
+      setCooldown();
+      applyCooldownUi();
+      startCooldownTicker();
       if (status) status.textContent = genericSignInSuccessMessage();
     } catch (error) {
       console.error(error);
       if (status) status.textContent = genericSignInErrorMessage(error);
-    } finally {
       if (button) button.disabled = false;
     }
   }
@@ -137,10 +212,15 @@ window.CR = window.CR || {};
 
     form?.addEventListener('submit', handleSignIn);
     emailInput?.addEventListener('input', () => {
-      if (status) status.textContent = '';
+      if (status && !cooldownRemainingMs()) status.textContent = '';
     });
     document.querySelector('#authSignOutButton')?.addEventListener('click', handleSignOut);
     document.querySelector('#retryBootButton')?.addEventListener('click', boot);
+
+    applyCooldownUi();
+    if (cooldownRemainingMs() > 0) {
+      startCooldownTicker();
+    }
   }
 
   async function boot() {
