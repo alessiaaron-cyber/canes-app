@@ -90,6 +90,11 @@ window.CR = window.CR || {};
   async function handleSignIn(event) {
     event.preventDefault();
 
+    const submitter = event.submitter;
+    if (!submitter || submitter.id !== 'authSubmitButton') {
+      return;
+    }
+
     const emailInput = document.querySelector('#authEmailInput');
     const status = document.querySelector('#authStatus');
     const button = document.querySelector('#authSubmitButton');
@@ -126,7 +131,14 @@ window.CR = window.CR || {};
   }
 
   function bindAuthUi() {
-    document.querySelector('#authSignInForm')?.addEventListener('submit', handleSignIn);
+    const form = document.querySelector('#authSignInForm');
+    const emailInput = document.querySelector('#authEmailInput');
+    const status = document.querySelector('#authStatus');
+
+    form?.addEventListener('submit', handleSignIn);
+    emailInput?.addEventListener('input', () => {
+      if (status) status.textContent = '';
+    });
     document.querySelector('#authSignOutButton')?.addEventListener('click', handleSignOut);
     document.querySelector('#retryBootButton')?.addEventListener('click', boot);
   }
