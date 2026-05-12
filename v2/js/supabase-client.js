@@ -1,15 +1,30 @@
 window.CR = window.CR || {};
 
 (() => {
-  const SUPABASE_URL = 'https://hhhxgbztfizmwxbuoprq.supabase.co';
-  const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_4laNe86TxiC5pLkAF5NeIg_oMmf1unQ';
+  function resolveConfig() {
+    const runtimeConfig = window.CR?.config || window.APP_CONFIG || {};
+
+    const url = runtimeConfig.supabaseUrl;
+    const publishableKey = runtimeConfig.supabaseAnonKey;
+
+    if (!url || !publishableKey) {
+      throw new Error('Missing Supabase runtime configuration.');
+    }
+
+    return {
+      url,
+      publishableKey
+    };
+  }
 
   function createSupabaseClient() {
     if (!window.supabase?.createClient) {
       throw new Error('Supabase client library did not load.');
     }
 
-    return window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+    const config = resolveConfig();
+
+    return window.supabase.createClient(config.url, config.publishableKey, {
       auth: {
         persistSession: true,
         autoRefreshToken: true,
@@ -17,11 +32,6 @@ window.CR = window.CR || {};
       }
     });
   }
-
-  window.CR.supabaseConfig = {
-    url: SUPABASE_URL,
-    publishableKey: SUPABASE_PUBLISHABLE_KEY
-  };
 
   window.CR.getSupabase = () => {
     if (!window.CR.supabase) {
