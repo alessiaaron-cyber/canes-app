@@ -23,6 +23,7 @@
   <link rel="stylesheet" href="css/auth.css?v=auth3" />
   <link rel="stylesheet" href="css/gameday.css?v=v2gameday12" />
   <link rel="stylesheet" href="css/gameday-overrides.css?v=v2gameday-override3" />
+  <link rel="stylesheet" href="css/history.css?v=v2history1" />
 </head>
 <body>
   <div id="appRoot"></div>
@@ -98,15 +99,7 @@
         <main class="content-stack gameday-stack" id="gameDayContent"></main>
       </section>
 
-      <section class="app-view" id="historyView" data-view="history">
-        <main class="content-stack">
-          <section class="panel-card">
-            <div class="eyebrow">History</div>
-            <h2>Season rivalry archive</h2>
-            <p class="placeholder-copy">Stable placeholder restored while new Game Day is rebuilt separately.</p>
-          </section>
-        </main>
-      </section>
+      <section class="app-view" id="historyView" data-view="history"></section>
 
       <section class="app-view" id="manageView" data-view="manage">
         <main class="content-stack">
@@ -187,7 +180,12 @@
   <script src="js/gameday/gameday-render.js?v=render8"></script>
   <script src="js/gameday/gameday-events.js?v=events3"></script>
   <script src="js/gameday/gameday.js?v=v2gameday8"></script>
-  <script src="js/app.js?v=authboot4"></script>
+  <script src="js/history/history-mock-data.js?v=v2history1"></script>
+  <script src="js/history/history-model.js?v=v2history1"></script>
+  <script src="js/history/history-render.js?v=v2history1"></script>
+  <script src="js/history/history-events.js?v=v2history1"></script>
+  <script src="js/history/history.js?v=v2history1"></script>
+  <script src="js/app.js?v=authboot5"></script>
   <script src="js/boot.js?v=authboot8"></script>
 </body>
 </html>
