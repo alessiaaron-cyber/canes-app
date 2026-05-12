@@ -47,10 +47,10 @@ window.CR = window.CR || {};
       'Sign in',
       'Enter your approved email to request a one-time sign-in code.',
       `
-        <form class="auth-form" id="authSignInForm">
+        <form class="auth-form" id="authSignInForm" novalidate>
           <label class="auth-label" for="authEmailInput">Email</label>
           <input class="auth-input" id="authEmailInput" type="email" inputmode="email" autocomplete="email" placeholder="you@example.com" value="${escapeHtml(email)}" required />
-          <button class="auth-button" type="submit" id="authSubmitButton">Send code</button>
+          <button class="auth-button" type="button" id="authSubmitButton">Send code</button>
         </form>
 
         <div class="auth-status" id="authStatus"></div>
@@ -63,10 +63,10 @@ window.CR = window.CR || {};
       'Enter code',
       `Type the sign-in code sent to ${escapeHtml(email || 'your email')}.`,
       `
-        <form class="auth-form" id="authVerifyForm">
+        <form class="auth-form" id="authVerifyForm" novalidate>
           <label class="auth-label" for="authTokenInput">Sign-in code</label>
           <input class="auth-input auth-input-code" id="authTokenInput" type="text" inputmode="numeric" autocomplete="one-time-code" placeholder="123456" required />
-          <button class="auth-button" type="submit" id="authVerifyButton">Verify code</button>
+          <button class="auth-button" type="button" id="authVerifyButton">Verify code</button>
           <button class="auth-button auth-button-secondary" type="button" id="authBackButton">Back</button>
         </form>
 
