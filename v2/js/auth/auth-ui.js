@@ -31,15 +31,31 @@ window.CR = window.CR || {};
     return shell(message, 'Checking your session and account access.');
   }
 
-  function renderSignedOut() {
+  function renderSignedOut(email = '') {
     return shell(
       'Sign in',
-      'Use your approved email to get a one-time sign-in code.',
+      'Use your approved email to request a one-time sign-in code.',
       `
         <form class="auth-form" id="authSignInForm">
           <label class="auth-label" for="authEmailInput">Approved email</label>
-          <input class="auth-input" id="authEmailInput" type="email" inputmode="email" autocomplete="email" placeholder="you@example.com" required />
+          <input class="auth-input" id="authEmailInput" type="email" inputmode="email" autocomplete="email" placeholder="you@example.com" value="${escapeHtml(email)}" required />
           <button class="auth-button" type="submit" id="authSubmitButton">Send sign-in code</button>
+        </form>
+        <div class="auth-status" id="authStatus"></div>
+      `
+    );
+  }
+
+  function renderTokenStep(email = '') {
+    return shell(
+      'Enter sign-in code',
+      `Enter the code sent to ${escapeHtml(email || 'your email')}.`,
+      `
+        <form class="auth-form" id="authVerifyForm">
+          <label class="auth-label" for="authTokenInput">Email code</label>
+          <input class="auth-input" id="authTokenInput" type="text" inputmode="numeric" autocomplete="one-time-code" placeholder="123456" required />
+          <button class="auth-button" type="submit" id="authVerifyButton">Verify code</button>
+          <button class="auth-button auth-button-secondary" type="button" id="authBackButton">Back</button>
         </form>
         <div class="auth-status" id="authStatus"></div>
       `
@@ -73,6 +89,7 @@ window.CR = window.CR || {};
   CR.authUi = {
     renderBoot,
     renderSignedOut,
+    renderTokenStep,
     renderUnauthorized,
     renderProfileMissing,
     renderAuthError
