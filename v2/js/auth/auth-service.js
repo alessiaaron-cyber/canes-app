@@ -12,15 +12,21 @@ window.CR = window.CR || {};
     return data?.session || null;
   }
 
-  async function signIn(email) {
+  async function requestOtp(email) {
     const supabase = await CR.getSupabase();
-    const redirectUrl = window.CR?.config?.authRedirectUrl || `${window.location.origin}/canes-rivalry-app/v2/`;
 
     return await supabase.auth.signInWithOtp({
+      email
+    });
+  }
+
+  async function verifyOtp(email, token) {
+    const supabase = await CR.getSupabase();
+
+    return await supabase.auth.verifyOtp({
       email,
-      options: {
-        emailRedirectTo: redirectUrl
-      }
+      token,
+      type: 'email'
     });
   }
 
@@ -62,7 +68,8 @@ window.CR = window.CR || {};
 
   CR.auth = {
     getSession,
-    signIn,
+    requestOtp,
+    verifyOtp,
     signOut,
     loadProfile,
     isAllowedUser
