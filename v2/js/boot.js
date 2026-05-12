@@ -2,7 +2,7 @@ window.CR = window.CR || {};
 
 (() => {
   const CR = window.CR;
-  const SIGN_IN_COOLDOWN_MS = 90 * 1000;
+  const SIGN_IN_COOLDOWN_MS = 31 * 60 * 1000;
   const TRANSITION_MS = 220;
 
   const STATES = {
@@ -72,14 +72,14 @@ window.CR = window.CR || {};
     const message = String(error?.message || '').toLowerCase();
 
     if (message.includes('rate limit')) {
-      return 'Too many sign-in attempts. Please wait a bit and try again.';
+      return 'Too many sign-in attempts. Please wait before requesting another code.';
     }
 
     if (message.includes('invalid email')) {
       return 'Enter a valid email address.';
     }
 
-    return 'Unable to send a sign-in code right now. Please try again.';
+    return 'Unable to send a sign-in code right now. Please try again later.';
   }
 
   function genericVerifyErrorMessage() {
@@ -105,8 +105,8 @@ window.CR = window.CR || {};
   }
 
   function formatCooldownMessage(ms) {
-    const seconds = Math.max(1, Math.ceil(ms / 1000));
-    return `Code recently requested. Try again in ${seconds}s.`;
+    const minutes = Math.ceil(ms / 60000);
+    return `Code recently requested. Try again in about ${minutes} min.`;
   }
 
   function applyCooldownUi() {
@@ -126,7 +126,7 @@ window.CR = window.CR || {};
     }
 
     button.disabled = false;
-    button.textContent = 'Send sign-in code';
+    button.textContent = 'Send code';
     return false;
   }
 
@@ -148,7 +148,7 @@ window.CR = window.CR || {};
         status.textContent = '';
       }
       clearCooldown();
-    }, 1000);
+    }, 30 * 1000);
   }
 
   async function resolveSessionState() {
@@ -224,6 +224,10 @@ window.CR = window.CR || {};
       return;
     }
 
+    setCooldown();
+    applyCooldownUi();
+    startCooldownTicker();
+
     if (button) button.disabled = true;
     if (status) status.textContent = 'Sending sign-in code...';
 
@@ -231,19 +235,15 @@ window.CR = window.CR || {};
       const { error } = await CR.auth.requestOtp(email);
       if (error) throw error;
 
-      setCooldown();
       renderTokenStep(email);
 
       const tokenStatus = document.querySelector('#authStatus');
       if (tokenStatus) {
         tokenStatus.textContent = genericSignInSuccessMessage();
       }
-
-      startCooldownTicker();
     } catch (error) {
       console.error(error);
       if (status) status.textContent = genericSignInErrorMessage(error);
-      if (button) button.disabled = false;
     }
   }
 
