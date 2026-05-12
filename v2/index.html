@@ -18,7 +18,7 @@
   <link rel="icon" type="image/png" href="./assets/app-icon.png?v=v2gameday2" />
   <link rel="apple-touch-icon" href="./assets/app-icon.png?v=v2gameday2" />
 
-  <link rel="stylesheet" href="css/app-shell.css?v=shell6" />
+  <link rel="stylesheet" href="css/app-shell.css?v=shell7" />
   <link rel="stylesheet" href="css/app-foundation.css?v=foundation1" />
   <link rel="stylesheet" href="css/auth.css?v=auth3" />
   <link rel="stylesheet" href="css/gameday.css?v=v2gameday12" />
@@ -29,6 +29,12 @@
 
   <template id="appShellTemplate">
     <div class="sync-flash" id="syncFlash"></div>
+    <div class="pull-refresh" id="pullRefresh" aria-hidden="true">
+      <div class="pull-refresh-indicator">
+        <span class="pull-refresh-icon">↻</span>
+        <span class="pull-refresh-label" id="pullRefreshLabel">Pull to refresh</span>
+      </div>
+    </div>
 
     <div class="app-shell">
       <header class="app-header">
@@ -137,11 +143,6 @@
       </section>
     </div>
 
-    <button class="sync-pill" id="refreshButton" type="button" aria-label="Refresh app data">
-      <span class="sync-pill-icon">↻</span>
-      <span class="sync-pill-label">Refresh</span>
-    </button>
-
     <nav class="bottom-nav" id="bottomNav">
       <button class="active" data-tab="gameday" type="button">Game Day</button>
       <button data-tab="history" type="button">History</button>
@@ -176,7 +177,7 @@
   </script>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-  <script src="js/ui.js?v=navrestore3"></script>
+  <script src="js/ui.js?v=navrestore4"></script>
   <script src="js/tabs.js?v=navrestore3"></script>
   <script src="js/supabase-client.js?v=auth4"></script>
   <script src="js/auth/auth-service.js?v=auth5"></script>
@@ -186,7 +187,7 @@
   <script src="js/gameday/gameday-render.js?v=render8"></script>
   <script src="js/gameday/gameday-events.js?v=events3"></script>
   <script src="js/gameday/gameday.js?v=v2gameday8"></script>
-  <script src="js/app.js?v=authboot3"></script>
-  <script src="js/boot.js?v=authboot6"></script>
+  <script src="js/app.js?v=authboot4"></script>
+  <script src="js/boot.js?v=authboot7"></script>
 </body>
 </html>
