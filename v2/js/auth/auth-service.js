@@ -52,18 +52,14 @@ window.CR = window.CR || {};
     return data || null;
   }
 
-  async function isAllowedUser(email) {
+  async function isAllowedUser() {
     const supabase = await CR.getSupabase();
 
-    const { data, error } = await supabase
-      .from('allowed_users')
-      .select('email')
-      .ilike('email', String(email || '').trim())
-      .maybeSingle();
+    const { data, error } = await supabase.rpc('is_allowed_user');
 
     if (error) throw error;
 
-    return !!data;
+    return data === true;
   }
 
   CR.auth = {
