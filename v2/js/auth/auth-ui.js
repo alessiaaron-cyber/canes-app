@@ -23,7 +23,7 @@ window.CR = window.CR || {};
 
             <div>
               <div class="auth-kicker">Canes Rivalry</div>
-              <div class="auth-brand-subtitle">Aaron vs Julie</div>
+              <div class="auth-brand-subtitle">Carolina hockey rivalry tracker</div>
             </div>
           </div>
 
