@@ -18,9 +18,9 @@
   <link rel="icon" type="image/png" href="./assets/app-icon.png?v=v2gameday2" />
   <link rel="apple-touch-icon" href="./assets/app-icon.png?v=v2gameday2" />
 
-  <link rel="stylesheet" href="css/app-shell.css?v=shell3" />
+  <link rel="stylesheet" href="css/app-shell.css?v=shell4" />
   <link rel="stylesheet" href="css/app-foundation.css?v=foundation1" />
-  <link rel="stylesheet" href="css/auth.css?v=auth2" />
+  <link rel="stylesheet" href="css/auth.css?v=auth3" />
   <link rel="stylesheet" href="css/gameday.css?v=v2gameday12" />
   <link rel="stylesheet" href="css/gameday-overrides.css?v=v2gameday-override3" />
 </head>
@@ -48,8 +48,6 @@
               <div class="account-chip-meta" id="accountChipMeta">Signed in</div>
             </div>
           </div>
-
-          <button class="icon-button" id="refreshButton" type="button">↻</button>
         </div>
       </header>
 
@@ -60,7 +58,10 @@
               <span class="eyebrow">Game Day</span>
               <h2 id="stateTitle">Pregame</h2>
             </div>
-            <span class="panel-tag calm" id="stateBadge">Regular</span>
+            <div class="panel-header-actions">
+              <span class="panel-tag calm" id="stateBadge">Regular</span>
+              <button class="icon-button icon-button-soft" id="refreshButton" type="button" aria-label="Refresh game day">↻</button>
+            </div>
           </div>
 
           <div class="gd-toolbar-group">
@@ -181,7 +182,7 @@
   <script src="js/gameday/gameday-render.js?v=render8"></script>
   <script src="js/gameday/gameday-events.js?v=events3"></script>
   <script src="js/gameday/gameday.js?v=v2gameday8"></script>
-  <script src="js/app.js?v=authboot2"></script>
-  <script src="js/boot.js?v=authboot5"></script>
+  <script src="js/app.js?v=authboot3"></script>
+  <script src="js/boot.js?v=authboot6"></script>
 </body>
 </html>
