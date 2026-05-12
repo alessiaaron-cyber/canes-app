@@ -20,20 +20,32 @@
 
 * {
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
 
 html {
   min-height: 100%;
+  background: var(--bg-canvas-top);
+  touch-action: manipulation;
 }
 
 body {
   min-height: 100vh;
+  min-height: 100dvh;
   margin: 0;
   background: linear-gradient(180deg, var(--bg-canvas-top) 0%, var(--bg-canvas) 100%);
+  background-attachment: fixed;
   color: var(--text-primary);
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  overscroll-behavior-y: none;
+}
+
+#appRoot {
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: linear-gradient(180deg, var(--bg-canvas-top) 0%, var(--bg-canvas) 100%);
 }
 
 .app-shell {
