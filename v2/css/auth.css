@@ -1,3 +1,42 @@
+.boot-stage,
+.app-shell-stage {
+  opacity: 0;
+  transform: translateY(10px) scale(0.992);
+  transition:
+    opacity 220ms ease,
+    transform 220ms ease;
+}
+
+.boot-stage.is-visible,
+.app-shell-stage.is-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.boot-stage.boot-exit,
+.app-shell-stage.boot-exit {
+  opacity: 0;
+  transform: translateY(8px) scale(0.992);
+}
+
+.auth-stage-success .auth-card {
+  animation: authSuccessPulse 620ms ease;
+}
+
+@keyframes authSuccessPulse {
+  0% {
+    transform: scale(1);
+  }
+
+  40% {
+    transform: scale(1.012);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
 .auth-screen {
   position: relative;
   min-height: 100vh;
