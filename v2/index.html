@@ -20,115 +20,134 @@
 
   <link rel="stylesheet" href="css/app-shell.css?v=shell1" />
   <link rel="stylesheet" href="css/app-foundation.css?v=foundation1" />
+  <link rel="stylesheet" href="css/auth.css?v=auth1" />
   <link rel="stylesheet" href="css/gameday.css?v=v2gameday12" />
   <link rel="stylesheet" href="css/gameday-overrides.css?v=v2gameday-override3" />
 </head>
 <body>
-  <div class="sync-flash" id="syncFlash"></div>
+  <div id="appRoot"></div>
 
-  <div class="app-shell">
-    <header class="app-header">
-      <div>
-        <div class="app-header-topline">
-          <span class="eyebrow">Canes Rivalry V2</span>
-          <span class="global-live-indicator is-hidden" id="globalLiveIndicator"><span class="global-live-dot"></span>Live</span>
-        </div>
-        <h1 id="pageTitle">Game Day</h1>
-      </div>
+  <template id="appShellTemplate">
+    <div class="sync-flash" id="syncFlash"></div>
 
-      <button class="icon-button" id="refreshButton" type="button">↻</button>
-    </header>
-
-    <section class="app-view active-view" id="gameDayView" data-view="gameday">
-      <section class="state-lab panel-card game-toolbar-card">
-        <div class="panel-header compact-header">
-          <div>
-            <span class="eyebrow">Game Day</span>
-            <h2 id="stateTitle">Pregame</h2>
+    <div class="app-shell">
+      <header class="app-header">
+        <div>
+          <div class="app-header-topline">
+            <span class="eyebrow">Canes Rivalry V2</span>
+            <span class="global-live-indicator is-hidden" id="globalLiveIndicator"><span class="global-live-dot"></span>Live</span>
           </div>
-          <span class="panel-tag calm" id="stateBadge">Regular</span>
+          <h1 id="pageTitle">Game Day</h1>
         </div>
 
-        <div class="gd-toolbar-group">
-          <div class="gd-toolbar-label">Phase</div>
-          <div class="state-switcher" id="phaseSwitcher">
-            <button class="active" data-phase="pregame" type="button">Pregame</button>
-            <button data-phase="live" type="button">Live</button>
-            <button data-phase="final" type="button">Final</button>
-          </div>
-        </div>
+        <button class="icon-button" id="refreshButton" type="button">↻</button>
+      </header>
 
-        <div class="gd-toolbar-group">
-          <div class="gd-toolbar-label">Playoffs</div>
-          <div class="playoff-switcher" id="modeSwitcher">
-            <button class="active" data-playoff-mode="regular" type="button">Off</button>
-            <button data-playoff-mode="playoffs" type="button">On</button>
+      <section class="app-view active-view" id="gameDayView" data-view="gameday">
+        <section class="state-lab panel-card game-toolbar-card">
+          <div class="panel-header compact-header">
+            <div>
+              <span class="eyebrow">Game Day</span>
+              <h2 id="stateTitle">Pregame</h2>
+            </div>
+            <span class="panel-tag calm" id="stateBadge">Regular</span>
           </div>
-        </div>
 
-        <div class="gd-toolbar-group">
-          <div class="gd-toolbar-label">Carryover</div>
-          <div class="carryover-switcher" id="carryoverSwitcher">
-            <button class="active" data-carryover="off" type="button">Off</button>
-            <button data-carryover="on" type="button">On</button>
+          <div class="gd-toolbar-group">
+            <div class="gd-toolbar-label">Phase</div>
+            <div class="state-switcher" id="phaseSwitcher">
+              <button class="active" data-phase="pregame" type="button">Pregame</button>
+              <button data-phase="live" type="button">Live</button>
+              <button data-phase="final" type="button">Final</button>
+            </div>
           </div>
-        </div>
+
+          <div class="gd-toolbar-group">
+            <div class="gd-toolbar-label">Playoffs</div>
+            <div class="playoff-switcher" id="modeSwitcher">
+              <button class="active" data-playoff-mode="regular" type="button">Off</button>
+              <button data-playoff-mode="playoffs" type="button">On</button>
+            </div>
+          </div>
+
+          <div class="gd-toolbar-group">
+            <div class="gd-toolbar-label">Carryover</div>
+            <div class="carryover-switcher" id="carryoverSwitcher">
+              <button class="active" data-carryover="off" type="button">Off</button>
+              <button data-carryover="on" type="button">On</button>
+            </div>
+          </div>
+        </section>
+
+        <main class="content-stack gameday-stack" id="gameDayContent"></main>
       </section>
 
-      <main class="content-stack gameday-stack" id="gameDayContent"></main>
-    </section>
+      <section class="app-view" id="historyView" data-view="history">
+        <main class="content-stack">
+          <section class="panel-card">
+            <div class="eyebrow">History</div>
+            <h2>Season rivalry archive</h2>
+            <p class="placeholder-copy">Stable placeholder restored while new Game Day is rebuilt separately.</p>
+          </section>
+        </main>
+      </section>
 
-    <section class="app-view" id="historyView" data-view="history">
-      <main class="content-stack">
-        <section class="panel-card">
-          <div class="eyebrow">History</div>
-          <h2>Season rivalry archive</h2>
-          <p class="placeholder-copy">Stable placeholder restored while new Game Day is rebuilt separately.</p>
-        </section>
-      </main>
-    </section>
+      <section class="app-view" id="manageView" data-view="manage">
+        <main class="content-stack">
+          <section class="panel-card">
+            <div class="eyebrow">Manage</div>
+            <h2>Settings and controls</h2>
+            <p class="placeholder-copy">Stable placeholder restored while new Game Day is rebuilt separately.</p>
+          </section>
+        </main>
+      </section>
+    </div>
 
-    <section class="app-view" id="manageView" data-view="manage">
-      <main class="content-stack">
-        <section class="panel-card">
-          <div class="eyebrow">Manage</div>
-          <h2>Settings and controls</h2>
-          <p class="placeholder-copy">Stable placeholder restored while new Game Day is rebuilt separately.</p>
-        </section>
-      </main>
-    </section>
-  </div>
+    <nav class="bottom-nav" id="bottomNav">
+      <button class="active" data-tab="gameday" type="button">Game Day</button>
+      <button data-tab="history" type="button">History</button>
+      <button data-tab="manage" type="button">Manage</button>
+    </nav>
 
-  <nav class="bottom-nav" id="bottomNav">
-    <button class="active" data-tab="gameday" type="button">Game Day</button>
-    <button data-tab="history" type="button">History</button>
-    <button data-tab="manage" type="button">Manage</button>
-  </nav>
-
-  <div class="gd-sheet" id="manageSheet">
-    <div class="gd-sheet-card">
-      <div class="gd-sheet-handle"></div>
-      <div class="gd-sheet-title">Manage Picks</div>
-      <div class="gd-sheet-copy">Admin-only quick swap for locked picks.</div>
-      <div class="gd-sheet-actions" id="manageSheetActions"></div>
-      <div class="gd-sheet-footer">
-        <button class="gd-sheet-close" type="button" id="closeSheet">Cancel</button>
-        <button class="gd-sheet-save" type="button" id="saveSheet">Save Picks</button>
+    <div class="gd-sheet" id="manageSheet">
+      <div class="gd-sheet-card">
+        <div class="gd-sheet-handle"></div>
+        <div class="gd-sheet-title">Manage Picks</div>
+        <div class="gd-sheet-copy">Admin-only quick swap for locked picks.</div>
+        <div class="gd-sheet-actions" id="manageSheetActions"></div>
+        <div class="gd-sheet-footer">
+          <button class="gd-sheet-close" type="button" id="closeSheet">Cancel</button>
+          <button class="gd-sheet-save" type="button" id="saveSheet">Save Picks</button>
+        </div>
       </div>
     </div>
-  </div>
 
-  <div class="toast-stack">
-    <div id="toast" class="toast">Preview event</div>
-  </div>
+    <div class="toast-stack">
+      <div id="toast" class="toast">Preview event</div>
+    </div>
+  </template>
 
+  <script>
+    window.CR = window.CR || {};
+    window.CR.config = {
+      supabaseUrl: 'https://hhhxgbztfizmwxbuoprq.supabase.co',
+      supabaseAnonKey: 'sb_publishable_4laNe86TxiC5pLkAF5NeIg_oMmf1unQ',
+      authRedirectUrl: window.location.origin + '/canes-rivalry-app/v2/'
+    };
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/ui.js?v=navrestore3"></script>
   <script src="js/tabs.js?v=navrestore3"></script>
+  <script src="js/supabase-client.js?v=auth2"></script>
+  <script src="js/auth/auth-service.js?v=auth2"></script>
+  <script src="js/auth/auth-ui.js?v=auth1"></script>
   <script src="js/gameday/gameday-model.js?v=model3"></script>
   <script src="js/gameday/gameday-helpers.js?v=helpers2"></script>
   <script src="js/gameday/gameday-render.js?v=render8"></script>
   <script src="js/gameday/gameday-events.js?v=events3"></script>
   <script src="js/gameday/gameday.js?v=v2gameday8"></script>
-  <script src="js/app.js?v=navrestore3"></script>
+  <script src="js/app.js?v=authboot1"></script>
+  <script src="js/boot.js?v=authboot2"></script>
 </body>
 </html>
