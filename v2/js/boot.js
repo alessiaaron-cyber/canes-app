@@ -3,6 +3,7 @@ window.CR = window.CR || {};
 (() => {
   const CR = window.CR;
   const SIGN_IN_COOLDOWN_MS = 90 * 1000;
+  const TRANSITION_MS = 220;
 
   const STATES = {
     BOOTING: 'BOOTING',
@@ -19,19 +20,47 @@ window.CR = window.CR || {};
     return document.querySelector('#appRoot');
   }
 
-  function render(content) {
-    const el = root();
-    if (!el) return;
-    el.innerHTML = content;
+  function wait(ms) {
+    return new Promise((resolve) => window.setTimeout(resolve, ms));
   }
 
-  function mountShell() {
+  function render(content, className = 'boot-stage') {
+    const el = root();
+    if (!el) return;
+    el.innerHTML = `<div class="${className} boot-enter">${content}</div>`;
+
+    window.requestAnimationFrame(() => {
+      el.querySelector('.boot-enter')?.classList.add('is-visible');
+    });
+  }
+
+  async function transitionOutCurrentStage() {
+    const currentStage = root()?.firstElementChild;
+    if (!currentStage) return;
+
+    currentStage.classList.remove('is-visible');
+    currentStage.classList.add('boot-exit');
+    await wait(TRANSITION_MS);
+  }
+
+  async function swapStage(content, className = 'boot-stage') {
+    await transitionOutCurrentStage();
+    render(content, className);
+  }
+
+  async function mountShell() {
     const template = document.querySelector('#appShellTemplate');
     const el = root();
 
     if (!template || !el) return;
 
-    el.innerHTML = template.innerHTML;
+    await transitionOutCurrentStage();
+    el.innerHTML = `<div class="app-shell-stage boot-enter">${template.innerHTML}</div>`;
+
+    window.requestAnimationFrame(() => {
+      el.querySelector('.app-shell-stage')?.classList.add('is-visible');
+    });
+
     CR.startApp?.();
   }
 
@@ -161,8 +190,13 @@ window.CR = window.CR || {};
 
   function renderTokenStep(email) {
     CR.pendingAuthEmail = email;
-    render(CR.authUi.renderTokenStep(email));
+    render(CR.authUi.renderTokenStep(email), 'boot-stage auth-stage');
     bindTokenUi();
+  }
+
+  async function showSuccessTransition() {
+    await swapStage(CR.authUi.renderBoot('Signing you in'), 'boot-stage auth-stage auth-stage-success');
+    await wait(520);
   }
 
   async function handleSignIn(event) {
@@ -236,6 +270,7 @@ window.CR = window.CR || {};
       if (error) throw error;
 
       CR.pendingAuthEmail = '';
+      await showSuccessTransition();
       await boot();
     } catch (error) {
       console.error(error);
@@ -245,7 +280,7 @@ window.CR = window.CR || {};
   }
 
   function handleBackToEmail() {
-    render(CR.authUi.renderSignedOut(CR.pendingAuthEmail));
+    render(CR.authUi.renderSignedOut(CR.pendingAuthEmail), 'boot-stage auth-stage');
     bindAuthUi();
   }
 
@@ -284,23 +319,27 @@ window.CR = window.CR || {};
 
   async function boot() {
     try {
-      render(CR.authUi.renderBoot());
+      if (!root()?.firstElementChild) {
+        render(CR.authUi.renderBoot(), 'boot-stage auth-stage');
+      } else {
+        await swapStage(CR.authUi.renderBoot(), 'boot-stage auth-stage');
+      }
 
       const resolved = await resolveSessionState();
 
       switch (resolved.state) {
         case STATES.SIGNED_OUT:
-          render(CR.authUi.renderSignedOut());
+          await swapStage(CR.authUi.renderSignedOut(), 'boot-stage auth-stage');
           bindAuthUi();
           return;
 
         case STATES.UNAUTHORIZED:
-          render(CR.authUi.renderUnauthorized(resolved.email));
+          await swapStage(CR.authUi.renderUnauthorized(resolved.email), 'boot-stage auth-stage');
           bindAuthUi();
           return;
 
         case STATES.PROFILE_MISSING:
-          render(CR.authUi.renderProfileMissing(resolved.email));
+          await swapStage(CR.authUi.renderProfileMissing(resolved.email), 'boot-stage auth-stage');
           bindAuthUi();
           return;
 
@@ -308,7 +347,7 @@ window.CR = window.CR || {};
           CR.session = resolved.session;
           CR.currentUser = resolved.user;
           CR.currentProfile = resolved.profile;
-          mountShell();
+          await mountShell();
           return;
 
         default:
@@ -316,7 +355,7 @@ window.CR = window.CR || {};
       }
     } catch (error) {
       console.error('Boot failed', error);
-      render(CR.authUi.renderAuthError(error?.message || 'Unable to load Canes Rivalry V2.'));
+      await swapStage(CR.authUi.renderAuthError(error?.message || 'Unable to load Canes Rivalry V2.'), 'boot-stage auth-stage');
       bindAuthUi();
     }
   }
