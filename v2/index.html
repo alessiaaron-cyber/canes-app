@@ -18,7 +18,7 @@
   <link rel="icon" type="image/png" href="./assets/app-icon.png?v=v2gameday2" />
   <link rel="apple-touch-icon" href="./assets/app-icon.png?v=v2gameday2" />
 
-  <link rel="stylesheet" href="css/app-shell.css?v=shell4" />
+  <link rel="stylesheet" href="css/app-shell.css?v=shell6" />
   <link rel="stylesheet" href="css/app-foundation.css?v=foundation1" />
   <link rel="stylesheet" href="css/auth.css?v=auth3" />
   <link rel="stylesheet" href="css/gameday.css?v=v2gameday12" />
@@ -60,7 +60,6 @@
             </div>
             <div class="panel-header-actions">
               <span class="panel-tag calm" id="stateBadge">Regular</span>
-              <button class="icon-button icon-button-soft" id="refreshButton" type="button" aria-label="Refresh game day">↻</button>
             </div>
           </div>
 
@@ -137,6 +136,11 @@
         </main>
       </section>
     </div>
+
+    <button class="sync-pill" id="refreshButton" type="button" aria-label="Refresh app data">
+      <span class="sync-pill-icon">↻</span>
+      <span class="sync-pill-label">Refresh</span>
+    </button>
 
     <nav class="bottom-nav" id="bottomNav">
       <button class="active" data-tab="gameday" type="button">Game Day</button>
