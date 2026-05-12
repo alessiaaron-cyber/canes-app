@@ -201,12 +201,7 @@ window.CR = window.CR || {};
   }
 
   async function handleSignIn(event) {
-    event.preventDefault();
-
-    const submitter = event.submitter;
-    if (!submitter || submitter.id !== 'authSubmitButton') {
-      return;
-    }
+    event?.preventDefault?.();
 
     const emailInput = document.querySelector('#authEmailInput');
     const status = document.querySelector('#authStatus');
@@ -249,7 +244,7 @@ window.CR = window.CR || {};
   }
 
   async function handleVerify(event) {
-    event.preventDefault();
+    event?.preventDefault?.();
 
     const tokenInput = document.querySelector('#authTokenInput');
     const status = document.querySelector('#authStatus');
@@ -271,6 +266,7 @@ window.CR = window.CR || {};
       if (error) throw error;
 
       CR.pendingAuthEmail = '';
+      clearCooldown();
       await showSuccessTransition();
       await boot();
     } catch (error) {
@@ -296,7 +292,8 @@ window.CR = window.CR || {};
   }
 
   function bindTokenUi() {
-    document.querySelector('#authVerifyForm')?.addEventListener('submit', handleVerify);
+    document.querySelector('#authVerifyForm')?.addEventListener('submit', (event) => event.preventDefault());
+    document.querySelector('#authVerifyButton')?.addEventListener('click', handleVerify);
     document.querySelector('#authBackButton')?.addEventListener('click', handleBackToEmail);
   }
 
@@ -304,8 +301,16 @@ window.CR = window.CR || {};
     const form = document.querySelector('#authSignInForm');
     const emailInput = document.querySelector('#authEmailInput');
     const status = document.querySelector('#authStatus');
+    const submitButton = document.querySelector('#authSubmitButton');
 
-    form?.addEventListener('submit', handleSignIn);
+    form?.addEventListener('submit', (event) => event.preventDefault());
+    submitButton?.addEventListener('click', handleSignIn);
+    emailInput?.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        handleSignIn(event);
+      }
+    });
     emailInput?.addEventListener('input', () => {
       if (status && !cooldownRemainingMs()) status.textContent = '';
     });
