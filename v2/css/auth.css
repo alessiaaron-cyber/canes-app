@@ -1,5 +1,4 @@
-.boot-stage,
-.app-shell-stage {
+.boot-stage {
   opacity: 0;
   transform: translateY(10px) scale(0.992);
   transition:
@@ -7,16 +6,27 @@
     transform 220ms ease;
 }
 
-.boot-stage.is-visible,
-.app-shell-stage.is-visible {
+.app-shell-stage {
+  opacity: 0;
+  transition: opacity 220ms ease;
+}
+
+.boot-stage.is-visible {
   opacity: 1;
   transform: translateY(0) scale(1);
 }
 
-.boot-stage.boot-exit,
-.app-shell-stage.boot-exit {
+.app-shell-stage.is-visible {
+  opacity: 1;
+}
+
+.boot-stage.boot-exit {
   opacity: 0;
   transform: translateY(8px) scale(0.992);
+}
+
+.app-shell-stage.boot-exit {
+  opacity: 0;
 }
 
 .auth-stage-success .auth-card {
