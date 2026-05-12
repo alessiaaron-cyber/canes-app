@@ -12,228 +12,223 @@ window.CR = window.CR || {};
       .replace(/'/g, '&#39;');
   }
 
-  function renderHeader(data, state) {
+  function renderBoard(data) {
+    const board = data.allTimeBoard || {};
     return `
-      <section class="panel-card history-topbar">
-        <div class="history-topbar-copy">
-          <div class="eyebrow">History</div>
-          <h2>Rivalry archive</h2>
-          <p class="history-support-copy">Current season first. Earlier seasons stay visible below as archived chapters.</p>
+      <section class="panel-card rivalry-board-card">
+        <div class="rivalry-board-topline">
+          <span class="eyebrow">All-time</span>
+          <span class="panel-tag live">Rivalry</span>
         </div>
-        <div class="history-season-switcher" id="historySeasonSwitcher">
-          ${(data.seasons || []).map((season) => `<button type="button" data-history-season="${escapeHtml(season.id)}" class="${state.seasonId === season.id ? 'active' : ''}">${escapeHtml(season.shortLabel || season.label)}</button>`).join('')}
+        <h2 class="rivalry-board-title">Rivalry Board</h2>
+        <div class="rivalry-board-score-grid">
+          <article class="rivalry-score-card">
+            <div class="eyebrow">Aaron</div>
+            <div class="rivalry-score-value">${escapeHtml(String(board.aaron ?? 0))}</div>
+          </article>
+          <article class="rivalry-score-card">
+            <div class="eyebrow">Julie</div>
+            <div class="rivalry-score-value">${escapeHtml(String(board.julie ?? 0))}</div>
+          </article>
         </div>
+        <div class="rivalry-board-banner">${escapeHtml(board.lead || 'Rivalry tied')}</div>
       </section>
     `;
   }
 
-  function renderHero(data) {
-    const season = data.selectedSeason || {};
-    const summary = data.selectedSummary || {};
-    const story = data.selectedMoments?.[0]?.text || season.note || 'The rivalry is still writing itself.';
+  function renderHighlights(data) {
+    const highlights = data.highlights || { heater: {}, cards: [], boothNote: '' };
     return `
-      <section class="panel-card history-hero-card">
-        <div class="eyebrow">${escapeHtml(season.label || 'Season')}</div>
-        <h2>${escapeHtml(summary.label || season.label || 'Current season')}</h2>
-        <div class="history-season-record">${escapeHtml(summary.recordText || '—')}</div>
-        <p class="history-hero-copy">${escapeHtml(story)}</p>
-      </section>
-    `;
-  }
-
-  function renderTimeline(data) {
-    return `
-      <section class="panel-card history-timeline-card">
-        <div class="history-block-header">
-          <div class="eyebrow">Season flow</div>
-          <h3>Momentum timeline</h3>
+      <section class="panel-card rivalry-highlights-card">
+        <div class="rivalry-highlights-header">
+          <h3>Rivalry Highlights</h3>
+          <span class="panel-tag dark">Broadcast Booth</span>
         </div>
-        <div class="history-timeline">
-          ${(data.selectedMomentum || []).map((item) => `
-            <button class="history-timeline-node ${item.winner === 'Aaron' ? 'is-aaron' : item.winner === 'Julie' ? 'is-julie' : 'is-tie'} ${item.playoff ? 'is-playoff' : ''}" type="button" data-history-game-jump="${escapeHtml(item.id)}">
-              <span class="history-timeline-dot"></span>
-              <span class="history-timeline-copy">${escapeHtml(item.title)}</span>
-            </button>
-          `).join('')}
-        </div>
-        <p class="history-support-copy">Tap a point in the rivalry line to jump to that game.</p>
-      </section>
-    `;
-  }
-
-  function renderStories(data) {
-    return `
-      <section class="history-block">
-        <div class="history-block-header">
-          <div class="eyebrow">Key moments</div>
-          <h3>What defined this season</h3>
-        </div>
-        <div class="history-card-stack">
-          ${(data.selectedMoments || []).map((moment) => `
-            <article class="panel-card history-story-card ${moment.winner === 'Aaron' ? 'is-aaron' : 'is-julie'}">
-              <div class="history-moment-topline">
-                <span class="panel-tag ${moment.playoff ? 'warning' : 'dark'}">${moment.playoff ? 'Playoffs' : 'Regular'}</span>
-                <span class="history-date">${escapeHtml(moment.date)}</span>
-              </div>
-              <h3>${escapeHtml(moment.title)}</h3>
-              <p>${escapeHtml(moment.text)}</p>
+        <article class="rivalry-heater-card">
+          <div class="eyebrow">Current heater</div>
+          <div class="rivalry-heater-title">${escapeHtml(highlights.heater?.title || 'No streak')}</div>
+          <p>${escapeHtml(highlights.heater?.copy || 'Nobody owns momentum. The booth is calling this one chaos.')}</p>
+        </article>
+        <div class="rivalry-highlight-grid">
+          ${(highlights.cards || []).map((card) => `
+            <article class="rivalry-highlight-item panel-card">
+              <div class="eyebrow">${escapeHtml(card.label)}</div>
+              <div class="rivalry-highlight-value">${escapeHtml(card.value)}</div>
+              <p>${escapeHtml(card.copy)}</p>
             </article>
           `).join('')}
         </div>
+        <div class="rivalry-booth-note">Booth note: ${escapeHtml(highlights.boothNote || 'The rivalry still has range.')}</div>
       </section>
     `;
   }
 
-  function renderGameCard(game, expanded, editing) {
-    const picks = ['Aaron', 'Julie'].map((side) => `
-      <section class="history-pick-column">
-        <div class="eyebrow">${escapeHtml(side)}</div>
-        ${(game.picks?.[side] || []).map((pick) => `
-          <div class="history-pick-row">
-            <div>
-              <strong>${escapeHtml(pick.playerName)}</strong>
-              <span>${escapeHtml(`${pick.goals}G • ${pick.assists}A${pick.firstGoal ? ' • First goal' : ''}`)}</span>
-            </div>
-            <div class="history-pick-points">${escapeHtml(String(pick.points))}</div>
-          </div>
-        `).join('')}
-      </section>
-    `).join('');
-
+  function renderHistoryHeader(data) {
+    const board = data.seasonBoard || {};
     return `
-      <article class="panel-card history-game-card ${game.winner === 'Aaron' ? 'is-aaron' : game.winner === 'Julie' ? 'is-julie' : ''}" id="history-game-${escapeHtml(game.id)}">
-        <div class="history-game-head">
-          <button class="history-game-button" type="button" data-history-expand="${escapeHtml(game.id)}">
-            <div class="history-game-topline">
-              <span class="panel-tag ${game.playoff ? 'warning' : 'dark'}">${game.playoff ? 'Playoffs' : 'Regular'}</span>
-              <span class="history-date">${escapeHtml(game.date)}</span>
-            </div>
-            <div class="history-game-mainline">
-              <div>
-                <h3>${escapeHtml(game.title)}</h3>
-                <p>${escapeHtml(game.summary)}</p>
-              </div>
-              <div class="history-game-score">${escapeHtml(`${game.aaronScore}–${game.julieScore}`)}</div>
-            </div>
-            <div class="history-tag-row">${(game.tags || []).slice(0, 3).map((tag) => `<span class="history-chip">${escapeHtml(tag)}</span>`).join('')}</div>
-          </button>
-          <button class="history-edit-trigger" type="button" data-history-admin-action="open-tools" data-history-game="${escapeHtml(game.id)}">Commissioner tools</button>
+      <section class="panel-card history-hq-card">
+        <div class="history-hq-topline">
+          <span class="eyebrow">History</span>
+          <span class="panel-tag live">${escapeHtml(String(data.allTimeBoard?.totalGames || 0))} Games</span>
         </div>
-        ${expanded ? `
-          <div class="history-game-detail">
-            <div class="history-pick-columns">${picks}</div>
-            <div class="history-support-copy">${escapeHtml((game.moments || []).join(' • '))}</div>
-            ${editing ? `
-              <div class="history-admin-row">
-                <button class="mini-button" type="button" data-history-admin-action="edit-game" data-history-game="${escapeHtml(game.id)}">Edit game</button>
-                <button class="mini-button" type="button" data-history-admin-action="edit-picks" data-history-game="${escapeHtml(game.id)}">Adjust picks</button>
-                <button class="mini-button" type="button" data-history-admin-action="recalc" data-history-game="${escapeHtml(game.id)}">Recalculate</button>
+        <h2 class="history-hq-title">Game Log</h2>
+        <p class="history-hq-copy">Browse seasons, review picks, and fix past records.</p>
+        <div class="history-season-field">
+          <label class="eyebrow" for="historySeasonSelect">Season</label>
+          <select id="historySeasonSelect" class="history-season-select">
+            ${(data.seasons || []).map((season) => `<option value="${escapeHtml(season.id)}" ${data.selectedSeason?.id === season.id ? 'selected' : ''}>${escapeHtml(season.label)}</option>`).join('')}
+          </select>
+        </div>
+        <div class="history-season-score-grid">
+          <article class="rivalry-score-card">
+            <div class="eyebrow">Aaron</div>
+            <div class="rivalry-score-value">${escapeHtml(String(board.aaron ?? 0))}</div>
+          </article>
+          <article class="rivalry-score-card">
+            <div class="eyebrow">Julie</div>
+            <div class="rivalry-score-value">${escapeHtml(String(board.julie ?? 0))}</div>
+          </article>
+        </div>
+      </section>
+    `;
+  }
+
+  function renderEditTabs(state) {
+    const tabs = [
+      { id: 'result', label: 'Result' },
+      { id: 'picks', label: 'Picks' },
+      { id: 'info', label: 'Info' }
+    ];
+    return `
+      <div class="history-edit-tabs">
+        ${tabs.map((tab) => `<button type="button" class="${state.editTab === tab.id ? 'active' : ''}" data-history-edit-tab="${tab.id}">${tab.label}</button>`).join('')}
+      </div>
+    `;
+  }
+
+  function renderResultEditor(game) {
+    return `
+      <div class="history-edit-panel">
+        <label class="eyebrow">First Goal Scorer</label>
+        <div class="history-edit-field">${escapeHtml(game.firstGoalScorer || '—')}</div>
+        <label class="eyebrow">Status</label>
+        <div class="history-edit-field">Final</div>
+        <p class="history-support-copy">Scores are recalculated from the pick goals and assists. Go to Picks to change the numbers.</p>
+      </div>
+    `;
+  }
+
+  function renderPicksEditor(game) {
+    return `
+      <div class="history-edit-panel history-picks-editor">
+        ${['Aaron', 'Julie'].map((side) => `
+          <section class="history-edit-side">
+            <div class="history-edit-side-header">
+              <h3>${escapeHtml(side)} Picks</h3>
+              <span class="eyebrow">G / A</span>
+            </div>
+            ${(game.picks?.[side] || []).map((pick, index) => `
+              <div class="history-pick-edit-card">
+                <div class="eyebrow">Pick ${index + 1}</div>
+                <div class="history-pick-edit-grid">
+                  <div class="history-edit-field history-edit-player">${escapeHtml(pick.playerName)}</div>
+                  <div class="history-edit-mini-field">${escapeHtml(String(pick.goals))}</div>
+                  <div class="history-edit-mini-field">${escapeHtml(String(pick.assists))}</div>
+                </div>
               </div>
-            ` : ''}
+            `).join('')}
+          </section>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  function renderInfoEditor(game) {
+    return `
+      <div class="history-edit-panel">
+        <label class="eyebrow">Date</label>
+        <div class="history-edit-field">${escapeHtml(game.date)}</div>
+        <label class="eyebrow">Type</label>
+        <div class="history-edit-field">${escapeHtml(game.playoff ? 'Playoffs' : 'Regular')}</div>
+        <label class="eyebrow">First Pick</label>
+        <div class="history-edit-field">${escapeHtml(game.aaronScore >= game.julieScore ? 'Aaron' : 'Julie')}</div>
+      </div>
+    `;
+  }
+
+  function renderEditor(game, state) {
+    const tab = state.editTab || 'result';
+    return `
+      <div class="history-game-edit-shell">
+        ${renderEditTabs(state)}
+        ${tab === 'result' ? renderResultEditor(game) : ''}
+        ${tab === 'picks' ? renderPicksEditor(game) : ''}
+        ${tab === 'info' ? renderInfoEditor(game) : ''}
+        <div class="history-edit-actions">
+          <button class="history-edit-cancel" type="button" data-history-edit-cancel="1">Cancel</button>
+          <button class="history-edit-save" type="button" data-history-edit-save="1">Save</button>
+        </div>
+        <p class="history-support-copy">First goal can be any roster player. Bonus applies only if that player was picked and has a goal logged.</p>
+      </div>
+    `;
+  }
+
+  function renderGameCard(game, state) {
+    const isEditing = state.editingGameId === game.id;
+    const scorePill = `${game.aaronScore}-${game.julieScore}`;
+    return `
+      <article class="panel-card history-log-card" id="history-game-${escapeHtml(game.id)}">
+        <div class="history-log-topline">
+          <div>
+            <h3>Game ${escapeHtml(String(game.displayNumber))} • ${escapeHtml(game.playoff ? 'Playoffs' : 'Regular')}</h3>
           </div>
-        ` : ''}
+          <div class="history-log-actions">
+            <span class="history-score-pill">${escapeHtml(scorePill)}</span>
+            <button class="history-edit-trigger" type="button" data-history-open-edit="${escapeHtml(game.id)}">Edit</button>
+          </div>
+        </div>
+        <div class="history-log-body">
+          <div>${escapeHtml(game.date)}</div>
+          <div>First goal: ${escapeHtml(game.firstGoalScorer || '—')}</div>
+          <div>Aaron: ${escapeHtml((game.picks?.Aaron || []).map((pick) => pick.playerName).join(' / ') || '—')}</div>
+          <div>Julie: ${escapeHtml((game.picks?.Julie || []).map((pick) => pick.playerName).join(' / ') || '—')}</div>
+        </div>
+        ${isEditing ? renderEditor(game, state) : ''}
       </article>
     `;
   }
 
-  function renderGames(data, state) {
+  function renderGameLog(data, state) {
     return `
-      <section class="history-block">
-        <div class="history-block-header">
-          <div class="eyebrow">Game archive</div>
-          <h3>How the season swung</h3>
-        </div>
-        <div class="history-card-stack">
-          ${(data.selectedGames || []).map((game) => renderGameCard(game, state.expandedGameId === game.id, state.editing)).join('')}
-        </div>
-      </section>
-    `;
-  }
-
-  function renderPlayers(data) {
-    return `
-      <section class="history-block">
-        <div class="history-block-header">
-          <div class="eyebrow">Player spotlight</div>
-          <h3>Who shaped the season</h3>
-        </div>
-        <div class="history-card-stack">
-          ${(data.playerSpotlights || []).map((player) => `
-            <article class="panel-card history-player-card">
-              <div class="history-player-topline">
-                <div>
-                  <div class="eyebrow">${escapeHtml(player.position)} • ${escapeHtml(player.owner)} lean</div>
-                  <h3>${escapeHtml(player.name)}</h3>
-                </div>
-                <div class="history-player-hero-stat">${escapeHtml(String(player.totalPoints))}</div>
-              </div>
-              <p class="history-player-vibe">${escapeHtml(player.clutch)}. ${escapeHtml(player.vibe)}</p>
-              <div class="history-support-copy">Picked ${escapeHtml(String(player.gamesPicked))} times • Record ${escapeHtml(player.recordWhenPicked)} • Best game ${escapeHtml(player.bestGame?.title || 'Still waiting')}.</div>
-            </article>
-          `).join('')}
-        </div>
-      </section>
-    `;
-  }
-
-  function renderRecap(data) {
-    const season = data.selectedSummary;
-    if (!season) return '';
-    return `
-      <section class="panel-card history-season-card is-current">
-        <div class="history-block-header">
-          <div class="eyebrow">Season recap</div>
-          <h3>${escapeHtml(season.label)}</h3>
-        </div>
-        <div class="history-season-record">${escapeHtml(season.recordText)}</div>
-        <p>${escapeHtml(season.note)}</p>
-        <div class="history-player-stats">
-          <span>Playoffs ${escapeHtml(season.playoffText)}</span>
-          <span>Best game ${escapeHtml(season.bestGameTitle)}</span>
-          <span>Closest ${escapeHtml(season.closestGameTitle)}</span>
-        </div>
-        <div class="history-support-copy">${escapeHtml(season.bestMoment)}</div>
+      <section class="history-log-stack">
+        ${(data.gameLog || []).map((game) => renderGameCard(game, state)).join('')}
       </section>
     `;
   }
 
   function renderArchive(data) {
     return `
-      <section class="history-block">
-        <div class="history-block-header">
-          <div class="eyebrow">Past seasons</div>
-          <h3>Earlier chapters</h3>
-        </div>
-        <div class="history-card-stack">
-          ${(data.archiveSeasons || []).map((season) => `
-            <article class="panel-card history-season-card">
-              <div class="history-season-topline">
-                <div>
-                  <div class="eyebrow">Archive</div>
-                  <h3>${escapeHtml(season.label)}</h3>
-                </div>
-                <button class="history-season-jump" type="button" data-history-season="${escapeHtml(season.seasonId)}">Open</button>
-              </div>
-              <div class="history-season-record">${escapeHtml(season.recordText)}</div>
-              <p>${escapeHtml(season.note)}</p>
-              <div class="history-support-copy">${escapeHtml(season.bestMoment)}</div>
-            </article>
-          `).join('')}
-        </div>
+      <section class="history-archive-stack">
+        ${(data.archiveSeasons || []).map((season) => `
+          <article class="panel-card history-archive-card">
+            <div class="history-season-topline">
+              <h3>${escapeHtml(season.label)}</h3>
+              <div class="history-archive-record">${escapeHtml(season.recordText)}</div>
+            </div>
+            <p>${escapeHtml(season.note)}</p>
+          </article>
+        `).join('')}
       </section>
     `;
   }
 
   function renderShell(data, state) {
     return `
-      ${renderHeader(data, state)}
-      <div class="history-feed">
-        ${renderHero(data)}
-        ${renderTimeline(data)}
-        ${renderStories(data)}
-        ${renderGames(data, state)}
-        ${renderPlayers(data)}
-        ${renderRecap(data)}
+      <div class="history-feed rivalry-hq-feed">
+        ${renderBoard(data)}
+        ${renderHighlights(data)}
+        ${renderHistoryHeader(data)}
+        ${renderGameLog(data, state)}
         ${renderArchive(data)}
       </div>
     `;
