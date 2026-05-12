@@ -4,7 +4,7 @@ window.CR = window.CR || {};
   const CR = window.CR;
 
   async function getSession() {
-    const supabase = CR.getSupabase();
+    const supabase = await CR.getSupabase();
     const { data, error } = await supabase.auth.getSession();
 
     if (error) throw error;
@@ -13,25 +13,26 @@ window.CR = window.CR || {};
   }
 
   async function signIn(email) {
-    const supabase = CR.getSupabase();
+    const supabase = await CR.getSupabase();
+    const redirectUrl = window.CR?.config?.authRedirectUrl || `${window.location.origin}/canes-rivalry-app/v2/`;
 
     return await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: `${window.location.origin}/canes-rivalry-app/v2/`
+        emailRedirectTo: redirectUrl
       }
     });
   }
 
   async function signOut() {
-    const supabase = CR.getSupabase();
+    const supabase = await CR.getSupabase();
     return await supabase.auth.signOut();
   }
 
   async function loadProfile(user) {
     if (!user?.id) return null;
 
-    const supabase = CR.getSupabase();
+    const supabase = await CR.getSupabase();
 
     const { data, error } = await supabase
       .from('user_profiles')
@@ -46,7 +47,7 @@ window.CR = window.CR || {};
   }
 
   async function isAllowedUser(email) {
-    const supabase = CR.getSupabase();
+    const supabase = await CR.getSupabase();
 
     const { data, error } = await supabase
       .from('allowed_users')
