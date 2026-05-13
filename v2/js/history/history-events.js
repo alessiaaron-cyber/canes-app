@@ -35,6 +35,20 @@ window.CR = window.CR || {};
         return;
       }
 
+      const openGame = event.target.closest('button[data-history-open-game]');
+      if (openGame) {
+        const gameId = openGame.dataset.historyOpenGame;
+        const game = (CR.historyData?.seasonGames?.[CR.historyState.seasonId] || []).find((item) => item.id === gameId);
+        openHistorySheet({
+          title: game ? `Game ${game.title || gameId}` : 'Game detail',
+          message: game
+            ? `${game.playoff ? 'Playoff' : 'Regular'} game on ${game.date}. Score ${game.aaronScore}-${game.julieScore}. First goal: ${game.picks?.Aaron?.find((pick) => pick.firstGoal)?.playerName || game.picks?.Julie?.find((pick) => pick.firstGoal)?.playerName || '—'}.`
+            : 'Game detail mock view coming next.',
+          primaryAction: 'Open full game view'
+        });
+        return;
+      }
+
       const access = event.target.closest('button[data-history-access]');
       if (access) {
         const id = access.dataset.historyAccess;
