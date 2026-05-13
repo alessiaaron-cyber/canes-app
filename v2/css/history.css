@@ -884,6 +884,7 @@
   flex: 1 1 auto;
   min-height: 0;
   overflow: hidden;
+  height: min(62vh, 560px);
 }
 
 .history-admin-sheet-details .history-sheet-form-v2 {
