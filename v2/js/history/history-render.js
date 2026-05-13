@@ -132,16 +132,16 @@ window.CR = window.CR || {};
           <button class="history-view-all-button" type="button" data-history-access="all_games">View All</button>
         </div>
         <div class="history-log-stack recap-log-stack">
-          ${(data.recentGames || []).map((game) => renderGameCard(game)).join('')}
+          ${(data.recentGames || []).map((game) => renderGameCard(game, false)).join('')}
         </div>
       </section>
     `;
   }
 
-  function renderGameCard(game) {
+  function renderGameCard(game, isArchive) {
     const winnerClass = game.winner === 'Aaron' ? 'winner-aaron' : game.winner === 'Julie' ? 'winner-julie' : 'winner-tie';
     return `
-      <article class="history-log-card rivalry-recap-card ${winnerClass}" id="history-game-${escapeHtml(game.id)}">
+      <article class="history-log-card rivalry-recap-card ${winnerClass} ${isArchive ? 'is-archive' : ''}" id="history-game-${escapeHtml(game.id)}">
         <div class="history-log-topline">
           <div>
             <h3>Game ${escapeHtml(String(game.displayNumber))}</h3>
@@ -211,7 +211,35 @@ window.CR = window.CR || {};
     `;
   }
 
-  function renderShell(data) {
+  function renderAllGames(data) {
+    return `
+      <section class="history-all-games-view">
+        <section class="panel-card history-all-games-header-card">
+          <div class="history-section-head history-all-games-head">
+            <div>
+              <div class="eyebrow">Season archive</div>
+              <h2>${escapeHtml(data.selectedSeason?.label || 'Season')} All Games</h2>
+            </div>
+            <button class="history-view-all-button" type="button" data-history-back-hq="1">Back</button>
+          </div>
+          <p class="history-support-copy">Browse every rivalry game for the selected season. This is the clean management/history surface for full-season review and admin workflows.</p>
+        </section>
+        <section class="panel-card history-all-games-list-card">
+          <div class="history-section-head">
+            <div>
+              <div class="eyebrow">Game archive</div>
+              <h3>${escapeHtml(String(data.gameLog?.length || 0))} games</h3>
+            </div>
+          </div>
+          <div class="history-log-stack archive-log-stack">
+            ${(data.gameLog || []).map((game) => renderGameCard(game, true)).join('')}
+          </div>
+        </section>
+      </section>
+    `;
+  }
+
+  function renderHQ(data) {
     return `
       <div class="history-feed rivalry-command-feed">
         ${renderBoard(data)}
@@ -222,6 +250,10 @@ window.CR = window.CR || {};
         ${renderPlayerSpotlights(data)}
       </div>
     `;
+  }
+
+  function renderShell(data, state) {
+    return state?.view === 'all_games' ? renderAllGames(data) : renderHQ(data);
   }
 
   function renderAdminSheet(state) {
