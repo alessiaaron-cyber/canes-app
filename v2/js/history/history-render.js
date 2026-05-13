@@ -206,6 +206,31 @@ window.CR = window.CR || {};
     `;
   }
 
+  function renderPlayerSpotlights(data) {
+    if (!(data.playerSpotlights || []).length) return '';
+    return `
+      <section class="history-player-spotlights">
+        ${(data.playerSpotlights || []).map((player) => `
+          <article class="panel-card history-player-spotlight-card">
+            <div class="history-player-spotlight-topline">
+              <div>
+                <div class="eyebrow">${escapeHtml(player.position)} • ${escapeHtml(player.owner)} lean</div>
+                <h3>${escapeHtml(player.name)}</h3>
+              </div>
+              <div class="history-player-hero-stat">${escapeHtml(String(player.totalPoints))}</div>
+            </div>
+            <p class="history-support-copy">${escapeHtml(player.clutch)}. ${escapeHtml(player.vibe)}.</p>
+            <div class="history-player-stats">
+              <span>${escapeHtml(String(player.gamesPicked))} picks</span>
+              <span>${escapeHtml(player.recordWhenPicked)}</span>
+              <span>${escapeHtml(player.bestGame?.title || 'Best game TBD')}</span>
+            </div>
+          </article>
+        `).join('')}
+      </section>
+    `;
+  }
+
   function renderArchive(data) {
     return `
       <section class="history-archive-stack">
@@ -216,6 +241,7 @@ window.CR = window.CR || {};
               <div class="history-archive-record">${escapeHtml(season.recordText)}</div>
             </div>
             <p>${escapeHtml(season.note)}</p>
+            <button class="history-season-jump" type="button" data-history-season="${escapeHtml(season.seasonId)}">Open Season</button>
           </article>
         `).join('')}
       </section>
@@ -229,6 +255,7 @@ window.CR = window.CR || {};
         ${renderHighlights(data)}
         ${renderHistoryHeader(data)}
         ${renderGameLog(data, state)}
+        ${renderPlayerSpotlights(data)}
         ${renderArchive(data)}
       </div>
     `;
