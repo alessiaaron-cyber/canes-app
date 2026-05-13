@@ -47,7 +47,8 @@
 .history-log-row,
 .history-recap-side-head,
 .history-recap-footer,
-.history-all-games-head {
+.history-all-games-head,
+.history-archive-actions-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -217,6 +218,7 @@
 
 .rivalry-recap-card.is-archive {
   border-radius: 22px;
+  padding: 12px;
 }
 
 .rivalry-recap-card.winner-aaron {
@@ -258,6 +260,11 @@
   background: #f4f6f8;
 }
 
+.rivalry-recap-card.is-archive .history-recap-winner {
+  margin-top: 10px;
+  padding: 9px 11px;
+}
+
 .history-recap-winner.winner-aaron {
   background: linear-gradient(180deg, #f6f8fb 0%, #eef3f8 100%);
 }
@@ -273,6 +280,10 @@
   padding: 12px;
 }
 
+.rivalry-recap-card.is-archive .history-recap-side {
+  padding: 10px;
+}
+
 .history-recap-side-head strong,
 .history-recap-side-head span {
   color: var(--ink-strong);
@@ -286,6 +297,11 @@
   margin-top: 10px;
 }
 
+.rivalry-recap-card.is-archive .history-recap-picks {
+  gap: 6px;
+  margin-top: 8px;
+}
+
 .history-recap-pick {
   border-radius: 12px;
   background: var(--surface-secondary);
@@ -294,12 +310,21 @@
   font-weight: 700;
 }
 
+.rivalry-recap-card.is-archive .history-recap-pick {
+  padding: 8px 9px;
+}
+
 .history-recap-footer {
   margin-top: 12px;
   align-items: flex-end;
 }
 
-.history-recap-actions {
+.rivalry-recap-card.is-archive .history-recap-footer {
+  margin-top: 10px;
+}
+
+.history-recap-actions,
+.history-archive-actions-row {
   display: flex;
   gap: 8px;
 }
@@ -358,6 +383,14 @@
   margin-bottom: 2px;
 }
 
+.history-archive-meta-row {
+  margin-top: 12px;
+}
+
+.history-archive-actions-row {
+  margin-top: 14px;
+}
+
 .history-admin-sheet {
   position: fixed;
   inset: 0;
@@ -385,12 +418,14 @@
   }
 
   .history-recap-footer,
-  .history-all-games-head {
+  .history-all-games-head,
+  .history-archive-actions-row {
     flex-direction: column;
     align-items: stretch;
   }
 
-  .history-recap-actions {
+  .history-recap-actions,
+  .history-archive-actions-row {
     width: 100%;
   }
 
