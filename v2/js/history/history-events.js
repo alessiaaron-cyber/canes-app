@@ -19,6 +19,16 @@ window.CR = window.CR || {};
     window.scrollTo(0, 0);
   }
 
+  function navigate(view, options = {}) {
+    if (options.trackPrevious !== false) {
+      CR.historyState.previousView = CR.historyState.view;
+    }
+
+    CR.historyState.view = view;
+    CR.renderHistory?.();
+    scrollHistoryToTop();
+  }
+
   function bindHistoryEvents() {
     const root = document.querySelector('#historyView');
     if (!root) return;
@@ -33,9 +43,7 @@ window.CR = window.CR || {};
       const seasonOverview = event.target.closest('[data-history-open-season]');
       if (seasonOverview) {
         CR.historyState.seasonId = seasonOverview.dataset.historyOpenSeason;
-        CR.historyState.view = 'all_games';
-        CR.renderHistory?.();
-        scrollHistoryToTop();
+        navigate('all_games');
         return;
       }
 
@@ -49,17 +57,14 @@ window.CR = window.CR || {};
 
       const back = event.target.closest('button[data-history-back]');
       if (back) {
-        CR.historyState.view = 'seasons';
-        CR.renderHistory?.();
-        scrollHistoryToTop();
+        const target = CR.historyState.previousView === 'seasons' ? 'seasons' : 'hq';
+        navigate(target, { trackPrevious: false });
         return;
       }
 
       const backHq = event.target.closest('button[data-history-back-hq]');
       if (backHq) {
-        CR.historyState.view = 'hq';
-        CR.renderHistory?.();
-        scrollHistoryToTop();
+        navigate('hq', { trackPrevious: false });
         return;
       }
 
@@ -68,16 +73,12 @@ window.CR = window.CR || {};
         const id = access.dataset.historyAccess;
 
         if (id === 'all_games') {
-          CR.historyState.view = 'all_games';
-          CR.renderHistory?.();
-          scrollHistoryToTop();
+          navigate('all_games');
           return;
         }
 
         if (id === 'seasons') {
-          CR.historyState.view = 'seasons';
-          CR.renderHistory?.();
-          scrollHistoryToTop();
+          navigate('seasons');
           return;
         }
 
