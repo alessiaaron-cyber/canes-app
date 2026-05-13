@@ -267,37 +267,6 @@
   padding: 16px;
 }
 
-.history-view-all-button,
-.history-open-button,
-.history-edit-button {
-  appearance: none;
-  border-radius: 999px;
-  min-height: 34px;
-  padding: 0 12px;
-  font: inherit;
-  font-size: 12px;
-  font-weight: 800;
-}
-
-.history-view-all-button {
-  border: 0;
-  background: var(--ink-strong);
-  color: #fff;
-  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.12);
-}
-
-.history-open-button {
-  border: 1px solid var(--border-subtle);
-  background: #fff;
-  color: var(--ink-strong);
-}
-
-.history-edit-button {
-  border: 1px solid rgba(200, 16, 46, 0.18);
-  background: rgba(200, 16, 46, 0.04);
-  color: #8f1730;
-}
-
 .rivalry-recap-card {
   padding: 14px;
   background: linear-gradient(180deg, #ffffff 0%, #fbfcfd 100%);
@@ -323,32 +292,6 @@
 .history-log-kicker {
   font-size: 13px;
   font-weight: 800;
-  color: var(--ink-strong);
-}
-
-.history-playoff-badge,
-.history-regular-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 28px;
-  padding: 0 10px;
-  border-radius: 999px;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.02em;
-  border: 1px solid transparent;
-}
-
-.history-playoff-badge {
-  background: rgba(200, 16, 46, 0.08);
-  border-color: rgba(200, 16, 46, 0.14);
-  color: #8f1730;
-}
-
-.history-regular-badge {
-  background: #ffffff;
-  border-color: var(--border-subtle);
   color: var(--ink-strong);
 }
 
@@ -574,11 +517,31 @@
   padding: 16px;
 }
 
+.history-admin-sheet-head {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 42px;
+  padding: 0 44px;
+}
+
+.history-admin-sheet-head .gd-sheet-title {
+  text-align: center;
+}
+
+.history-admin-sheet-head .cr-sheet-close {
+  position: absolute;
+  right: 0;
+  top: 3px;
+}
+
 .history-admin-sheet-details {
   margin-top: 10px;
   flex: 1 1 auto;
   min-height: 0;
   overflow: hidden;
+  height: min(62vh, 560px);
 }
 
 .history-sheet-form-v2 {
@@ -615,25 +578,28 @@
 .history-sheet-tabs {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
+  gap: 6px;
   margin-top: 12px;
+  padding: 5px;
+  border-radius: 18px;
+  background: #f4f6f8;
 }
 
 .history-sheet-tab {
   appearance: none;
-  border: 1px solid var(--border-subtle);
-  border-radius: 999px;
-  min-height: 40px;
-  background: #f3f4f7;
+  border: 0;
+  border-radius: 14px;
+  min-height: 42px;
+  background: transparent;
   color: var(--ink-strong);
   font: inherit;
-  font-weight: 800;
+  font-weight: 900;
 }
 
 .history-sheet-tab.is-active {
-  background: var(--ink-strong);
+  background: var(--ui-graphite);
   color: #fff;
-  border-color: var(--ink-strong);
+  box-shadow: 0 8px 18px rgba(17, 24, 39, 0.14);
 }
 
 .history-sheet-panel {
@@ -789,16 +755,6 @@
   margin: 8px 8px 0;
 }
 
-.history-admin-sheet .gd-sheet-footer {
-  display: flex;
-  gap: 10px;
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid var(--border-subtle);
-  background: #fff;
-  flex: 0 0 auto;
-}
-
 .history-sheet-open,
 .history-sheet-open body {
   overflow: hidden;
@@ -823,12 +779,6 @@
 
   .history-recap-actions {
     width: 100%;
-  }
-
-  .history-open-button,
-  .history-edit-button,
-  .history-view-all-button {
-    flex: 1 1 0;
   }
 
   .history-season-overview-score {
@@ -863,48 +813,4 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px;
   }
-}
-
-/* History edit modal layout overrides */
-.history-admin-sheet {
-  align-items: center;
-  justify-content: center;
-  padding: max(18px, env(safe-area-inset-top)) 16px max(18px, env(safe-area-inset-bottom));
-}
-
-.history-admin-sheet-card {
-  width: min(100%, 520px);
-  max-height: min(88vh, 820px);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.history-admin-sheet-details {
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow: hidden;
-  height: min(62vh, 560px);
-}
-
-.history-admin-sheet-details .history-sheet-form-v2 {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  min-height: 0;
-}
-
-.history-admin-sheet-details .history-sheet-panel {
-  flex: 1 1 auto;
-  min-height: 0;
-  height: auto;
-  overflow: auto;
-}
-
-.history-admin-sheet .gd-sheet-footer {
-  flex: 0 0 auto;
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid var(--border-subtle);
-  background: #fff;
 }
