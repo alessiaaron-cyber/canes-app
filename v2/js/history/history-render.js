@@ -17,6 +17,12 @@ window.CR = window.CR || {};
     return `${pick.playerName} • ${pick.goals}G ${pick.assists}A • ${points} pts`;
   }
 
+  function seasonWinner(summary, totals) {
+    if (totals.aaron > totals.julie) return 'Aaron';
+    if (totals.julie > totals.aaron) return 'Julie';
+    return 'Tie';
+  }
+
   function renderBoard(data) {
     const board = data.allTimeBoard || {};
     return `
@@ -49,7 +55,7 @@ window.CR = window.CR || {};
       <section class="panel-card history-hq-card">
         <div class="history-hq-topline">
           <span class="eyebrow">Current season view</span>
-          <span class="panel-tag dark">Snapshot</span>
+          <button class="history-view-all-button" type="button" data-history-access="seasons">All Seasons</button>
         </div>
         <h3 class="history-hq-title">${escapeHtml(board.seasonLabel || 'Season')}</h3>
         <div class="history-season-field">
@@ -210,6 +216,56 @@ window.CR = window.CR || {};
     `;
   }
 
+  function renderSeasonCard(data, summary) {
+    const season = (data.seasons || []).find((item) => item.id === summary.seasonId);
+    const games = data.seasonGames?.[summary.seasonId] || [];
+    const totals = games.reduce((acc, game) => {
+      acc.aaron += Number(game.aaronScore || 0);
+      acc.julie += Number(game.julieScore || 0);
+      return acc;
+    }, { aaron: 0, julie: 0 });
+    const winner = seasonWinner(summary, totals);
+    const winnerClass = winner === 'Aaron' ? 'winner-aaron' : winner === 'Julie' ? 'winner-julie' : 'winner-tie';
+    return `
+      <button class="history-season-overview-card ${winnerClass}" type="button" data-history-open-season="${escapeHtml(summary.seasonId)}">
+        <div class="history-season-overview-topline">
+          <div>
+            <div class="eyebrow">${escapeHtml(season?.isCurrent ? 'Current season' : 'Season')}</div>
+            <h3>${escapeHtml(summary.label || season?.label || summary.seasonId)}</h3>
+          </div>
+          <span>${escapeHtml(String(games.length))} games</span>
+        </div>
+        <div class="history-season-overview-score">
+          <strong>Aaron ${escapeHtml(String(totals.aaron))}</strong>
+          <span>Julie ${escapeHtml(String(totals.julie))}</span>
+        </div>
+        <div class="history-recap-winner ${winnerClass}">${escapeHtml(summary.recordText || 'Season record unavailable')}</div>
+        <p class="history-support-copy">${escapeHtml(summary.bestGameTitle ? `Best game: ${summary.bestGameTitle}` : 'Tap to open this season archive.')}</p>
+      </button>
+    `;
+  }
+
+  function renderSeasonsOverview(data) {
+    const summaries = (data.seasonSummaries || []).slice().sort((a, b) => String(b.label || '').localeCompare(String(a.label || '')));
+    return `
+      <section class="history-seasons-view">
+        <section class="panel-card history-all-games-header-card">
+          <div class="history-section-head history-all-games-head">
+            <div>
+              <div class="eyebrow">Season overview</div>
+              <h2>All Seasons</h2>
+            </div>
+            <button class="history-open-button" type="button" data-history-back-hq="1">Back</button>
+          </div>
+          <p class="history-support-copy">Quickly scan every rivalry season, compare the season scores, and jump into that season’s full archive.</p>
+        </section>
+        <div class="history-seasons-stack">
+          ${summaries.map((summary) => renderSeasonCard(data, summary)).join('')}
+        </div>
+      </section>
+    `;
+  }
+
   function renderAllGames(data) {
     const playoffCount = (data.gameLog || []).filter((game) => game.playoff).length;
     const regularCount = Math.max(0, (data.gameLog?.length || 0) - playoffCount);
@@ -221,7 +277,7 @@ window.CR = window.CR || {};
               <div class="eyebrow">Season archive</div>
               <h2>${escapeHtml(data.selectedSeason?.label || 'Season')} All Games</h2>
             </div>
-            <button class="history-view-all-button" type="button" data-history-back-hq="1">Back</button>
+            <button class="history-open-button" type="button" data-history-back="1">Back</button>
           </div>
           <p class="history-support-copy">Browse every rivalry game for the selected season. This is the clean management/history surface for full-season review and admin workflows.</p>
           <div class="history-season-field history-archive-season-field">
@@ -266,7 +322,9 @@ window.CR = window.CR || {};
   }
 
   function renderShell(data, state) {
-    return state?.view === 'all_games' ? renderAllGames(data) : renderHQ(data);
+    if (state?.view === 'seasons') return renderSeasonsOverview(data);
+    if (state?.view === 'all_games') return renderAllGames(data);
+    return renderHQ(data);
   }
 
   function renderAdminSheet(state) {
