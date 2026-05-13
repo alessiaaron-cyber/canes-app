@@ -20,6 +20,10 @@ window.CR = window.CR || {};
   }
 
   function navigate(view, options = {}) {
+    if (options.returnView) {
+      CR.historyState.returnView = options.returnView;
+    }
+
     if (options.trackPrevious !== false) {
       CR.historyState.previousView = CR.historyState.view;
     }
@@ -43,7 +47,7 @@ window.CR = window.CR || {};
       const seasonOverview = event.target.closest('[data-history-open-season]');
       if (seasonOverview) {
         CR.historyState.seasonId = seasonOverview.dataset.historyOpenSeason;
-        navigate('all_games');
+        navigate('all_games', { returnView: 'seasons' });
         return;
       }
 
@@ -57,8 +61,7 @@ window.CR = window.CR || {};
 
       const back = event.target.closest('button[data-history-back]');
       if (back) {
-        const target = CR.historyState.previousView === 'seasons' ? 'seasons' : 'hq';
-        navigate(target, { trackPrevious: false });
+        navigate(CR.historyState.returnView || 'hq', { trackPrevious: false });
         return;
       }
 
@@ -73,7 +76,7 @@ window.CR = window.CR || {};
         const id = access.dataset.historyAccess;
 
         if (id === 'all_games') {
-          navigate('all_games');
+          navigate('all_games', { returnView: 'hq' });
           return;
         }
 
