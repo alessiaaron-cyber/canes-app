@@ -190,6 +190,7 @@ window.CR = window.CR || {};
     CR.historyState = {
       seasonId: CR.historyData.currentSeasonId,
       view: 'hq',
+      previousView: 'hq',
       sheet: { open: false }
     };
     renderHistory();
