@@ -36,6 +36,11 @@ window.CR = window.CR || {};
     return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
   }
 
+  function resetRosterDraft() {
+    CR.manageState.rosterDraft = { name: '', position: 'F' };
+    CR.manageState.editingRosterPlayerId = null;
+  }
+
   function resetScheduleDraft() {
     CR.manageState.scheduleDraft = {
       date: '',
@@ -79,6 +84,50 @@ window.CR = window.CR || {};
         closeAllSheets();
         CR.manageState.activeManageView = viewTrigger.dataset.manageView || 'main';
         rerender({ scrollTop: true });
+        return;
+      }
+
+      const editPlayer = event.target.closest('[data-manage-edit-player]');
+      if (editPlayer) {
+        const player = CR.manageState.roster.find((item) => item.id === editPlayer.dataset.manageEditPlayer);
+        if (player) {
+          CR.manageState.editingRosterPlayerId = player.id;
+          CR.manageState.rosterDraft = { name: player.name, position: player.position };
+          CR.showToast?.({ message: `Editing ${player.name}` });
+          rerender({ scrollTop: true });
+        }
+        return;
+      }
+
+      const cancelEditPlayer = event.target.closest('[data-manage-cancel-edit-player]');
+      if (cancelEditPlayer) {
+        resetRosterDraft();
+        rerender();
+        CR.showToast?.({ message: 'Edit canceled' });
+        return;
+      }
+
+      const savePlayer = event.target.closest('[data-manage-save-player]');
+      if (savePlayer) {
+        const draft = CR.manageState.rosterDraft;
+        const name = String(draft.name || '').trim();
+        if (!name) {
+          CR.showToast?.({ message: 'Add a player name first' });
+          return;
+        }
+        const payload = { name, position: draft.position || 'F' };
+        if (CR.manageState.editingRosterPlayerId) {
+          const player = CR.manageState.roster.find((item) => item.id === CR.manageState.editingRosterPlayerId);
+          if (player) Object.assign(player, payload);
+          resetRosterDraft();
+          rerender();
+          CR.showToast?.({ message: `${name} updated` });
+          return;
+        }
+        CR.manageState.roster.push({ id: makeId('player'), ...payload, active: true });
+        resetRosterDraft();
+        rerender();
+        CR.showToast?.({ message: `${name} added` });
         return;
       }
 
@@ -176,25 +225,11 @@ window.CR = window.CR || {};
         return;
       }
 
-      const addPlayer = event.target.closest('[data-manage-add-player]');
-      if (addPlayer) {
-        const draft = CR.manageState.rosterDraft;
-        const name = String(draft.name || '').trim();
-        if (!name) {
-          CR.showToast?.({ message: 'Add a player name first' });
-          return;
-        }
-        CR.manageState.roster.push({ id: makeId('player'), name, position: draft.position || 'F', active: true });
-        CR.manageState.rosterDraft = { name: '', position: 'F' };
-        rerender();
-        CR.showToast?.({ message: `${name} added` });
-        return;
-      }
-
       const togglePlayer = event.target.closest('[data-manage-toggle-player]');
       if (togglePlayer) {
         const player = CR.manageState.roster.find((item) => item.id === togglePlayer.dataset.manageTogglePlayer);
         if (player) {
+          if (CR.manageState.editingRosterPlayerId === player.id) resetRosterDraft();
           player.active = !player.active;
           rerender();
           CR.showToast?.({ message: `${player.name} ${player.active ? 'restored' : 'removed from future picks'}` });
