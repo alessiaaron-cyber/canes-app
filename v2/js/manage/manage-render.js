@@ -48,11 +48,7 @@ window.CR = window.CR || {};
     let badgeHtml = '';
 
     if (badge) {
-      if (badge.rawClassName) {
-        badgeHtml = `<span class="${escapeHtml(badge.rawClassName)}">${escapeHtml(badge.label || '')}</span>`;
-      } else {
-        badgeHtml = `<span class="panel-tag ${escapeHtml(badge.className || 'neutral')}">${escapeHtml(badge.label || '')}</span>`;
-      }
+      badgeHtml = `<span class="panel-tag ${escapeHtml(badge.className || 'neutral')}">${escapeHtml(badge.label || '')}</span>`;
     }
 
     return `
@@ -139,8 +135,8 @@ window.CR = window.CR || {};
 
   function renderSeasonSetup(state) {
     const seasonBadge = state.season.playoffMode
-      ? { rawClassName: 'history-playoff-badge', label: 'Playoffs' }
-      : { rawClassName: 'history-regular-badge', label: 'Regular' };
+      ? { className: 'warning', label: 'Playoffs' }
+      : { className: 'neutral', label: 'Regular' };
 
     return `
       <section class="panel-card manage-card">
