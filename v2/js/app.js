@@ -93,7 +93,9 @@ window.CR = window.CR || {};
       window.CR.initGameDay?.();
       window.CR.initHistory?.();
       window.CR.initPullRefresh?.();
-      window.CR.switchTab?.('gameday');
+
+      const savedTab = window.CR.getSavedTab?.() || 'gameday';
+      window.CR.switchTab?.(savedTab);
     } catch (error) {
       console.error('V2 bootstrap failed', error);
       const root = document.querySelector('#appRoot') || document.body;
