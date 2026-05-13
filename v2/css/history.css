@@ -1,8 +1,10 @@
 .history-feed,
 .rivalry-command-feed,
+.history-all-games-view,
 .history-log-stack,
 .history-player-spotlights,
-.rivalry-highlight-grid {
+.rivalry-highlight-grid,
+.archive-log-stack {
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -14,6 +16,8 @@
 .rivalry-highlights-card,
 .history-recent-card,
 .history-player-wrap-card,
+.history-all-games-header-card,
+.history-all-games-list-card,
 .history-log-card,
 .rivalry-highlight-item,
 .history-player-spotlight-card {
@@ -28,7 +32,9 @@
 .history-momentum-card,
 .rivalry-highlights-card,
 .history-recent-card,
-.history-player-wrap-card {
+.history-player-wrap-card,
+.history-all-games-header-card,
+.history-all-games-list-card {
   background: linear-gradient(180deg, #ffffff 0%, #fbfcfd 100%);
 }
 
@@ -40,7 +46,8 @@
 .history-player-spotlight-topline,
 .history-log-row,
 .history-recap-side-head,
-.history-recap-footer {
+.history-recap-footer,
+.history-all-games-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -49,7 +56,8 @@
 
 .rivalry-board-title,
 .history-hq-title,
-.history-section-head h3 {
+.history-section-head h3,
+.history-all-games-head h2 {
   margin: 6px 0 0;
   letter-spacing: -0.04em;
 }
@@ -115,7 +123,8 @@
 .history-player-wrap-card p,
 .history-log-subtitle,
 .history-recap-pick,
-.history-recap-first-goal {
+.history-recap-first-goal,
+.history-all-games-header-card p {
   color: var(--text-secondary);
   line-height: 1.45;
 }
@@ -172,7 +181,8 @@
 }
 
 .compact-grid,
-.recap-log-stack {
+.recap-log-stack,
+.archive-log-stack {
   margin-top: 14px;
 }
 
@@ -203,6 +213,10 @@
 .rivalry-recap-card {
   padding: 14px;
   background: linear-gradient(180deg, #ffffff 0%, #fbfcfd 100%);
+}
+
+.rivalry-recap-card.is-archive {
+  border-radius: 22px;
 }
 
 .rivalry-recap-card.winner-aaron {
@@ -326,6 +340,24 @@
   margin-top: 14px;
 }
 
+.history-all-games-header-card,
+.history-all-games-list-card {
+  padding: 16px;
+}
+
+.history-all-games-head {
+  align-items: flex-start;
+}
+
+.history-all-games-head h2 {
+  font-size: 26px;
+  color: var(--ink-strong);
+}
+
+.history-all-games-list-card .history-section-head {
+  margin-bottom: 2px;
+}
+
 .history-admin-sheet {
   position: fixed;
   inset: 0;
@@ -352,7 +384,8 @@
     grid-template-columns: 1fr;
   }
 
-  .history-recap-footer {
+  .history-recap-footer,
+  .history-all-games-head {
     flex-direction: column;
     align-items: stretch;
   }
@@ -362,7 +395,8 @@
   }
 
   .history-open-button,
-  .history-edit-button {
+  .history-edit-button,
+  .history-view-all-button {
     flex: 1 1 0;
   }
 }
