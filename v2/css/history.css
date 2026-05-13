@@ -321,21 +321,26 @@
 .history-regular-badge {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   min-height: 28px;
   padding: 0 10px;
   border-radius: 999px;
   font-size: 11px;
   font-weight: 800;
+  letter-spacing: 0.02em;
+  border: 1px solid transparent;
 }
 
 .history-playoff-badge {
-  background: rgba(200, 16, 46, 0.10);
+  background: rgba(200, 16, 46, 0.08);
+  border-color: rgba(200, 16, 46, 0.14);
   color: #8f1730;
 }
 
 .history-regular-badge {
-  background: #eef1f4;
-  color: var(--text-secondary);
+  background: #ffffff;
+  border-color: var(--border-subtle);
+  color: var(--ink-strong);
 }
 
 .history-log-subtitle {
