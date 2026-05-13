@@ -23,6 +23,17 @@ window.CR = window.CR || {};
     return 'Tie';
   }
 
+  function renderRootShell() {
+    return `
+      <div class="history-shell">
+        <div id="historyPanelHq"></div>
+        <div id="historyPanelSeasons" hidden></div>
+        <div id="historyPanelAllGames" hidden></div>
+        <div id="historyAdminLayer"></div>
+      </div>
+    `;
+  }
+
   function renderBoard(data) {
     const board = data.allTimeBoard || {};
     return `
@@ -282,8 +293,8 @@ window.CR = window.CR || {};
           </div>
           <p class="history-support-copy">Browse every rivalry game for the selected season. This is the clean management/history surface for full-season review and admin workflows.</p>
           <div class="history-season-field history-archive-season-field">
-            <label class="eyebrow" for="historySeasonSelect">Season</label>
-            <select id="historySeasonSelect" class="history-season-select">
+            <label class="eyebrow" for="historySeasonSelectArchive">Season</label>
+            <select id="historySeasonSelectArchive" class="history-season-select">
               ${(data.seasons || []).map((season) => `<option value="${escapeHtml(season.id)}" ${data.selectedSeason?.id === season.id ? 'selected' : ''}>${escapeHtml(season.label)}</option>`).join('')}
             </select>
           </div>
@@ -322,12 +333,6 @@ window.CR = window.CR || {};
     `;
   }
 
-  function renderShell(data, state) {
-    if (state?.view === 'seasons') return renderSeasonsOverview(data);
-    if (state?.view === 'all_games') return renderAllGames(data);
-    return renderHQ(data);
-  }
-
   function renderAdminSheet(state) {
     if (!state.sheet?.open) return '';
     return `
@@ -345,5 +350,11 @@ window.CR = window.CR || {};
     `;
   }
 
-  CR.historyRender = { renderShell, renderAdminSheet };
+  CR.historyRender = {
+    renderRootShell,
+    renderHQ,
+    renderSeasonsOverview,
+    renderAllGames,
+    renderAdminSheet
+  };
 })();
