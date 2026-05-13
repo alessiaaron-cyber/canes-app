@@ -44,6 +44,16 @@ window.CR = window.CR || {};
     `;
   }
 
+  function renderEditableMetaCard({ field, label, value }) {
+    return `
+      <button class="manage-meta-card manage-meta-button" type="button" data-manage-edit="${escapeHtml(field)}" aria-label="Edit ${escapeHtml(label)}">
+        <span class="eyebrow">${escapeHtml(label)}</span>
+        <strong>${escapeHtml(value)}</strong>
+        <span class="manage-meta-edit-hint">Tap to edit</span>
+      </button>
+    `;
+  }
+
   function renderCardHeader(eyebrow, title, copy, badge) {
     let badgeHtml = '';
 
@@ -107,18 +117,9 @@ window.CR = window.CR || {};
       <section class="panel-card manage-card">
         ${renderCardHeader('Season setup', 'Playoffs and defaults', 'Core rivalry settings that shape how the season behaves before backend wiring lands.', seasonBadge)}
         <div class="manage-meta-grid">
-          <article class="manage-meta-card">
-            <span class="eyebrow">Active season</span>
-            <strong>${escapeHtml(state.season.activeSeasonLabel)}</strong>
-          </article>
-          <article class="manage-meta-card">
-            <span class="eyebrow">Scoring profile</span>
-            <strong>${escapeHtml(state.season.scoringProfile)}</strong>
-          </article>
-          <article class="manage-meta-card">
-            <span class="eyebrow">Draft rotation</span>
-            <strong>${escapeHtml(state.season.draftRotation)}</strong>
-          </article>
+          ${renderEditableMetaCard({ field: 'activeSeasonLabel', label: 'Active season', value: state.season.activeSeasonLabel })}
+          ${renderEditableMetaCard({ field: 'scoringProfile', label: 'Scoring profile', value: state.season.scoringProfile })}
+          ${renderEditableMetaCard({ field: 'draftRotation', label: 'Draft rotation', value: state.season.draftRotation })}
         </div>
         <div class="manage-setting-stack">
           ${renderToggleRow({ key: 'season.playoffMode', label: 'Playoff mode', hint: 'Use postseason behavior and settings language.', checked: state.season.playoffMode })}
@@ -144,6 +145,41 @@ window.CR = window.CR || {};
     `;
   }
 
+  function renderEditSheet(state) {
+    const field = state.activeEditField;
+    if (!field) return '';
+
+    const editConfig = state.editOptions?.[field];
+    if (!editConfig) return '';
+
+    const currentValue = state.season?.[field];
+
+    return `
+      <div class="manage-edit-sheet" role="dialog" aria-modal="true" aria-labelledby="manageEditSheetTitle">
+        <div class="manage-edit-backdrop" data-manage-close-edit></div>
+        <section class="manage-edit-card">
+          <div class="gd-sheet-handle"></div>
+          <div class="manage-edit-header">
+            <div>
+              <div class="eyebrow">Season setup</div>
+              <h2 id="manageEditSheetTitle">${escapeHtml(editConfig.title)}</h2>
+              <p>${escapeHtml(editConfig.hint)}</p>
+            </div>
+            <button class="manage-edit-close" type="button" data-manage-close-edit aria-label="Close editor">×</button>
+          </div>
+          <div class="manage-edit-options">
+            ${editConfig.options.map((option) => `
+              <button class="manage-edit-option ${option === currentValue ? 'is-active' : ''}" type="button" data-manage-edit-value="${escapeHtml(option)}">
+                <span>${escapeHtml(option)}</span>
+                ${option === currentValue ? '<strong>Selected</strong>' : ''}
+              </button>
+            `).join('')}
+          </div>
+        </section>
+      </div>
+    `;
+  }
+
   function renderRoot(state) {
     return `
       <div class="content-stack manage-stack">
@@ -152,6 +188,7 @@ window.CR = window.CR || {};
         ${renderSeasonSetup(state)}
         ${renderStatus(state)}
       </div>
+      ${renderEditSheet(state)}
     `;
   }
 
