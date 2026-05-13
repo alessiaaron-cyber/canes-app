@@ -356,7 +356,7 @@ window.CR = window.CR || {};
         <div class="history-admin-sheet-card">
           <div class="gd-sheet-handle"></div>
           <div class="gd-sheet-title">${escapeHtml(state.sheet.title || 'History tools')}</div>
-          <div class="gd-sheet-copy">${escapeHtml(state.sheet.message || 'Mock history detail view.')}</div>
+          ${state.sheet.message ? `<div class="gd-sheet-copy">${escapeHtml(state.sheet.message)}</div>` : ''}
           ${state.sheet.detailsHtml ? `<div class="history-admin-sheet-details">${state.sheet.detailsHtml}</div>` : ''}
           <div class="gd-sheet-footer">
             <button class="gd-sheet-close" type="button" data-history-sheet-close="1">Close</button>
