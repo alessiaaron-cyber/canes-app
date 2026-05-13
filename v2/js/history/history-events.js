@@ -43,11 +43,11 @@ window.CR = window.CR || {};
     scrollHistoryToTop();
   }
 
-  function renderPickRows(picks) {
-    return (picks || []).map((pick) => `
-      <div class="history-sheet-pick-row">
-        <span>${escapeHtml(pick.playerName)}</span>
-        <strong>${escapeHtml(`${pick.goals}G ${pick.assists}A • ${pick.points} pts`)}</strong>
+  function renderPickRows(picks, sideKey) {
+    return (picks || []).map((pick, index) => `
+      <div class="history-sheet-pick-row is-editable">
+        <input class="history-sheet-inline-input" type="text" value="${escapeHtml(pick.playerName)}" aria-label="${escapeHtml(sideKey)} pick ${index + 1} player" />
+        <input class="history-sheet-inline-input is-compact" type="text" value="${escapeHtml(`${pick.goals}G ${pick.assists}A • ${pick.points} pts`)}" aria-label="${escapeHtml(sideKey)} pick ${index + 1} stat line" />
       </div>
     `).join('');
   }
@@ -65,30 +65,56 @@ window.CR = window.CR || {};
     }
 
     const detailsHtml = `
-      <div class="history-sheet-game-summary">
+      <form class="history-sheet-form" onsubmit="return false;">
         <div class="history-sheet-meta-row">
           <span class="history-sheet-meta-pill">${escapeHtml(game.date)}</span>
-          <span class="history-sheet-meta-pill">${escapeHtml(game.playoff ? 'Playoffs' : 'Regular Season')}</span>
-          <span class="history-sheet-meta-pill">Score ${escapeHtml(`${game.aaronScore}-${game.julieScore}`)}</span>
+          <span class="history-sheet-meta-pill">${escapeHtml(context === 'archive' ? 'Archive edit' : 'Recent game edit')}</span>
         </div>
+
+        <div class="history-sheet-field-grid">
+          <label class="history-sheet-field">
+            <span>Game type</span>
+            <select class="history-sheet-select" aria-label="Game type">
+              <option ${game.playoff ? '' : 'selected'}>Regular Season</option>
+              <option ${game.playoff ? 'selected' : ''}>Playoffs</option>
+            </select>
+          </label>
+          <label class="history-sheet-field">
+            <span>First goal scorer</span>
+            <input class="history-sheet-input" type="text" value="${escapeHtml(game.firstGoalScorer || '—')}" aria-label="First goal scorer" />
+          </label>
+        </div>
+
+        <div class="history-sheet-score-grid">
+          <label class="history-sheet-field history-sheet-score-field">
+            <span>Aaron score</span>
+            <input class="history-sheet-input" type="number" value="${escapeHtml(String(game.aaronScore))}" aria-label="Aaron score" />
+          </label>
+          <label class="history-sheet-field history-sheet-score-field">
+            <span>Julie score</span>
+            <input class="history-sheet-input" type="number" value="${escapeHtml(String(game.julieScore))}" aria-label="Julie score" />
+          </label>
+        </div>
+
         <div class="history-sheet-sides">
           <section class="history-sheet-side">
             <div class="history-sheet-side-head">
-              <strong>Aaron</strong>
+              <strong>Aaron picks</strong>
               <span>${escapeHtml(String(game.aaronScore))}</span>
             </div>
-            ${renderPickRows(game.picks?.Aaron)}
+            ${renderPickRows(game.picks?.Aaron, 'Aaron')}
           </section>
           <section class="history-sheet-side">
             <div class="history-sheet-side-head">
-              <strong>Julie</strong>
+              <strong>Julie picks</strong>
               <span>${escapeHtml(String(game.julieScore))}</span>
             </div>
-            ${renderPickRows(game.picks?.Julie)}
+            ${renderPickRows(game.picks?.Julie, 'Julie')}
           </section>
         </div>
-        <div class="history-sheet-actions-note">Editing flow for ${escapeHtml(context === 'archive' ? 'archive' : 'recent game')} cards will live here: score corrections, first goal changes, and pick/stat adjustments.</div>
-      </div>
+
+        <div class="history-sheet-actions-note">Commissioner workspace for score corrections, first-goal fixes, and pick/stat cleanup. This is the final staging surface before real persistence is wired in.</div>
+      </form>
     `;
 
     openHistorySheet({
