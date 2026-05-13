@@ -226,6 +226,12 @@ window.CR = window.CR || {};
     CR.historyPanelKeys[name] = key;
   }
 
+  function syncSheetScrollLock() {
+    const isOpen = Boolean(CR.historyState?.sheet?.open);
+    document.body.classList.toggle('history-sheet-open', isOpen);
+    document.documentElement.classList.toggle('history-sheet-open', isOpen);
+  }
+
   function renderHistory() {
     const root = document.querySelector('#historyView');
     if (!root) return;
@@ -245,6 +251,7 @@ window.CR = window.CR || {};
     renderPanel('admin', `admin:${sheetState}`, CR.historyRender.renderAdminSheet(CR.historyState), CR.historyDom.admin);
 
     syncPanelVisibility(CR.historyState.view);
+    syncSheetScrollLock();
 
     if (!CR.historyEventsBound) {
       CR.historyEvents.bindHistoryEvents();
