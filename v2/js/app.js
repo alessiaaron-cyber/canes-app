@@ -83,6 +83,7 @@ window.CR = window.CR || {};
     window.CR.showToast?.('Rivalry refresh complete');
     window.CR.renderGameDayState?.();
     window.CR.renderHistory?.();
+    window.CR.renderManage?.();
   };
 
   window.CR.startApp = () => {
@@ -92,6 +93,7 @@ window.CR = window.CR || {};
       window.CR.initTabs?.();
       window.CR.initGameDay?.();
       window.CR.initHistory?.();
+      window.CR.initManage?.();
       window.CR.initPullRefresh?.();
 
       const savedTab = window.CR.getSavedTab?.() || 'gameday';
