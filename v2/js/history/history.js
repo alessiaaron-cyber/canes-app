@@ -199,18 +199,65 @@ window.CR = window.CR || {};
     };
   }
 
+  function ensureHistoryShell(root) {
+    if (CR.historyDom?.root === root) return;
+
+    root.innerHTML = CR.historyRender.renderRootShell();
+    CR.historyDom = {
+      root,
+      hq: root.querySelector('#historyPanelHq'),
+      seasons: root.querySelector('#historyPanelSeasons'),
+      allGames: root.querySelector('#historyPanelAllGames'),
+      admin: root.querySelector('#historyAdminLayer')
+    };
+    CR.historyPanelKeys = { hq: '', seasons: '', all_games: '', admin: '' };
+  }
+
+  function syncPanelVisibility(view) {
+    if (!CR.historyDom) return;
+    CR.historyDom.hq.hidden = view !== 'hq';
+    CR.historyDom.seasons.hidden = view !== 'seasons';
+    CR.historyDom.allGames.hidden = view !== 'all_games';
+  }
+
+  function renderPanel(name, key, html, target) {
+    if (CR.historyPanelKeys[name] === key) return;
+    target.innerHTML = html;
+    CR.historyPanelKeys[name] = key;
+  }
+
   function renderHistory() {
     const root = document.querySelector('#historyView');
     if (!root) return;
 
+    ensureHistoryShell(root);
+
     const scoped = getScopedData(CR.historyData, CR.historyState);
-    root.innerHTML = `${CR.historyRender.renderShell(scoped, CR.historyState)}<div id="historyAdminLayer">${CR.historyRender.renderAdminSheet(CR.historyState)}</div>`;
-    CR.historyEvents.bindHistoryEvents();
+    const seasonKey = `${CR.historyState.seasonId}`;
+
+    renderPanel('hq', `hq:${seasonKey}`, CR.historyRender.renderHQ(scoped), CR.historyDom.hq);
+    renderPanel('seasons', 'seasons:static', CR.historyRender.renderSeasonsOverview(scoped), CR.historyDom.seasons);
+    renderPanel('all_games', `all_games:${seasonKey}`, CR.historyRender.renderAllGames(scoped), CR.historyDom.allGames);
+
+    const sheetState = CR.historyState.sheet?.open
+      ? `${CR.historyState.sheet.title}|${CR.historyState.sheet.message}|${CR.historyState.sheet.primaryAction}`
+      : 'closed';
+    renderPanel('admin', `admin:${sheetState}`, CR.historyRender.renderAdminSheet(CR.historyState), CR.historyDom.admin);
+
+    syncPanelVisibility(CR.historyState.view);
+
+    if (!CR.historyEventsBound) {
+      CR.historyEvents.bindHistoryEvents();
+      CR.historyEventsBound = true;
+    }
   }
 
   function initHistory() {
     CR.historyData = CR.historyModel.build(CR.historyMockData);
     CR.historyCache = { staticData: null, seasons: {} };
+    CR.historyDom = null;
+    CR.historyEventsBound = false;
+    CR.historyPanelKeys = { hq: '', seasons: '', all_games: '', admin: '' };
     CR.historyState = {
       seasonId: CR.historyData.currentSeasonId,
       view: 'hq',
