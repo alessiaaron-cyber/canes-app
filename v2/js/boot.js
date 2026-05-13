@@ -49,13 +49,16 @@ window.CR = window.CR || {};
     render(content, className);
   }
 
-  async function mountShell() {
+  async function mountShell(useTransition = true) {
     const template = document.querySelector('#appShellTemplate');
     const el = root();
 
     if (!template || !el) return;
 
-    await transitionOutCurrentStage();
+    if (useTransition && root()?.firstElementChild) {
+      await transitionOutCurrentStage();
+    }
+
     el.innerHTML = `<div class="app-shell-stage boot-enter">${template.innerHTML}</div>`;
 
     window.requestAnimationFrame(() => {
@@ -328,10 +331,15 @@ window.CR = window.CR || {};
     CR.__bootInFlight = true;
 
     try {
-      if (!root()?.firstElementChild) {
-        render(CR.authUi.renderBoot(), 'boot-stage auth-stage');
-      } else {
-        await swapStage(CR.authUi.renderBoot(), 'boot-stage auth-stage');
+      const existingSession = await CR.auth.getSession();
+      const hasExistingSession = !!existingSession?.user;
+
+      if (!hasExistingSession) {
+        if (!root()?.firstElementChild) {
+          render(CR.authUi.renderBoot(), 'boot-stage auth-stage');
+        } else {
+          await swapStage(CR.authUi.renderBoot(), 'boot-stage auth-stage');
+        }
       }
 
       const resolved = await resolveSessionState();
@@ -356,7 +364,7 @@ window.CR = window.CR || {};
           CR.session = resolved.session;
           CR.currentUser = resolved.user;
           CR.currentProfile = resolved.profile;
-          await mountShell();
+          await mountShell(!hasExistingSession);
           return;
 
         default:
