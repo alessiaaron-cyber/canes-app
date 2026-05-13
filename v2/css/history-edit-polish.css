@@ -69,6 +69,7 @@
 
 .history-sheet-panel {
   margin-top: 12px;
+  min-height: 360px;
 }
 
 .history-sheet-score-preview-grid {
@@ -231,5 +232,9 @@
 
   .history-sheet-pick-grid {
     grid-template-columns: minmax(0, 1fr) 52px 52px;
+  }
+
+  .history-sheet-panel {
+    min-height: 400px;
   }
 }
