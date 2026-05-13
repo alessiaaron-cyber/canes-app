@@ -13,10 +13,15 @@ window.CR = window.CR || {};
   }
 
   function syncManageChrome() {
+    const manageView = document.querySelector('#manageView');
     const accountPanel = document.querySelector('#manageView .account-panel');
     const isSubpage = CR.manageState?.activeManageView && CR.manageState.activeManageView !== 'main';
 
+    manageView?.classList.toggle('is-manage-subpage', Boolean(isSubpage));
+
     if (accountPanel) {
+      accountPanel.hidden = Boolean(isSubpage);
+      accountPanel.setAttribute('aria-hidden', isSubpage ? 'true' : 'false');
       accountPanel.classList.toggle('is-hidden', Boolean(isSubpage));
     }
   }
@@ -25,6 +30,7 @@ window.CR = window.CR || {};
     const root = document.querySelector('#manageContent');
     if (!root || !CR.manageRender) return;
 
+    syncManageChrome();
     root.innerHTML = CR.manageRender.renderRoot(CR.manageState);
     syncManageChrome();
 
