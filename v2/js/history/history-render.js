@@ -29,7 +29,6 @@ window.CR = window.CR || {};
       <section class="panel-card rivalry-board-card">
         <div class="rivalry-board-topline">
           <span class="eyebrow">All-time rivalry</span>
-          <span class="panel-tag live">HQ</span>
         </div>
         <h2 class="rivalry-board-title">${escapeHtml(board.lead || 'Rivalry tied')}</h2>
         <div class="rivalry-board-score-grid">
@@ -55,7 +54,7 @@ window.CR = window.CR || {};
       <section class="panel-card history-hq-card">
         <div class="history-hq-topline">
           <span class="eyebrow">Current season view</span>
-          <button class="history-view-all-button" type="button" data-history-access="seasons">All Seasons</button>
+          <button class="history-view-all-button" type="button" data-history-access="seasons">View All</button>
         </div>
         <h3 class="history-hq-title">${escapeHtml(board.seasonLabel || 'Season')}</h3>
         <div class="history-season-field">
@@ -233,14 +232,16 @@ window.CR = window.CR || {};
             <div class="eyebrow">${escapeHtml(season?.isCurrent ? 'Current season' : 'Season')}</div>
             <h3>${escapeHtml(summary.label || season?.label || summary.seasonId)}</h3>
           </div>
-          <span>${escapeHtml(String(games.length))} games</span>
+          <span class="history-season-overview-count">${escapeHtml(String(games.length))} games</span>
         </div>
         <div class="history-season-overview-score">
           <strong>Aaron ${escapeHtml(String(totals.aaron))}</strong>
           <span>Julie ${escapeHtml(String(totals.julie))}</span>
         </div>
-        <div class="history-recap-winner ${winnerClass}">${escapeHtml(summary.recordText || 'Season record unavailable')}</div>
-        <p class="history-support-copy">${escapeHtml(summary.bestGameTitle ? `Best game: ${summary.bestGameTitle}` : 'Tap to open this season archive.')}</p>
+        <div class="history-season-overview-meta">
+          <span class="history-season-overview-tag ${winnerClass}">${escapeHtml(summary.recordText || 'Season record unavailable')}</span>
+          ${summary.bestGameTitle ? `<span class="history-season-overview-note">Best game: ${escapeHtml(summary.bestGameTitle)}</span>` : `<span class="history-season-overview-note">Tap to open this season archive.</span>`}
+        </div>
       </button>
     `;
   }
@@ -249,7 +250,7 @@ window.CR = window.CR || {};
     const summaries = (data.seasonSummaries || []).slice().sort((a, b) => String(b.label || '').localeCompare(String(a.label || '')));
     return `
       <section class="history-seasons-view">
-        <section class="panel-card history-all-games-header-card">
+        <section class="panel-card history-all-games-header-card history-seasons-header-card">
           <div class="history-section-head history-all-games-head">
             <div>
               <div class="eyebrow">Season overview</div>
