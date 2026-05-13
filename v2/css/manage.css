@@ -223,21 +223,6 @@
   color: var(--ink-strong);
 }
 
-.manage-watch-card {
-  position: relative;
-}
-
-.manage-watch-card::after {
-  content: '';
-  position: absolute;
-  inset: auto -30px -80px auto;
-  width: 180px;
-  height: 180px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(200, 16, 46, 0.08) 0%, rgba(200, 16, 46, 0) 70%);
-  pointer-events: none;
-}
-
 @media (max-width: 430px) {
   .manage-option-grid,
   .manage-meta-grid,
