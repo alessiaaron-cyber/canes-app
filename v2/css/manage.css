@@ -189,6 +189,13 @@
   margin-top: 20px;
 }
 
+.manage-card .cr-button.primary,
+.manage-card .cr-button.add,
+.manage-card .cr-button.save {
+  margin-top: 24px;
+  margin-bottom: 2px;
+}
+
 .manage-row-actions {
   display: flex;
   align-items: center;
