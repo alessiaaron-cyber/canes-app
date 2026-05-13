@@ -86,10 +86,10 @@ window.CR = window.CR || {};
         ${renderCardHeader('Manage data', 'Roster and schedule', 'Add, update, or deactivate future-facing roster and schedule data without touching history.', { className: 'dark', label: 'Tools' })}
         <div class="manage-tool-list">
           <button class="manage-tool-row" type="button" data-manage-view="roster">
-            <div><strong>Roster</strong><span>${state.roster.filter((player) => player.active).length} active players · add, edit, deactivate</span></div><span>›</span>
+            <div class="manage-tool-copy"><strong>Roster</strong><span>${state.roster.filter((player) => player.active).length} active players · add, edit, deactivate</span></div><span class="manage-tool-arrow">›</span>
           </button>
           <button class="manage-tool-row" type="button" data-manage-view="schedule">
-            <div><strong>Schedule</strong><span>${state.schedule.length} mock games · import, add, update</span></div><span>›</span>
+            <div class="manage-tool-copy"><strong>Schedule</strong><span>${state.schedule.length} mock games · import, add, update</span></div><span class="manage-tool-arrow">›</span>
           </button>
         </div>
       </section>`;
@@ -114,11 +114,11 @@ window.CR = window.CR || {};
     const scoring = state.season.scoringSystems?.[selectedProfile] || {};
     return `
       <div class="manage-score-card">
-        <div class="manage-score-card-header"><span class="eyebrow">${escapeHtml(selectedProfile)} scoring</span><button class="mini-button manage-secondary-action" type="button" data-manage-edit-scoring>Edit</button></div>
+        <div class="manage-score-card-header"><div><span class="eyebrow">${escapeHtml(selectedProfile)} scoring</span><strong>Point values</strong></div><button class="manage-score-edit-button" type="button" data-manage-edit-scoring>Edit</button></div>
         <div class="manage-score-rule-row">
-          <div><span class="eyebrow">First goal</span><strong>${escapeHtml(scoring.firstGoal ?? '—')}</strong></div>
-          <div><span class="eyebrow">Goal</span><strong>${escapeHtml(scoring.goal ?? '—')}</strong></div>
-          <div><span class="eyebrow">Assist</span><strong>${escapeHtml(scoring.assist ?? '—')}</strong></div>
+          <div class="manage-score-rule"><span class="eyebrow">First goal</span><strong>${escapeHtml(scoring.firstGoal ?? '—')}</strong></div>
+          <div class="manage-score-rule"><span class="eyebrow">Goal</span><strong>${escapeHtml(scoring.goal ?? '—')}</strong></div>
+          <div class="manage-score-rule"><span class="eyebrow">Assist</span><strong>${escapeHtml(scoring.assist ?? '—')}</strong></div>
         </div>
       </div>`;
   }
@@ -135,7 +135,7 @@ window.CR = window.CR || {};
         </div>
         ${renderScoringSummary(state)}
         <div class="manage-setting-stack">${renderToggleRow({ key: 'season.playoffMode', label: 'Playoff mode', hint: 'Use postseason behavior and settings language.', checked: state.season.playoffMode })}</div>
-        <div class="manage-action-row"><button class="mini-button manage-primary-action" type="button" data-manage-start-season>Start new season</button></div>
+        <div class="manage-action-row"><button class="manage-start-season-inline-button" type="button" data-manage-start-season>Start new season</button></div>
       </section>`;
   }
 
@@ -155,7 +155,7 @@ window.CR = window.CR || {};
   }
 
   function renderSubviewHeader(label, title, copy) {
-    return `<section class="panel-card manage-subview-hero"><button class="mini-button" type="button" data-manage-view="main">← Manage</button><span class="panel-tag dark">${escapeHtml(label)}</span><h2>${escapeHtml(title)}</h2><p>${escapeHtml(copy)}</p></section>`;
+    return `<section class="panel-card manage-subview-hero"><button class="manage-back-button" type="button" data-manage-view="main">← Manage</button><span class="panel-tag dark">${escapeHtml(label)}</span><h2>${escapeHtml(title)}</h2><p>${escapeHtml(copy)}</p></section>`;
   }
 
   function renderRosterView(state) {
@@ -168,15 +168,15 @@ window.CR = window.CR || {};
             <label><span class="eyebrow">Name</span><input class="manage-input" value="${escapeHtml(state.rosterDraft.name)}" placeholder="Player name" data-manage-roster-input="name" /></label>
             <label><span class="eyebrow">Position</span><select class="manage-input" data-manage-roster-input="position"><option ${state.rosterDraft.position === 'F' ? 'selected' : ''}>F</option><option ${state.rosterDraft.position === 'D' ? 'selected' : ''}>D</option></select></label>
           </div>
-          <button class="mini-button manage-primary-action manage-full-action" type="button" data-manage-add-player>Add Player</button>
+          <button class="manage-form-submit" type="button" data-manage-add-player>Add Player</button>
         </section>
         <section class="panel-card manage-card">
           ${renderCardHeader('Active players', 'Roster list', '', { className: 'neutral', label: `${state.roster.filter((p) => p.active).length}` })}
           <div class="manage-list-stack">
             ${state.roster.map((player) => `
               <article class="manage-list-row ${!player.active ? 'is-muted' : ''}">
-                <div><strong>${escapeHtml(player.name)}</strong><span>${escapeHtml(player.position)} · ${player.active ? 'Active' : 'Inactive'}</span></div>
-                <button class="mini-button" type="button" data-manage-toggle-player="${escapeHtml(player.id)}">${player.active ? 'Remove' : 'Restore'}</button>
+                <div class="manage-list-copy"><strong>${escapeHtml(player.name)}</strong><span>${escapeHtml(player.position)} · ${player.active ? 'Active' : 'Inactive'}</span></div>
+                <button class="manage-list-action" type="button" data-manage-toggle-player="${escapeHtml(player.id)}">${player.active ? 'Remove' : 'Restore'}</button>
               </article>`).join('')}
           </div>
         </section>
@@ -189,7 +189,7 @@ window.CR = window.CR || {};
         ${renderSubviewHeader('Schedule', 'Schedule', 'Upcoming games only. Finalized history stays protected.')}
         <section class="panel-card manage-card">
           ${renderCardHeader('NHL schedule import', 'Safe sync', 'Import today and upcoming Canes games. Finals and hidden games stay protected.', null)}
-          <button class="mini-button manage-primary-action manage-full-action" type="button" data-manage-import-schedule>Import NHL Schedule</button>
+          <button class="manage-form-submit" type="button" data-manage-import-schedule>Import NHL Schedule</button>
         </section>
         <section class="panel-card manage-card">
           ${renderCardHeader('Add game', 'Add Game', '', null)}
@@ -199,15 +199,15 @@ window.CR = window.CR || {};
             <label><span class="eyebrow">Type</span><select class="manage-input" data-manage-schedule-input="type"><option ${state.scheduleDraft.type === 'Regular' ? 'selected' : ''}>Regular</option><option ${state.scheduleDraft.type === 'Playoffs' ? 'selected' : ''}>Playoffs</option></select></label>
             <label><span class="eyebrow">First pick</span><select class="manage-input" data-manage-schedule-input="firstPicker">${state.users.map((user) => `<option ${state.scheduleDraft.firstPicker === user.username ? 'selected' : ''}>${escapeHtml(user.username)}</option>`).join('')}</select></label>
           </div>
-          <button class="mini-button manage-primary-action manage-full-action" type="button" data-manage-add-game>Add Game</button>
+          <button class="manage-form-submit" type="button" data-manage-add-game>Add Game</button>
         </section>
         <section class="panel-card manage-card">
           ${renderCardHeader('Upcoming games', 'Schedule list', '', { className: 'neutral', label: `${state.schedule.length}` })}
           <div class="manage-list-stack">
             ${state.schedule.map((game) => `
               <article class="manage-list-row">
-                <div><strong>${escapeHtml(game.date)} · ${escapeHtml(game.opponent)}</strong><span>${escapeHtml(game.type)} · ${escapeHtml(game.firstPicker)} picks first</span></div>
-                <button class="mini-button" type="button" data-manage-remove-game="${escapeHtml(game.id)}">Remove</button>
+                <div class="manage-list-copy"><strong>${escapeHtml(game.date)} · ${escapeHtml(game.opponent)}</strong><span>${escapeHtml(game.type)} · ${escapeHtml(game.firstPicker)} picks first</span></div>
+                <button class="manage-list-action" type="button" data-manage-remove-game="${escapeHtml(game.id)}">Remove</button>
               </article>`).join('')}
           </div>
         </section>
