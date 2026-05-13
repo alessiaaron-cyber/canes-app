@@ -157,13 +157,16 @@ window.CR = window.CR || {};
   function renderGameCard(game, isArchive) {
     const winnerClass = game.winner === 'Aaron' ? 'winner-aaron' : game.winner === 'Julie' ? 'winner-julie' : 'winner-tie';
     const context = isArchive ? 'archive' : 'recent';
+    const gameTypeBadge = game.playoff
+      ? '<span class="panel-tag warning">Playoffs</span>'
+      : '<span class="panel-tag calm">Regular</span>';
     return `
       <article class="history-log-card rivalry-recap-card ${winnerClass} ${isArchive ? 'is-archive' : ''}" id="history-game-${escapeHtml(game.id)}">
         <div class="history-log-topline">
           <div>
             <div class="history-log-kicker-row">
               <span class="history-log-kicker">Game ${escapeHtml(String(game.displayNumber))}</span>
-              ${game.playoff ? '<span class="history-playoff-badge">Playoffs</span>' : '<span class="history-regular-badge">Regular</span>'}
+              ${gameTypeBadge}
             </div>
             <div class="history-log-subtitle">${escapeHtml(game.date)}</div>
           </div>
