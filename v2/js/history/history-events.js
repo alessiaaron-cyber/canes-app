@@ -13,6 +13,15 @@ window.CR = window.CR || {};
     CR.renderHistory?.();
   }
 
+  function scrollHistoryToTop() {
+    const container = document.querySelector('#historyView');
+    if (container) {
+      container.scrollTop = 0;
+    }
+
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }
+
   function bindHistoryEvents() {
     const root = document.querySelector('#historyView');
     if (!root) return;
@@ -20,6 +29,7 @@ window.CR = window.CR || {};
     root.querySelector('#historySeasonSelect')?.addEventListener('change', (event) => {
       CR.historyState.seasonId = event.target.value;
       CR.renderHistory?.();
+      scrollHistoryToTop();
     });
 
     root.addEventListener('click', (event) => {
@@ -27,6 +37,7 @@ window.CR = window.CR || {};
       if (seasonJump) {
         CR.historyState.seasonId = seasonJump.dataset.historySeason;
         CR.renderHistory?.();
+        scrollHistoryToTop();
         return;
       }
 
@@ -34,20 +45,7 @@ window.CR = window.CR || {};
       if (backHq) {
         CR.historyState.view = 'hq';
         CR.renderHistory?.();
-        return;
-      }
-
-      const openGame = event.target.closest('button[data-history-open-game]');
-      if (openGame) {
-        const gameId = openGame.dataset.historyOpenGame;
-        const game = (CR.historyData?.seasonGames?.[CR.historyState.seasonId] || []).find((item) => item.id === gameId);
-        openHistorySheet({
-          title: game ? game.title : 'Game detail',
-          message: game
-            ? `${game.playoff ? 'Playoff' : 'Regular'} game on ${game.date}. Aaron ${game.aaronScore}, Julie ${game.julieScore}. First goal: ${game.picks?.Aaron?.find((pick) => pick.firstGoal)?.playerName || game.picks?.Julie?.find((pick) => pick.firstGoal)?.playerName || '—'}.`
-            : 'Game detail mock view coming next.',
-          primaryAction: 'Open full game view'
-        });
+        scrollHistoryToTop();
         return;
       }
 
@@ -58,6 +56,7 @@ window.CR = window.CR || {};
         if (id === 'all_games') {
           CR.historyState.view = 'all_games';
           CR.renderHistory?.();
+          scrollHistoryToTop();
           return;
         }
 
