@@ -196,9 +196,6 @@
 .history-open-button,
 .history-edit-button {
   appearance: none;
-  border: 0;
-  background: #eef1f4;
-  color: var(--ink-strong);
   border-radius: 999px;
   min-height: 34px;
   padding: 0 12px;
@@ -208,7 +205,22 @@
 }
 
 .history-view-all-button {
-  background: rgba(200, 16, 46, 0.08);
+  border: 0;
+  background: var(--ink-strong);
+  color: #fff;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.12);
+}
+
+.history-open-button {
+  border: 1px solid var(--border-subtle);
+  background: #fff;
+  color: var(--ink-strong);
+}
+
+.history-edit-button {
+  border: 1px solid rgba(200, 16, 46, 0.18);
+  background: rgba(200, 16, 46, 0.04);
+  color: #8f1730;
 }
 
 .rivalry-recap-card {
@@ -327,14 +339,6 @@
 .history-archive-actions-row {
   display: flex;
   gap: 8px;
-}
-
-.history-open-button {
-  background: #eef1f4;
-}
-
-.history-edit-button {
-  background: rgba(200, 16, 46, 0.08);
 }
 
 .history-log-row {
