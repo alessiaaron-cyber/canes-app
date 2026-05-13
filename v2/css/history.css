@@ -20,6 +20,14 @@
   overflow: hidden;
 }
 
+.rivalry-board-card {
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 72%, #fff6f7 100%);
+}
+
+.history-hq-card {
+  background: linear-gradient(180deg, #ffffff 0%, #fbfcfd 100%);
+}
+
 .rivalry-board-topline,
 .rivalry-highlights-header,
 .history-hq-topline,
@@ -38,6 +46,10 @@
 .rivalry-board-title,
 .history-hq-title {
   margin: 6px 0 0;
+}
+
+.rivalry-board-title {
+  letter-spacing: -0.04em;
 }
 
 .rivalry-board-score-grid,
@@ -213,6 +225,12 @@
   padding: 10px 12px;
   border-radius: 14px;
   background: var(--surface-secondary);
+  align-items: flex-start;
+}
+
+.history-log-row > span:last-child {
+  min-width: 0;
+  text-align: right;
 }
 
 .history-log-label {
@@ -221,6 +239,7 @@
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.02em;
+  flex: 0 0 auto;
 }
 
 .history-game-edit-shell {
