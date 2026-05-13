@@ -15,11 +15,8 @@ window.CR = window.CR || {};
 
   function scrollHistoryToTop() {
     const container = document.querySelector('#historyView');
-    if (container) {
-      container.scrollTop = 0;
-    }
-
-    window.scrollTo({ top: 0, behavior: 'instant' });
+    if (container) container.scrollTop = 0;
+    window.scrollTo(0, 0);
   }
 
   function bindHistoryEvents() {
@@ -33,9 +30,26 @@ window.CR = window.CR || {};
     });
 
     root.addEventListener('click', (event) => {
+      const seasonOverview = event.target.closest('[data-history-open-season]');
+      if (seasonOverview) {
+        CR.historyState.seasonId = seasonOverview.dataset.historyOpenSeason;
+        CR.historyState.view = 'all_games';
+        CR.renderHistory?.();
+        scrollHistoryToTop();
+        return;
+      }
+
       const seasonJump = event.target.closest('button[data-history-season]');
       if (seasonJump) {
         CR.historyState.seasonId = seasonJump.dataset.historySeason;
+        CR.renderHistory?.();
+        scrollHistoryToTop();
+        return;
+      }
+
+      const back = event.target.closest('button[data-history-back]');
+      if (back) {
+        CR.historyState.view = 'seasons';
         CR.renderHistory?.();
         scrollHistoryToTop();
         return;
@@ -55,6 +69,13 @@ window.CR = window.CR || {};
 
         if (id === 'all_games') {
           CR.historyState.view = 'all_games';
+          CR.renderHistory?.();
+          scrollHistoryToTop();
+          return;
+        }
+
+        if (id === 'seasons') {
+          CR.historyState.view = 'seasons';
           CR.renderHistory?.();
           scrollHistoryToTop();
           return;
