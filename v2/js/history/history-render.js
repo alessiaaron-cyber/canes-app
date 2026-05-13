@@ -32,6 +32,10 @@ window.CR = window.CR || {};
           </article>
         </div>
         <div class="rivalry-board-banner">${escapeHtml(board.lead || 'Rivalry tied')}</div>
+        <div class="rivalry-board-meta-row">
+          <span class="rivalry-board-meta-pill">${escapeHtml(String(board.totalGames || 0))} games</span>
+          <span class="rivalry-board-meta-pill">Viewing ${escapeHtml(data.selectedSeason?.label || 'season')}</span>
+        </div>
       </section>
     `;
   }
@@ -194,10 +198,10 @@ window.CR = window.CR || {};
           </div>
         </div>
         <div class="history-log-body">
-          <div>${escapeHtml(game.date)}</div>
-          <div>First goal: ${escapeHtml(game.firstGoalScorer || '—')}</div>
-          <div>Aaron: ${escapeHtml((game.picks?.Aaron || []).map((pick) => pick.playerName).join(' / ') || '—')}</div>
-          <div>Julie: ${escapeHtml((game.picks?.Julie || []).map((pick) => pick.playerName).join(' / ') || '—')}</div>
+          <div class="history-log-row"><span class="history-log-label">Date</span><span>${escapeHtml(game.date)}</span></div>
+          <div class="history-log-row"><span class="history-log-label">First goal</span><span>${escapeHtml(game.firstGoalScorer || '—')}</span></div>
+          <div class="history-log-row"><span class="history-log-label">Aaron</span><span>${escapeHtml((game.picks?.Aaron || []).map((pick) => pick.playerName).join(' / ') || '—')}</span></div>
+          <div class="history-log-row"><span class="history-log-label">Julie</span><span>${escapeHtml((game.picks?.Julie || []).map((pick) => pick.playerName).join(' / ') || '—')}</span></div>
         </div>
         ${isEditing ? renderEditor(game, state) : ''}
       </article>
