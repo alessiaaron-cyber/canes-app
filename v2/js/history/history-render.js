@@ -65,14 +65,15 @@ window.CR = window.CR || {};
 
   function renderHistoryHeader(data) {
     const board = data.seasonBoard || {};
+    const summary = data.selectedSummary || {};
     return `
       <section class="panel-card history-hq-card">
         <div class="history-hq-topline">
           <span class="eyebrow">History</span>
           <span class="panel-tag live">${escapeHtml(String(data.allTimeBoard?.totalGames || 0))} Games</span>
         </div>
-        <h2 class="history-hq-title">Game Log</h2>
-        <p class="history-hq-copy">Browse seasons, review picks, and fix past records.</p>
+        <h2 class="history-hq-title">${escapeHtml(data.selectedSeason?.label || 'Season')} Game Log</h2>
+        <p class="history-hq-copy">${escapeHtml(summary.note || 'Browse seasons, review picks, and fix past records.')}</p>
         <div class="history-season-field">
           <label class="eyebrow" for="historySeasonSelect">Season</label>
           <select id="historySeasonSelect" class="history-season-select">
@@ -88,6 +89,11 @@ window.CR = window.CR || {};
             <div class="eyebrow">Julie</div>
             <div class="rivalry-score-value">${escapeHtml(String(board.julie ?? 0))}</div>
           </article>
+        </div>
+        <div class="history-season-meta-row">
+          <span class="history-season-meta-pill">Record ${escapeHtml(summary.recordText || '—')}</span>
+          <span class="history-season-meta-pill">Playoffs ${escapeHtml(summary.playoffText || '—')}</span>
+          <span class="history-season-meta-pill">Best game ${escapeHtml(summary.bestGameTitle || '—')}</span>
         </div>
       </section>
     `;
