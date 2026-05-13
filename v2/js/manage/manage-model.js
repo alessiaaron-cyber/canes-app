@@ -16,6 +16,19 @@ window.CR = window.CR || {};
     { id: 'julie', username: 'Julie' }
   ];
 
+  const MOCK_ROSTER = [
+    { id: 'aho', name: 'Sebastian Aho', position: 'F', active: true },
+    { id: 'jarvis', name: 'Seth Jarvis', position: 'F', active: true },
+    { id: 'svechnikov', name: 'Andrei Svechnikov', position: 'F', active: true },
+    { id: 'slavin', name: 'Jaccob Slavin', position: 'D', active: true },
+    { id: 'chatfield', name: 'Jalen Chatfield', position: 'D', active: true }
+  ];
+
+  const MOCK_SCHEDULE = [
+    { id: 'game-1', date: '2026-03-08', opponent: 'NYR', type: 'Playoffs', firstPicker: 'Aaron' },
+    { id: 'game-2', date: '2026-03-10', opponent: 'FLA', type: 'Regular', firstPicker: 'Julie' }
+  ];
+
   const EDIT_OPTIONS = {
     activeSeasonLabel: {
       title: 'Active season',
@@ -34,8 +47,21 @@ window.CR = window.CR || {};
     }
   };
 
+  function getNextSeasonLabel(currentLabel) {
+    const match = String(currentLabel || '').match(/^(\d{4})-(\d{2})$/);
+    if (!match) return '2026-27';
+
+    const startYear = Number(match[1]) + 1;
+    const endYear = String((startYear + 1) % 100).padStart(2, '0');
+    return `${startYear}-${endYear}`;
+  }
+
   function build() {
+    const currentSeason = '2025-26';
+    const nextSeason = getNextSeasonLabel(currentSeason);
+
     return {
+      activeManageView: 'main',
       streamMode: {
         selected: '90s',
         options: STREAM_OPTIONS,
@@ -48,7 +74,7 @@ window.CR = window.CR || {};
         toastsEnabled: true
       },
       season: {
-        activeSeasonLabel: '2025-26',
+        activeSeasonLabel: currentSeason,
         playoffMode: false,
         scoringProfile: 'Classic',
         firstPicker: 'Aaron',
@@ -64,6 +90,23 @@ window.CR = window.CR || {};
             assist: 2
           }
         }
+      },
+      newSeasonDraft: {
+        seasonLabel: nextSeason,
+        firstPicker: 'Aaron'
+      },
+      newSeasonOptions: [nextSeason],
+      roster: MOCK_ROSTER,
+      schedule: MOCK_SCHEDULE,
+      rosterDraft: {
+        name: '',
+        position: 'F'
+      },
+      scheduleDraft: {
+        date: '',
+        opponent: '',
+        type: 'Regular',
+        firstPicker: 'Aaron'
       },
       appHealth: {
         realtimeStatus: 'Connected',
