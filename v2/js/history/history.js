@@ -192,7 +192,7 @@ window.CR = window.CR || {};
     if (!root) return;
 
     const scoped = getScopedData(CR.historyData, CR.historyState);
-    root.innerHTML = `${CR.historyRender.renderShell(scoped, CR.historyState)}<div id="historyAdminLayer">${CR.historyRender.renderAdminSheet(CR.historyState)}</div>`;
+    root.innerHTML = `${CR.historyRender.renderShell(scoped)}<div id="historyAdminLayer">${CR.historyRender.renderAdminSheet(CR.historyState)}</div>`;
     CR.historyEvents.bindHistoryEvents();
   }
 
@@ -200,8 +200,6 @@ window.CR = window.CR || {};
     CR.historyData = CR.historyModel.build(CR.historyMockData);
     CR.historyState = {
       seasonId: CR.historyData.currentSeasonId,
-      editingGameId: null,
-      editTab: 'result',
       sheet: { open: false }
     };
     renderHistory();
