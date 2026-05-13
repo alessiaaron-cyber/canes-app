@@ -2,7 +2,8 @@
 .rivalry-hq-feed,
 .history-log-stack,
 .history-archive-stack,
-.rivalry-highlight-grid {
+.rivalry-highlight-grid,
+.history-player-spotlights {
   display: flex;
   flex-direction: column;
   gap: 18px;
@@ -14,7 +15,8 @@
 .history-log-card,
 .history-archive-card,
 .rivalry-highlight-item,
-.rivalry-heater-card {
+.rivalry-heater-card,
+.history-player-spotlight-card {
   overflow: hidden;
 }
 
@@ -24,7 +26,8 @@
 .history-log-topline,
 .history-season-topline,
 .history-log-actions,
-.history-edit-side-header {
+.history-edit-side-header,
+.history-player-spotlight-topline {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -78,7 +81,8 @@
 .history-archive-card,
 .history-edit-panel,
 .history-pick-edit-card,
-.history-edit-side {
+.history-edit-side,
+.history-player-spotlight-card {
   border: 1px solid var(--border-subtle);
   background: #fff;
   border-radius: 20px;
@@ -232,6 +236,35 @@
   font-weight: 800;
 }
 
+.history-player-spotlights {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+.history-player-spotlight-card {
+  background: linear-gradient(180deg, #ffffff 0%, #fafbfc 100%);
+}
+
+.history-player-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.history-player-stats span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: #eef1f4;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 700;
+}
+
 .history-admin-sheet {
   position: fixed;
   inset: 0;
@@ -255,7 +288,8 @@
 
 @media (min-width: 431px) {
   .rivalry-highlight-grid,
-  .history-archive-stack {
+  .history-archive-stack,
+  .history-player-spotlights {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 14px;
