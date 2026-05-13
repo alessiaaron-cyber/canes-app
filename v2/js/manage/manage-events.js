@@ -36,6 +36,10 @@ window.CR = window.CR || {};
     return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
   }
 
+  function rerender(options = {}) {
+    CR.renderManage?.({ scrollTop: options.scrollTop });
+  }
+
   function bindManageEvents() {
     const root = document.querySelector('#manageContent');
     if (!root) return;
@@ -59,31 +63,28 @@ window.CR = window.CR || {};
       }
     });
 
-    root.addEventListener('change', (event) => {
-      const newSeasonInput = event.target.closest('[data-manage-new-season-input]');
-      if (newSeasonInput) {
-        CR.manageState.newSeasonDraft.seasonLabel = newSeasonInput.value;
-        return;
-      }
-
-      const rosterInput = event.target.closest('[data-manage-roster-input]');
-      if (rosterInput) {
-        CR.manageState.rosterDraft[rosterInput.dataset.manageRosterInput] = rosterInput.value;
-        return;
-      }
-
-      const scheduleInput = event.target.closest('[data-manage-schedule-input]');
-      if (scheduleInput) {
-        CR.manageState.scheduleDraft[scheduleInput.dataset.manageScheduleInput] = scheduleInput.value;
-      }
-    });
-
     root.addEventListener('click', (event) => {
       const viewTrigger = event.target.closest('[data-manage-view]');
       if (viewTrigger) {
         closeAllSheets();
         CR.manageState.activeManageView = viewTrigger.dataset.manageView || 'main';
-        CR.renderManage?.();
+        rerender({ scrollTop: true });
+        return;
+      }
+
+      const editGame = event.target.closest('[data-manage-edit-game]');
+      if (editGame) {
+        const game = CR.manageState.schedule.find((item) => item.id === editGame.dataset.manageEditGame);
+        if (game) {
+          CR.manageState.scheduleDraft = {
+            date: game.date,
+            opponent: game.opponent,
+            type: game.type,
+            firstPicker: game.firstPicker
+          };
+          CR.showToast?.({ message: `Loaded ${game.opponent} for editing` });
+          rerender();
+        }
         return;
       }
 
@@ -91,21 +92,21 @@ window.CR = window.CR || {};
       if (startSeason) {
         closeAllSheets();
         CR.manageState.startSeasonOpen = true;
-        CR.renderManage?.();
+        rerender();
         return;
       }
 
       const closeStartSeason = event.target.closest('[data-manage-close-start-season]');
       if (closeStartSeason) {
         CR.manageState.startSeasonOpen = false;
-        CR.renderManage?.();
+        rerender();
         return;
       }
 
       const newSeasonPicker = event.target.closest('[data-manage-new-season-picker]');
       if (newSeasonPicker) {
         CR.manageState.newSeasonDraft.firstPicker = newSeasonPicker.dataset.manageNewSeasonPicker;
-        CR.renderManage?.();
+        rerender();
         return;
       }
 
@@ -122,7 +123,7 @@ window.CR = window.CR || {};
         CR.manageState.season.playoffMode = false;
         CR.manageState.schedule = [];
         CR.manageState.startSeasonOpen = false;
-        CR.renderManage?.();
+        rerender();
         CR.showToast?.({ message: `${seasonLabel} season started` });
         return;
       }
@@ -131,14 +132,14 @@ window.CR = window.CR || {};
       if (editScoring) {
         closeAllSheets();
         CR.manageState.scoringEditOpen = true;
-        CR.renderManage?.();
+        rerender();
         return;
       }
 
       const closeScoring = event.target.closest('[data-manage-close-scoring]');
       if (closeScoring) {
         CR.manageState.scoringEditOpen = false;
-        CR.renderManage?.();
+        rerender();
         return;
       }
 
@@ -150,7 +151,7 @@ window.CR = window.CR || {};
         const scoring = CR.manageState.season.scoringSystems?.[profile];
         if (scoring && Object.prototype.hasOwnProperty.call(scoring, key)) {
           scoring[key] = Math.max(0, Number(scoring[key] || 0) + delta);
-          CR.renderManage?.();
+          rerender();
         }
         return;
       }
@@ -165,7 +166,7 @@ window.CR = window.CR || {};
         }
         CR.manageState.roster.push({ id: makeId('player'), name, position: draft.position || 'F', active: true });
         CR.manageState.rosterDraft = { name: '', position: 'F' };
-        CR.renderManage?.();
+        rerender();
         CR.showToast?.({ message: `${name} added` });
         return;
       }
@@ -175,7 +176,7 @@ window.CR = window.CR || {};
         const player = CR.manageState.roster.find((item) => item.id === togglePlayer.dataset.manageTogglePlayer);
         if (player) {
           player.active = !player.active;
-          CR.renderManage?.();
+          rerender();
           CR.showToast?.({ message: `${player.name} ${player.active ? 'restored' : 'removed from future picks'}` });
         }
         return;
@@ -198,7 +199,7 @@ window.CR = window.CR || {};
         }
         CR.manageState.schedule.push({ id: makeId('game'), date, opponent, type: draft.type || 'Regular', firstPicker: draft.firstPicker || CR.manageState.season.firstPicker });
         CR.manageState.scheduleDraft = { date: '', opponent: '', type: 'Regular', firstPicker: CR.manageState.season.firstPicker };
-        CR.renderManage?.();
+        rerender();
         CR.showToast?.({ message: `${opponent} game added` });
         return;
       }
@@ -206,8 +207,8 @@ window.CR = window.CR || {};
       const removeGame = event.target.closest('[data-manage-remove-game]');
       if (removeGame) {
         CR.manageState.schedule = CR.manageState.schedule.filter((game) => game.id !== removeGame.dataset.manageRemoveGame);
-        CR.renderManage?.();
-        CR.showToast?.({ message: 'Game removed from mock schedule' });
+        rerender();
+        CR.showToast?.({ message: 'Game removed from schedule' });
         return;
       }
 
@@ -215,14 +216,14 @@ window.CR = window.CR || {};
       if (editTrigger) {
         closeAllSheets();
         CR.manageState.activeEditField = editTrigger.dataset.manageEdit;
-        CR.renderManage?.();
+        rerender();
         return;
       }
 
       const closeEdit = event.target.closest('[data-manage-close-edit]');
       if (closeEdit) {
         CR.manageState.activeEditField = null;
-        CR.renderManage?.();
+        rerender();
         return;
       }
 
@@ -233,7 +234,7 @@ window.CR = window.CR || {};
         if (field && Object.prototype.hasOwnProperty.call(CR.manageState.season, field)) {
           CR.manageState.season[field] = value;
           CR.manageState.activeEditField = null;
-          CR.renderManage?.();
+          rerender();
           CR.showToast?.({ message: `${value} selected` });
         }
         return;
@@ -244,7 +245,7 @@ window.CR = window.CR || {};
         const key = toggleButton.dataset.manageToggle;
         const currentValue = Boolean(getNestedValue(CR.manageState, key));
         setNestedValue(CR.manageState, key, !currentValue);
-        CR.renderManage?.();
+        rerender();
         CR.showToast?.({ message: `${toggleButton.querySelector('.manage-toggle-label')?.textContent || 'Setting'} ${!currentValue ? 'on' : 'off'}` });
         return;
       }
@@ -253,7 +254,7 @@ window.CR = window.CR || {};
       if (streamOption) {
         const nextValue = streamOption.dataset.manageStreamOption;
         CR.manageState.streamMode.selected = nextValue;
-        CR.renderManage?.();
+        rerender();
         CR.showToast?.({ message: `Stream Mode set to ${labelForStreamOption(nextValue)}` });
       }
     });
