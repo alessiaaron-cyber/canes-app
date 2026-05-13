@@ -78,6 +78,19 @@ window.CR = window.CR || {};
     }
   }
 
+  function restoreManageFallback() {
+    const mount = document.querySelector('#manageContent');
+    if (!mount) return;
+
+    mount.outerHTML = `
+      <section class="panel-card">
+        <div class="eyebrow">Manage</div>
+        <h2>Settings and controls</h2>
+        <p class="placeholder-copy">Manage preview is temporarily unavailable while the new control center finishes loading.</p>
+      </section>
+    `;
+  }
+
   function ensureManageStylesheet() {
     const href = 'css/manage.css?v=v2manage1';
 
@@ -109,7 +122,7 @@ window.CR = window.CR || {};
   }
 
   async function ensureManageAssets() {
-    if (window.CR.__manageAssetsReady) return;
+    if (window.CR.__manageAssetsReady) return true;
 
     ensureManageMount();
     await ensureManageStylesheet();
@@ -126,6 +139,7 @@ window.CR = window.CR || {};
     }
 
     window.CR.__manageAssetsReady = true;
+    return true;
   }
 
   async function handleManageSignOut() {
@@ -164,8 +178,18 @@ window.CR = window.CR || {};
       window.CR.initTabs?.();
       window.CR.initGameDay?.();
       window.CR.initHistory?.();
-      await ensureManageAssets();
-      window.CR.initManage?.();
+
+      try {
+        const manageReady = await ensureManageAssets();
+
+        if (manageReady) {
+          window.CR.initManage?.();
+        }
+      } catch (manageError) {
+        console.error('Manage initialization failed', manageError);
+        restoreManageFallback();
+      }
+
       window.CR.initPullRefresh?.();
 
       const savedTab = window.CR.getSavedTab?.() || 'gameday';
