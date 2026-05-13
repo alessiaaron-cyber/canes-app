@@ -131,6 +131,27 @@
   color: var(--ink-strong);
 }
 
+.history-season-meta-row,
+.history-player-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.history-season-meta-pill,
+.history-player-stats span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: #eef1f4;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 700;
+}
+
 .history-score-pill {
   min-height: 40px;
   padding: 0 14px;
