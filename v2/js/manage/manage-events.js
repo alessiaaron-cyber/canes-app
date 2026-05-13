@@ -25,11 +25,43 @@ window.CR = window.CR || {};
     return option?.label || 'Updated';
   }
 
+  function closeEditSheet() {
+    if (!CR.manageState) return;
+    CR.manageState.activeEditField = null;
+    CR.renderManage?.();
+  }
+
   function bindManageEvents() {
     const root = document.querySelector('#manageContent');
     if (!root) return;
 
     root.addEventListener('click', (event) => {
+      const editTrigger = event.target.closest('[data-manage-edit]');
+      if (editTrigger) {
+        CR.manageState.activeEditField = editTrigger.dataset.manageEdit;
+        CR.renderManage?.();
+        return;
+      }
+
+      const closeEdit = event.target.closest('[data-manage-close-edit]');
+      if (closeEdit) {
+        closeEditSheet();
+        return;
+      }
+
+      const editOption = event.target.closest('[data-manage-edit-value]');
+      if (editOption) {
+        const field = CR.manageState.activeEditField;
+        const value = editOption.dataset.manageEditValue;
+        if (field && Object.prototype.hasOwnProperty.call(CR.manageState.season, field)) {
+          CR.manageState.season[field] = value;
+          CR.manageState.activeEditField = null;
+          CR.renderManage?.();
+          CR.showToast?.({ message: `${value} selected` });
+        }
+        return;
+      }
+
       const toggleButton = event.target.closest('[data-manage-toggle]');
       if (toggleButton) {
         const key = toggleButton.dataset.manageToggle;
@@ -46,28 +78,6 @@ window.CR = window.CR || {};
         CR.manageState.streamMode.selected = nextValue;
         CR.renderManage?.();
         CR.showToast?.({ message: `Stream Mode set to ${labelForStreamOption(nextValue)}` });
-        return;
-      }
-
-      const inlineChoice = event.target.closest('[data-manage-choice]');
-      if (inlineChoice) {
-        const key = inlineChoice.dataset.manageChoice;
-        const value = inlineChoice.dataset.manageValue;
-        setNestedValue(CR.manageState, key, value);
-        CR.renderManage?.();
-        CR.showToast?.({ message: `${inlineChoice.textContent || 'Preference'} selected` });
-        return;
-      }
-
-      const actionButton = event.target.closest('[data-manage-action]');
-      if (actionButton) {
-        const action = actionButton.dataset.manageAction;
-        const labels = {
-          carryover: 'Carryover review coming next',
-          commissioner: 'Commissioner tools will hook in later',
-          health: 'Health check placeholder run'
-        };
-        CR.showToast?.({ message: labels[action] || 'Manage action triggered' });
       }
     });
   }
