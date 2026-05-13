@@ -12,6 +12,11 @@ window.CR = window.CR || {};
       .replace(/'/g, '&#39;');
   }
 
+  function pickLine(pick) {
+    const points = Number(pick.points || 0);
+    return `${pick.playerName} • ${pick.goals}G ${pick.assists}A • ${points} pts`;
+  }
+
   function renderBoard(data) {
     const board = data.allTimeBoard || {};
     return `
@@ -33,7 +38,6 @@ window.CR = window.CR || {};
         </div>
         <div class="rivalry-board-meta-row">
           <span class="rivalry-board-meta-pill">${escapeHtml(String(board.totalGames || 0))} total games</span>
-          <span class="rivalry-board-meta-pill">Viewing ${escapeHtml(data.selectedSeason?.label || 'season')}</span>
         </div>
       </section>
     `;
@@ -125,8 +129,9 @@ window.CR = window.CR || {};
             <div class="eyebrow">Recent games</div>
             <h3>Latest rivalry results</h3>
           </div>
+          <button class="history-view-all-button" type="button" data-history-access="all_games">View All</button>
         </div>
-        <div class="history-log-stack compact-log-stack">
+        <div class="history-log-stack recap-log-stack">
           ${(data.recentGames || []).map((game) => renderGameCard(game)).join('')}
         </div>
       </section>
@@ -134,45 +139,47 @@ window.CR = window.CR || {};
   }
 
   function renderGameCard(game) {
-    const scorePill = `${game.aaronScore}-${game.julieScore}`;
+    const winnerClass = game.winner === 'Aaron' ? 'winner-aaron' : game.winner === 'Julie' ? 'winner-julie' : 'winner-tie';
     return `
-      <button class="history-log-card compact-log-card history-log-open" type="button" data-history-open-game="${escapeHtml(game.id)}">
+      <article class="history-log-card rivalry-recap-card ${winnerClass}" id="history-game-${escapeHtml(game.id)}">
         <div class="history-log-topline">
           <div>
             <h3>Game ${escapeHtml(String(game.displayNumber))}</h3>
-            <div class="history-log-subtitle">${escapeHtml(game.playoff ? 'Playoffs' : 'Regular')}</div>
+            <div class="history-log-subtitle">${escapeHtml(game.date)} • ${escapeHtml(game.playoff ? 'Playoffs' : 'Regular Season')}</div>
           </div>
           <div class="history-log-actions">
-            <span class="history-score-pill">${escapeHtml(scorePill)}</span>
-            <span class="history-log-open-label">Open</span>
+            <span class="history-score-pill">${escapeHtml(`${game.aaronScore}-${game.julieScore}`)}</span>
           </div>
         </div>
-        <div class="history-log-body">
-          <div class="history-log-row"><span class="history-log-label">Date</span><span>${escapeHtml(game.date)}</span></div>
-          <div class="history-log-row"><span class="history-log-label">First goal</span><span>${escapeHtml(game.firstGoalScorer || '—')}</span></div>
+        <div class="history-recap-winner ${winnerClass}">${escapeHtml(game.winner === 'Tie' ? 'Tie game' : `${game.winner} won this matchup`)}</div>
+        <div class="history-recap-sides">
+          <section class="history-recap-side">
+            <div class="history-recap-side-head">
+              <strong>Aaron</strong>
+              <span>${escapeHtml(String(game.aaronScore))}</span>
+            </div>
+            <div class="history-recap-picks">
+              ${(game.picks?.Aaron || []).map((pick) => `<div class="history-recap-pick">${escapeHtml(pickLine(pick))}</div>`).join('')}
+            </div>
+          </section>
+          <section class="history-recap-side">
+            <div class="history-recap-side-head">
+              <strong>Julie</strong>
+              <span>${escapeHtml(String(game.julieScore))}</span>
+            </div>
+            <div class="history-recap-picks">
+              ${(game.picks?.Julie || []).map((pick) => `<div class="history-recap-pick">${escapeHtml(pickLine(pick))}</div>`).join('')}
+            </div>
+          </section>
         </div>
-      </button>
-    `;
-  }
-
-  function renderQuickAccess(data) {
-    return `
-      <section class="panel-card history-quick-access-card">
-        <div class="history-section-head">
-          <div>
-            <div class="eyebrow">Quick access</div>
-            <h3>Go deeper without clutter</h3>
+        <div class="history-recap-footer">
+          <span class="history-recap-first-goal">First goal: ${escapeHtml(game.firstGoalScorer || '—')}</span>
+          <div class="history-recap-actions">
+            <button class="history-open-button" type="button" data-history-open-game="${escapeHtml(game.id)}">Open</button>
+            <button class="history-edit-button" type="button" data-history-access="commissioner">Edit</button>
           </div>
         </div>
-        <div class="history-quick-access-grid">
-          ${(data.quickAccess || []).map((item) => `
-            <button class="history-access-card" type="button" data-history-access="${escapeHtml(item.id)}">
-              <strong>${escapeHtml(item.label)}</strong>
-              <span>${escapeHtml(item.meta)}</span>
-            </button>
-          `).join('')}
-        </div>
-      </section>
+      </article>
     `;
   }
 
@@ -213,7 +220,6 @@ window.CR = window.CR || {};
         ${renderHighlights(data)}
         ${renderRecentGames(data)}
         ${renderPlayerSpotlights(data)}
-        ${renderQuickAccess(data)}
       </div>
     `;
   }
