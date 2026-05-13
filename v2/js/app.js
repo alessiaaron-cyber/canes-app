@@ -21,6 +21,23 @@ window.CR = window.CR || {};
     return role ? `${role.charAt(0).toUpperCase()}${role.slice(1)}` : 'Member';
   }
 
+  function getAssetBase() {
+    const knownScript = Array.from(document.querySelectorAll('script[src]')).find((script) => {
+      const src = script.getAttribute('src') || '';
+      return src.includes('js/app.js') || src.includes('js/ui.js');
+    });
+
+    if (knownScript?.src) {
+      return new URL('.', knownScript.src).href;
+    }
+
+    return new URL('./', window.location.href).href;
+  }
+
+  function assetUrl(relativePath) {
+    return new URL(relativePath, getAssetBase()).href;
+  }
+
   function renderAccountIdentity() {
     const profile = window.CR.currentProfile || {};
     const user = window.CR.currentUser || {};
@@ -92,9 +109,9 @@ window.CR = window.CR || {};
   }
 
   function ensureManageStylesheet() {
-    const href = 'css/manage.css?v=v2manage1';
+    const href = assetUrl('../css/manage.css?v=v2manage1');
 
-    const existing = Array.from(document.querySelectorAll('link[rel="stylesheet"]')).find((link) => link.getAttribute('href') === href);
+    const existing = Array.from(document.querySelectorAll('link[rel="stylesheet"]')).find((link) => link.href === href);
     if (existing) return Promise.resolve();
 
     return new Promise((resolve, reject) => {
@@ -107,8 +124,10 @@ window.CR = window.CR || {};
     });
   }
 
-  function loadScript(src) {
-    const existing = Array.from(document.querySelectorAll('script')).find((script) => script.getAttribute('src') === src);
+  function loadScript(relativePath) {
+    const src = assetUrl(relativePath);
+
+    const existing = Array.from(document.querySelectorAll('script')).find((script) => script.src === src);
 
     if (existing) return Promise.resolve();
 
@@ -116,7 +135,7 @@ window.CR = window.CR || {};
       const script = document.createElement('script');
       script.src = src;
       script.onload = () => resolve();
-      script.onerror = () => reject(new Error(`Failed to load ${src}`));
+      script.onerror = () => reject(new Error(`Failed to load ${relativePath}`));
       document.body.appendChild(script);
     });
   }
@@ -128,14 +147,14 @@ window.CR = window.CR || {};
     await ensureManageStylesheet();
 
     const scripts = [
-      'js/manage/manage-model.js?v=v2manage1',
-      'js/manage/manage-render.js?v=v2manage1',
-      'js/manage/manage-events.js?v=v2manage1',
-      'js/manage/manage.js?v=v2manage1'
+      'manage/manage-model.js?v=v2manage1',
+      'manage/manage-render.js?v=v2manage1',
+      'manage/manage-events.js?v=v2manage1',
+      'manage/manage.js?v=v2manage1'
     ];
 
-    for (const src of scripts) {
-      await loadScript(src);
+    for (const relativePath of scripts) {
+      await loadScript(relativePath);
     }
 
     window.CR.__manageAssetsReady = true;
