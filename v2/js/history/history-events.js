@@ -3,12 +3,22 @@ window.CR = window.CR || {};
 (() => {
   const CR = window.CR;
 
+  function escapeHtml(value) {
+    return String(value ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/\"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
   function openHistorySheet(config) {
     CR.historyState.sheet = {
       open: true,
       title: config.title,
       message: config.message,
-      primaryAction: config.primaryAction || ''
+      primaryAction: config.primaryAction || '',
+      detailsHtml: config.detailsHtml || ''
     };
     CR.renderHistory?.();
   }
@@ -33,6 +43,62 @@ window.CR = window.CR || {};
     scrollHistoryToTop();
   }
 
+  function renderPickRows(picks) {
+    return (picks || []).map((pick) => `
+      <div class="history-sheet-pick-row">
+        <span>${escapeHtml(pick.playerName)}</span>
+        <strong>${escapeHtml(`${pick.goals}G ${pick.assists}A • ${pick.points} pts`)}</strong>
+      </div>
+    `).join('');
+  }
+
+  function openGameEditSheet(gameId, context) {
+    const games = CR.historyData?.games || [];
+    const game = games.find((item) => String(item.id) === String(gameId));
+    if (!game) {
+      openHistorySheet({
+        title: 'Game edit',
+        message: 'Could not load this game.',
+        primaryAction: ''
+      });
+      return;
+    }
+
+    const detailsHtml = `
+      <div class="history-sheet-game-summary">
+        <div class="history-sheet-meta-row">
+          <span class="history-sheet-meta-pill">${escapeHtml(game.date)}</span>
+          <span class="history-sheet-meta-pill">${escapeHtml(game.playoff ? 'Playoffs' : 'Regular Season')}</span>
+          <span class="history-sheet-meta-pill">Score ${escapeHtml(`${game.aaronScore}-${game.julieScore}`)}</span>
+        </div>
+        <div class="history-sheet-sides">
+          <section class="history-sheet-side">
+            <div class="history-sheet-side-head">
+              <strong>Aaron</strong>
+              <span>${escapeHtml(String(game.aaronScore))}</span>
+            </div>
+            ${renderPickRows(game.picks?.Aaron)}
+          </section>
+          <section class="history-sheet-side">
+            <div class="history-sheet-side-head">
+              <strong>Julie</strong>
+              <span>${escapeHtml(String(game.julieScore))}</span>
+            </div>
+            ${renderPickRows(game.picks?.Julie)}
+          </section>
+        </div>
+        <div class="history-sheet-actions-note">Editing flow for ${escapeHtml(context === 'archive' ? 'archive' : 'recent game')} cards will live here: score corrections, first goal changes, and pick/stat adjustments.</div>
+      </div>
+    `;
+
+    openHistorySheet({
+      title: `Edit Game ${game.displayNumber || ''}`.trim(),
+      message: 'Commissioner edit workspace',
+      primaryAction: 'Save Changes',
+      detailsHtml
+    });
+  }
+
   function handleSeasonSelect(event) {
     const target = event.target;
     if (!target.matches('#historySeasonSelect, #historySeasonSelectArchive')) return;
@@ -43,6 +109,12 @@ window.CR = window.CR || {};
   }
 
   function handleClick(event) {
+    const editGame = event.target.closest('[data-history-edit-game]');
+    if (editGame) {
+      openGameEditSheet(editGame.dataset.historyEditGame, editGame.dataset.historyEditContext || 'recent');
+      return;
+    }
+
     const seasonOverview = event.target.closest('[data-history-open-season]');
     if (seasonOverview) {
       CR.historyState.seasonId = seasonOverview.dataset.historyOpenSeason;
@@ -106,7 +178,7 @@ window.CR = window.CR || {};
     const sheetApply = event.target.closest('[data-history-sheet-apply]');
     if (sheetApply) {
       CR.historyState.sheet = { open: false };
-      CR.showToast?.({ message: 'Mock history tool opened', tier: 'light' });
+      CR.showToast?.({ message: 'Mock commissioner save complete', tier: 'light' });
       CR.renderHistory?.();
     }
   }
