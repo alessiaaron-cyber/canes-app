@@ -129,28 +129,6 @@
   transform: translateX(18px);
 }
 
-.manage-inline-choice-row {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  margin-top: 18px;
-}
-
-.manage-inline-choice {
-  border: 1px solid var(--border-subtle);
-  border-radius: 999px;
-  padding: 11px 10px;
-  background: #f4f6f8;
-  color: var(--text-secondary);
-  font-weight: 800;
-}
-
-.manage-inline-choice.is-active {
-  background: #111827;
-  color: #fff;
-  border-color: #111827;
-}
-
 .manage-meta-grid,
 .manage-health-grid {
   display: grid;
@@ -200,10 +178,6 @@
   letter-spacing: -0.01em;
 }
 
-.manage-meta-card-wide {
-  grid-column: 1 / -1;
-}
-
 .manage-health-topline {
   display: flex;
   flex-direction: column;
@@ -235,31 +209,49 @@
 }
 
 .manage-action-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
   margin-top: 18px;
 }
 
-.manage-action-row .mini-button {
-  background: #f3f4f6;
-  color: var(--ink-strong);
+.manage-start-season-inline-button,
+.manage-score-edit-button,
+.manage-back-button,
+.manage-list-action,
+.manage-form-submit,
+.manage-start-season-button {
+  appearance: none;
+  border: 0;
+  font: inherit;
+  font-weight: 950;
+  letter-spacing: -0.02em;
 }
 
-.manage-primary-action {
-  background: #111827 !important;
-  color: #fff !important;
-}
-
-.manage-secondary-action {
-  background: #f3f4f6 !important;
-  color: var(--ink-strong) !important;
-}
-
-.manage-full-action {
-  width: 100%;
+.manage-form-submit,
+.manage-start-season-button {
+  display: flex;
+  align-items: center;
   justify-content: center;
-  margin-top: 14px;
+  width: 100%;
+  min-height: 54px;
+  margin-top: 16px;
+  border-radius: 18px;
+  background: #111827;
+  color: #fff;
+  font-size: 16px;
+}
+
+.manage-start-season-inline-button,
+.manage-score-edit-button,
+.manage-back-button,
+.manage-list-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: #eef2f6;
+  color: var(--ink-strong);
+  font-size: 13px;
 }
 
 .manage-tool-list,
@@ -277,66 +269,81 @@
   justify-content: space-between;
   gap: 14px;
   width: 100%;
+  min-height: 82px;
   border: 1px solid var(--border-subtle);
-  border-radius: 18px;
-  padding: 14px;
+  border-radius: 20px;
+  padding: 15px;
   background: #fbfcfd;
   text-align: left;
   color: var(--ink-strong);
+  appearance: none;
+  font: inherit;
 }
 
-.manage-tool-row strong,
-.manage-list-row strong {
+.manage-tool-copy,
+.manage-list-copy {
+  min-width: 0;
+}
+
+.manage-tool-copy strong,
+.manage-list-copy strong {
   display: block;
   font-size: 18px;
-  font-weight: 900;
+  font-weight: 950;
   letter-spacing: -0.04em;
+  color: var(--ink-strong);
 }
 
-.manage-tool-row span,
-.manage-list-row span {
+.manage-tool-copy span,
+.manage-list-copy span {
   display: block;
-  margin-top: 4px;
+  margin-top: 5px;
   color: var(--text-secondary);
   font-size: 13px;
   font-weight: 800;
   line-height: 1.35;
 }
 
-.manage-tool-row > span:last-child {
+.manage-tool-arrow {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
+  width: 46px;
+  height: 46px;
   margin: 0;
   flex: 0 0 auto;
   border-radius: 16px;
   background: #111827;
   color: #fff;
-  font-size: 28px;
+  font-size: 30px;
   line-height: 1;
+}
+
+.manage-list-action {
+  flex: 0 0 auto;
 }
 
 .manage-list-row.is-muted {
   opacity: 0.62;
 }
 
-.manage-form-grid label {
+.manage-form-grid label,
+.manage-season-field {
   display: grid;
   gap: 8px;
+  margin-top: 14px;
 }
 
 .manage-input {
   width: 100%;
-  min-height: 52px;
+  min-height: 54px;
   border: 1px solid var(--border-subtle);
   border-radius: 18px;
   background: #fff;
   color: var(--ink-strong);
   font: inherit;
   font-size: 16px;
-  font-weight: 800;
+  font-weight: 850;
   padding: 0 14px;
   outline: none;
 }
@@ -346,23 +353,26 @@
 }
 
 .manage-subview-hero {
+  position: relative;
   border-top: 6px solid #c8102e;
   text-align: center;
+  padding-top: 18px;
 }
 
-.manage-subview-hero .mini-button {
-  float: left;
-  background: #eef2f6;
-  color: var(--ink-strong);
+.manage-subview-hero .manage-back-button {
+  position: absolute;
+  top: 18px;
+  left: 16px;
 }
 
 .manage-subview-hero .panel-tag {
-  float: right;
+  position: absolute;
+  top: 18px;
+  right: 16px;
 }
 
 .manage-subview-hero h2 {
-  clear: both;
-  margin-top: 58px;
+  margin-top: 86px;
   font-size: 34px;
   line-height: 1;
   letter-spacing: -0.06em;
@@ -372,14 +382,14 @@
   max-width: 30ch;
   margin: 10px auto 0;
   color: var(--text-secondary);
-  font-weight: 800;
+  font-weight: 850;
   line-height: 1.25;
 }
 
 .manage-score-card {
   margin-top: 18px;
   border: 1px solid var(--border-subtle);
-  border-radius: 20px;
+  border-radius: 22px;
   background: #fbfcfd;
   padding: 14px;
 }
@@ -391,6 +401,15 @@
   gap: 12px;
 }
 
+.manage-score-card-header strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 17px;
+  font-weight: 950;
+  letter-spacing: -0.04em;
+  color: var(--ink-strong);
+}
+
 .manage-score-rule-row {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -398,17 +417,17 @@
   margin-top: 12px;
 }
 
-.manage-score-rule-row > div {
-  border-radius: 16px;
+.manage-score-rule {
+  border-radius: 17px;
   background: #fff;
   border: 1px solid var(--border-subtle);
   padding: 12px;
 }
 
-.manage-score-rule-row strong {
+.manage-score-rule strong {
   display: block;
   margin-top: 6px;
-  font-size: 24px;
+  font-size: 25px;
   font-weight: 950;
   letter-spacing: -0.05em;
   color: var(--ink-strong);
@@ -458,19 +477,6 @@
 
 .manage-edit-options-spaced {
   margin-top: 10px;
-}
-
-.manage-start-season-button {
-  width: 100%;
-  min-height: 54px;
-  margin-top: 16px;
-  border: 0;
-  border-radius: 18px;
-  background: #111827;
-  color: #fff;
-  font-size: 16px;
-  font-weight: 950;
-  letter-spacing: -0.02em;
 }
 
 .manage-edit-sheet {
@@ -587,17 +593,12 @@
     grid-template-columns: 1fr;
   }
 
-  .manage-inline-choice-row {
-    grid-template-columns: 1fr;
-  }
-
   .manage-card-header {
     flex-direction: column;
     align-items: flex-start;
   }
 
   .manage-list-row {
-    flex-direction: column;
-    align-items: stretch;
+    align-items: flex-start;
   }
 }
