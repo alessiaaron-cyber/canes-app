@@ -22,9 +22,7 @@ window.CR = window.CR || {};
       },
       notifications: {
         pushEnabled: true,
-        toastsEnabled: true,
-        rivalrySwings: true,
-        scoringMoments: true
+        toastsEnabled: true
       },
       season: {
         activeSeasonLabel: '2025-26',
@@ -42,7 +40,9 @@ window.CR = window.CR || {};
       admin: {
         rosterStatus: 'Verified',
         scheduleStatus: 'Imported',
-        activeGameContext: 'No live game right now'
+        liveOpsStatus: 'Ready',
+        notificationToolsStatus: 'Ready',
+        userManagementStatus: 'Admin only'
       }
     };
   }
