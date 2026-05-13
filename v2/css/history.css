@@ -1,97 +1,60 @@
 .history-feed,
-.history-card-stack {
+.rivalry-hq-feed,
+.history-log-stack,
+.history-archive-stack,
+.rivalry-highlight-grid {
   display: flex;
   flex-direction: column;
   gap: 18px;
 }
 
-.history-topbar,
-.history-hero-card,
-.history-timeline-card,
-.history-story-card,
-.history-game-card,
-.history-player-card,
-.history-season-card {
+.rivalry-board-card,
+.rivalry-highlights-card,
+.history-hq-card,
+.history-log-card,
+.history-archive-card,
+.rivalry-highlight-item,
+.rivalry-heater-card {
   overflow: hidden;
 }
 
-.history-topbar {
+.rivalry-board-topline,
+.rivalry-highlights-header,
+.history-hq-topline,
+.history-log-topline,
+.history-season-topline,
+.history-log-actions,
+.history-edit-side-header {
   display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.history-topbar-copy {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.history-block {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.history-block-header,
-.history-moment-topline,
-.history-game-topline,
-.history-game-head,
-.history-player-topline,
-.history-season-topline {
-  display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 12px;
 }
 
-.history-season-switcher {
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  padding-bottom: 2px;
-  scrollbar-width: none;
+.rivalry-board-title,
+.history-hq-title {
+  margin: 6px 0 0;
 }
 
-.history-season-switcher::-webkit-scrollbar {
-  display: none;
+.rivalry-board-score-grid,
+.history-season-score-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 16px;
 }
 
-.history-season-switcher button,
-.history-season-jump,
-.history-edit-trigger {
-  border: 0;
-  border-radius: 999px;
-  padding: 10px 14px;
-  background: #eef1f4;
-  color: var(--text-secondary);
-  font-weight: 800;
-  white-space: nowrap;
+.rivalry-score-card {
+  border-radius: 20px;
+  border: 1px solid var(--border-subtle);
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  padding: 16px;
 }
 
-.history-season-switcher button.active {
-  background: var(--ink-strong);
-  color: #fff;
-}
-
-.history-season-jump,
-.history-edit-trigger {
-  padding: 9px 12px;
-  font-size: 12px;
-}
-
-.history-hero-copy,
-.history-support-copy,
-.history-story-card p,
-.history-game-card p,
-.history-player-card p,
-.history-season-card p {
-  color: var(--text-secondary);
-  line-height: 1.48;
-}
-
-.history-season-record,
-.history-game-score,
+.rivalry-score-value,
+.rivalry-highlight-value,
+.history-archive-record,
+.history-score-pill,
 .history-player-hero-stat {
   font-size: 30px;
   font-weight: 900;
@@ -99,160 +62,174 @@
   color: var(--ink-strong);
 }
 
-.history-timeline-card {
-  background: linear-gradient(180deg, #ffffff 0%, #fafbfc 100%);
-}
-
-.history-timeline {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 12px;
-}
-
-.history-timeline-node {
-  border: 0;
+.rivalry-board-banner,
+.rivalry-booth-note {
+  margin-top: 14px;
   border-radius: 18px;
-  padding: 12px 14px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  text-align: left;
-  background: #f6f7f9;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, rgba(200, 16, 46, 0.08), rgba(17, 24, 39, 0.04));
+  color: var(--ink-strong);
+  font-weight: 800;
+}
+
+.rivalry-heater-card,
+.rivalry-highlight-item,
+.history-log-card,
+.history-archive-card,
+.history-edit-panel,
+.history-pick-edit-card,
+.history-edit-side {
+  border: 1px solid var(--border-subtle);
+  background: #fff;
+  border-radius: 20px;
+  padding: 16px;
+}
+
+.rivalry-heater-title {
+  margin-top: 8px;
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: -0.04em;
   color: var(--ink-strong);
 }
 
-.history-timeline-node.is-aaron {
-  background: linear-gradient(180deg, #f7f8fa 0%, #eef2f6 100%);
+.rivalry-heater-card p,
+.rivalry-highlight-item p,
+.history-hq-copy,
+.history-log-body,
+.history-support-copy,
+.history-edit-panel p,
+.history-archive-card p {
+  color: var(--text-secondary);
+  line-height: 1.48;
 }
 
-.history-timeline-node.is-julie {
-  background: linear-gradient(180deg, #fff8f8 0%, #fff0f2 100%);
+.rivalry-highlight-grid {
+  margin-top: 14px;
 }
 
-.history-timeline-node.is-playoff {
-  box-shadow: 0 0 0 1px rgba(200, 16, 46, 0.14) inset;
-}
-
-.history-timeline-dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 999px;
-  background: var(--ink-strong);
-  flex: 0 0 auto;
-}
-
-.history-timeline-node.is-julie .history-timeline-dot {
-  background: #c8102e;
-}
-
-.history-timeline-copy {
-  font-size: 14px;
-  font-weight: 800;
-  letter-spacing: -0.01em;
-}
-
-.history-story-card.is-aaron,
-.history-game-card.is-aaron,
-.history-season-card.is-current {
-  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
-}
-
-.history-story-card.is-julie,
-.history-game-card.is-julie {
-  background: linear-gradient(180deg, #ffffff 0%, #fff7f8 100%);
-}
-
-.history-date {
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--text-tertiary);
-}
-
-.history-game-button {
-  width: 100%;
-  border: 0;
-  padding: 0;
-  background: transparent;
-  text-align: left;
-}
-
-.history-game-mainline {
-  margin-top: 12px;
+.history-season-field {
+  margin-top: 14px;
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 14px;
-}
-
-.history-tag-row,
-.history-player-stats,
-.history-admin-row {
-  display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 8px;
-  margin-top: 12px;
 }
 
-.history-chip,
-.history-player-stats span {
+.history-season-select {
+  width: 100%;
+  min-height: 46px;
+  border-radius: 16px;
+  border: 1px solid var(--border-subtle);
+  background: #fff;
+  padding: 0 14px;
+  font: inherit;
+  font-weight: 700;
+  color: var(--ink-strong);
+}
+
+.history-score-pill {
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #ffffff 0%, #f5f7fa 100%);
+  border: 1px solid var(--border-subtle);
   display: inline-flex;
   align-items: center;
-  min-height: 30px;
-  padding: 0 10px;
+  justify-content: center;
+  font-size: 20px;
+}
+
+.history-edit-trigger,
+.history-edit-tabs button,
+.history-edit-cancel,
+.history-season-jump {
+  border: 0;
   border-radius: 999px;
   background: #eef1f4;
   color: var(--text-secondary);
-  font-size: 12px;
+  font-weight: 800;
+}
+
+.history-edit-trigger,
+.history-season-jump {
+  min-height: 36px;
+  padding: 0 12px;
+  white-space: nowrap;
+}
+
+.history-edit-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.history-edit-tabs button {
+  flex: 1 1 0;
+  min-height: 38px;
+}
+
+.history-edit-tabs button.active,
+.history-edit-save {
+  background: var(--ink-strong);
+  color: #fff;
+}
+
+.history-log-body {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
   font-weight: 700;
 }
 
-.history-game-detail {
+.history-game-edit-shell {
   margin-top: 16px;
   padding-top: 16px;
   border-top: 1px solid var(--border-subtle);
 }
 
-.history-pick-columns {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 12px;
+.history-edit-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.history-pick-column {
-  padding: 14px;
-  border-radius: 18px;
+.history-edit-field,
+.history-edit-mini-field,
+.history-edit-player {
+  min-height: 42px;
+  border-radius: 14px;
+  border: 1px solid var(--border-subtle);
   background: var(--surface-secondary);
-}
-
-.history-pick-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  padding: 0 12px;
+  color: var(--ink-strong);
+  font-weight: 700;
+}
+
+.history-picks-editor {
+  gap: 14px;
+}
+
+.history-pick-edit-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 56px 56px;
+  gap: 8px;
   margin-top: 10px;
 }
 
-.history-pick-row strong,
-.history-pick-row span {
-  display: block;
+.history-edit-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
 }
 
-.history-pick-row span {
-  margin-top: 4px;
-  color: var(--text-secondary);
-  font-size: 12px;
-}
-
-.history-pick-points {
-  font-size: 18px;
-  font-weight: 900;
-  letter-spacing: -0.03em;
-}
-
-.history-player-vibe {
-  margin-top: 8px;
-  font-weight: 700;
+.history-edit-cancel,
+.history-edit-save {
+  flex: 1 1 0;
+  min-height: 42px;
+  border-radius: 14px;
+  font-weight: 800;
 }
 
 .history-admin-sheet {
@@ -277,7 +254,10 @@
 }
 
 @media (min-width: 431px) {
-  .history-pick-columns {
+  .rivalry-highlight-grid,
+  .history-archive-stack {
+    display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
   }
 }
