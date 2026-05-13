@@ -25,33 +25,15 @@ window.CR = window.CR || {};
   }
 
   function renderPill(value, label, active, note) {
-    return `
-      <button class="manage-option-pill ${active ? 'is-active' : ''}" type="button" data-manage-stream-option="${escapeHtml(value)}" aria-pressed="${active ? 'true' : 'false'}">
-        <span class="manage-option-pill-label">${escapeHtml(label)}</span>
-        ${note ? `<span class="manage-option-pill-note">${escapeHtml(note)}</span>` : ''}
-      </button>
-    `;
+    return `<button class="manage-option-pill ${active ? 'is-active' : ''}" type="button" data-manage-stream-option="${escapeHtml(value)}" aria-pressed="${active ? 'true' : 'false'}"><span class="manage-option-pill-label">${escapeHtml(label)}</span>${note ? `<span class="manage-option-pill-note">${escapeHtml(note)}</span>` : ''}</button>`;
   }
 
   function renderHealthItem(label, value, tone = 'neutral') {
-    return `
-      <article class="manage-health-item">
-        <div class="manage-health-topline">
-          <span class="eyebrow">${escapeHtml(label)}</span>
-          <span class="manage-health-badge is-${escapeHtml(tone)}">${escapeHtml(value)}</span>
-        </div>
-      </article>
-    `;
+    return `<article class="manage-health-item"><div class="manage-health-topline"><span class="eyebrow">${escapeHtml(label)}</span><span class="manage-health-badge is-${escapeHtml(tone)}">${escapeHtml(value)}</span></div></article>`;
   }
 
   function renderEditableMetaCard({ field, label, value }) {
-    return `
-      <button class="manage-meta-card manage-meta-button" type="button" data-manage-edit="${escapeHtml(field)}" aria-label="Edit ${escapeHtml(label)}">
-        <span class="eyebrow">${escapeHtml(label)}</span>
-        <strong>${escapeHtml(value)}</strong>
-        <span class="manage-meta-edit-hint">Tap to edit</span>
-      </button>
-    `;
+    return `<button class="manage-meta-card manage-meta-button" type="button" data-manage-edit="${escapeHtml(field)}" aria-label="Edit ${escapeHtml(label)}"><span class="eyebrow">${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong><span class="manage-meta-edit-hint">Tap to edit</span></button>`;
   }
 
   function renderCardHeader(eyebrow, title, copy, badge) {
@@ -100,7 +82,12 @@ window.CR = window.CR || {};
   }
 
   function renderScheduleView(state) {
-    return `<div class="content-stack manage-stack">${renderSubviewHeader('Schedule', 'Schedule', 'Manage all games. Finalized history stays protected until explicitly edited.')}<section class="panel-card manage-card">${renderCardHeader('NHL schedule import', 'Safe sync', 'Import Canes games while preserving finalized history.', null)}<button class="cr-button primary" type="button" data-manage-import-schedule>Import NHL Schedule</button></section><section class="panel-card manage-card">${renderCardHeader('Add game', 'Add Game', '', null)}<div class="cr-form-grid"><label><span class="eyebrow">Date</span><input class="cr-input" value="${escapeHtml(state.scheduleDraft.date)}" placeholder="YYYY-MM-DD" data-manage-schedule-input="date" /></label><label><span class="eyebrow">Opponent</span><input class="cr-input" value="${escapeHtml(state.scheduleDraft.opponent)}" placeholder="NYR, FLA, etc." data-manage-schedule-input="opponent" /></label><label><span class="eyebrow">Type</span><select class="cr-input" data-manage-schedule-input="type"><option ${state.scheduleDraft.type === 'Regular' ? 'selected' : ''}>Regular</option><option ${state.scheduleDraft.type === 'Playoffs' ? 'selected' : ''}>Playoffs</option></select></label><label><span class="eyebrow">First pick</span><select class="cr-input" data-manage-schedule-input="firstPicker">${state.users.map((user) => `<option ${state.scheduleDraft.firstPicker === user.username ? 'selected' : ''}>${escapeHtml(user.username)}</option>`).join('')}</select></label></div><button class="cr-button primary" type="button" data-manage-add-game>Add Game</button></section><section class="panel-card manage-card">${renderCardHeader('Games', 'All games', '', { className: 'neutral', label: `${state.schedule.length}` })}<div class="cr-list-stack">${state.schedule.map((game) => `<article class="cr-action-row"><div class="cr-action-copy"><strong>${escapeHtml(game.date)} · ${escapeHtml(game.opponent)}</strong><span>${escapeHtml(game.type)} · ${escapeHtml(game.firstPicker)} picks first</span></div><div class="manage-row-actions"><button class="cr-button" type="button" data-manage-edit-game="${escapeHtml(game.id)}">Edit</button><button class="cr-button remove" type="button" data-manage-remove-game="${escapeHtml(game.id)}">Remove</button></div></article>`).join('')}</div></section></div>`;
+    const isEditing = Boolean(state.editingScheduleGameId);
+    const heading = isEditing ? 'Edit game' : 'Add game';
+    const actionLabel = isEditing ? 'Save Game' : 'Add Game';
+    const helper = isEditing ? 'Update this game without changing finalized history.' : '';
+
+    return `<div class="content-stack manage-stack">${renderSubviewHeader('Schedule', 'Schedule', 'Manage all games. Finalized history stays protected until explicitly edited.')}<section class="panel-card manage-card">${renderCardHeader('NHL schedule import', 'Safe sync', 'Import Canes games while preserving finalized history.', null)}<button class="cr-button primary" type="button" data-manage-import-schedule>Import NHL Schedule</button></section><section class="panel-card manage-card">${renderCardHeader(isEditing ? 'Editing schedule' : 'Add game', heading, helper, isEditing ? { className: 'warning', label: 'Editing' } : null)}<div class="cr-form-grid"><label><span class="eyebrow">Date</span><input class="cr-input" value="${escapeHtml(state.scheduleDraft.date)}" placeholder="YYYY-MM-DD" data-manage-schedule-input="date" /></label><label><span class="eyebrow">Opponent</span><input class="cr-input" value="${escapeHtml(state.scheduleDraft.opponent)}" placeholder="NYR, FLA, etc." data-manage-schedule-input="opponent" /></label><label><span class="eyebrow">Type</span><select class="cr-input" data-manage-schedule-input="type"><option ${state.scheduleDraft.type === 'Regular' ? 'selected' : ''}>Regular</option><option ${state.scheduleDraft.type === 'Playoffs' ? 'selected' : ''}>Playoffs</option></select></label><label><span class="eyebrow">First pick</span><select class="cr-input" data-manage-schedule-input="firstPicker">${state.users.map((user) => `<option ${state.scheduleDraft.firstPicker === user.username ? 'selected' : ''}>${escapeHtml(user.username)}</option>`).join('')}</select></label></div><button class="cr-button primary" type="button" data-manage-save-game>${actionLabel}</button>${isEditing ? '<button class="cr-button manage-cancel-edit" type="button" data-manage-cancel-edit-game>Cancel edit</button>' : ''}</section><section class="panel-card manage-card">${renderCardHeader('Games', 'All games', '', { className: 'neutral', label: `${state.schedule.length}` })}<div class="cr-list-stack">${state.schedule.map((game) => `<article class="cr-action-row ${state.editingScheduleGameId === game.id ? 'is-editing' : ''}"><div class="cr-action-copy"><strong>${escapeHtml(game.date)} · ${escapeHtml(game.opponent)}</strong><span>${escapeHtml(game.type)} · ${escapeHtml(game.firstPicker)} picks first</span></div><div class="manage-row-actions"><button class="cr-button" type="button" data-manage-edit-game="${escapeHtml(game.id)}">Edit</button><button class="cr-button remove" type="button" data-manage-remove-game="${escapeHtml(game.id)}">Remove</button></div></article>`).join('')}</div></section></div>`;
   }
 
   function renderEditSheet(state) {
