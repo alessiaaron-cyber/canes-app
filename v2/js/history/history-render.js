@@ -212,6 +212,8 @@ window.CR = window.CR || {};
   }
 
   function renderAllGames(data) {
+    const playoffCount = (data.gameLog || []).filter((game) => game.playoff).length;
+    const regularCount = Math.max(0, (data.gameLog?.length || 0) - playoffCount);
     return `
       <section class="history-all-games-view">
         <section class="panel-card history-all-games-header-card">
@@ -223,6 +225,18 @@ window.CR = window.CR || {};
             <button class="history-view-all-button" type="button" data-history-back-hq="1">Back</button>
           </div>
           <p class="history-support-copy">Browse every rivalry game for the selected season. This is the clean management/history surface for full-season review and admin workflows.</p>
+          <div class="history-season-field history-archive-season-field">
+            <label class="eyebrow" for="historySeasonSelect">Season</label>
+            <select id="historySeasonSelect" class="history-season-select">
+              ${(data.seasons || []).map((season) => `<option value="${escapeHtml(season.id)}" ${data.selectedSeason?.id === season.id ? 'selected' : ''}>${escapeHtml(season.label)}</option>`).join('')}
+            </select>
+          </div>
+          <div class="history-season-meta-row history-archive-meta-row">
+            <span class="history-season-meta-pill">${escapeHtml(String(data.gameLog?.length || 0))} games</span>
+            <span class="history-season-meta-pill">${escapeHtml(String(regularCount))} regular</span>
+            <span class="history-season-meta-pill">${escapeHtml(String(playoffCount))} playoff</span>
+            <span class="history-season-meta-pill">Record ${escapeHtml(data.seasonBoard?.recordText || '—')}</span>
+          </div>
         </section>
         <section class="panel-card history-all-games-list-card">
           <div class="history-section-head">
