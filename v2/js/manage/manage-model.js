@@ -11,6 +11,11 @@ window.CR = window.CR || {};
     { value: 'final', label: 'Final Only', note: 'Keep everything hidden until the game ends.' }
   ];
 
+  const MOCK_USERS = [
+    { id: 'aaron', username: 'Aaron' },
+    { id: 'julie', username: 'Julie' }
+  ];
+
   const EDIT_OPTIONS = {
     activeSeasonLabel: {
       title: 'Active season',
@@ -19,13 +24,13 @@ window.CR = window.CR || {};
     },
     scoringProfile: {
       title: 'Scoring profile',
-      hint: 'Preview different rivalry scoring defaults before backend wiring.',
-      options: ['Classic', 'Playoff Boost', 'Balanced', 'Chaos Mode']
+      hint: 'Choose the scoring system used for new rivalry matchups.',
+      options: ['Classic', 'Playoff Boost']
     },
-    draftRotation: {
-      title: 'Draft rotation',
-      hint: 'Control who is shown as next in the mock draft flow.',
-      options: ['Aaron next', 'Julie next', 'Snake draft', 'Manual']
+    firstPicker: {
+      title: 'First picker',
+      hint: 'Choose who picks first next game. Picks alternate after that.',
+      options: MOCK_USERS.map((user) => user.username)
     }
   };
 
@@ -46,7 +51,19 @@ window.CR = window.CR || {};
         activeSeasonLabel: '2025-26',
         playoffMode: false,
         scoringProfile: 'Classic',
-        draftRotation: 'Aaron next'
+        firstPicker: 'Aaron',
+        scoringSystems: {
+          Classic: {
+            firstGoal: 3,
+            goal: 2,
+            assist: 1
+          },
+          'Playoff Boost': {
+            firstGoal: 5,
+            goal: 3,
+            assist: 2
+          }
+        }
       },
       appHealth: {
         realtimeStatus: 'Connected',
@@ -55,6 +72,7 @@ window.CR = window.CR || {};
         pwaStatus: 'Installed',
         lastSyncLabel: '2 minutes ago'
       },
+      users: MOCK_USERS,
       editOptions: EDIT_OPTIONS
     };
   }
