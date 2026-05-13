@@ -84,19 +84,15 @@ window.CR = window.CR || {};
   function renderNotifications(state) {
     const enabledCount = [
       state.notifications.pushEnabled,
-      state.notifications.toastsEnabled,
-      state.notifications.rivalrySwings,
-      state.notifications.scoringMoments
+      state.notifications.toastsEnabled
     ].filter(Boolean).length;
 
     return `
       <section class="panel-card manage-card">
-        ${renderCardHeader('Notifications', 'Rivalry alerts', 'Keep moments punchy without turning the app into a horn spam machine.', { className: 'dark', label: `${enabledCount} on` })}
+        ${renderCardHeader('Notifications', 'Rivalry alerts', 'Simple notification controls while the smarter rivalry logic runs automatically behind the scenes.', { className: 'dark', label: `${enabledCount} on` })}
         <div class="manage-setting-stack">
           ${renderToggleRow({ key: 'notifications.pushEnabled', label: 'Push alerts', hint: 'Send rivalry moments to your phone.', checked: state.notifications.pushEnabled })}
           ${renderToggleRow({ key: 'notifications.toastsEnabled', label: 'In-app toasts', hint: 'Show quick banners while the app is open.', checked: state.notifications.toastsEnabled })}
-          ${renderToggleRow({ key: 'notifications.rivalrySwings', label: 'Lead-change rivalry swings', hint: 'Prioritize emotional momentum changes.', checked: state.notifications.rivalrySwings })}
-          ${renderToggleRow({ key: 'notifications.scoringMoments', label: 'Scoring moments', hint: 'Goals, first-goal hits, and scoring surges.', checked: state.notifications.scoringMoments })}
         </div>
       </section>
     `;
@@ -151,23 +147,31 @@ window.CR = window.CR || {};
   function renderAdmin(state) {
     return `
       <section class="panel-card manage-card">
-        ${renderCardHeader('Commissioner tools', 'Admin tools', 'Focused entry points for roster management, schedule imports, and commissioner workflows.', { className: 'dark', label: 'Admin' })}
+        ${renderCardHeader('Commissioner tools', 'Admin tools', 'Operational tools for rosters, schedules, notifications, live game management, and league administration.', { className: 'dark', label: 'Admin' })}
         <div class="manage-meta-grid manage-meta-grid-admin">
           <article class="manage-meta-card">
-            <span class="eyebrow">Roster</span>
+            <span class="eyebrow">Roster management</span>
             <strong>${escapeHtml(state.admin.rosterStatus)}</strong>
           </article>
           <article class="manage-meta-card">
-            <span class="eyebrow">Schedule</span>
+            <span class="eyebrow">Schedule tools</span>
             <strong>${escapeHtml(state.admin.scheduleStatus)}</strong>
           </article>
+          <article class="manage-meta-card">
+            <span class="eyebrow">Live operations</span>
+            <strong>${escapeHtml(state.admin.liveOpsStatus)}</strong>
+          </article>
+          <article class="manage-meta-card">
+            <span class="eyebrow">Notification tools</span>
+            <strong>${escapeHtml(state.admin.notificationToolsStatus)}</strong>
+          </article>
           <article class="manage-meta-card manage-meta-card-wide">
-            <span class="eyebrow">Current context</span>
-            <strong>${escapeHtml(state.admin.activeGameContext)}</strong>
+            <span class="eyebrow">User management</span>
+            <strong>${escapeHtml(state.admin.userManagementStatus)}</strong>
           </article>
         </div>
         <div class="manage-action-row">
-          <button class="mini-button" type="button" data-manage-action="commissioner">Commissioner tools</button>
+          <button class="mini-button" type="button" data-manage-action="commissioner">Open commissioner tools</button>
         </div>
       </section>
     `;
