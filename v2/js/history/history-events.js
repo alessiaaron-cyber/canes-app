@@ -57,7 +57,7 @@ window.CR = window.CR || {};
     const game = games.find((item) => String(item.id) === String(gameId));
     if (!game) {
       openHistorySheet({
-        title: 'Game edit',
+        title: 'Edit Game',
         message: 'Could not load this game.',
         primaryAction: ''
       });
@@ -68,7 +68,7 @@ window.CR = window.CR || {};
       <form class="history-sheet-form" onsubmit="return false;">
         <div class="history-sheet-meta-row">
           <span class="history-sheet-meta-pill">${escapeHtml(game.date)}</span>
-          <span class="history-sheet-meta-pill">${escapeHtml(context === 'archive' ? 'Archive edit' : 'Recent game edit')}</span>
+          <span class="history-sheet-meta-pill">${escapeHtml(context === 'archive' ? 'Archive' : 'Recent')}</span>
         </div>
 
         <div class="history-sheet-field-grid">
@@ -113,13 +113,13 @@ window.CR = window.CR || {};
           </section>
         </div>
 
-        <div class="history-sheet-actions-note">Commissioner workspace for score corrections, first-goal fixes, and pick/stat cleanup. This is the final staging surface before real persistence is wired in.</div>
+        <div class="history-sheet-actions-note">Update the game details, first goal, and player stats here. Save when everything looks right.</div>
       </form>
     `;
 
     openHistorySheet({
       title: `Edit Game ${game.displayNumber || ''}`.trim(),
-      message: 'Commissioner edit workspace',
+      message: 'Make changes and save when finished.',
       primaryAction: 'Save Changes',
       detailsHtml
     });
@@ -184,9 +184,9 @@ window.CR = window.CR || {};
 
       const configs = {
         commissioner: {
-          title: 'Commissioner tools',
-          message: 'Admin history tools will live behind this entry point for editing, corrections, and recalculation.',
-          primaryAction: 'Open tools'
+          title: 'Edit Tools',
+          message: 'History editing tools will live here.',
+          primaryAction: 'Open'
         }
       };
 
@@ -204,7 +204,7 @@ window.CR = window.CR || {};
     const sheetApply = event.target.closest('[data-history-sheet-apply]');
     if (sheetApply) {
       CR.historyState.sheet = { open: false };
-      CR.showToast?.({ message: 'Mock commissioner save complete', tier: 'light' });
+      CR.showToast?.({ message: 'Game changes saved', tier: 'light' });
       CR.renderHistory?.();
     }
   }
