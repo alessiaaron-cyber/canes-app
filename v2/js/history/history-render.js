@@ -159,7 +159,7 @@ window.CR = window.CR || {};
     const context = isArchive ? 'archive' : 'recent';
     const gameTypeBadge = game.playoff
       ? '<span class="panel-tag warning">Playoffs</span>'
-      : '<span class="panel-tag dark">Regular</span>';
+      : '<span class="panel-tag neutral">Regular</span>';
     return `
       <article class="history-log-card rivalry-recap-card ${winnerClass} ${isArchive ? 'is-archive' : ''}" id="history-game-${escapeHtml(game.id)}">
         <div class="history-log-topline">
