@@ -154,25 +154,48 @@ window.CR = window.CR || {};
     }));
   }
 
-  function getScopedData(model, state) {
-    const selectedSeason = model.seasons.find((season) => season.id === state.seasonId) || model.seasons[0] || null;
-    const selectedGames = model.seasonGames?.[state.seasonId] || [];
-    const selectedSummary = model.seasonSummaries?.find((season) => season.seasonId === state.seasonId) || null;
+  function buildStaticHistoryData(model) {
+    return {
+      allTimeBoard: buildAllTimeBoard(model.games || []),
+      highlights: buildHighlights(model.games || [])
+    };
+  }
+
+  function buildSeasonScopedData(model, seasonId) {
+    const selectedSeason = model.seasons.find((season) => season.id === seasonId) || model.seasons[0] || null;
+    const resolvedSeasonId = selectedSeason?.id || seasonId;
+    const selectedGames = model.seasonGames?.[resolvedSeasonId] || [];
+    const selectedSummary = model.seasonSummaries?.find((season) => season.seasonId === resolvedSeasonId) || null;
     const playerSpotlights = buildSeasonPlayerSpotlights(selectedGames);
     const gameLog = buildGameLog(selectedGames);
 
     return {
-      ...model,
       selectedSeason,
       selectedSummary,
       selectedGames,
       seasonBoard: buildSeasonBoard(selectedSeason, selectedGames, selectedSummary),
-      allTimeBoard: buildAllTimeBoard(model.games || []),
-      highlights: buildHighlights(model.games || []),
       momentum: buildMomentum(selectedGames),
       recentGames: gameLog.slice(0, 4),
       gameLog,
       playerSpotlights
+    };
+  }
+
+  function getScopedData(model, state) {
+    const cache = CR.historyCache || (CR.historyCache = { staticData: null, seasons: {} });
+
+    if (!cache.staticData) {
+      cache.staticData = buildStaticHistoryData(model);
+    }
+
+    if (!cache.seasons[state.seasonId]) {
+      cache.seasons[state.seasonId] = buildSeasonScopedData(model, state.seasonId);
+    }
+
+    return {
+      ...model,
+      ...cache.staticData,
+      ...cache.seasons[state.seasonId]
     };
   }
 
@@ -187,6 +210,7 @@ window.CR = window.CR || {};
 
   function initHistory() {
     CR.historyData = CR.historyModel.build(CR.historyMockData);
+    CR.historyCache = { staticData: null, seasons: {} };
     CR.historyState = {
       seasonId: CR.historyData.currentSeasonId,
       view: 'hq',
