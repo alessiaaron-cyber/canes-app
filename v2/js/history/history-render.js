@@ -117,7 +117,7 @@ window.CR = window.CR || {};
     `;
   }
 
-  function renderRecentGames(data, state) {
+  function renderRecentGames(data) {
     return `
       <section class="panel-card history-recent-card">
         <div class="history-section-head">
@@ -127,17 +127,16 @@ window.CR = window.CR || {};
           </div>
         </div>
         <div class="history-log-stack compact-log-stack">
-          ${(data.recentGames || []).map((game) => renderGameCard(game, state)).join('')}
+          ${(data.recentGames || []).map((game) => renderGameCard(game)).join('')}
         </div>
       </section>
     `;
   }
 
-  function renderGameCard(game, state) {
-    const isEditing = state.editingGameId === game.id;
+  function renderGameCard(game) {
     const scorePill = `${game.aaronScore}-${game.julieScore}`;
     return `
-      <article class="history-log-card compact-log-card" id="history-game-${escapeHtml(game.id)}">
+      <button class="history-log-card compact-log-card history-log-open" type="button" data-history-open-game="${escapeHtml(game.id)}">
         <div class="history-log-topline">
           <div>
             <h3>Game ${escapeHtml(String(game.displayNumber))}</h3>
@@ -145,15 +144,14 @@ window.CR = window.CR || {};
           </div>
           <div class="history-log-actions">
             <span class="history-score-pill">${escapeHtml(scorePill)}</span>
-            <button class="history-edit-trigger" type="button" data-history-open-edit="${escapeHtml(game.id)}">Edit</button>
+            <span class="history-log-open-label">Open</span>
           </div>
         </div>
         <div class="history-log-body">
           <div class="history-log-row"><span class="history-log-label">Date</span><span>${escapeHtml(game.date)}</span></div>
           <div class="history-log-row"><span class="history-log-label">First goal</span><span>${escapeHtml(game.firstGoalScorer || '—')}</span></div>
         </div>
-        ${isEditing ? renderEditor(game, state) : ''}
-      </article>
+      </button>
     `;
   }
 
@@ -206,85 +204,14 @@ window.CR = window.CR || {};
     `;
   }
 
-  function renderEditor(game, state) {
-    const tab = state.editTab || 'result';
-    return `
-      <div class="history-game-edit-shell">
-        ${renderEditTabs(state)}
-        ${tab === 'result' ? renderResultEditor(game) : ''}
-        ${tab === 'picks' ? renderPicksEditor(game) : ''}
-        ${tab === 'info' ? renderInfoEditor(game) : ''}
-        <div class="history-edit-actions">
-          <button class="history-edit-cancel" type="button" data-history-edit-cancel="1">Cancel</button>
-          <button class="history-edit-save" type="button" data-history-edit-save="1">Save</button>
-        </div>
-      </div>
-    `;
-  }
-
-  function renderEditTabs(state) {
-    const tabs = [
-      { id: 'result', label: 'Result' },
-      { id: 'picks', label: 'Picks' },
-      { id: 'info', label: 'Info' }
-    ];
-    return `<div class="history-edit-tabs">${tabs.map((tab) => `<button type="button" class="${state.editTab === tab.id ? 'active' : ''}" data-history-edit-tab="${tab.id}">${tab.label}</button>`).join('')}</div>`;
-  }
-
-  function renderResultEditor(game) {
-    return `
-      <div class="history-edit-panel">
-        <label class="eyebrow">First Goal Scorer</label>
-        <div class="history-edit-field">${escapeHtml(game.firstGoalScorer || '—')}</div>
-        <label class="eyebrow">Status</label>
-        <div class="history-edit-field">Final</div>
-      </div>
-    `;
-  }
-
-  function renderPicksEditor(game) {
-    return `
-      <div class="history-edit-panel history-picks-editor">
-        ${['Aaron', 'Julie'].map((side) => `
-          <section class="history-edit-side">
-            <div class="history-edit-side-header">
-              <h3>${escapeHtml(side)} Picks</h3>
-              <span class="eyebrow">G / A</span>
-            </div>
-            ${(game.picks?.[side] || []).map((pick) => `
-              <div class="history-pick-edit-card">
-                <div class="history-pick-edit-grid">
-                  <div class="history-edit-field history-edit-player">${escapeHtml(pick.playerName)}</div>
-                  <div class="history-edit-mini-field">${escapeHtml(String(pick.goals))}</div>
-                  <div class="history-edit-mini-field">${escapeHtml(String(pick.assists))}</div>
-                </div>
-              </div>
-            `).join('')}
-          </section>
-        `).join('')}
-      </div>
-    `;
-  }
-
-  function renderInfoEditor(game) {
-    return `
-      <div class="history-edit-panel">
-        <label class="eyebrow">Date</label>
-        <div class="history-edit-field">${escapeHtml(game.date)}</div>
-        <label class="eyebrow">Type</label>
-        <div class="history-edit-field">${escapeHtml(game.playoff ? 'Playoffs' : 'Regular')}</div>
-      </div>
-    `;
-  }
-
-  function renderShell(data, state) {
+  function renderShell(data) {
     return `
       <div class="history-feed rivalry-command-feed">
         ${renderBoard(data)}
         ${renderSeasonSnapshot(data)}
         ${renderMomentum(data)}
         ${renderHighlights(data)}
-        ${renderRecentGames(data, state)}
+        ${renderRecentGames(data)}
         ${renderPlayerSpotlights(data)}
         ${renderQuickAccess(data)}
       </div>
