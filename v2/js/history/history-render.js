@@ -156,12 +156,16 @@ window.CR = window.CR || {};
 
   function renderGameCard(game, isArchive) {
     const winnerClass = game.winner === 'Aaron' ? 'winner-aaron' : game.winner === 'Julie' ? 'winner-julie' : 'winner-tie';
+    const context = isArchive ? 'archive' : 'recent';
     return `
       <article class="history-log-card rivalry-recap-card ${winnerClass} ${isArchive ? 'is-archive' : ''}" id="history-game-${escapeHtml(game.id)}">
         <div class="history-log-topline">
           <div>
-            <h3>Game ${escapeHtml(String(game.displayNumber))}</h3>
-            <div class="history-log-subtitle">${escapeHtml(game.date)} • ${escapeHtml(game.playoff ? 'Playoffs' : 'Regular Season')}</div>
+            <div class="history-log-kicker-row">
+              <span class="history-log-kicker">Game ${escapeHtml(String(game.displayNumber))}</span>
+              ${game.playoff ? '<span class="history-playoff-badge">Playoffs</span>' : '<span class="history-regular-badge">Regular</span>'}
+            </div>
+            <div class="history-log-subtitle">${escapeHtml(game.date)}</div>
           </div>
           <div class="history-log-actions">
             <span class="history-score-pill">${escapeHtml(`${game.aaronScore}-${game.julieScore}`)}</span>
@@ -191,7 +195,7 @@ window.CR = window.CR || {};
         <div class="history-recap-footer">
           <span class="history-recap-first-goal">First goal: ${escapeHtml(game.firstGoalScorer || '—')}</span>
           <div class="history-recap-actions">
-            <button class="history-edit-button" type="button" data-history-access="commissioner">Edit</button>
+            <button class="history-edit-button" type="button" data-history-edit-game="${escapeHtml(game.id)}" data-history-edit-context="${context}">Edit</button>
           </div>
         </div>
       </article>
@@ -236,6 +240,7 @@ window.CR = window.CR || {};
     }, { aaron: 0, julie: 0 });
     const winner = seasonWinner(summary, totals);
     const winnerClass = winner === 'Aaron' ? 'winner-aaron' : winner === 'Julie' ? 'winner-julie' : 'winner-tie';
+    const playoffCount = games.filter((game) => game.playoff).length;
     return `
       <button class="history-season-overview-card ${winnerClass}" type="button" data-history-open-season="${escapeHtml(summary.seasonId)}">
         <div class="history-season-overview-topline">
@@ -246,12 +251,20 @@ window.CR = window.CR || {};
           <span class="history-season-overview-count">${escapeHtml(String(games.length))} games</span>
         </div>
         <div class="history-season-overview-score">
-          <strong>Aaron ${escapeHtml(String(totals.aaron))}</strong>
-          <span>Julie ${escapeHtml(String(totals.julie))}</span>
+          <div class="history-season-overview-side">
+            <span class="history-season-overview-name">Aaron</span>
+            <strong>${escapeHtml(String(totals.aaron))}</strong>
+          </div>
+          <div class="history-season-overview-divider">vs</div>
+          <div class="history-season-overview-side is-right">
+            <span class="history-season-overview-name">Julie</span>
+            <strong>${escapeHtml(String(totals.julie))}</strong>
+          </div>
         </div>
         <div class="history-season-overview-meta">
           <span class="history-season-overview-tag ${winnerClass}">${escapeHtml(summary.recordText || 'Season record unavailable')}</span>
-          ${summary.bestGameTitle ? `<span class="history-season-overview-note">Best game: ${escapeHtml(summary.bestGameTitle)}</span>` : `<span class="history-season-overview-note">Tap to open this season archive.</span>`}
+          <span class="history-season-overview-note">${escapeHtml(playoffCount ? `${playoffCount} playoff games` : 'No playoff games')}</span>
+          ${summary.bestGameTitle ? `<span class="history-season-overview-note">Best game: ${escapeHtml(summary.bestGameTitle)}</span>` : ''}
         </div>
       </button>
     `;
@@ -269,7 +282,7 @@ window.CR = window.CR || {};
             </div>
             <button class="history-open-button" type="button" data-history-back-hq="1">Back</button>
           </div>
-          <p class="history-support-copy">Quickly scan every rivalry season, compare the season scores, and jump into that season’s full archive.</p>
+          <p class="history-support-copy">Quickly scan every rivalry season, compare scores, and jump into the full season archive.</p>
         </section>
         <div class="history-seasons-stack">
           ${summaries.map((summary) => renderSeasonCard(data, summary)).join('')}
@@ -291,7 +304,7 @@ window.CR = window.CR || {};
             </div>
             <button class="history-open-button" type="button" data-history-back="1">Back</button>
           </div>
-          <p class="history-support-copy">Browse every rivalry game for the selected season. This is the clean management/history surface for full-season review and admin workflows.</p>
+          <p class="history-support-copy">Browse every rivalry game for the selected season and make commissioner edits where needed.</p>
           <div class="history-season-field history-archive-season-field">
             <label class="eyebrow" for="historySeasonSelectArchive">Season</label>
             <select id="historySeasonSelectArchive" class="history-season-select">
@@ -341,6 +354,7 @@ window.CR = window.CR || {};
           <div class="gd-sheet-handle"></div>
           <div class="gd-sheet-title">${escapeHtml(state.sheet.title || 'History tools')}</div>
           <div class="gd-sheet-copy">${escapeHtml(state.sheet.message || 'Mock history detail view.')}</div>
+          ${state.sheet.detailsHtml ? `<div class="history-admin-sheet-details">${state.sheet.detailsHtml}</div>` : ''}
           <div class="gd-sheet-footer">
             <button class="gd-sheet-close" type="button" data-history-sheet-close="1">Close</button>
             ${state.sheet.primaryAction ? `<button class="gd-sheet-save" type="button" data-history-sheet-apply="1">${escapeHtml(state.sheet.primaryAction)}</button>` : ''}
