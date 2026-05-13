@@ -18,10 +18,7 @@ window.CR = window.CR || {};
     if (!root) return;
 
     root.querySelector('#historySeasonSelect')?.addEventListener('change', (event) => {
-      const nextSeasonId = event.target.value;
-      CR.historyState.seasonId = nextSeasonId;
-      CR.historyState.editingGameId = null;
-      CR.historyState.editTab = 'result';
+      CR.historyState.seasonId = event.target.value;
       CR.renderHistory?.();
     });
 
@@ -29,8 +26,6 @@ window.CR = window.CR || {};
       const seasonJump = event.target.closest('button[data-history-season]');
       if (seasonJump) {
         CR.historyState.seasonId = seasonJump.dataset.historySeason;
-        CR.historyState.editingGameId = null;
-        CR.historyState.editTab = 'result';
         CR.renderHistory?.();
         return;
       }
@@ -60,40 +55,6 @@ window.CR = window.CR || {};
           commissioner: { title: 'Commissioner tools', message: 'Admin history tools will live behind this entry point.', primaryAction: 'Open tools' }
         };
         openHistorySheet(configs[id] || { title: 'History', message: 'Mock detail view.' });
-        return;
-      }
-
-      const editOpen = event.target.closest('button[data-history-open-edit]');
-      if (editOpen) {
-        const gameId = editOpen.dataset.historyOpenEdit;
-        CR.historyState.editingGameId = CR.historyState.editingGameId === gameId ? null : gameId;
-        CR.historyState.editTab = 'result';
-        CR.renderHistory?.();
-        return;
-      }
-
-      const editTab = event.target.closest('button[data-history-edit-tab]');
-      if (editTab) {
-        CR.historyState.editTab = editTab.dataset.historyEditTab;
-        CR.renderHistory?.();
-        return;
-      }
-
-      const editCancel = event.target.closest('button[data-history-edit-cancel]');
-      if (editCancel) {
-        CR.historyState.editingGameId = null;
-        CR.historyState.editTab = 'result';
-        CR.renderHistory?.();
-        return;
-      }
-
-      const editSave = event.target.closest('button[data-history-edit-save]');
-      if (editSave) {
-        CR.historyState.editingGameId = null;
-        CR.historyState.editTab = 'result';
-        CR.flashSync?.();
-        CR.showToast?.({ message: 'Mock history change saved', tier: 'medium' });
-        CR.renderHistory?.();
         return;
       }
 
