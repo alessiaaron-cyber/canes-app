@@ -11,6 +11,24 @@ window.CR = window.CR || {};
     { value: 'final', label: 'Final Only', note: 'Keep everything hidden until the game ends.' }
   ];
 
+  const EDIT_OPTIONS = {
+    activeSeasonLabel: {
+      title: 'Active season',
+      hint: 'Choose which season Manage should treat as current.',
+      options: ['2025-26', '2026-27', '2027-28']
+    },
+    scoringProfile: {
+      title: 'Scoring profile',
+      hint: 'Preview different rivalry scoring defaults before backend wiring.',
+      options: ['Classic', 'Playoff Boost', 'Balanced', 'Chaos Mode']
+    },
+    draftRotation: {
+      title: 'Draft rotation',
+      hint: 'Control who is shown as next in the mock draft flow.',
+      options: ['Aaron next', 'Julie next', 'Snake draft', 'Manual']
+    }
+  };
+
   function build() {
     return {
       streamMode: {
@@ -37,13 +55,7 @@ window.CR = window.CR || {};
         pwaStatus: 'Installed',
         lastSyncLabel: '2 minutes ago'
       },
-      admin: {
-        rosterStatus: 'Verified',
-        scheduleStatus: 'Imported',
-        liveOpsStatus: 'Ready',
-        notificationToolsStatus: 'Ready',
-        userManagementStatus: 'Admin only'
-      }
+      editOptions: EDIT_OPTIONS
     };
   }
 
