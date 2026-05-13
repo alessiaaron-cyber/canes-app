@@ -57,6 +57,77 @@ window.CR = window.CR || {};
     if (manageEmail) manageEmail.textContent = email;
   }
 
+  function ensureManageMount() {
+    if (document.querySelector('#manageContent')) return;
+
+    const manageView = document.querySelector('#manageView .content-stack');
+    if (!manageView) return;
+
+    const placeholderCard = Array.from(manageView.querySelectorAll('.panel-card')).find((card) => {
+      const eyebrow = card.querySelector('.eyebrow');
+      return eyebrow?.textContent?.trim() === 'Manage';
+    });
+
+    const mount = document.createElement('div');
+    mount.id = 'manageContent';
+
+    if (placeholderCard) {
+      placeholderCard.replaceWith(mount);
+    } else {
+      manageView.appendChild(mount);
+    }
+  }
+
+  function ensureManageStylesheet() {
+    const href = 'css/manage.css?v=v2manage1';
+
+    const existing = Array.from(document.querySelectorAll('link[rel="stylesheet"]')).find((link) => link.getAttribute('href') === href);
+    if (existing) return Promise.resolve();
+
+    return new Promise((resolve, reject) => {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = href;
+      link.onload = () => resolve();
+      link.onerror = () => reject(new Error('Failed to load manage.css'));
+      document.head.appendChild(link);
+    });
+  }
+
+  function loadScript(src) {
+    const existing = Array.from(document.querySelectorAll('script')).find((script) => script.getAttribute('src') === src);
+
+    if (existing) return Promise.resolve();
+
+    return new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = src;
+      script.onload = () => resolve();
+      script.onerror = () => reject(new Error(`Failed to load ${src}`));
+      document.body.appendChild(script);
+    });
+  }
+
+  async function ensureManageAssets() {
+    if (window.CR.__manageAssetsReady) return;
+
+    ensureManageMount();
+    await ensureManageStylesheet();
+
+    const scripts = [
+      'js/manage/manage-model.js?v=v2manage1',
+      'js/manage/manage-render.js?v=v2manage1',
+      'js/manage/manage-events.js?v=v2manage1',
+      'js/manage/manage.js?v=v2manage1'
+    ];
+
+    for (const src of scripts) {
+      await loadScript(src);
+    }
+
+    window.CR.__manageAssetsReady = true;
+  }
+
   async function handleManageSignOut() {
     try {
       await window.CR.auth?.signOut?.();
@@ -86,13 +157,14 @@ window.CR = window.CR || {};
     window.CR.renderManage?.();
   };
 
-  window.CR.startApp = () => {
+  window.CR.startApp = async () => {
     try {
       renderAccountIdentity();
       bindAccountUi();
       window.CR.initTabs?.();
       window.CR.initGameDay?.();
       window.CR.initHistory?.();
+      await ensureManageAssets();
       window.CR.initManage?.();
       window.CR.initPullRefresh?.();
 
