@@ -13,6 +13,17 @@ window.CR = window.CR || {};
     CR.renderHistory?.();
   }
 
+  function buildAllGamesMessage() {
+    const games = (CR.historyData?.seasonGames?.[CR.historyState.seasonId] || []);
+    if (!games.length) return 'No games found for this season yet.';
+    const lines = games.slice(0, 8).map((game) => {
+      const type = game.playoff ? 'Playoff' : 'Regular';
+      return `${game.title} • ${type} • ${game.date} • ${game.aaronScore}-${game.julieScore}`;
+    });
+    const extra = games.length > 8 ? ` Plus ${games.length - 8} more games in this season.` : '';
+    return `${lines.join(' | ')}.${extra}`;
+  }
+
   function bindHistoryEvents() {
     const root = document.querySelector('#historyView');
     if (!root) return;
@@ -35,9 +46,9 @@ window.CR = window.CR || {};
         const gameId = openGame.dataset.historyOpenGame;
         const game = (CR.historyData?.seasonGames?.[CR.historyState.seasonId] || []).find((item) => item.id === gameId);
         openHistorySheet({
-          title: game ? `Game ${game.title || gameId}` : 'Game detail',
+          title: game ? game.title : 'Game detail',
           message: game
-            ? `${game.playoff ? 'Playoff' : 'Regular'} game on ${game.date}. Score ${game.aaronScore}-${game.julieScore}. First goal: ${game.picks?.Aaron?.find((pick) => pick.firstGoal)?.playerName || game.picks?.Julie?.find((pick) => pick.firstGoal)?.playerName || '—'}.`
+            ? `${game.playoff ? 'Playoff' : 'Regular'} game on ${game.date}. Aaron ${game.aaronScore}, Julie ${game.julieScore}. First goal: ${game.picks?.Aaron?.find((pick) => pick.firstGoal)?.playerName || game.picks?.Julie?.find((pick) => pick.firstGoal)?.playerName || '—'}.`
             : 'Game detail mock view coming next.',
           primaryAction: 'Open full game view'
         });
@@ -48,11 +59,8 @@ window.CR = window.CR || {};
       if (access) {
         const id = access.dataset.historyAccess;
         const configs = {
-          seasons: { title: 'Seasons', message: 'Season browser mock view coming next.', primaryAction: 'Open season list' },
-          records: { title: 'Records', message: 'Rivalry records drill-down mock view coming next.', primaryAction: 'View records' },
-          players: { title: 'Top performers', message: 'Player history drill-down mock view coming next.', primaryAction: 'Open players' },
-          moments: { title: 'Moments', message: 'Iconic moments mock view coming next.', primaryAction: 'Open moments' },
-          commissioner: { title: 'Commissioner tools', message: 'Admin history tools will live behind this entry point.', primaryAction: 'Open tools' }
+          all_games: { title: 'All Games', message: buildAllGamesMessage(), primaryAction: 'Open season archive' },
+          commissioner: { title: 'Commissioner tools', message: 'Admin history tools will live behind this entry point for editing, corrections, and recalculation.', primaryAction: 'Open tools' }
         };
         openHistorySheet(configs[id] || { title: 'History', message: 'Mock detail view.' });
         return;
