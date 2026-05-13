@@ -74,10 +74,7 @@ window.CR = window.CR || {};
   }
 
   function renderNotifications(state) {
-    const enabledCount = [
-      state.notifications.pushEnabled,
-      state.notifications.toastsEnabled
-    ].filter(Boolean).length;
+    const enabledCount = [state.notifications.pushEnabled, state.notifications.toastsEnabled].filter(Boolean).length;
 
     return `
       <section class="panel-card manage-card">
@@ -108,6 +105,20 @@ window.CR = window.CR || {};
     `;
   }
 
+  function renderScoringSummary(state) {
+    const selectedProfile = state.season.scoringProfile;
+    const scoring = state.season.scoringSystems?.[selectedProfile] || {};
+
+    return `
+      <div class="manage-score-rule-row">
+        <div><span class="eyebrow">First goal</span><strong>${escapeHtml(scoring.firstGoal ?? '—')}</strong></div>
+        <div><span class="eyebrow">Goal</span><strong>${escapeHtml(scoring.goal ?? '—')}</strong></div>
+        <div><span class="eyebrow">Assist</span><strong>${escapeHtml(scoring.assist ?? '—')}</strong></div>
+      </div>
+      <button class="mini-button manage-secondary-action" type="button" data-manage-edit-scoring>Edit scoring values</button>
+    `;
+  }
+
   function renderSeasonSetup(state) {
     const seasonBadge = state.season.playoffMode
       ? { className: 'warning', label: 'Playoffs' }
@@ -119,10 +130,14 @@ window.CR = window.CR || {};
         <div class="manage-meta-grid">
           ${renderEditableMetaCard({ field: 'activeSeasonLabel', label: 'Active season', value: state.season.activeSeasonLabel })}
           ${renderEditableMetaCard({ field: 'scoringProfile', label: 'Scoring profile', value: state.season.scoringProfile })}
-          ${renderEditableMetaCard({ field: 'draftRotation', label: 'Draft rotation', value: state.season.draftRotation })}
+          ${renderEditableMetaCard({ field: 'firstPicker', label: 'First picker', value: state.season.firstPicker })}
         </div>
+        ${renderScoringSummary(state)}
         <div class="manage-setting-stack">
           ${renderToggleRow({ key: 'season.playoffMode', label: 'Playoff mode', hint: 'Use postseason behavior and settings language.', checked: state.season.playoffMode })}
+        </div>
+        <div class="manage-action-row">
+          <button class="mini-button manage-primary-action" type="button" data-manage-start-season>Start new season</button>
         </div>
       </section>
     `;
@@ -180,6 +195,83 @@ window.CR = window.CR || {};
     `;
   }
 
+  function renderStartSeasonSheet(state) {
+    if (!state.startSeasonOpen) return '';
+    const draft = state.newSeasonDraft;
+    return `
+      <div class="manage-edit-sheet" role="dialog" aria-modal="true" aria-labelledby="manageStartSeasonTitle">
+        <div class="manage-edit-backdrop" data-manage-close-start-season></div>
+        <section class="manage-edit-card">
+          <div class="gd-sheet-handle"></div>
+          <div class="manage-edit-header">
+            <div>
+              <div class="eyebrow">Season setup</div>
+              <h2 id="manageStartSeasonTitle">Start new season</h2>
+              <p>Creates a blank current season for History while all-time rivalry data stays intact.</p>
+            </div>
+            <button class="manage-edit-close" type="button" data-manage-close-start-season aria-label="Close new season editor">×</button>
+          </div>
+          <div class="manage-edit-options">
+            ${(state.newSeasonOptions || []).map((option) => `
+              <button class="manage-edit-option ${option === draft?.seasonLabel ? 'is-active' : ''}" type="button" data-manage-new-season-value="${escapeHtml(option)}">
+                <span>${escapeHtml(option)}</span>
+                ${option === draft?.seasonLabel ? '<strong>Selected</strong>' : ''}
+              </button>
+            `).join('')}
+          </div>
+          <div class="manage-edit-options manage-edit-options-spaced">
+            ${(state.users || []).map((user) => `
+              <button class="manage-edit-option ${user.username === draft?.firstPicker ? 'is-active' : ''}" type="button" data-manage-new-season-picker="${escapeHtml(user.username)}">
+                <span>${escapeHtml(user.username)} picks first</span>
+                ${user.username === draft?.firstPicker ? '<strong>Selected</strong>' : ''}
+              </button>
+            `).join('')}
+          </div>
+          <button class="manage-start-season-button" type="button" data-manage-confirm-start-season>Start ${escapeHtml(draft?.seasonLabel || 'season')}</button>
+        </section>
+      </div>
+    `;
+  }
+
+  function renderScoringSheet(state) {
+    if (!state.scoringEditOpen) return '';
+    const profile = state.season.scoringProfile;
+    const scoring = state.season.scoringSystems?.[profile] || {};
+    const fields = [
+      { key: 'firstGoal', label: 'First goal scorer' },
+      { key: 'goal', label: 'Goal' },
+      { key: 'assist', label: 'Assist' }
+    ];
+
+    return `
+      <div class="manage-edit-sheet" role="dialog" aria-modal="true" aria-labelledby="manageScoringTitle">
+        <div class="manage-edit-backdrop" data-manage-close-scoring></div>
+        <section class="manage-edit-card">
+          <div class="gd-sheet-handle"></div>
+          <div class="manage-edit-header">
+            <div>
+              <div class="eyebrow">${escapeHtml(profile)}</div>
+              <h2 id="manageScoringTitle">Scoring values</h2>
+              <p>Edit mock point values for first goal scorer, goals, and assists.</p>
+            </div>
+            <button class="manage-edit-close" type="button" data-manage-close-scoring aria-label="Close scoring editor">×</button>
+          </div>
+          <div class="manage-score-edit-list">
+            ${fields.map((field) => `
+              <div class="manage-score-edit-row">
+                <div><span class="eyebrow">${escapeHtml(field.label)}</span><strong>${escapeHtml(scoring[field.key])} pts</strong></div>
+                <div class="manage-stepper">
+                  <button type="button" data-manage-score-step="${field.key}" data-step="-1">−</button>
+                  <button type="button" data-manage-score-step="${field.key}" data-step="1">+</button>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </section>
+      </div>
+    `;
+  }
+
   function renderRoot(state) {
     return `
       <div class="content-stack manage-stack">
@@ -189,6 +281,8 @@ window.CR = window.CR || {};
         ${renderStatus(state)}
       </div>
       ${renderEditSheet(state)}
+      ${renderStartSeasonSheet(state)}
+      ${renderScoringSheet(state)}
     `;
   }
 
