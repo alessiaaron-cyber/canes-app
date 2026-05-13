@@ -62,6 +62,7 @@ window.CR = window.CR || {};
 
     return {
       activeManageView: 'main',
+      editingScheduleGameId: null,
       streamMode: {
         selected: '90s',
         options: STREAM_OPTIONS,
