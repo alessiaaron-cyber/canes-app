@@ -175,7 +175,6 @@ window.CR = window.CR || {};
         <div class="history-recap-footer">
           <span class="history-recap-first-goal">First goal: ${escapeHtml(game.firstGoalScorer || '—')}</span>
           <div class="history-recap-actions">
-            <button class="history-open-button" type="button" data-history-open-game="${escapeHtml(game.id)}">${isArchive ? 'Details' : 'Open'}</button>
             <button class="history-edit-button" type="button" data-history-access="commissioner">Edit</button>
           </div>
         </div>
@@ -236,10 +235,6 @@ window.CR = window.CR || {};
             <span class="history-season-meta-pill">${escapeHtml(String(regularCount))} regular</span>
             <span class="history-season-meta-pill">${escapeHtml(String(playoffCount))} playoff</span>
             <span class="history-season-meta-pill">Record ${escapeHtml(data.seasonBoard?.recordText || '—')}</span>
-          </div>
-          <div class="history-archive-actions-row">
-            <button class="history-open-button" type="button" data-history-back-hq="1">Back to HQ</button>
-            <button class="history-edit-button" type="button" data-history-access="commissioner">Commissioner Tools</button>
           </div>
         </section>
         <section class="panel-card history-all-games-list-card">
