@@ -63,17 +63,9 @@ window.CR = window.CR || {};
     `;
   }
 
-  function toneLabel(value) {
-    switch (value) {
-      case 'light': return 'Light';
-      case 'balanced': return 'Balanced';
-      case 'spicy': return 'Spicy';
-      default: return 'Balanced';
-    }
-  }
-
   function renderWatchExperience(state) {
     const selected = state.streamMode.options.find((option) => option.value === state.streamMode.selected);
+
     return `
       <section class="panel-card manage-card manage-watch-card">
         ${renderCardHeader('Watch experience', 'Stream Mode', 'Protect against broadcast spoilers without changing the underlying rivalry engine.', { className: 'warning', label: selected?.label || 'Custom' })}
@@ -84,8 +76,6 @@ window.CR = window.CR || {};
           ${renderToggleRow({ key: 'streamMode.delayPush', label: 'Delay push notifications', hint: 'Keep lock-screen alerts aligned with your spoiler buffer.', checked: state.streamMode.delayPush })}
           ${renderToggleRow({ key: 'streamMode.delayToasts', label: 'Delay in-app toasts too', hint: 'Useful if you keep the app open while watching.', checked: state.streamMode.delayToasts })}
           ${renderToggleRow({ key: 'streamMode.delayFeed', label: 'Delay visible feed moments', hint: 'Internal scoring stays realtime while visible updates wait.', checked: state.streamMode.delayFeed })}
-          ${renderToggleRow({ key: 'streamMode.bigMomentsOnly', label: 'Big moments only', hint: 'Focus on swings, goals, and chaos instead of every micro-event.', checked: state.streamMode.bigMomentsOnly })}
-          ${renderToggleRow({ key: 'streamMode.quietViewing', label: 'Quiet viewing mode', hint: 'Reduce chatter when you want the game to breathe.', checked: state.streamMode.quietViewing })}
         </div>
       </section>
     `;
@@ -96,8 +86,7 @@ window.CR = window.CR || {};
       state.notifications.pushEnabled,
       state.notifications.toastsEnabled,
       state.notifications.rivalrySwings,
-      state.notifications.scoringMoments,
-      state.notifications.recapSummaries
+      state.notifications.scoringMoments
     ].filter(Boolean).length;
 
     return `
@@ -108,26 +97,6 @@ window.CR = window.CR || {};
           ${renderToggleRow({ key: 'notifications.toastsEnabled', label: 'In-app toasts', hint: 'Show quick banners while the app is open.', checked: state.notifications.toastsEnabled })}
           ${renderToggleRow({ key: 'notifications.rivalrySwings', label: 'Lead-change rivalry swings', hint: 'Prioritize emotional momentum changes.', checked: state.notifications.rivalrySwings })}
           ${renderToggleRow({ key: 'notifications.scoringMoments', label: 'Scoring moments', hint: 'Goals, first-goal hits, and scoring surges.', checked: state.notifications.scoringMoments })}
-          ${renderToggleRow({ key: 'notifications.recapSummaries', label: 'Recap summaries', hint: 'Send grouped updates instead of every beat.', checked: state.notifications.recapSummaries })}
-          ${renderToggleRow({ key: 'notifications.consolidateBursts', label: 'Consolidate rapid bursts', hint: 'Bundle quick back-to-back events when the game gets wild.', checked: state.notifications.consolidateBursts })}
-        </div>
-      </section>
-    `;
-  }
-
-  function renderRivalryPreferences(state) {
-    return `
-      <section class="panel-card manage-card">
-        ${renderCardHeader('Rivalry vibe', 'Personality and feel', 'Tune how loud or restrained the rivalry presentation feels on your device.', { className: 'neutral', label: toneLabel(state.rivalry.tone) })}
-        <div class="manage-inline-choice-row">
-          <button class="manage-inline-choice ${state.rivalry.tone === 'light' ? 'is-active' : ''}" type="button" data-manage-choice="rivalry.tone" data-manage-value="light">Light</button>
-          <button class="manage-inline-choice ${state.rivalry.tone === 'balanced' ? 'is-active' : ''}" type="button" data-manage-choice="rivalry.tone" data-manage-value="balanced">Balanced</button>
-          <button class="manage-inline-choice ${state.rivalry.tone === 'spicy' ? 'is-active' : ''}" type="button" data-manage-choice="rivalry.tone" data-manage-value="spicy">Spicy</button>
-        </div>
-        <div class="manage-setting-stack">
-          ${renderToggleRow({ key: 'rivalry.showMomentumLanguage', label: 'Momentum language', hint: 'Use more rivalry-style copy around heaters and swings.', checked: state.rivalry.showMomentumLanguage })}
-          ${renderToggleRow({ key: 'rivalry.celebrateLeadChanges', label: 'Celebrate lead changes', hint: 'Give bigger treatment to rivalry turning points.', checked: state.rivalry.celebrateLeadChanges })}
-          ${renderToggleRow({ key: 'rivalry.subtleMotionOnly', label: 'Subtle motion only', hint: 'Keep movement cleaner and calmer on the manage side.', checked: state.rivalry.subtleMotionOnly })}
         </div>
       </section>
     `;
@@ -140,7 +109,7 @@ window.CR = window.CR || {};
 
     return `
       <section class="panel-card manage-card">
-        ${renderCardHeader('Season setup', 'Playoffs, carryover, and defaults', 'Core rivalry settings that shape how the season behaves before backend wiring lands.', seasonBadge)}
+        ${renderCardHeader('Season setup', 'Playoffs and defaults', 'Core rivalry settings that shape how the season behaves before backend wiring lands.', seasonBadge)}
         <div class="manage-meta-grid">
           <article class="manage-meta-card">
             <span class="eyebrow">Active season</span>
@@ -157,18 +126,18 @@ window.CR = window.CR || {};
         </div>
         <div class="manage-setting-stack">
           ${renderToggleRow({ key: 'season.playoffMode', label: 'Playoff mode', hint: 'Use postseason behavior and settings language.', checked: state.season.playoffMode })}
-          ${renderToggleRow({ key: 'season.carryoverEnabled', label: 'Carryover enabled', hint: 'Keep carryover systems visible while V2 rules take shape.', checked: state.season.carryoverEnabled })}
         </div>
       </section>
     `;
   }
 
-  function renderHealth(state) {
+  function renderStatus(state) {
     const realtimeTone = String(state.appHealth.realtimeStatus || '').toLowerCase() === 'connected' ? 'good' : 'neutral';
     const notificationTone = String(state.appHealth.notificationStatus || '').toLowerCase() === 'ready' ? 'good' : 'neutral';
+
     return `
       <section class="panel-card manage-card">
-        ${renderCardHeader('Status center', 'System status', 'Read-only health for realtime, notifications, install state, and sync timing. Permission controls belong in Notifications.', { className: 'calm', label: state.appHealth.syncStatus })}
+        ${renderCardHeader('Status center', 'System status', 'Read-only health for realtime, notifications, install state, and sync timing.', { className: 'calm', label: state.appHealth.syncStatus })}
         <div class="manage-health-grid">
           ${renderHealthItem('Realtime', state.appHealth.realtimeStatus, realtimeTone)}
           ${renderHealthItem('Notifications', state.appHealth.notificationStatus, notificationTone)}
@@ -182,7 +151,7 @@ window.CR = window.CR || {};
   function renderAdmin(state) {
     return `
       <section class="panel-card manage-card">
-        ${renderCardHeader('Commissioner tools', 'Lightweight admin actions', 'These are entry points into focused roster, schedule, carryover, and commissioner flows — not the full tools inline on this card.', { className: 'dark', label: 'Admin' })}
+        ${renderCardHeader('Commissioner tools', 'Admin tools', 'Focused entry points for roster management, schedule imports, and commissioner workflows.', { className: 'dark', label: 'Admin' })}
         <div class="manage-meta-grid manage-meta-grid-admin">
           <article class="manage-meta-card">
             <span class="eyebrow">Roster</span>
@@ -198,9 +167,7 @@ window.CR = window.CR || {};
           </article>
         </div>
         <div class="manage-action-row">
-          <button class="mini-button" type="button" data-manage-action="carryover">Review carryover</button>
           <button class="mini-button" type="button" data-manage-action="commissioner">Commissioner tools</button>
-          <button class="mini-button" type="button" data-manage-action="health">Run health check</button>
         </div>
       </section>
     `;
@@ -211,9 +178,8 @@ window.CR = window.CR || {};
       <div class="content-stack manage-stack">
         ${renderWatchExperience(state)}
         ${renderNotifications(state)}
-        ${renderRivalryPreferences(state)}
         ${renderSeasonSetup(state)}
-        ${renderHealth(state)}
+        ${renderStatus(state)}
         ${renderAdmin(state)}
       </div>
     `;
