@@ -349,6 +349,12 @@ h3 {
   color: #ffffff;
 }
 
+.panel-tag.neutral {
+  background: var(--surface-secondary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-subtle);
+}
+
 .panel-tag.calm {
   background: var(--live-green-soft);
   color: var(--live-green);
