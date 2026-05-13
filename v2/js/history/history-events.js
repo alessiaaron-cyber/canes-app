@@ -3,6 +3,16 @@ window.CR = window.CR || {};
 (() => {
   const CR = window.CR;
 
+  function openHistorySheet(config) {
+    CR.historyState.sheet = {
+      open: true,
+      title: config.title,
+      message: config.message,
+      primaryAction: config.primaryAction || ''
+    };
+    CR.renderHistory?.();
+  }
+
   function bindHistoryEvents() {
     const root = document.querySelector('#historyView');
     if (!root) return;
@@ -10,7 +20,6 @@ window.CR = window.CR || {};
     root.querySelector('#historySeasonSelect')?.addEventListener('change', (event) => {
       const nextSeasonId = event.target.value;
       CR.historyState.seasonId = nextSeasonId;
-      CR.historyState.expandedGameId = null;
       CR.historyState.editingGameId = null;
       CR.historyState.editTab = 'result';
       CR.renderHistory?.();
@@ -20,10 +29,23 @@ window.CR = window.CR || {};
       const seasonJump = event.target.closest('button[data-history-season]');
       if (seasonJump) {
         CR.historyState.seasonId = seasonJump.dataset.historySeason;
-        CR.historyState.expandedGameId = null;
         CR.historyState.editingGameId = null;
         CR.historyState.editTab = 'result';
         CR.renderHistory?.();
+        return;
+      }
+
+      const access = event.target.closest('button[data-history-access]');
+      if (access) {
+        const id = access.dataset.historyAccess;
+        const configs = {
+          seasons: { title: 'Seasons', message: 'Season browser mock view coming next.', primaryAction: 'Open season list' },
+          records: { title: 'Records', message: 'Rivalry records drill-down mock view coming next.', primaryAction: 'View records' },
+          players: { title: 'Top performers', message: 'Player history drill-down mock view coming next.', primaryAction: 'Open players' },
+          moments: { title: 'Moments', message: 'Iconic moments mock view coming next.', primaryAction: 'Open moments' },
+          commissioner: { title: 'Commissioner tools', message: 'Admin history tools will live behind this entry point.', primaryAction: 'Open tools' }
+        };
+        openHistorySheet(configs[id] || { title: 'History', message: 'Mock detail view.' });
         return;
       }
 
@@ -59,6 +81,20 @@ window.CR = window.CR || {};
         CR.showToast?.({ message: 'Mock history change saved', tier: 'medium' });
         CR.renderHistory?.();
         return;
+      }
+
+      const sheetClose = event.target.closest('[data-history-sheet-close]');
+      if (sheetClose || event.target.id === 'historyAdminSheet') {
+        CR.historyState.sheet = { open: false };
+        CR.renderHistory?.();
+        return;
+      }
+
+      const sheetApply = event.target.closest('[data-history-sheet-apply]');
+      if (sheetApply) {
+        CR.historyState.sheet = { open: false };
+        CR.showToast?.({ message: 'Mock history tool opened', tier: 'light' });
+        CR.renderHistory?.();
       }
     });
   }
