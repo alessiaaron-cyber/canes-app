@@ -154,21 +154,12 @@ window.CR = window.CR || {};
     }));
   }
 
-  function buildQuickAccess(selectedGames, playerSpotlights) {
-    return [
-      { id: 'seasons', label: 'Seasons', meta: `${selectedGames.length} games` },
-      { id: 'records', label: 'Records', meta: 'Rivalry marks' },
-      { id: 'players', label: 'Top performers', meta: `${playerSpotlights.length} spotlighted` },
-      { id: 'moments', label: 'Moments', meta: 'Quick hits' },
-      { id: 'commissioner', label: 'Commissioner', meta: 'Admin tools' }
-    ];
-  }
-
   function getScopedData(model, state) {
     const selectedSeason = model.seasons.find((season) => season.id === state.seasonId) || model.seasons[0] || null;
     const selectedGames = model.seasonGames?.[state.seasonId] || [];
     const selectedSummary = model.seasonSummaries?.find((season) => season.seasonId === state.seasonId) || null;
     const playerSpotlights = buildSeasonPlayerSpotlights(selectedGames);
+    const gameLog = buildGameLog(selectedGames);
 
     return {
       ...model,
@@ -179,11 +170,9 @@ window.CR = window.CR || {};
       allTimeBoard: buildAllTimeBoard(model.games || []),
       highlights: buildHighlights(model.games || []),
       momentum: buildMomentum(selectedGames),
-      recentGames: buildGameLog(selectedGames).slice(0, 4),
-      gameLog: buildGameLog(selectedGames),
-      playerSpotlights,
-      quickAccess: buildQuickAccess(selectedGames, playerSpotlights),
-      archiveSeasons: (model.seasonSummaries || []).filter((season) => season.seasonId !== state.seasonId)
+      recentGames: gameLog.slice(0, 4),
+      gameLog,
+      playerSpotlights
     };
   }
 
@@ -192,7 +181,7 @@ window.CR = window.CR || {};
     if (!root) return;
 
     const scoped = getScopedData(CR.historyData, CR.historyState);
-    root.innerHTML = `${CR.historyRender.renderShell(scoped)}<div id="historyAdminLayer">${CR.historyRender.renderAdminSheet(CR.historyState)}</div>`;
+    root.innerHTML = `${CR.historyRender.renderShell(scoped, CR.historyState)}<div id="historyAdminLayer">${CR.historyRender.renderAdminSheet(CR.historyState)}</div>`;
     CR.historyEvents.bindHistoryEvents();
   }
 
@@ -200,6 +189,7 @@ window.CR = window.CR || {};
     CR.historyData = CR.historyModel.build(CR.historyMockData);
     CR.historyState = {
       seasonId: CR.historyData.currentSeasonId,
+      view: 'hq',
       sheet: { open: false }
     };
     renderHistory();
