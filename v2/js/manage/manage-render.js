@@ -45,6 +45,16 @@ window.CR = window.CR || {};
   }
 
   function renderCardHeader(eyebrow, title, copy, badge) {
+    let badgeHtml = '';
+
+    if (badge) {
+      if (badge.rawClassName) {
+        badgeHtml = `<span class="${escapeHtml(badge.rawClassName)}">${escapeHtml(badge.label || '')}</span>`;
+      } else {
+        badgeHtml = `<span class="panel-tag ${escapeHtml(badge.className || 'neutral')}">${escapeHtml(badge.label || '')}</span>`;
+      }
+    }
+
     return `
       <div class="panel-header compact-header manage-card-header">
         <div>
@@ -52,7 +62,7 @@ window.CR = window.CR || {};
           <h2>${escapeHtml(title)}</h2>
           ${copy ? `<p class="manage-support-copy">${escapeHtml(copy)}</p>` : ''}
         </div>
-        ${badge ? `<span class="panel-tag ${escapeHtml(badge.className || 'neutral')}">${escapeHtml(badge.label || '')}</span>` : ''}
+        ${badgeHtml}
       </div>
     `;
   }
@@ -128,9 +138,13 @@ window.CR = window.CR || {};
   }
 
   function renderSeasonSetup(state) {
+    const seasonBadge = state.season.playoffMode
+      ? { rawClassName: 'history-playoff-badge', label: 'Playoffs' }
+      : { rawClassName: 'history-regular-badge', label: 'Regular' };
+
     return `
       <section class="panel-card manage-card">
-        ${renderCardHeader('Season setup', 'Playoffs, carryover, and defaults', 'Core rivalry settings that shape how the season behaves before backend wiring lands.', { className: state.season.playoffMode ? 'warning' : 'calm', label: state.season.playoffMode ? 'Playoffs on' : 'Regular mode' })}
+        ${renderCardHeader('Season setup', 'Playoffs, carryover, and defaults', 'Core rivalry settings that shape how the season behaves before backend wiring lands.', seasonBadge)}
         <div class="manage-meta-grid">
           <article class="manage-meta-card">
             <span class="eyebrow">Active season</span>
@@ -158,7 +172,7 @@ window.CR = window.CR || {};
     const notificationTone = String(state.appHealth.notificationStatus || '').toLowerCase() === 'ready' ? 'good' : 'neutral';
     return `
       <section class="panel-card manage-card">
-        ${renderCardHeader('App health', 'Status center', 'A lightweight read on the systems that make the rivalry feel live.', { className: 'calm', label: state.appHealth.syncStatus })}
+        ${renderCardHeader('Status center', 'System status', 'Read-only health for realtime, notifications, install state, and sync timing. Permission controls belong in Notifications.', { className: 'calm', label: state.appHealth.syncStatus })}
         <div class="manage-health-grid">
           ${renderHealthItem('Realtime', state.appHealth.realtimeStatus, realtimeTone)}
           ${renderHealthItem('Notifications', state.appHealth.notificationStatus, notificationTone)}
@@ -172,7 +186,7 @@ window.CR = window.CR || {};
   function renderAdmin(state) {
     return `
       <section class="panel-card manage-card">
-        ${renderCardHeader('Commissioner tools', 'Lightweight admin actions', 'Quick controls for season oversight without dumping heavy backend tools into this screen.', { className: 'dark', label: 'Admin' })}
+        ${renderCardHeader('Commissioner tools', 'Lightweight admin actions', 'These are entry points into focused roster, schedule, carryover, and commissioner flows — not the full tools inline on this card.', { className: 'dark', label: 'Admin' })}
         <div class="manage-meta-grid manage-meta-grid-admin">
           <article class="manage-meta-card">
             <span class="eyebrow">Roster</span>
