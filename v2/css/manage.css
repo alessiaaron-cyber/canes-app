@@ -40,9 +40,9 @@
 }
 
 .manage-option-pill.is-active {
-  background: #111827;
+  background: var(--ui-primary);
   color: #fff;
-  border-color: #111827;
+  border-color: var(--ui-primary);
   box-shadow: 0 12px 24px rgba(17, 24, 39, 0.16);
 }
 
@@ -110,7 +110,7 @@
 }
 
 .manage-switch.is-on {
-  background: #111827;
+  background: var(--ui-primary);
 }
 
 .manage-switch-knob {
@@ -171,7 +171,7 @@
   margin-top: 9px;
   padding: 0 10px;
   border-radius: 999px;
-  background: #eef2f6;
+  background: var(--ui-muted-surface);
   color: var(--text-secondary);
   font-size: 12px;
   font-weight: 900;
@@ -183,29 +183,6 @@
   flex-direction: column;
   align-items: flex-start;
   gap: 10px;
-}
-
-.manage-health-badge {
-  display: inline-flex;
-  align-items: center;
-  min-height: 28px;
-  padding: 0 11px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 900;
-  letter-spacing: -0.01em;
-  background: #eef2f6;
-  color: var(--text-secondary);
-}
-
-.manage-health-badge.is-good {
-  background: var(--live-green-soft);
-  color: var(--live-green);
-}
-
-.manage-health-badge.is-neutral {
-  background: #eef2f6;
-  color: var(--text-secondary);
 }
 
 .manage-action-row {
@@ -220,39 +197,14 @@
 }
 
 .manage-row-actions .cr-button,
-.manage-score-card-header .cr-button,
-.manage-cancel-edit {
+.manage-score-card-header .cr-button {
   min-height: 38px;
   padding: 0 16px;
   border-radius: 13px;
-  background: #f3f4f6;
-  color: var(--ink-strong);
-  box-shadow: none;
-}
-
-.manage-row-actions .cr-button.remove {
-  background: #fee4e2;
-  color: #b42318;
-  box-shadow: 0 0 0 1px rgba(180, 35, 24, 0.12) inset;
-}
-
-.cr-button.primary {
-  margin-top: 24px;
-  min-height: 58px;
 }
 
 .manage-cancel-edit {
-  width: 100%;
   margin-top: 12px;
-}
-
-.cr-action-row.is-editing {
-  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.24) inset;
-  background: #fffbeb;
-}
-
-.cr-action-row.is-muted {
-  opacity: 0.62;
 }
 
 .manage-subview-hero {
@@ -346,9 +298,9 @@
 .manage-stepper button {
   width: 42px;
   height: 42px;
-  border: 1px solid var(--border-subtle);
+  border: 0;
   border-radius: 14px;
-  background: #111827;
+  background: var(--ui-primary);
   color: #fff;
   font-size: 22px;
   font-weight: 900;
@@ -453,8 +405,8 @@
   min-height: 26px;
   padding: 0 10px;
   border-radius: 999px;
-  background: var(--live-green-soft);
-  color: var(--live-green);
+  background: var(--ui-success-soft);
+  color: var(--ui-success);
   font-size: 12px;
   font-weight: 900;
 }
