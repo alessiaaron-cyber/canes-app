@@ -18,28 +18,17 @@ window.CR = window.CR || {};
         options: STREAM_OPTIONS,
         delayPush: true,
         delayToasts: true,
-        delayFeed: false,
-        bigMomentsOnly: false,
-        quietViewing: true
+        delayFeed: false
       },
       notifications: {
         pushEnabled: true,
         toastsEnabled: true,
         rivalrySwings: true,
-        scoringMoments: true,
-        recapSummaries: true,
-        consolidateBursts: true
-      },
-      rivalry: {
-        tone: 'balanced',
-        showMomentumLanguage: true,
-        celebrateLeadChanges: true,
-        subtleMotionOnly: true
+        scoringMoments: true
       },
       season: {
         activeSeasonLabel: '2025-26',
         playoffMode: false,
-        carryoverEnabled: true,
         scoringProfile: 'Classic',
         draftRotation: 'Aaron next'
       },
@@ -53,8 +42,7 @@ window.CR = window.CR || {};
       admin: {
         rosterStatus: 'Verified',
         scheduleStatus: 'Imported',
-        activeGameContext: 'No live game right now',
-        correctionToolsEnabled: true
+        activeGameContext: 'No live game right now'
       }
     };
   }
