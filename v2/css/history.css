@@ -1,10 +1,12 @@
 .history-feed,
 .rivalry-command-feed,
 .history-all-games-view,
+.history-seasons-view,
 .history-log-stack,
 .history-player-spotlights,
 .rivalry-highlight-grid,
-.archive-log-stack {
+.archive-log-stack,
+.history-seasons-stack {
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -20,7 +22,8 @@
 .history-all-games-list-card,
 .history-log-card,
 .rivalry-highlight-item,
-.history-player-spotlight-card {
+.history-player-spotlight-card,
+.history-season-overview-card {
   overflow: hidden;
 }
 
@@ -34,7 +37,8 @@
 .history-recent-card,
 .history-player-wrap-card,
 .history-all-games-header-card,
-.history-all-games-list-card {
+.history-all-games-list-card,
+.history-seasons-header-card {
   background: linear-gradient(180deg, #ffffff 0%, #fbfcfd 100%);
 }
 
@@ -48,7 +52,8 @@
 .history-recap-side-head,
 .history-recap-footer,
 .history-all-games-head,
-.history-archive-actions-row {
+.history-season-overview-topline,
+.history-season-overview-score {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -58,7 +63,8 @@
 .rivalry-board-title,
 .history-hq-title,
 .history-section-head h3,
-.history-all-games-head h2 {
+.history-all-games-head h2,
+.history-season-overview-topline h3 {
   margin: 6px 0 0;
   letter-spacing: -0.04em;
 }
@@ -98,7 +104,8 @@
 
 .rivalry-board-meta-row,
 .history-season-meta-row,
-.history-player-stats {
+.history-player-stats,
+.history-season-overview-meta {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
@@ -107,16 +114,47 @@
 
 .rivalry-board-meta-pill,
 .history-season-meta-pill,
-.history-player-stats span {
+.history-player-stats span,
+.history-season-overview-count,
+.history-season-overview-tag,
+.history-season-overview-note {
   display: inline-flex;
   align-items: center;
   min-height: 30px;
   padding: 0 10px;
   border-radius: 999px;
-  background: #eef1f4;
-  color: var(--text-secondary);
   font-size: 12px;
   font-weight: 700;
+}
+
+.rivalry-board-meta-pill,
+.history-season-meta-pill,
+.history-player-stats span,
+.history-season-overview-count {
+  background: #eef1f4;
+  color: var(--text-secondary);
+}
+
+.history-season-overview-tag {
+  color: var(--ink-strong);
+  background: #f4f6f8;
+}
+
+.history-season-overview-tag.winner-aaron {
+  background: linear-gradient(180deg, #f6f8fb 0%, #eef3f8 100%);
+}
+
+.history-season-overview-tag.winner-julie {
+  background: linear-gradient(180deg, #fff8f8 0%, #fff0f2 100%);
+}
+
+.history-season-overview-tag.winner-tie {
+  background: linear-gradient(180deg, #f7f8fa 0%, #eef1f4 100%);
+}
+
+.history-season-overview-note {
+  background: rgba(15, 23, 42, 0.04);
+  color: var(--text-secondary);
 }
 
 .history-support-copy,
@@ -125,7 +163,8 @@
 .history-log-subtitle,
 .history-recap-pick,
 .history-recap-first-goal,
-.history-all-games-header-card p {
+.history-all-games-header-card p,
+.history-season-overview-card p {
   color: var(--text-secondary);
   line-height: 1.45;
 }
@@ -335,8 +374,7 @@
   margin-top: 10px;
 }
 
-.history-recap-actions,
-.history-archive-actions-row {
+.history-recap-actions {
   display: flex;
   gap: 8px;
 }
@@ -370,7 +408,8 @@
 }
 
 .history-all-games-header-card,
-.history-all-games-list-card {
+.history-all-games-list-card,
+.history-seasons-header-card {
   padding: 16px;
 }
 
@@ -391,8 +430,54 @@
   margin-top: 12px;
 }
 
-.history-archive-actions-row {
-  margin-top: 14px;
+.history-seasons-stack {
+  gap: 14px;
+}
+
+.history-season-overview-card {
+  width: 100%;
+  display: block;
+  text-align: left;
+  border: 1px solid var(--border-subtle);
+  border-radius: 24px;
+  padding: 18px;
+  background: linear-gradient(180deg, #ffffff 0%, #fbfcfd 100%);
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
+}
+
+.history-season-overview-card.winner-aaron {
+  box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.05), 0 8px 20px rgba(15, 23, 42, 0.05);
+}
+
+.history-season-overview-card.winner-julie {
+  box-shadow: inset 0 0 0 1px rgba(200, 16, 46, 0.10), 0 8px 20px rgba(15, 23, 42, 0.05);
+}
+
+.history-season-overview-topline {
+  align-items: flex-start;
+}
+
+.history-season-overview-topline h3 {
+  font-size: 22px;
+  color: var(--ink-strong);
+}
+
+.history-season-overview-score {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.history-season-overview-score strong,
+.history-season-overview-score span {
+  display: block;
+  font-size: 18px;
+  font-weight: 900;
+  color: var(--ink-strong);
+}
+
+.history-season-overview-score span {
+  text-align: right;
 }
 
 .history-admin-sheet {
@@ -423,13 +508,13 @@
 
   .history-recap-footer,
   .history-all-games-head,
-  .history-archive-actions-row {
+  .history-season-overview-topline,
+  .history-season-overview-score {
     flex-direction: column;
     align-items: stretch;
   }
 
-  .history-recap-actions,
-  .history-archive-actions-row {
+  .history-recap-actions {
     width: 100%;
   }
 
@@ -437,6 +522,10 @@
   .history-edit-button,
   .history-view-all-button {
     flex: 1 1 0;
+  }
+
+  .history-season-overview-score span {
+    text-align: left;
   }
 }
 
