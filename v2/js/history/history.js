@@ -191,6 +191,7 @@ window.CR = window.CR || {};
       seasonId: CR.historyData.currentSeasonId,
       view: 'hq',
       previousView: 'hq',
+      returnView: 'hq',
       sheet: { open: false }
     };
     renderHistory();
