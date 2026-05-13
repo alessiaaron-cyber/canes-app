@@ -89,7 +89,8 @@ window.CR = window.CR || {};
 
   function renderAdminSheet(state) {
     if (!state.sheet?.open) return '';
-    return `<div class="history-admin-sheet is-open" id="historyAdminSheet"><div class="history-admin-sheet-card"><div class="gd-sheet-handle"></div><div class="gd-sheet-title">${escapeHtml(state.sheet.title || 'History tools')}</div>${state.sheet.message ? `<div class="gd-sheet-copy">${escapeHtml(state.sheet.message)}</div>` : ''}${state.sheet.detailsHtml ? `<div class="history-admin-sheet-details">${state.sheet.detailsHtml}</div>` : ''}<div class="gd-sheet-footer"><button class="cr-button secondary full" type="button" data-history-sheet-close="1">Close</button>${state.sheet.primaryAction ? `<button class="cr-button save" type="button" data-history-sheet-apply="1">${escapeHtml(state.sheet.primaryAction)}</button>` : ''}</div></div></div>`;
+    const primary = state.sheet.primaryAction ? `<button class="cr-button save" type="button" data-history-sheet-apply="1">${escapeHtml(state.sheet.primaryAction)}</button>` : '';
+    return `<div class="history-admin-sheet is-open" id="historyAdminSheet"><div class="history-admin-sheet-card"><div class="gd-sheet-handle"></div><div class="history-admin-sheet-head"><div class="gd-sheet-title">${escapeHtml(state.sheet.title || 'History tools')}</div><button class="cr-sheet-close" type="button" data-history-sheet-close="1" aria-label="Close">×</button></div>${state.sheet.message ? `<div class="gd-sheet-copy">${escapeHtml(state.sheet.message)}</div>` : ''}${state.sheet.detailsHtml ? `<div class="history-admin-sheet-details">${state.sheet.detailsHtml}</div>` : ''}${primary ? `<div class="cr-sheet-actions single">${primary}</div>` : ''}</div></div>`;
   }
 
   CR.historyRender = { renderRootShell, renderHQ, renderSeasonsOverview, renderAllGames, renderAdminSheet };
