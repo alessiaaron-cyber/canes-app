@@ -27,7 +27,8 @@
 .history-season-topline,
 .history-log-actions,
 .history-edit-side-header,
-.history-player-spotlight-topline {
+.history-player-spotlight-topline,
+.history-log-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -73,6 +74,29 @@
   background: linear-gradient(135deg, rgba(200, 16, 46, 0.08), rgba(17, 24, 39, 0.04));
   color: var(--ink-strong);
   font-weight: 800;
+}
+
+.rivalry-board-meta-row,
+.history-season-meta-row,
+.history-player-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.rivalry-board-meta-pill,
+.history-season-meta-pill,
+.history-player-stats span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: #eef1f4;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .rivalry-heater-card,
@@ -131,27 +155,6 @@
   color: var(--ink-strong);
 }
 
-.history-season-meta-row,
-.history-player-stats {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 14px;
-}
-
-.history-season-meta-pill,
-.history-player-stats span {
-  display: inline-flex;
-  align-items: center;
-  min-height: 30px;
-  padding: 0 10px;
-  border-radius: 999px;
-  background: #eef1f4;
-  color: var(--text-secondary);
-  font-size: 12px;
-  font-weight: 700;
-}
-
 .history-score-pill {
   min-height: 40px;
   padding: 0 14px;
@@ -204,6 +207,20 @@
   gap: 8px;
   margin-top: 12px;
   font-weight: 700;
+}
+
+.history-log-row {
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: var(--surface-secondary);
+}
+
+.history-log-label {
+  color: var(--text-tertiary);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
 }
 
 .history-game-edit-shell {
