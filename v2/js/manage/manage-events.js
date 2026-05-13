@@ -36,6 +36,16 @@ window.CR = window.CR || {};
     return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
   }
 
+  function resetScheduleDraft() {
+    CR.manageState.scheduleDraft = {
+      date: '',
+      opponent: '',
+      type: 'Regular',
+      firstPicker: CR.manageState.season.firstPicker
+    };
+    CR.manageState.editingScheduleGameId = null;
+  }
+
   function rerender(options = {}) {
     CR.renderManage?.({ scrollTop: options.scrollTop });
   }
@@ -76,15 +86,24 @@ window.CR = window.CR || {};
       if (editGame) {
         const game = CR.manageState.schedule.find((item) => item.id === editGame.dataset.manageEditGame);
         if (game) {
+          CR.manageState.editingScheduleGameId = game.id;
           CR.manageState.scheduleDraft = {
             date: game.date,
             opponent: game.opponent,
             type: game.type,
             firstPicker: game.firstPicker
           };
-          CR.showToast?.({ message: `Loaded ${game.opponent} for editing` });
-          rerender();
+          CR.showToast?.({ message: `Editing ${game.opponent}` });
+          rerender({ scrollTop: true });
         }
+        return;
+      }
+
+      const cancelEditGame = event.target.closest('[data-manage-cancel-edit-game]');
+      if (cancelEditGame) {
+        resetScheduleDraft();
+        rerender();
+        CR.showToast?.({ message: 'Edit canceled' });
         return;
       }
 
@@ -122,6 +141,7 @@ window.CR = window.CR || {};
         CR.manageState.season.firstPicker = draft.firstPicker;
         CR.manageState.season.playoffMode = false;
         CR.manageState.schedule = [];
+        resetScheduleDraft();
         CR.manageState.startSeasonOpen = false;
         rerender();
         CR.showToast?.({ message: `${seasonLabel} season started` });
@@ -188,8 +208,8 @@ window.CR = window.CR || {};
         return;
       }
 
-      const addGame = event.target.closest('[data-manage-add-game]');
-      if (addGame) {
+      const saveGame = event.target.closest('[data-manage-save-game]');
+      if (saveGame) {
         const draft = CR.manageState.scheduleDraft;
         const opponent = String(draft.opponent || '').trim().toUpperCase();
         const date = String(draft.date || '').trim();
@@ -197,8 +217,25 @@ window.CR = window.CR || {};
           CR.showToast?.({ message: 'Add a date and opponent first' });
           return;
         }
-        CR.manageState.schedule.push({ id: makeId('game'), date, opponent, type: draft.type || 'Regular', firstPicker: draft.firstPicker || CR.manageState.season.firstPicker });
-        CR.manageState.scheduleDraft = { date: '', opponent: '', type: 'Regular', firstPicker: CR.manageState.season.firstPicker };
+
+        const payload = {
+          date,
+          opponent,
+          type: draft.type || 'Regular',
+          firstPicker: draft.firstPicker || CR.manageState.season.firstPicker
+        };
+
+        if (CR.manageState.editingScheduleGameId) {
+          const game = CR.manageState.schedule.find((item) => item.id === CR.manageState.editingScheduleGameId);
+          if (game) Object.assign(game, payload);
+          resetScheduleDraft();
+          rerender();
+          CR.showToast?.({ message: `${opponent} game updated` });
+          return;
+        }
+
+        CR.manageState.schedule.push({ id: makeId('game'), ...payload });
+        resetScheduleDraft();
         rerender();
         CR.showToast?.({ message: `${opponent} game added` });
         return;
@@ -206,6 +243,7 @@ window.CR = window.CR || {};
 
       const removeGame = event.target.closest('[data-manage-remove-game]');
       if (removeGame) {
+        if (CR.manageState.editingScheduleGameId === removeGame.dataset.manageRemoveGame) resetScheduleDraft();
         CR.manageState.schedule = CR.manageState.schedule.filter((game) => game.id !== removeGame.dataset.manageRemoveGame);
         rerender();
         CR.showToast?.({ message: 'Game removed from schedule' });
