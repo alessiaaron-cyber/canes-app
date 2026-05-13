@@ -554,17 +554,18 @@
   position: fixed;
   inset: 0;
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: center;
-  padding: 18px 16px calc(var(--bottom-nav-height) + env(safe-area-inset-bottom) + 12px);
+  padding: max(18px, env(safe-area-inset-top)) 16px max(18px, env(safe-area-inset-bottom));
   background: rgba(15, 23, 42, 0.24);
   z-index: 5002;
 }
 
 .history-admin-sheet-card {
-  width: 100%;
-  max-width: 520px;
-  max-height: min(84vh, 860px);
+  width: min(100%, 520px);
+  max-height: min(88vh, 820px);
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
   border-radius: 28px;
   background: #fff;
@@ -575,10 +576,15 @@
 
 .history-admin-sheet-details {
   margin-top: 10px;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .history-sheet-form-v2 {
   gap: 12px;
+  height: 100%;
+  min-height: 0;
 }
 
 .history-sheet-summary {
@@ -632,7 +638,8 @@
 
 .history-sheet-panel {
   margin-top: 12px;
-  height: 400px;
+  flex: 1 1 auto;
+  min-height: 0;
   overflow: auto;
   -webkit-overflow-scrolling: touch;
   padding-right: 2px;
@@ -778,6 +785,20 @@
   background: rgba(15, 23, 42, 0.04);
 }
 
+.history-admin-sheet .gd-sheet-copy {
+  margin: 8px 8px 0;
+}
+
+.history-admin-sheet .gd-sheet-footer {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-subtle);
+  background: #fff;
+  flex: 0 0 auto;
+}
+
 .history-sheet-open,
 .history-sheet-open body {
   overflow: hidden;
@@ -830,10 +851,6 @@
     grid-template-columns: minmax(0, 1fr) 52px 52px;
   }
 
-  .history-sheet-panel {
-    height: 420px;
-  }
-
   .history-sheet-pick-row.is-editable {
     grid-template-columns: 1fr;
   }
@@ -846,4 +863,47 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px;
   }
+}
+
+/* History edit modal layout overrides */
+.history-admin-sheet {
+  align-items: center;
+  justify-content: center;
+  padding: max(18px, env(safe-area-inset-top)) 16px max(18px, env(safe-area-inset-bottom));
+}
+
+.history-admin-sheet-card {
+  width: min(100%, 520px);
+  max-height: min(88vh, 820px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.history-admin-sheet-details {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.history-admin-sheet-details .history-sheet-form-v2 {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.history-admin-sheet-details .history-sheet-panel {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: auto;
+  overflow: auto;
+}
+
+.history-admin-sheet .gd-sheet-footer {
+  flex: 0 0 auto;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-subtle);
+  background: #fff;
 }
