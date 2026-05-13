@@ -17,6 +17,16 @@ window.CR = window.CR || {};
     });
 
     root.addEventListener('click', (event) => {
+      const seasonJump = event.target.closest('button[data-history-season]');
+      if (seasonJump) {
+        CR.historyState.seasonId = seasonJump.dataset.historySeason;
+        CR.historyState.expandedGameId = null;
+        CR.historyState.editingGameId = null;
+        CR.historyState.editTab = 'result';
+        CR.renderHistory?.();
+        return;
+      }
+
       const editOpen = event.target.closest('button[data-history-open-edit]');
       if (editOpen) {
         const gameId = editOpen.dataset.historyOpenEdit;
