@@ -76,7 +76,8 @@
 .history-season-score-grid,
 .history-recap-sides,
 .history-sheet-sides,
-.history-sheet-score-grid {
+.history-sheet-score-grid,
+.history-sheet-score-preview-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
@@ -87,7 +88,9 @@
 .history-log-card,
 .history-player-spotlight-card,
 .rivalry-highlight-item,
-.history-sheet-side {
+.history-sheet-side,
+.history-sheet-score-preview-card,
+.history-sheet-pick-card {
   border: 1px solid var(--border-subtle);
   border-radius: 20px;
   background: #fff;
@@ -102,7 +105,9 @@
 .history-player-hero-stat,
 .rivalry-highlight-value,
 .history-score-pill,
-.history-season-overview-side strong {
+.history-season-overview-side strong,
+.history-sheet-score-preview-value,
+.history-sheet-side-total {
   font-size: 30px;
   font-weight: 900;
   letter-spacing: -0.05em;
@@ -113,7 +118,8 @@
 .history-season-meta-row,
 .history-player-stats,
 .history-season-overview-meta,
-.history-sheet-meta-row {
+.history-sheet-meta-row,
+.history-sheet-summary-chips {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
@@ -176,7 +182,10 @@
 .history-all-games-header-card p,
 .history-season-overview-card p,
 .history-sheet-actions-note,
-.history-sheet-field span {
+.history-sheet-field span,
+.history-sheet-summary-copy,
+.history-sheet-summary-subtitle,
+.history-sheet-footer-note {
   color: var(--text-secondary);
   line-height: 1.45;
 }
@@ -555,22 +564,189 @@
 .history-admin-sheet-card {
   width: 100%;
   max-width: 520px;
+  max-height: min(84vh, 860px);
+  overflow: hidden;
   border-radius: 28px;
   background: #fff;
   border: 1px solid var(--border-subtle);
   box-shadow: 0 18px 40px rgba(15, 23, 42, 0.18);
-  padding: 18px;
+  padding: 16px;
 }
 
 .history-admin-sheet-details {
-  margin-top: 14px;
+  margin-top: 10px;
+}
+
+.history-sheet-form-v2 {
+  gap: 12px;
+}
+
+.history-sheet-summary {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.history-sheet-summary-title {
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: -0.05em;
+  font-weight: 900;
+  color: var(--ink-strong);
+}
+
+.history-sheet-summary-copy,
+.history-sheet-summary-subtitle,
+.history-sheet-footer-note {
+  margin-top: 5px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.history-sheet-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.history-sheet-tab {
+  appearance: none;
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  min-height: 40px;
+  background: #f3f4f7;
+  color: var(--ink-strong);
+  font: inherit;
+  font-weight: 800;
+}
+
+.history-sheet-tab.is-active {
+  background: var(--ink-strong);
+  color: #fff;
+  border-color: var(--ink-strong);
+}
+
+.history-sheet-panel {
+  margin-top: 12px;
+  height: 400px;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-right: 2px;
+}
+
+.history-sheet-score-preview-card {
+  padding: 14px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+}
+
+.history-sheet-score-preview-value,
+.history-sheet-side-total {
+  margin-top: 4px;
+  font-size: 26px;
+  letter-spacing: -0.04em;
+}
+
+.history-sheet-side-section {
+  margin-top: 10px;
+}
+
+.history-sheet-side-section:first-child {
+  margin-top: 0;
+}
+
+.history-sheet-side-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.history-sheet-side-section-head h3 {
+  margin: 0;
+  font-size: 18px;
+  letter-spacing: -0.03em;
+}
+
+.history-sheet-ga-head {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--text-tertiary);
+}
+
+.history-sheet-pick-stack {
+  display: grid;
+  gap: 8px;
+}
+
+.history-sheet-pick-card {
+  border-radius: 16px;
+  padding: 10px;
+}
+
+.history-sheet-pick-card-topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.history-sheet-pick-card-topline strong,
+.history-sheet-pick-points-row strong {
+  font-size: 13px;
+  font-weight: 900;
+  color: var(--ink-strong);
+}
+
+.history-sheet-pick-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 56px 56px;
+  gap: 8px;
+  align-items: end;
+}
+
+.history-sheet-pick-name-wrap,
+.history-sheet-mini-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.history-sheet-mini-stat span {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+.history-sheet-pick-name,
+.history-sheet-mini-input {
+  min-height: 40px;
+}
+
+.history-sheet-mini-input {
+  text-align: center;
+  padding: 0 8px;
+}
+
+.history-sheet-pick-points-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 8px;
 }
 
 .history-sheet-field-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
-  margin-top: 14px;
+  margin-top: 0;
 }
 
 .history-sheet-score-field .history-sheet-input {
@@ -596,23 +772,30 @@
 }
 
 .history-sheet-actions-note {
-  margin-top: 14px;
+  margin-top: 12px;
   padding: 12px 14px;
   border-radius: 16px;
   background: rgba(15, 23, 42, 0.04);
+}
+
+.history-sheet-open,
+.history-sheet-open body {
+  overflow: hidden;
 }
 
 @media (max-width: 430px) {
   .history-recap-sides,
   .history-sheet-sides,
   .history-sheet-score-grid,
-  .history-sheet-field-grid {
+  .history-sheet-field-grid,
+  .history-sheet-score-preview-grid {
     grid-template-columns: 1fr;
   }
 
   .history-recap-footer,
   .history-all-games-head,
-  .history-season-overview-topline {
+  .history-season-overview-topline,
+  .history-sheet-summary {
     flex-direction: column;
     align-items: stretch;
   }
@@ -637,6 +820,18 @@
 
   .history-season-overview-divider {
     align-self: flex-start;
+  }
+
+  .history-sheet-summary-title {
+    font-size: 22px;
+  }
+
+  .history-sheet-pick-grid {
+    grid-template-columns: minmax(0, 1fr) 52px 52px;
+  }
+
+  .history-sheet-panel {
+    height: 420px;
   }
 
   .history-sheet-pick-row.is-editable {
