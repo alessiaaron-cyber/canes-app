@@ -93,7 +93,8 @@
 
 .cr-button.danger,
 .cr-button.remove,
-.cr-button.delete {
+.cr-button.delete,
+.cr-button.signout {
   background: var(--ui-danger-soft);
   color: var(--ui-danger);
   box-shadow: none;
@@ -195,8 +196,8 @@
   height: 46px;
   flex: 0 0 auto;
   border-radius: 16px;
-  background: var(--ui-graphite);
-  color: #fff;
+  background: var(--ui-graphite-soft);
+  color: var(--ui-graphite);
   font-size: 30px;
   line-height: 1;
 }
