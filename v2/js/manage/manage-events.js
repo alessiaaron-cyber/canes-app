@@ -41,6 +41,12 @@ window.CR = window.CR || {};
     if (!root) return;
 
     root.addEventListener('input', (event) => {
+      const newSeasonInput = event.target.closest('[data-manage-new-season-input]');
+      if (newSeasonInput) {
+        CR.manageState.newSeasonDraft.seasonLabel = newSeasonInput.value;
+        return;
+      }
+
       const rosterInput = event.target.closest('[data-manage-roster-input]');
       if (rosterInput) {
         CR.manageState.rosterDraft[rosterInput.dataset.manageRosterInput] = rosterInput.value;
@@ -54,6 +60,12 @@ window.CR = window.CR || {};
     });
 
     root.addEventListener('change', (event) => {
+      const newSeasonInput = event.target.closest('[data-manage-new-season-input]');
+      if (newSeasonInput) {
+        CR.manageState.newSeasonDraft.seasonLabel = newSeasonInput.value;
+        return;
+      }
+
       const rosterInput = event.target.closest('[data-manage-roster-input]');
       if (rosterInput) {
         CR.manageState.rosterDraft[rosterInput.dataset.manageRosterInput] = rosterInput.value;
@@ -90,13 +102,6 @@ window.CR = window.CR || {};
         return;
       }
 
-      const newSeasonValue = event.target.closest('[data-manage-new-season-value]');
-      if (newSeasonValue) {
-        CR.manageState.newSeasonDraft.seasonLabel = newSeasonValue.dataset.manageNewSeasonValue;
-        CR.renderManage?.();
-        return;
-      }
-
       const newSeasonPicker = event.target.closest('[data-manage-new-season-picker]');
       if (newSeasonPicker) {
         CR.manageState.newSeasonDraft.firstPicker = newSeasonPicker.dataset.manageNewSeasonPicker;
@@ -107,13 +112,18 @@ window.CR = window.CR || {};
       const confirmStartSeason = event.target.closest('[data-manage-confirm-start-season]');
       if (confirmStartSeason) {
         const draft = CR.manageState.newSeasonDraft;
-        CR.manageState.season.activeSeasonLabel = draft.seasonLabel;
+        const seasonLabel = String(draft.seasonLabel || '').trim();
+        if (!seasonLabel) {
+          CR.showToast?.({ message: 'Add a season name first' });
+          return;
+        }
+        CR.manageState.season.activeSeasonLabel = seasonLabel;
         CR.manageState.season.firstPicker = draft.firstPicker;
         CR.manageState.season.playoffMode = false;
         CR.manageState.schedule = [];
         CR.manageState.startSeasonOpen = false;
         CR.renderManage?.();
-        CR.showToast?.({ message: `${draft.seasonLabel} season started` });
+        CR.showToast?.({ message: `${seasonLabel} season started` });
         return;
       }
 
