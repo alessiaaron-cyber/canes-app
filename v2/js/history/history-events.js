@@ -33,84 +33,92 @@ window.CR = window.CR || {};
     scrollHistoryToTop();
   }
 
-  function bindHistoryEvents() {
-    const root = document.querySelector('#historyView');
-    if (!root) return;
+  function handleSeasonSelect(event) {
+    const target = event.target;
+    if (!target.matches('#historySeasonSelect, #historySeasonSelectArchive')) return;
 
-    root.querySelector('#historySeasonSelect')?.addEventListener('change', (event) => {
-      CR.historyState.seasonId = event.target.value;
+    CR.historyState.seasonId = target.value;
+    CR.renderHistory?.();
+    scrollHistoryToTop();
+  }
+
+  function handleClick(event) {
+    const seasonOverview = event.target.closest('[data-history-open-season]');
+    if (seasonOverview) {
+      CR.historyState.seasonId = seasonOverview.dataset.historyOpenSeason;
+      navigate('all_games', { returnView: 'seasons' });
+      return;
+    }
+
+    const seasonJump = event.target.closest('button[data-history-season]');
+    if (seasonJump) {
+      CR.historyState.seasonId = seasonJump.dataset.historySeason;
       CR.renderHistory?.();
       scrollHistoryToTop();
-    });
+      return;
+    }
 
-    root.addEventListener('click', (event) => {
-      const seasonOverview = event.target.closest('[data-history-open-season]');
-      if (seasonOverview) {
-        CR.historyState.seasonId = seasonOverview.dataset.historyOpenSeason;
-        navigate('all_games', { returnView: 'seasons' });
+    const back = event.target.closest('button[data-history-back]');
+    if (back) {
+      navigate(CR.historyState.returnView || 'hq', { trackPrevious: false });
+      return;
+    }
+
+    const backHq = event.target.closest('button[data-history-back-hq]');
+    if (backHq) {
+      navigate('hq', { trackPrevious: false });
+      return;
+    }
+
+    const access = event.target.closest('button[data-history-access]');
+    if (access) {
+      const id = access.dataset.historyAccess;
+
+      if (id === 'all_games') {
+        navigate('all_games', { returnView: 'hq' });
         return;
       }
 
-      const seasonJump = event.target.closest('button[data-history-season]');
-      if (seasonJump) {
-        CR.historyState.seasonId = seasonJump.dataset.historySeason;
-        CR.renderHistory?.();
-        scrollHistoryToTop();
+      if (id === 'seasons') {
+        navigate('seasons');
         return;
       }
 
-      const back = event.target.closest('button[data-history-back]');
-      if (back) {
-        navigate(CR.historyState.returnView || 'hq', { trackPrevious: false });
-        return;
-      }
-
-      const backHq = event.target.closest('button[data-history-back-hq]');
-      if (backHq) {
-        navigate('hq', { trackPrevious: false });
-        return;
-      }
-
-      const access = event.target.closest('button[data-history-access]');
-      if (access) {
-        const id = access.dataset.historyAccess;
-
-        if (id === 'all_games') {
-          navigate('all_games', { returnView: 'hq' });
-          return;
+      const configs = {
+        commissioner: {
+          title: 'Commissioner tools',
+          message: 'Admin history tools will live behind this entry point for editing, corrections, and recalculation.',
+          primaryAction: 'Open tools'
         }
+      };
 
-        if (id === 'seasons') {
-          navigate('seasons');
-          return;
-        }
+      openHistorySheet(configs[id] || { title: 'History', message: 'Mock detail view.' });
+      return;
+    }
 
-        const configs = {
-          commissioner: {
-            title: 'Commissioner tools',
-            message: 'Admin history tools will live behind this entry point for editing, corrections, and recalculation.',
-            primaryAction: 'Open tools'
-          }
-        };
+    const sheetClose = event.target.closest('[data-history-sheet-close]');
+    if (sheetClose || event.target.id === 'historyAdminSheet') {
+      CR.historyState.sheet = { open: false };
+      CR.renderHistory?.();
+      return;
+    }
 
-        openHistorySheet(configs[id] || { title: 'History', message: 'Mock detail view.' });
-        return;
-      }
+    const sheetApply = event.target.closest('[data-history-sheet-apply]');
+    if (sheetApply) {
+      CR.historyState.sheet = { open: false };
+      CR.showToast?.({ message: 'Mock history tool opened', tier: 'light' });
+      CR.renderHistory?.();
+    }
+  }
 
-      const sheetClose = event.target.closest('[data-history-sheet-close]');
-      if (sheetClose || event.target.id === 'historyAdminSheet') {
-        CR.historyState.sheet = { open: false };
-        CR.renderHistory?.();
-        return;
-      }
+  function bindHistoryEvents() {
+    const root = document.querySelector('#historyView');
+    if (!root || root.dataset.historyBound === 'true') return;
 
-      const sheetApply = event.target.closest('[data-history-sheet-apply]');
-      if (sheetApply) {
-        CR.historyState.sheet = { open: false };
-        CR.showToast?.({ message: 'Mock history tool opened', tier: 'light' });
-        CR.renderHistory?.();
-      }
-    });
+    root.addEventListener('change', handleSeasonSelect);
+    root.addEventListener('click', handleClick);
+
+    root.dataset.historyBound = 'true';
   }
 
   CR.historyEvents = { bindHistoryEvents };
