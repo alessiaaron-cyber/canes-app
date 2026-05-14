@@ -13,8 +13,8 @@ window.CR = window.CR || {};
     `;
   }
 
-  function renderPlayerCard({ side, picks, red, themeClass, pointsFor, isPlayoffs }) {
-    const resolvedTheme = themeClass || (red ? 'owner-primary' : 'owner-secondary');
+  function renderPlayerCard({ side, picks, themeClass, pointsFor, isPlayoffs }) {
+    const resolvedTheme = themeClass || 'owner-primary';
     const total = picks.reduce((sum, pick) => sum + pointsFor(pick), 0);
 
     return `
