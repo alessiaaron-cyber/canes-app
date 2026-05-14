@@ -1,6 +1,11 @@
 window.CR = window.CR || {};
 
 (() => {
+  const users = [
+    { id: 'user-aaron', username: 'Aaron', displayName: 'Aaron', themeClass: 'owner-primary', avatarClass: 'avatar-primary' },
+    { id: 'user-julie', username: 'Julie', displayName: 'Julie', themeClass: 'owner-secondary', avatarClass: 'avatar-secondary' }
+  ];
+
   const players = [
     { id: 'aho', name: 'Sebastian Aho', position: 'C', vibe: 'Reliable chaos' },
     { id: 'jarvis', name: 'Seth Jarvis', position: 'RW', vibe: 'Annoyingly clutch' },
@@ -322,6 +327,7 @@ window.CR = window.CR || {};
 
   window.CR.historyMockData = {
     currentSeasonId: '2025-26',
+    users,
     seasons,
     players,
     games
