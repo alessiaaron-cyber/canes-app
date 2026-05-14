@@ -1,6 +1,14 @@
 window.CR = window.CR || {};
+window.CR.ui = window.CR.ui || {};
 
 window.CR.$ = (selector) => document.querySelector(selector);
+
+window.CR.ui.escapeHtml = (value) => String(value ?? '')
+  .replace(/&/g, '&amp;')
+  .replace(/</g, '&lt;')
+  .replace(/>/g, '&gt;')
+  .replace(/\"/g, '&quot;')
+  .replace(/'/g, '&#39;');
 
 window.CR.showToast = (input) => {
   const toast = window.CR.$('#toast');
