@@ -23,7 +23,7 @@
   <link rel="stylesheet" href="css/app-semantics.css?v=semantics3" />
   <link rel="stylesheet" href="css/app-icons.css?v=icons1" />
   <link rel="stylesheet" href="css/auth.css?v=auth5" />
-  <link rel="stylesheet" href="css/gameday/gameday.css?v=v2gameday14" />
+  <link rel="stylesheet" href="css/gameday/gameday.css?v=v2gameday15" />
   <link rel="stylesheet" href="css/gameday/gameday-overrides.css?v=v2gameday-override7" />
   <link rel="stylesheet" href="css/gameday/gameday-tokens.css?v=v2gameday-tokens2" />
   <link rel="stylesheet" href="css/gameday/gameday-refinements.css?v=v2gameday-refine2" />
@@ -147,13 +147,16 @@
     <div class="gd-sheet" id="manageSheet">
       <div class="gd-sheet-card">
         <div class="gd-sheet-handle"></div>
-        <div class="gd-sheet-title">Manage Picks</div>
-        <div class="gd-sheet-copy">Admin-only quick swap for locked picks.</div>
-        <div class="gd-sheet-actions" id="manageSheetActions"></div>
-        <div class="cr-sheet-actions double">
-          <button class="cr-button secondary" type="button" id="closeSheet">Cancel</button>
-          <button class="cr-button save" type="button" id="saveSheet">Save Picks</button>
+        <div class="manage-edit-header">
+          <div>
+            <div class="eyebrow">Game Day</div>
+            <h2>Manage Picks</h2>
+            <p>Admin-only quick swap for locked picks.</p>
+          </div>
+          <button class="manage-edit-close" type="button" id="closeSheet" aria-label="Close">×</button>
         </div>
+        <div class="gd-sheet-actions" id="manageSheetActions"></div>
+        <button class="cr-button save" type="button" id="saveSheet">Save Picks</button>
       </div>
     </div>
 
