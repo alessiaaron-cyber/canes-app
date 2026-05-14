@@ -25,7 +25,7 @@ window.CR = window.CR || {};
   }
 
   function renderEditableMetaCard({ field, label, value }) {
-    return `<button class="manage-meta-card manage-meta-button" type="button" data-manage-edit="${escapeHtml(field)}" aria-label="Edit ${escapeHtml(label)}"><span class="eyebrow">${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong><span class="manage-meta-edit-hint">Tap to edit</span></button>`;
+    return `<button class="manage-meta-card manage-meta-button" type="button" data-manage-edit="${escapeHtml(field)}" aria-label="Edit ${escapeHtml(label)}"><span class="eyebrow">${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong><span class="cr-button edit manage-meta-edit-hint">Edit</span></button>`;
   }
 
   function renderCardHeader(eyebrow, title, copy, badge) {
