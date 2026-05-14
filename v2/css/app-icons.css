@@ -1,0 +1,118 @@
+/* Shared icon action system */
+.cr-icon-button {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: var(--radius-sm, 14px);
+  background: rgba(255, 255, 255, 0.78);
+  color: var(--ink-strong);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.72) inset;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+  transition:
+    transform var(--motion-fast, 140ms) var(--ease-standard, ease),
+    background var(--motion-fast, 140ms) ease,
+    border-color var(--motion-fast, 140ms) ease,
+    color var(--motion-fast, 140ms) ease,
+    box-shadow var(--motion-fast, 140ms) ease;
+}
+
+.cr-icon-button:active { transform: scale(.96); }
+
+.cr-icon-button svg,
+.cr-icon {
+  width: 18px;
+  height: 18px;
+  display: block;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+  pointer-events: none;
+}
+
+.cr-icon-button--soft {
+  background: rgba(102, 112, 133, 0.08);
+  border-color: transparent;
+  color: var(--text-secondary);
+  box-shadow: none;
+}
+
+.cr-icon-button--primary {
+  background: var(--ink-strong);
+  border-color: var(--ink-strong);
+  color: #fff;
+  box-shadow: 0 8px 18px rgba(17, 24, 39, 0.14);
+}
+
+.cr-icon-button--danger {
+  background: var(--ui-danger-soft, #fff1f0);
+  border-color: transparent;
+  color: var(--ui-danger, #b42318);
+  box-shadow: none;
+}
+
+.cr-icon-button--ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--text-secondary);
+  box-shadow: none;
+}
+
+.cr-section-action {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  border-radius: var(--radius-md, 18px);
+}
+
+.cr-row-icon-actions,
+.cr-card-actions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+.cr-row-icon-actions .cr-icon-button {
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
+  border-radius: var(--radius-sm, 14px);
+}
+
+.cr-fab {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--ink-strong);
+  color: #fff;
+  box-shadow: 0 14px 30px rgba(17, 24, 39, 0.18);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.cr-fab svg { width: 22px; height: 22px; }
+
+.cr-icon-button[aria-disabled="true"],
+.cr-icon-button:disabled,
+.cr-fab:disabled {
+  opacity: .45;
+  pointer-events: none;
+  box-shadow: none;
+}
