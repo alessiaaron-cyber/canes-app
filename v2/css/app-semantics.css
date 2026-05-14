@@ -1,0 +1,219 @@
+/* Semantic UI foundation
+   Purpose: make interaction roles, metadata, status, and selection states visually distinct. */
+:root {
+  --role-action-primary-bg: var(--ink-strong);
+  --role-action-primary-text: #ffffff;
+  --role-action-secondary-bg: #eef1f5;
+  --role-action-secondary-text: var(--ink-strong);
+  --role-action-danger-bg: var(--ui-danger-soft, #fff1f0);
+  --role-action-danger-text: var(--ui-danger, #b42318);
+
+  --role-selected-bg: rgba(17, 24, 39, 0.08);
+  --role-selected-text: var(--ink-strong);
+  --role-selected-border: rgba(17, 24, 39, 0.12);
+
+  --role-metadata-bg: rgba(102, 112, 133, 0.09);
+  --role-metadata-text: var(--text-secondary);
+  --role-metadata-border: transparent;
+
+  --role-status-live-bg: rgba(200, 16, 46, 0.1);
+  --role-status-live-text: #c8102e;
+  --role-status-success-bg: var(--live-green-soft);
+  --role-status-success-text: var(--live-green);
+  --role-status-special-bg: #fff4e5;
+  --role-status-special-text: #92400e;
+  --role-status-warning-bg: var(--warning-soft);
+  --role-status-warning-text: var(--warning);
+
+  --role-row-action-bg: #fbfcfd;
+  --role-row-action-border: var(--border-subtle);
+  --role-disabled-bg: #f7f8fa;
+  --role-disabled-text: var(--text-tertiary);
+
+  --control-height-tiny: 34px;
+  --control-height-sm: 38px;
+  --control-height-md: 44px;
+  --control-height-lg: 52px;
+  --control-height-row: 70px;
+}
+
+/* Actions */
+.cr-button,
+.mini-button,
+.icon-button,
+.gd-draft-btn,
+.gd-small-action,
+.gd-sim-button,
+.manage-stepper button {
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.cr-button {
+  min-height: var(--control-height-sm);
+}
+
+.cr-button.primary,
+.cr-button.add,
+.cr-button.save,
+.gd-sheet-save {
+  min-height: var(--control-height-lg);
+  background: var(--role-action-primary-bg);
+  color: var(--role-action-primary-text);
+}
+
+.cr-button.secondary,
+.cr-button.edit,
+.cr-button.back,
+.gd-sheet-close,
+.gd-small-action,
+.gd-sim-button {
+  min-height: var(--control-height-sm);
+  background: var(--role-action-secondary-bg);
+  color: var(--role-action-secondary-text);
+}
+
+.cr-button.danger,
+.cr-button.remove,
+.cr-button.delete,
+.cr-button.signout {
+  background: var(--role-action-danger-bg);
+  color: var(--role-action-danger-text);
+}
+
+.cr-row-actions .cr-button,
+.manage-row-actions .cr-button,
+.manage-score-card-header .cr-button,
+.gd-manage-tiny {
+  min-height: var(--control-height-tiny);
+  border-radius: var(--radius-sm);
+}
+
+/* Selection controls */
+.cr-segmented,
+.state-switcher,
+.playoff-switcher,
+.carryover-switcher {
+  background: rgba(102, 112, 133, 0.08);
+}
+
+.cr-segment,
+.state-switcher button,
+.playoff-switcher button,
+.carryover-switcher button {
+  min-height: var(--control-height-sm);
+  box-shadow: none;
+}
+
+.cr-segment.is-active,
+.cr-segment[aria-selected="true"],
+.cr-segment[aria-pressed="true"],
+.state-switcher button.active,
+.playoff-switcher button.active,
+.carryover-switcher button.active {
+  background: var(--role-selected-bg);
+  color: var(--role-selected-text);
+  border-color: var(--role-selected-border);
+  box-shadow: 0 0 0 1px var(--role-selected-border) inset;
+}
+
+/* Metadata and status should not look like controls. */
+.cr-pill,
+.cr-status-pill,
+.status-pill,
+.panel-tag,
+.gd-pill-soft,
+.gd-inline-note,
+.gd-tag,
+.history-season-meta-pill,
+.history-sheet-meta-pill,
+.history-season-overview-count,
+.history-season-overview-note,
+.manage-option-pill-note {
+  min-height: 24px;
+  background: var(--role-metadata-bg);
+  color: var(--role-metadata-text);
+  border-color: var(--role-metadata-border);
+  box-shadow: none;
+  cursor: default;
+}
+
+.panel-tag.live,
+.gd-pill-state.live,
+.global-live-indicator {
+  background: var(--role-status-live-bg);
+  color: var(--role-status-live-text);
+}
+
+.panel-tag.calm,
+.cr-pill.success,
+.cr-status-pill.success,
+.cr-pill.good,
+.cr-status-pill.good {
+  background: var(--role-status-success-bg);
+  color: var(--role-status-success-text);
+}
+
+.gd-pill-playoff,
+.gd-inline-note-playoff,
+.cr-pill.playoff,
+.cr-status-pill.playoff,
+.history-season-overview-tag.winner-aaron,
+.history-season-overview-tag.winner-julie {
+  background: var(--role-status-special-bg);
+  color: var(--role-status-special-text);
+}
+
+.panel-tag.warning,
+.cr-pill.warning,
+.cr-status-pill.warning,
+.gd-inline-note-warning {
+  background: var(--role-status-warning-bg);
+  color: var(--role-status-warning-text);
+}
+
+/* Rows that perform navigation/actions should read differently from passive cards. */
+.cr-action-row,
+.cr-sheet-option,
+.manage-toggle-row,
+.manage-option-pill,
+.history-season-overview-card {
+  background: var(--role-row-action-bg);
+  border-color: var(--role-row-action-border);
+}
+
+.cr-action-row,
+.cr-sheet-option,
+.manage-option-pill,
+.history-season-overview-card {
+  cursor: pointer;
+}
+
+.cr-action-row:active,
+.cr-sheet-option:active,
+.manage-option-pill:active,
+.history-season-overview-card:active {
+  transform: scale(.992);
+}
+
+/* Disabled/claimed/unavailable should be quiet, not merely gray metadata. */
+.gd-roster-row.claimed,
+.cr-action-row.is-muted,
+.cr-is-muted,
+[aria-disabled="true"] {
+  background: var(--role-disabled-bg);
+  color: var(--role-disabled-text);
+  opacity: .66;
+  cursor: default;
+}
+
+/* Button placement rhythm */
+.panel-card > .cr-button.primary:last-child,
+.panel-card > .cr-button.add:last-child,
+.panel-card > .cr-button.save:last-child,
+.cr-sheet-actions .cr-button.primary,
+.manage-card .cr-button.primary,
+.manage-card .cr-button.add,
+.manage-card .cr-button.save {
+  margin-top: 18px;
+}
