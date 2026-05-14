@@ -24,11 +24,10 @@
 .manage-health-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 16px; }
 .manage-meta-card,
 .manage-health-item { border: 1px solid var(--border-subtle); border-radius: var(--radius-md, 18px); padding: 13px; background: #fbfcfd; }
-.manage-meta-button { display: flex; flex-direction: column; align-items: flex-start; width: 100%; min-height: 102px; text-align: left; font: inherit; color: inherit; }
+.manage-meta-button { position: relative; display: flex; flex-direction: column; align-items: flex-start; width: 100%; min-height: 102px; padding-right: 58px; text-align: left; font: inherit; color: inherit; }
 .manage-meta-card strong,
 .manage-health-item strong { display: block; margin-top: 7px; font-size: 15px; font-weight: var(--font-heavy, 900); letter-spacing: -0.02em; color: var(--text-primary); }
-.manage-meta-edit-hint { align-self: flex-start; margin-top: auto; }
-.manage-meta-edit-hint.cr-button { min-height: 32px; padding: 0 13px; border-radius: var(--radius-sm, 14px); font-size: 12px; }
+.manage-meta-edit-hint { position: absolute; top: 13px; right: 13px; width: 40px; height: 40px; min-width: 40px; border-radius: var(--radius-md, 18px); background: rgba(102, 112, 133, 0.08); color: var(--text-secondary); }
 .manage-health-topline { display: flex; flex-direction: column; align-items: flex-start; gap: 9px; }
 .manage-action-row { margin-top: 18px; }
 .manage-card .cr-button.primary,
@@ -75,6 +74,7 @@
   .manage-health-grid,
   .manage-score-rule-row { grid-template-columns: 1fr; }
   .manage-card-header { flex-direction: column; align-items: flex-start; }
+  .manage-card-header .cr-card-actions { align-self: flex-end; margin-top: -42px; }
   .cr-action-row { align-items: flex-start; }
   .manage-row-actions { gap: 10px; }
 }
