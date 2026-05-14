@@ -21,6 +21,28 @@ window.CR = window.CR || {};
     return role ? `${role.charAt(0).toUpperCase()}${role.slice(1)}` : 'Member';
   }
 
+  function avatarThemeClass(profile) {
+    const explicit = String(profile?.avatar_class || profile?.avatarClass || profile?.theme_class || profile?.themeClass || '').trim();
+    if (explicit === 'avatar-primary' || explicit === 'avatar-secondary') return explicit;
+    if (explicit === 'owner-primary') return 'avatar-primary';
+    if (explicit === 'owner-secondary') return 'avatar-secondary';
+
+    const username = String(profile?.username || profile?.display_name || '').trim().toLowerCase();
+    const users = window.CR.historyMockData?.users || [];
+    const matchedUser = users.find((item) => String(item.username || item.displayName || '').trim().toLowerCase() === username);
+    if (matchedUser?.avatarClass) return matchedUser.avatarClass;
+    if (matchedUser?.themeClass === 'owner-primary') return 'avatar-primary';
+    if (matchedUser?.themeClass === 'owner-secondary') return 'avatar-secondary';
+
+    return 'avatar-primary';
+  }
+
+  function applyAvatarTheme(element, themeClass) {
+    if (!element) return;
+    element.classList.remove('avatar-primary', 'avatar-secondary');
+    element.classList.add(themeClass);
+  }
+
   function renderAccountIdentity() {
     const profile = window.CR.currentProfile || {};
     const user = window.CR.currentUser || {};
@@ -34,6 +56,7 @@ window.CR = window.CR || {};
       username,
       email
     });
+    const avatarClass = avatarThemeClass(profile);
 
     const chipAvatar = document.querySelector('#accountChipAvatar');
     const chipName = document.querySelector('#accountChipName');
@@ -45,13 +68,19 @@ window.CR = window.CR || {};
     const manageMeta = document.querySelector('#manageAccountMeta');
     const manageEmail = document.querySelector('#manageAccountEmail');
 
-    if (chipAvatar) chipAvatar.textContent = initials;
+    if (chipAvatar) {
+      chipAvatar.textContent = initials;
+      applyAvatarTheme(chipAvatar, avatarClass);
+    }
     if (chipName) chipName.textContent = displayName;
     if (chipMeta) chipMeta.textContent = role;
 
     if (manageTitle) manageTitle.textContent = displayName;
     if (manageRole) manageRole.textContent = role;
-    if (manageAvatar) manageAvatar.textContent = initials;
+    if (manageAvatar) {
+      manageAvatar.textContent = initials;
+      applyAvatarTheme(manageAvatar, avatarClass);
+    }
     if (manageName) manageName.textContent = displayName;
     if (manageMeta) manageMeta.textContent = `@${username}`;
     if (manageEmail) manageEmail.textContent = email;
