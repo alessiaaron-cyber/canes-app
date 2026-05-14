@@ -17,24 +17,69 @@ window.CR = window.CR || {};
     return `${pick.playerName} • ${pick.goals}G ${pick.assists}A • ${points} pts`;
   }
 
-  function seasonWinner(summary, totals) {
-    if (totals.aaron > totals.julie) return 'Aaron';
-    if (totals.julie > totals.aaron) return 'Julie';
+  function getUsers(data) {
+    return Array.isArray(data?.users) && data.users.length ? data.users : [
+      { username: 'Aaron', displayName: 'Aaron', themeClass: 'owner-primary' },
+      { username: 'Julie', displayName: 'Julie', themeClass: 'owner-secondary' }
+    ];
+  }
+
+  function getUser(data, index) {
+    return getUsers(data)[index] || {};
+  }
+
+  function userName(data, index) {
+    const user = getUser(data, index);
+    return user.displayName || user.username || (index === 0 ? 'Player 1' : 'Player 2');
+  }
+
+  function userThemeClass(data, usernameOrIndex) {
+    const users = getUsers(data);
+    const user = typeof usernameOrIndex === 'number'
+      ? users[usernameOrIndex]
+      : users.find((item) => String(item.username || item.displayName || '').toLowerCase() === String(usernameOrIndex || '').toLowerCase());
+    return user?.themeClass || (typeof usernameOrIndex === 'number' && usernameOrIndex === 0 ? 'owner-primary' : 'owner-secondary');
+  }
+
+  function scoreKeys(data) {
+    const first = getUser(data, 0).username || 'Aaron';
+    const second = getUser(data, 1).username || 'Julie';
+    return {
+      first,
+      second,
+      firstScore: `${String(first).toLowerCase()}Score`,
+      secondScore: `${String(second).toLowerCase()}Score`
+    };
+  }
+
+  function gameScores(data, game) {
+    const keys = scoreKeys(data);
+    return {
+      first: Number(game?.[keys.firstScore] ?? game?.aaronScore ?? 0),
+      second: Number(game?.[keys.secondScore] ?? game?.julieScore ?? 0)
+    };
+  }
+
+  function seasonWinner(data, summary, totals) {
+    if (totals.first > totals.second) return userName(data, 0);
+    if (totals.second > totals.first) return userName(data, 1);
     return 'Tie';
   }
 
-  function leaderClassFromRecord(recordText = '') {
+  function leaderClassFromRecord(data, recordText = '') {
     const match = String(recordText).match(/(\d+)\s*[–-]\s*(\d+)/);
     if (!match) return 'leader-tie';
-    const aaron = Number(match[1]);
-    const julie = Number(match[2]);
-    if (aaron > julie) return 'leader-aaron';
-    if (julie > aaron) return 'leader-julie';
+    const first = Number(match[1]);
+    const second = Number(match[2]);
+    if (first > second) return userThemeClass(data, 0).replace('owner-', 'leader-');
+    if (second > first) return userThemeClass(data, 1).replace('owner-', 'leader-');
     return 'leader-tie';
   }
 
-  function ownerClass(owner) {
-    return String(owner || '').toLowerCase() === 'aaron' ? 'owner-aaron' : String(owner || '').toLowerCase() === 'julie' ? 'owner-julie' : '';
+  function winnerThemeClass(data, winner) {
+    if (String(winner || '').toLowerCase() === 'tie') return 'winner-tie';
+    const theme = userThemeClass(data, winner);
+    return theme === 'owner-primary' ? 'winner-primary' : theme === 'owner-secondary' ? 'winner-secondary' : 'winner-tie';
   }
 
   function renderRootShell() {
@@ -43,35 +88,36 @@ window.CR = window.CR || {};
 
   function renderBoard(data) {
     const board = data.allTimeBoard || {};
-    return `<section class="panel-card rivalry-board-card"><div class="rivalry-board-topline"><span class="eyebrow">All-time rivalry</span></div><h2 class="rivalry-board-title">${escapeHtml(board.lead || 'Rivalry tied')}</h2><div class="rivalry-board-score-grid"><article class="rivalry-score-card"><div class="eyebrow owner-aaron">Aaron</div><div class="rivalry-score-value owner-aaron">${escapeHtml(String(board.aaron ?? 0))}</div></article><article class="rivalry-score-card"><div class="eyebrow owner-julie">Julie</div><div class="rivalry-score-value owner-julie">${escapeHtml(String(board.julie ?? 0))}</div></article></div><div class="rivalry-board-meta-row"><span class="history-meta-pill">${escapeHtml(String(board.totalGames || 0))} total games</span></div></section>`;
+    return `<section class="panel-card rivalry-board-card"><div class="rivalry-board-topline"><span class="eyebrow">All-time rivalry</span></div><h2 class="rivalry-board-title">${escapeHtml(board.lead || 'Rivalry tied')}</h2><div class="rivalry-board-score-grid"><article class="rivalry-score-card"><div class="eyebrow ${userThemeClass(data, 0)}">${escapeHtml(userName(data, 0))}</div><div class="rivalry-score-value">${escapeHtml(String(board.aaron ?? 0))}</div></article><article class="rivalry-score-card"><div class="eyebrow ${userThemeClass(data, 1)}">${escapeHtml(userName(data, 1))}</div><div class="rivalry-score-value">${escapeHtml(String(board.julie ?? 0))}</div></article></div><div class="rivalry-board-meta-row"><span class="history-meta-pill">${escapeHtml(String(board.totalGames || 0))} total games</span></div></section>`;
   }
 
   function renderSeasonSnapshot(data) {
     const board = data.seasonBoard || {};
-    const leaderClass = leaderClassFromRecord(board.recordText);
-    return `<section class="panel-card history-hq-card"><div class="history-hq-topline"><span class="eyebrow">Current season view</span><button class="cr-button secondary" type="button" data-history-access="seasons">View All</button></div><h3 class="history-hq-title">${escapeHtml(board.seasonLabel || 'Season')}</h3><div class="history-season-score-grid"><article class="rivalry-score-card"><div class="eyebrow owner-aaron">Aaron</div><div class="rivalry-score-value owner-aaron">${escapeHtml(String(board.aaron ?? 0))}</div></article><article class="rivalry-score-card"><div class="eyebrow owner-julie">Julie</div><div class="rivalry-score-value owner-julie">${escapeHtml(String(board.julie ?? 0))}</div></article></div><div class="history-season-meta-row"><span class="history-meta-pill history-record-pill ${leaderClass}">Record ${escapeHtml(board.recordText || '—')}</span><span class="history-meta-pill">${escapeHtml(board.recentText || 'Recent form unavailable')}</span></div>${board.bestGameTitle ? `<p class="history-meta-note">Best game: ${escapeHtml(board.bestGameTitle)}</p>` : ''}</section>`;
+    const leaderClass = leaderClassFromRecord(data, board.recordText);
+    return `<section class="panel-card history-hq-card"><div class="history-hq-topline"><span class="eyebrow">Current season view</span><button class="cr-button secondary" type="button" data-history-access="seasons">View All</button></div><h3 class="history-hq-title">${escapeHtml(board.seasonLabel || 'Season')}</h3><div class="history-season-score-grid"><article class="rivalry-score-card"><div class="eyebrow ${userThemeClass(data, 0)}">${escapeHtml(userName(data, 0))}</div><div class="rivalry-score-value">${escapeHtml(String(board.aaron ?? 0))}</div></article><article class="rivalry-score-card"><div class="eyebrow ${userThemeClass(data, 1)}">${escapeHtml(userName(data, 1))}</div><div class="rivalry-score-value">${escapeHtml(String(board.julie ?? 0))}</div></article></div><div class="history-season-meta-row"><span class="history-meta-pill history-record-pill ${leaderClass}">Record ${escapeHtml(board.recordText || '—')}</span><span class="history-meta-pill">${escapeHtml(board.recentText || 'Recent form unavailable')}</span></div>${board.bestGameTitle ? `<p class="history-meta-note">Best game: ${escapeHtml(board.bestGameTitle)}</p>` : ''}</section>`;
   }
 
   function renderMomentum(data) {
-    return `<section class="panel-card history-momentum-card"><div class="history-section-head"><div><div class="eyebrow">Momentum</div><h3>Last eight rivalry swings</h3></div></div><div class="history-momentum-strip">${(data.momentum || []).map((item) => `<div class="history-momentum-node ${item.winner === 'Aaron' ? 'is-aaron' : item.winner === 'Julie' ? 'is-julie' : 'is-tie'} ${item.playoff ? 'is-playoff' : ''}"><span>${escapeHtml(item.winner === 'Tie' ? 'T' : item.winner === 'Aaron' ? 'A' : 'J')}</span></div>`).join('')}</div><p class="history-support-copy">${escapeHtml(data.highlights?.heater?.copy || 'Momentum is still shifting.')}</p></section>`;
+    return `<section class="panel-card history-momentum-card"><div class="history-section-head"><div><div class="eyebrow">Momentum</div><h3>Last eight rivalry swings</h3></div></div><div class="history-momentum-strip">${(data.momentum || []).map((item) => `<div class="history-momentum-node ${winnerThemeClass(data, item.winner)} ${item.playoff ? 'is-playoff' : ''}"><span>${escapeHtml(item.winner === 'Tie' ? 'T' : String(item.winner || '').slice(0, 1))}</span></div>`).join('')}</div><p class="history-support-copy">${escapeHtml(data.highlights?.heater?.copy || 'Momentum is still shifting.')}</p></section>`;
   }
 
   function renderHighlights(data) {
     const cards = (data.highlights?.cards || []).slice(0, 3);
     const performers = (data.playerSpotlights || []).slice(0, 2);
-    const performerCards = performers.map((player) => `<article class="rivalry-highlight-item history-highlight-performer"><div class="eyebrow ${ownerClass(player.owner)}">${escapeHtml(player.position)} • ${escapeHtml(player.owner)} lean</div><div class="rivalry-highlight-value">${escapeHtml(player.name)}</div><p>${escapeHtml(player.totalPoints)} pts • ${escapeHtml(player.clutch)}</p></article>`).join('');
+    const performerCards = performers.map((player) => `<article class="rivalry-highlight-item history-highlight-performer"><div class="eyebrow ${userThemeClass(data, player.owner)}">${escapeHtml(player.position)} • ${escapeHtml(player.owner)} lean</div><div class="rivalry-highlight-value">${escapeHtml(player.name)}</div><p>${escapeHtml(player.totalPoints)} pts • ${escapeHtml(player.clutch)}</p></article>`).join('');
     return `<section class="panel-card rivalry-highlights-card"><div class="history-section-head"><div><div class="eyebrow">Highlights</div><h3>Rivalry notes</h3></div></div><div class="rivalry-highlight-grid compact-grid">${cards.map((card) => `<article class="rivalry-highlight-item panel-card"><div class="eyebrow">${escapeHtml(card.label)}</div><div class="rivalry-highlight-value">${escapeHtml(card.value)}</div><p>${escapeHtml(card.copy)}</p></article>`).join('')}${performerCards}</div></section>`;
   }
 
   function renderRecentGames(data) {
-    return `<section class="panel-card history-recent-card"><div class="history-section-head"><div><div class="eyebrow">Recent games</div><h3>Latest rivalry results</h3></div><button class="cr-button secondary" type="button" data-history-access="all_games">View All</button></div><div class="history-log-stack recap-log-stack">${(data.recentGames || []).map((game) => renderGameCard(game, false)).join('')}</div></section>`;
+    return `<section class="panel-card history-recent-card"><div class="history-section-head"><div><div class="eyebrow">Recent games</div><h3>Latest rivalry results</h3></div><button class="cr-button secondary" type="button" data-history-access="all_games">View All</button></div><div class="history-log-stack recap-log-stack">${(data.recentGames || []).map((game) => renderGameCard(data, game, false)).join('')}</div></section>`;
   }
 
-  function renderGameCard(game, isArchive) {
-    const winnerClass = game.winner === 'Aaron' ? 'winner-aaron' : game.winner === 'Julie' ? 'winner-julie' : 'winner-tie';
+  function renderGameCard(data, game, isArchive) {
+    const scores = gameScores(data, game);
+    const winnerClass = winnerThemeClass(data, game.winner);
     const context = isArchive ? 'archive' : 'recent';
     const gameTypeBadge = game.playoff ? '<span class="cr-pill playoff">Playoffs</span>' : '<span class="cr-pill regular">Regular</span>';
-    return `<article class="history-log-card rivalry-recap-card ${winnerClass} ${isArchive ? 'is-archive' : ''}" id="history-game-${escapeHtml(game.id)}"><div class="history-log-topline"><div><div class="history-log-kicker-row"><span class="history-log-kicker">Game ${escapeHtml(String(game.displayNumber))}</span>${gameTypeBadge}</div><div class="history-log-subtitle">${escapeHtml(game.date)}</div></div><div class="history-log-actions"><span class="history-score-pill">${escapeHtml(`${game.aaronScore}-${game.julieScore}`)}</span></div></div><div class="history-recap-winner ${winnerClass}">${escapeHtml(game.winner === 'Tie' ? 'Tie game' : `${game.winner} won this matchup`)}</div><div class="history-recap-sides"><section class="history-recap-side"><div class="history-recap-side-head"><strong class="owner-aaron">Aaron</strong><span class="owner-aaron">${escapeHtml(String(game.aaronScore))}</span></div><div class="history-recap-picks">${(game.picks?.Aaron || []).map((pick) => `<div class="history-recap-pick">${escapeHtml(pickLine(pick))}</div>`).join('')}</div></section><section class="history-recap-side"><div class="history-recap-side-head"><strong class="owner-julie">Julie</strong><span class="owner-julie">${escapeHtml(String(game.julieScore))}</span></div><div class="history-recap-picks">${(game.picks?.Julie || []).map((pick) => `<div class="history-recap-pick">${escapeHtml(pickLine(pick))}</div>`).join('')}</div></section></div><div class="history-recap-footer"><span class="history-recap-first-goal">First goal: ${escapeHtml(game.firstGoalScorer || '—')}</span><div class="history-recap-actions"><button class="cr-button edit" type="button" data-history-edit-game="${escapeHtml(game.id)}" data-history-edit-context="${context}">Edit</button></div></div></article>`;
+    return `<article class="history-log-card rivalry-recap-card ${winnerClass} ${isArchive ? 'is-archive' : ''}" id="history-game-${escapeHtml(game.id)}"><div class="history-log-topline"><div><div class="history-log-kicker-row"><span class="history-log-kicker">Game ${escapeHtml(String(game.displayNumber))}</span>${gameTypeBadge}</div><div class="history-log-subtitle">${escapeHtml(game.date)}</div></div><div class="history-log-actions"><span class="history-score-pill">${escapeHtml(`${scores.first}-${scores.second}`)}</span></div></div><div class="history-recap-winner ${winnerClass}">${escapeHtml(game.winner === 'Tie' ? 'Tie game' : `${game.winner} won this matchup`)}</div><div class="history-recap-sides"><section class="history-recap-side"><div class="history-recap-side-head"><strong class="${userThemeClass(data, 0)}">${escapeHtml(userName(data, 0))}</strong><span>${escapeHtml(String(scores.first))}</span></div><div class="history-recap-picks">${(game.picks?.[userName(data, 0)] || game.picks?.Aaron || []).map((pick) => `<div class="history-recap-pick">${escapeHtml(pickLine(pick))}</div>`).join('')}</div></section><section class="history-recap-side"><div class="history-recap-side-head"><strong class="${userThemeClass(data, 1)}">${escapeHtml(userName(data, 1))}</strong><span>${escapeHtml(String(scores.second))}</span></div><div class="history-recap-picks">${(game.picks?.[userName(data, 1)] || game.picks?.Julie || []).map((pick) => `<div class="history-recap-pick">${escapeHtml(pickLine(pick))}</div>`).join('')}</div></section></div><div class="history-recap-footer"><span class="history-recap-first-goal">First goal: ${escapeHtml(game.firstGoalScorer || '—')}</span><div class="history-recap-actions"><button class="cr-button edit" type="button" data-history-edit-game="${escapeHtml(game.id)}" data-history-edit-context="${context}">Edit</button></div></div></article>`;
   }
 
   function renderPlayerSpotlights() {
@@ -81,12 +127,12 @@ window.CR = window.CR || {};
   function renderSeasonCard(data, summary) {
     const season = (data.seasons || []).find((item) => item.id === summary.seasonId);
     const games = data.seasonGames?.[summary.seasonId] || [];
-    const totals = games.reduce((acc, game) => { acc.aaron += Number(game.aaronScore || 0); acc.julie += Number(game.julieScore || 0); return acc; }, { aaron: 0, julie: 0 });
-    const winner = seasonWinner(summary, totals);
-    const winnerClass = winner === 'Aaron' ? 'winner-aaron' : winner === 'Julie' ? 'winner-julie' : 'winner-tie';
-    const leaderClass = leaderClassFromRecord(summary.recordText);
+    const totals = games.reduce((acc, game) => { const scores = gameScores(data, game); acc.first += scores.first; acc.second += scores.second; return acc; }, { first: 0, second: 0 });
+    const winner = seasonWinner(data, summary, totals);
+    const winnerClass = winnerThemeClass(data, winner);
+    const leaderClass = leaderClassFromRecord(data, summary.recordText);
     const playoffCount = games.filter((game) => game.playoff).length;
-    return `<button class="history-season-overview-card ${winnerClass}" type="button" data-history-open-season="${escapeHtml(summary.seasonId)}" aria-label="View ${escapeHtml(summary.label || season?.label || summary.seasonId)} season details"><div class="history-season-overview-topline"><div><div class="eyebrow">${escapeHtml(season?.isCurrent ? 'Current season' : 'Season')}</div><h3>${escapeHtml(summary.label || season?.label || summary.seasonId)}</h3></div><span class="history-season-view-cue" aria-hidden="true">›</span></div><div class="history-season-overview-score"><div class="history-season-overview-side"><span class="history-season-overview-name owner-aaron">Aaron</span><strong class="owner-aaron">${escapeHtml(String(totals.aaron))}</strong></div><div class="history-season-overview-divider" aria-hidden="true">—</div><div class="history-season-overview-side is-right"><span class="history-season-overview-name owner-julie">Julie</span><strong class="owner-julie">${escapeHtml(String(totals.julie))}</strong></div></div><div class="history-season-overview-meta"><span class="history-meta-pill history-record-pill ${leaderClass}">Record ${escapeHtml(summary.recordText || '—')}</span><span class="history-meta-pill">${escapeHtml(String(games.length))} games</span><span class="history-meta-pill">${escapeHtml(playoffCount ? `${playoffCount} playoff games` : 'No playoff games')}</span></div>${summary.bestGameTitle ? `<p class="history-meta-note">Best game: ${escapeHtml(summary.bestGameTitle)}</p>` : ''}</button>`;
+    return `<button class="history-season-overview-card ${winnerClass}" type="button" data-history-open-season="${escapeHtml(summary.seasonId)}" aria-label="View ${escapeHtml(summary.label || season?.label || summary.seasonId)} season details"><div class="history-season-overview-topline"><div><div class="eyebrow">${escapeHtml(season?.isCurrent ? 'Current season' : 'Season')}</div><h3>${escapeHtml(summary.label || season?.label || summary.seasonId)}</h3></div><span class="history-season-view-cue" aria-hidden="true">›</span></div><div class="history-season-overview-score"><div class="history-season-overview-side"><span class="history-season-overview-name ${userThemeClass(data, 0)}">${escapeHtml(userName(data, 0))}</span><strong>${escapeHtml(String(totals.first))}</strong></div><div class="history-season-overview-divider" aria-hidden="true">—</div><div class="history-season-overview-side is-right"><span class="history-season-overview-name ${userThemeClass(data, 1)}">${escapeHtml(userName(data, 1))}</span><strong>${escapeHtml(String(totals.second))}</strong></div></div><div class="history-season-overview-meta"><span class="history-meta-pill history-record-pill ${leaderClass}">Record ${escapeHtml(summary.recordText || '—')}</span><span class="history-meta-pill">${escapeHtml(String(games.length))} games</span><span class="history-meta-pill">${escapeHtml(playoffCount ? `${playoffCount} playoff games` : 'No playoff games')}</span></div>${summary.bestGameTitle ? `<p class="history-meta-note">Best game: ${escapeHtml(summary.bestGameTitle)}</p>` : ''}</button>`;
   }
 
   function renderSeasonsOverview(data) {
@@ -97,8 +143,8 @@ window.CR = window.CR || {};
   function renderAllGames(data) {
     const playoffCount = (data.gameLog || []).filter((game) => game.playoff).length;
     const regularCount = Math.max(0, (data.gameLog?.length || 0) - playoffCount);
-    const leaderClass = leaderClassFromRecord(data.seasonBoard?.recordText);
-    return `<section class="history-all-games-view"><section class="panel-card history-all-games-header-card"><div class="history-section-head history-all-games-head"><div><div class="eyebrow">Season archive</div><h2>${escapeHtml(data.selectedSeason?.label || 'Season')} All Games</h2></div><button class="cr-button back" type="button" data-history-back="1">Back</button></div><p class="history-support-copy">Browse every rivalry game for the selected season and make commissioner edits where needed.</p><div class="history-season-field history-archive-season-field"><label class="eyebrow" for="historySeasonSelectArchive">Season</label><select id="historySeasonSelectArchive" class="history-season-select">${(data.seasons || []).map((season) => `<option value="${escapeHtml(season.id)}" ${data.selectedSeason?.id === season.id ? 'selected' : ''}>${escapeHtml(season.label)}</option>`).join('')}</select></div><div class="history-season-meta-row history-archive-meta-row"><span class="history-meta-pill">${escapeHtml(String(data.gameLog?.length || 0))} games</span><span class="history-meta-pill">${escapeHtml(String(regularCount))} regular</span><span class="history-meta-pill">${escapeHtml(String(playoffCount))} playoff</span><span class="history-meta-pill history-record-pill ${leaderClass}">Record ${escapeHtml(data.seasonBoard?.recordText || '—')}</span></div></section><section class="panel-card history-all-games-list-card"><div class="history-section-head"><div><div class="eyebrow">Game archive</div><h3>Games</h3><p class="history-support-copy">${escapeHtml(String(data.gameLog?.length || 0))} games in this season</p></div></div><div class="history-log-stack archive-log-stack">${(data.gameLog || []).map((game) => renderGameCard(game, true)).join('')}</div></section></section>`;
+    const leaderClass = leaderClassFromRecord(data, data.seasonBoard?.recordText);
+    return `<section class="history-all-games-view"><section class="panel-card history-all-games-header-card"><div class="history-section-head history-all-games-head"><div><div class="eyebrow">Season archive</div><h2>${escapeHtml(data.selectedSeason?.label || 'Season')} All Games</h2></div><button class="cr-button back" type="button" data-history-back="1">Back</button></div><p class="history-support-copy">Browse every rivalry game for the selected season and make commissioner edits where needed.</p><div class="history-season-field history-archive-season-field"><label class="eyebrow" for="historySeasonSelectArchive">Season</label><select id="historySeasonSelectArchive" class="history-season-select">${(data.seasons || []).map((season) => `<option value="${escapeHtml(season.id)}" ${data.selectedSeason?.id === season.id ? 'selected' : ''}>${escapeHtml(season.label)}</option>`).join('')}</select></div><div class="history-season-meta-row history-archive-meta-row"><span class="history-meta-pill">${escapeHtml(String(data.gameLog?.length || 0))} games</span><span class="history-meta-pill">${escapeHtml(String(regularCount))} regular</span><span class="history-meta-pill">${escapeHtml(String(playoffCount))} playoff</span><span class="history-meta-pill history-record-pill ${leaderClass}">Record ${escapeHtml(data.seasonBoard?.recordText || '—')}</span></div></section><section class="panel-card history-all-games-list-card"><div class="history-section-head"><div><div class="eyebrow">Game archive</div><h3>Games</h3><p class="history-support-copy">${escapeHtml(String(data.gameLog?.length || 0))} games in this season</p></div></div><div class="history-log-stack archive-log-stack">${(data.gameLog || []).map((game) => renderGameCard(data, game, true)).join('')}</div></section></section>`;
   }
 
   function renderHQ(data) {
