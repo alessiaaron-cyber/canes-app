@@ -4,13 +4,52 @@ window.CR = window.CR || {};
   const CR = window.CR;
   const pointsForPick = (pick) => ((pick.goals || 0) * 2) + (pick.assists || 0) + (pick.firstGoal ? 2 : 0);
 
+  const FALLBACK_USERS = [
+    { username: 'Aaron', displayName: 'Aaron', themeClass: 'owner-primary', avatarClass: 'avatar-primary', scoreKey: 'Aaron' },
+    { username: 'Julie', displayName: 'Julie', themeClass: 'owner-secondary', avatarClass: 'avatar-secondary', scoreKey: 'Julie' }
+  ];
+
   function clone(value) {
     return JSON.parse(JSON.stringify(value));
   }
 
-  function winner(game) {
-    if (game.aaronScore > game.julieScore) return 'Aaron';
-    if (game.julieScore > game.aaronScore) return 'Julie';
+  function getUsers(raw) {
+    const identityUsers = CR.identity?.getUsers?.(raw);
+    const source = Array.isArray(identityUsers) && identityUsers.length
+      ? identityUsers
+      : (Array.isArray(raw?.users) && raw.users.length ? raw.users : FALLBACK_USERS);
+
+    return source.map((user, index) => ({
+      ...user,
+      username: user.username || user.displayName || FALLBACK_USERS[index]?.username || `Player ${index + 1}`,
+      displayName: user.displayName || user.username || FALLBACK_USERS[index]?.displayName || `Player ${index + 1}`,
+      themeClass: user.themeClass || user.theme_class || FALLBACK_USERS[index]?.themeClass || (index === 0 ? 'owner-primary' : 'owner-secondary'),
+      avatarClass: user.avatarClass || user.avatar_class || FALLBACK_USERS[index]?.avatarClass || (index === 0 ? 'avatar-primary' : 'avatar-secondary'),
+      scoreKey: user.scoreKey || user.score_key || user.username || FALLBACK_USERS[index]?.scoreKey || `Player ${index + 1}`
+    }));
+  }
+
+  function scoreFor(game, users, index) {
+    const user = users[index] || FALLBACK_USERS[index];
+    const scoreKey = `${String(user.scoreKey || user.username || '').toLowerCase()}Score`;
+    const legacyKey = index === 0 ? 'aaronScore' : 'julieScore';
+    return Number(game?.[scoreKey] ?? game?.[legacyKey] ?? 0);
+  }
+
+  function pickKeyOptions(user, index) {
+    return [
+      user?.scoreKey,
+      user?.username,
+      user?.displayName,
+      index === 0 ? 'Aaron' : 'Julie'
+    ].filter(Boolean);
+  }
+
+  function winner(game, users = FALLBACK_USERS) {
+    const firstScore = scoreFor(game, users, 0);
+    const secondScore = scoreFor(game, users, 1);
+    if (firstScore > secondScore) return users[0]?.displayName || users[0]?.username || 'Player 1';
+    if (secondScore > firstScore) return users[1]?.displayName || users[1]?.username || 'Player 2';
     return 'Tie';
   }
 
@@ -18,9 +57,12 @@ window.CR = window.CR || {};
     return new Map((players || []).map((player) => [player.id, player]));
   }
 
-  function enrichGame(game, map) {
-    const picks = ['Aaron', 'Julie'].reduce((acc, side) => {
-      acc[side] = (game.picks?.[side] || []).map((pick) => {
+  function enrichGame(game, map, users) {
+    const picks = users.slice(0, 2).reduce((acc, user, index) => {
+      const targetKey = user.displayName || user.username || (index === 0 ? 'Player 1' : 'Player 2');
+      const sourceKey = pickKeyOptions(user, index).find((key) => Array.isArray(game.picks?.[key]));
+
+      acc[targetKey] = (game.picks?.[sourceKey] || []).map((pick) => {
         const player = map.get(pick.playerId) || { name: pick.playerId, position: '—', vibe: '' };
         return {
           ...pick,
@@ -30,44 +72,56 @@ window.CR = window.CR || {};
           points: pointsForPick(pick)
         };
       });
+
       return acc;
     }, {});
 
+    const firstScore = scoreFor(game, users, 0);
+    const secondScore = scoreFor(game, users, 1);
+    const gameWinner = winner(game, users);
+
     return {
       ...game,
-      winner: winner(game),
-      margin: Math.abs((game.aaronScore || 0) - (game.julieScore || 0)),
+      winner: gameWinner,
+      margin: Math.abs(firstScore - secondScore),
       picks,
-      isOneGoal: Math.abs((game.aaronScore || 0) - (game.julieScore || 0)) <= 1,
-      resultLabel: winner(game) === 'Tie' ? 'Tie' : `${winner(game)} wins`,
+      isOneGoal: Math.abs(firstScore - secondScore) <= 1,
+      resultLabel: gameWinner === 'Tie' ? 'Tie' : `${gameWinner} wins`,
       tagSummary: (game.tags || []).slice(0, 3).join(' • ')
     };
   }
 
-  function buildSeasonSummary(season, seasonGames) {
-    const totals = { Aaron: 0, Julie: 0, playoffAaron: 0, playoffJulie: 0 };
+  function buildSeasonSummary(season, seasonGames, users) {
+    const first = users[0]?.displayName || users[0]?.username || 'Player 1';
+    const second = users[1]?.displayName || users[1]?.username || 'Player 2';
+    const totals = { first: 0, second: 0, playoffFirst: 0, playoffSecond: 0 };
     const moments = [];
 
     seasonGames.forEach((game) => {
-      const gameWinner = winner(game);
-      if (gameWinner === 'Aaron') totals.Aaron += 1;
-      if (gameWinner === 'Julie') totals.Julie += 1;
-      if (game.playoff && gameWinner === 'Aaron') totals.playoffAaron += 1;
-      if (game.playoff && gameWinner === 'Julie') totals.playoffJulie += 1;
+      const gameWinner = winner(game, users);
+      if (gameWinner === first) totals.first += 1;
+      if (gameWinner === second) totals.second += 1;
+      if (game.playoff && gameWinner === first) totals.playoffFirst += 1;
+      if (game.playoff && gameWinner === second) totals.playoffSecond += 1;
       (game.moments || []).slice(0, 1).forEach((moment) => moments.push(moment));
     });
 
-    const bestGame = seasonGames.slice().sort((a, b) => Math.abs((b.aaronScore - b.julieScore)) - Math.abs((a.aaronScore - a.julieScore)))[0] || null;
-    const closestGame = seasonGames.slice().sort((a, b) => Math.abs((a.aaronScore - a.julieScore)) - Math.abs((b.aaronScore - b.julieScore)))[0] || null;
+    const bestGame = seasonGames.slice().sort((a, b) => Math.abs(scoreFor(b, users, 0) - scoreFor(b, users, 1)) - Math.abs(scoreFor(a, users, 0) - scoreFor(a, users, 1)))[0] || null;
+    const closestGame = seasonGames.slice().sort((a, b) => Math.abs(scoreFor(a, users, 0) - scoreFor(a, users, 1)) - Math.abs(scoreFor(b, users, 0) - scoreFor(b, users, 1)))[0] || null;
 
     return {
       seasonId: season.id,
       label: season.label,
       isCurrent: season.isCurrent,
       note: season.note,
-      totals,
-      recordText: `${totals.Aaron}–${totals.Julie}`,
-      playoffText: `${totals.playoffAaron}–${totals.playoffJulie}`,
+      totals: {
+        [first]: totals.first,
+        [second]: totals.second,
+        playoffFirst: totals.playoffFirst,
+        playoffSecond: totals.playoffSecond
+      },
+      recordText: `${totals.first}–${totals.second}`,
+      playoffText: `${totals.playoffFirst}–${totals.playoffSecond}`,
       bestMoment: moments[0] || 'Season still writing itself.',
       bestGameTitle: bestGame?.title || '—',
       closestGameTitle: closestGame?.title || '—'
@@ -77,14 +131,14 @@ window.CR = window.CR || {};
   CR.historyModel = {
     build(rawInput) {
       const raw = clone(rawInput || CR.historyMockData || {});
-      const users = raw.users || [];
+      const users = getUsers(raw);
       const seasons = raw.seasons || [];
       const players = raw.players || [];
       const map = playerMap(players);
-      const games = (raw.games || []).map((game) => enrichGame(game, map)).sort((a, b) => String(b.date).localeCompare(String(a.date)));
+      const games = (raw.games || []).map((game) => enrichGame(game, map, users)).sort((a, b) => String(b.date).localeCompare(String(a.date)));
       const currentSeasonId = raw.currentSeasonId || seasons.find((season) => season.isCurrent)?.id || seasons[0]?.id || '';
       const seasonGames = Object.fromEntries(seasons.map((season) => [season.id, games.filter((game) => game.seasonId === season.id)]));
-      const seasonSummaries = seasons.map((season) => buildSeasonSummary(season, seasonGames[season.id] || []));
+      const seasonSummaries = seasons.map((season) => buildSeasonSummary(season, seasonGames[season.id] || [], users));
 
       return {
         currentSeasonId,
