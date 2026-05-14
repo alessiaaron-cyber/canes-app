@@ -1,1 +1,31 @@
-window.CR=window.CR||{};(()=>{const CR=window.CR;CR.gameDayRender={renderStatChips(pick){return `<div class="gd-player-stats"><span class="gd-stat ${pick.goals?'live':''}">G ${pick.goals}</span><span class="gd-stat ${pick.assists?'live':''}">A ${pick.assists}</span><span class="gd-stat ${pick.firstGoal?'live':''}">FG</span></div>`;},renderPlayerCard({side,picks,score,red,themeClass,pointsFor,isPlayoffs}){const resolvedTheme=themeClass||(red?'owner-primary':'owner-secondary');const total=picks.reduce((sum,pick)=>sum+pointsFor(pick),0);return `<article class="gd-card gd-score-card ${isPlayoffs?'gd-card-playoff':''}"><div class="gd-pick-card-head"><strong class="${resolvedTheme}">${side}</strong><span class="gd-pick-card-score">${total} pts</span></div>${picks.map((pick)=>`<div class="gd-player-card"><div class="gd-player-main"><strong>${pick.player}</strong>${CR.gameDayRender.renderStatChips(pick)}</div><div class="gd-player-total">+${pointsFor(pick)}</div></div>`).join('')}</article>`;},renderHeroSection(args){if(CR.gameDayHeroRender?.renderHeroSection){return CR.gameDayHeroRender.renderHeroSection(args);}return '';},renderPregameSection(args){if(CR.gameDayPregameRender?.renderPregameSection){return CR.gameDayPregameRender.renderPregameSection(args);}return '';},renderLiveSection(args){if(CR.gameDayLiveRender?.renderLiveSection){return CR.gameDayLiveRender.renderLiveSection(args);}return '';},renderFinalSection(args){if(CR.gameDayFinalRender?.renderFinalSection){return CR.gameDayFinalRender.renderFinalSection(args);}return '';}};})();
+window.CR = window.CR || {};
+
+(() => {
+  const CR = window.CR;
+
+  CR.gameDayRender = {
+    renderStatChips(pick) {
+      return CR.gameDayCardRender?.renderStatChips?.(pick) || '';
+    },
+
+    renderPlayerCard(args) {
+      return CR.gameDayCardRender?.renderPlayerCard?.(args) || '';
+    },
+
+    renderHeroSection(args) {
+      return CR.gameDayHeroRender?.renderHeroSection?.(args) || '';
+    },
+
+    renderPregameSection(args) {
+      return CR.gameDayPregameRender?.renderPregameSection?.(args) || '';
+    },
+
+    renderLiveSection(args) {
+      return CR.gameDayLiveRender?.renderLiveSection?.(args) || '';
+    },
+
+    renderFinalSection(args) {
+      return CR.gameDayFinalRender?.renderFinalSection?.(args) || '';
+    }
+  };
+})();
