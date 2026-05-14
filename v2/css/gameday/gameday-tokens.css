@@ -1,0 +1,31 @@
+/* Game Day modular tokens and foundation overrides */
+:root {
+  --gd-shell: var(--radius-xl, 26px);
+  --gd-card-radius: var(--radius-md, 18px);
+  --gd-pill: var(--radius-pill, 999px);
+  --gd-shadow: 0 12px 28px rgba(17, 21, 31, 0.055);
+  --gd-motion-fast: var(--motion-fast, 140ms);
+  --gd-motion-standard: var(--motion-standard, 220ms);
+  --gd-motion-emphasis: var(--motion-emphasis, 340ms);
+  --gd-ease: var(--ease-standard, cubic-bezier(.22, 1, .36, 1));
+}
+
+.gd-card,
+.gd-panel {
+  border-radius: var(--gd-card-radius);
+}
+
+.gd-hero {
+  border-radius: var(--gd-shell);
+  box-shadow: var(--gd-shadow);
+}
+
+.gd-pill,
+.gd-inline-note,
+.gd-tag,
+.gd-draft-btn,
+.gd-small-action,
+.gd-track,
+.gd-track-fill {
+  border-radius: var(--gd-pill);
+}
