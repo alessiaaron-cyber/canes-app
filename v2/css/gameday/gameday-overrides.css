@@ -46,6 +46,13 @@
   background: linear-gradient(135deg, #202530, #434b57);
 }
 
+.gd-panel-head.owner-primary,
+.gd-panel-head.owner-secondary,
+.gd-panel-head.owner-primary span,
+.gd-panel-head.owner-secondary span {
+  color: #fff !important;
+}
+
 .gd-panel-head-playoff.owner-primary {
   background: linear-gradient(135deg, #b60f2a 0%, #7c1226 72%, #5d4a20 100%);
 }
@@ -57,13 +64,18 @@
 .gd-sim-button.owner-primary {
   background: var(--gd-red);
   border-color: var(--gd-red);
-  color: #fff;
+  color: #fff !important;
+}
+
+.gd-sim-button.owner-primary,
+.gd-sim-button.owner-primary * {
+  color: #fff !important;
 }
 
 .gd-sim-button.owner-secondary {
   background: #fff;
   border-color: var(--gd-border);
-  color: var(--gd-ink);
+  color: var(--gd-ink) !important;
 }
 
 .gd-hero-topline {
