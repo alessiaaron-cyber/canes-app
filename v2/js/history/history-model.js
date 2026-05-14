@@ -77,6 +77,7 @@ window.CR = window.CR || {};
   CR.historyModel = {
     build(rawInput) {
       const raw = clone(rawInput || CR.historyMockData || {});
+      const users = raw.users || [];
       const seasons = raw.seasons || [];
       const players = raw.players || [];
       const map = playerMap(players);
@@ -87,6 +88,7 @@ window.CR = window.CR || {};
 
       return {
         currentSeasonId,
+        users,
         seasons,
         games,
         seasonGames,
