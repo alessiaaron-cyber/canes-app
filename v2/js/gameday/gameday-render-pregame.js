@@ -28,7 +28,7 @@ window.CR = window.CR || {};
           <strong>${pick.player}</strong>
           <small>${isPlayoffs ? 'Locked for playoff night' : 'Locked pick'}</small>
           <div class="gd-lock-actions">
-            <button class="gd-small-action" data-side="${key}" data-player="${pick.player}" type="button">Change</button>
+            <button class="cr-button secondary gd-inline-action" data-side="${key}" data-player="${pick.player}" type="button">Change</button>
           </div>
         </div>
       </div>
