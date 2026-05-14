@@ -6,6 +6,7 @@ window.CR = window.CR || {};
   const sheets = CR.manageRenderSheets || {};
   const escapeHtml = utils.escapeHtml || CR.ui?.escapeHtml || ((value) => String(value ?? ''));
   const iconButton = utils.iconButton;
+  const renderActionRow = utils.renderActionRow;
   const renderToggleRow = utils.renderToggleRow;
   const renderPill = utils.renderPill;
   const renderHealthItem = utils.renderHealthItem;
@@ -25,7 +26,7 @@ window.CR = window.CR || {};
   }
 
   function renderManageTools(state) {
-    return `<section class="panel-card manage-card">${renderCardHeader('Manage data', 'Roster and schedule', 'Add, update, or deactivate future-facing roster and schedule data without touching history.', { className: 'neutral', label: 'Tools' })}<div class="cr-list-stack"><button class="cr-action-row" type="button" data-manage-view="roster"><div class="cr-action-copy"><strong>Roster</strong><span>${state.roster.filter((player) => player.active).length} active players · add, edit, remove</span></div><span class="cr-action-chevron">›</span></button><button class="cr-action-row" type="button" data-manage-view="schedule"><div class="cr-action-copy"><strong>Schedule</strong><span>${state.schedule.length} games · import, add, edit</span></div><span class="cr-action-chevron">›</span></button></div></section>`;
+    return `<section class="panel-card manage-card">${renderCardHeader('Manage data', 'Roster and schedule', 'Add, update, or deactivate future-facing roster and schedule data without touching history.', { className: 'neutral', label: 'Tools' })}<div class="cr-list-stack">${renderActionRow({ title: 'Roster', meta: `${state.roster.filter((player) => player.active).length} active players · add, edit, remove`, attrs: 'data-manage-view="roster"', chevron: true })}${renderActionRow({ title: 'Schedule', meta: `${state.schedule.length} games · import, add, edit`, attrs: 'data-manage-view="schedule"', chevron: true })}</div></section>`;
   }
 
   function renderWatchExperience(state) {
@@ -54,12 +55,20 @@ window.CR = window.CR || {};
   function renderRosterView(state) {
     const activeCount = state.roster.filter((p) => p.active).length;
     const addAction = iconButton({ icon: 'plus', label: 'Add player', className: 'cr-icon-button--primary cr-section-action', attrs: 'data-manage-open-player-sheet="add"' });
-    return `<div class="content-stack manage-stack">${renderSubviewHeader('Roster', 'Roster', 'Active pick list for future games. Removed players stay available in history records.')}<section class="panel-card manage-card">${renderCardHeader('Active players', 'Roster list', `${activeCount} active players`, null, addAction)}<div class="cr-list-stack">${state.roster.map((player) => `<article class="cr-action-row ${!player.active ? 'is-muted' : ''}"><div class="cr-action-copy"><strong>${escapeHtml(player.name)}</strong><span>${escapeHtml(player.position)} · ${player.active ? 'Active' : 'Inactive'}</span></div><div class="cr-row-icon-actions">${iconButton({ icon: 'pencil', label: `Edit ${player.name}`, attrs: `data-manage-edit-player="${escapeHtml(player.id)}"` })}${player.active ? iconButton({ icon: 'trash', label: `Remove ${player.name}`, className: 'cr-icon-button--danger', attrs: `data-manage-confirm-remove-player="${escapeHtml(player.id)}"` }) : ''}</div></article>`).join('')}</div></section>${renderRosterSheet(state)}${renderConfirmSheet(state)}</div>`;
+    const rosterRows = state.roster.map((player) => {
+      const actionsHtml = `<div class="cr-row-icon-actions">${iconButton({ icon: 'pencil', label: `Edit ${player.name}`, attrs: `data-manage-edit-player="${escapeHtml(player.id)}"` })}${player.active ? iconButton({ icon: 'trash', label: `Remove ${player.name}`, className: 'cr-icon-button--danger', attrs: `data-manage-confirm-remove-player="${escapeHtml(player.id)}"` }) : ''}</div>`;
+      return renderActionRow({ title: player.name, meta: `${player.position} · ${player.active ? 'Active' : 'Inactive'}`, actionsHtml, muted: !player.active, tag: 'article' });
+    }).join('');
+    return `<div class="content-stack manage-stack">${renderSubviewHeader('Roster', 'Roster', 'Active pick list for future games. Removed players stay available in history records.')}<section class="panel-card manage-card">${renderCardHeader('Active players', 'Roster list', `${activeCount} active players`, null, addAction)}<div class="cr-list-stack">${rosterRows}</div></section>${renderRosterSheet(state)}${renderConfirmSheet(state)}</div>`;
   }
 
   function renderScheduleView(state) {
     const addAction = iconButton({ icon: 'plus', label: 'Add game', className: 'cr-icon-button--primary cr-section-action', attrs: 'data-manage-open-game-sheet="add"' });
-    return `<div class="content-stack manage-stack">${renderSubviewHeader('Schedule', 'Schedule', 'Manage all games. Finalized history stays protected until explicitly edited.')}<section class="panel-card manage-card">${renderCardHeader('NHL schedule import', 'Safe sync', 'Import Canes games while preserving finalized history.', null)}<button class="cr-button primary" type="button" data-manage-import-schedule>Import NHL Schedule</button></section><section class="panel-card manage-card">${renderCardHeader('Games', 'All games', `${state.schedule.length} games`, null, addAction)}<div class="cr-list-stack">${state.schedule.map((game) => `<article class="cr-action-row"><div class="cr-action-copy"><strong>${escapeHtml(game.date)} · ${escapeHtml(game.opponent)}</strong><span>${escapeHtml(game.type)} · ${escapeHtml(game.firstPicker)} picks first</span></div><div class="cr-row-icon-actions">${iconButton({ icon: 'pencil', label: `Edit ${game.opponent} game`, attrs: `data-manage-edit-game="${escapeHtml(game.id)}"` })}${iconButton({ icon: 'trash', label: `Remove ${game.opponent} game`, className: 'cr-icon-button--danger', attrs: `data-manage-confirm-remove-game="${escapeHtml(game.id)}"` })}</div></article>`).join('')}</div></section>${renderScheduleSheet(state)}${renderConfirmSheet(state)}</div>`;
+    const scheduleRows = state.schedule.map((game) => {
+      const actionsHtml = `<div class="cr-row-icon-actions">${iconButton({ icon: 'pencil', label: `Edit ${game.opponent} game`, attrs: `data-manage-edit-game="${escapeHtml(game.id)}"` })}${iconButton({ icon: 'trash', label: `Remove ${game.opponent} game`, className: 'cr-icon-button--danger', attrs: `data-manage-confirm-remove-game="${escapeHtml(game.id)}"` })}</div>`;
+      return renderActionRow({ title: `${game.date} · ${game.opponent}`, meta: `${game.type} · ${game.firstPicker} picks first`, actionsHtml, tag: 'article' });
+    }).join('');
+    return `<div class="content-stack manage-stack">${renderSubviewHeader('Schedule', 'Schedule', 'Manage all games. Finalized history stays protected until explicitly edited.')}<section class="panel-card manage-card">${renderCardHeader('NHL schedule import', 'Safe sync', 'Import Canes games while preserving finalized history.', null)}<button class="cr-button primary" type="button" data-manage-import-schedule>Import NHL Schedule</button></section><section class="panel-card manage-card">${renderCardHeader('Games', 'All games', `${state.schedule.length} games`, null, addAction)}<div class="cr-list-stack">${scheduleRows}</div></section>${renderScheduleSheet(state)}${renderConfirmSheet(state)}</div>`;
   }
 
   function renderMain(state) {
