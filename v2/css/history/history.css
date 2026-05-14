@@ -101,6 +101,9 @@
   background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
 }
 
+.owner-aaron { color: var(--ui-canes-red, #c8102e) !important; }
+.owner-julie { color: var(--ink-strong, #101828) !important; }
+
 .rivalry-score-value,
 .history-player-hero-stat,
 .rivalry-highlight-value,
@@ -126,6 +129,7 @@
   margin-top: 12px;
 }
 
+.history-meta-pill,
 .rivalry-board-meta-pill,
 .history-season-meta-pill,
 .history-player-stats span,
@@ -140,21 +144,42 @@
   border-radius: var(--radius-pill, 999px);
   font-size: 12px;
   font-weight: var(--font-medium, 700);
+  background: rgba(102,112,133,0.1);
+  color: var(--text-secondary);
+  border: 1px solid transparent;
 }
 
-.rivalry-board-meta-pill,
-.history-season-meta-pill,
-.history-player-stats span,
-.history-season-overview-count,
-.history-sheet-meta-pill {
-  background: rgba(102,112,133,0.1);
+.history-record-pill {
+  position: relative;
+  font-weight: var(--font-strong, 800);
+  color: var(--ink-strong);
+  background: rgba(15, 23, 42, 0.035);
+}
+
+.history-record-pill.leader-aaron {
+  border-color: rgba(200, 16, 46, 0.22);
+  box-shadow: inset 3px 0 0 rgba(200, 16, 46, 0.42);
+}
+
+.history-record-pill.leader-julie {
+  border-color: rgba(16, 24, 40, 0.16);
+  box-shadow: inset 3px 0 0 rgba(16, 24, 40, 0.38);
+}
+
+.history-record-pill.leader-tie {
+  border-color: rgba(102,112,133,0.14);
+  box-shadow: inset 3px 0 0 rgba(102,112,133,0.28);
+}
+
+.history-meta-note {
+  margin: 9px 0 0;
+  font-size: 12px;
+  line-height: 1.45;
+  font-weight: var(--font-medium, 700);
   color: var(--text-secondary);
 }
 
 .history-season-overview-tag { color: var(--ink-strong); background: #f4f6f8; font-weight: var(--font-strong, 800); }
-.history-season-overview-tag.winner-aaron { background: linear-gradient(180deg, #f6f8fb 0%, #eef3f8 100%); }
-.history-season-overview-tag.winner-julie { background: linear-gradient(180deg, #fff8f8 0%, #fff0f2 100%); }
-.history-season-overview-tag.winner-tie { background: linear-gradient(180deg, #f7f8fa 0%, #eef1f4 100%); }
 .history-season-overview-note { background: rgba(15, 23, 42, 0.04); color: var(--text-secondary); }
 
 .history-support-copy,
@@ -231,7 +256,7 @@
 .history-recap-side-head strong,
 .history-recap-side-head span,
 .history-sheet-side-head strong,
-.history-sheet-side-head span { color: var(--ink-strong); font-size: 14px; font-weight: var(--font-strong, 800); }
+.history-sheet-side-head span { font-size: 14px; font-weight: var(--font-strong, 800); }
 
 .history-recap-picks { display: grid; gap: 6px; margin-top: 8px; }
 .rivalry-recap-card.is-archive .history-recap-picks { gap: 5px; margin-top: 7px; }
