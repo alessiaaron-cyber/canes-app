@@ -1,6 +1,8 @@
 window.CR = window.CR || {};
 
 (() => {
+  const CR = window.CR;
+
   const STREAM_OPTIONS = [
     { value: 'off', label: 'Realtime', note: 'Show live rivalry moments immediately.' },
     { value: '30s', label: '30s', note: 'Small spoiler buffer for near-live streams.' },
@@ -11,9 +13,9 @@ window.CR = window.CR || {};
     { value: 'final', label: 'Final Only', note: 'Keep everything hidden until the game ends.' }
   ];
 
-  const MOCK_USERS = [
-    { id: 'aaron', username: 'Aaron' },
-    { id: 'julie', username: 'Julie' }
+  const FALLBACK_USERS = [
+    { id: 'aaron', username: 'Aaron', displayName: 'Aaron', themeClass: 'owner-primary', avatarClass: 'avatar-primary', scoreKey: 'Aaron' },
+    { id: 'julie', username: 'Julie', displayName: 'Julie', themeClass: 'owner-secondary', avatarClass: 'avatar-secondary', scoreKey: 'Julie' }
   ];
 
   const MOCK_ROSTER = [
@@ -24,28 +26,47 @@ window.CR = window.CR || {};
     { id: 'chatfield', name: 'Jalen Chatfield', position: 'D', active: true }
   ];
 
-  const MOCK_SCHEDULE = [
-    { id: 'game-1', date: '2026-03-08', opponent: 'NYR', type: 'Playoffs', firstPicker: 'Aaron' },
-    { id: 'game-2', date: '2026-03-10', opponent: 'FLA', type: 'Regular', firstPicker: 'Julie' }
-  ];
+  function getManageUsers() {
+    const identityUsers = CR.identity?.getUsers?.();
+    const source = Array.isArray(identityUsers) && identityUsers.length ? identityUsers : FALLBACK_USERS;
+    return source.map((user, index) => ({
+      id: user.id || `user-${index + 1}`,
+      username: user.username || user.displayName || `Player ${index + 1}`,
+      displayName: user.displayName || user.username || `Player ${index + 1}`,
+      themeClass: user.themeClass || (index === 0 ? 'owner-primary' : 'owner-secondary'),
+      avatarClass: user.avatarClass || (index === 0 ? 'avatar-primary' : 'avatar-secondary'),
+      scoreKey: user.scoreKey || user.username || user.displayName || `Player ${index + 1}`
+    }));
+  }
 
-  const EDIT_OPTIONS = {
-    activeSeasonLabel: {
-      title: 'Active season',
-      hint: 'Choose which season Manage should treat as current.',
-      options: ['2025-26', '2026-27', '2027-28']
-    },
-    scoringProfile: {
-      title: 'Scoring profile',
-      hint: 'Choose the scoring system used for new rivalry matchups.',
-      options: ['Classic', 'Playoff Boost']
-    },
-    firstPicker: {
-      title: 'First picker',
-      hint: 'Choose who picks first next game. Picks alternate after that.',
-      options: MOCK_USERS.map((user) => user.username)
-    }
-  };
+  function buildSchedule(users) {
+    const first = users[0]?.username || 'Player 1';
+    const second = users[1]?.username || 'Player 2';
+    return [
+      { id: 'game-1', date: '2026-03-08', opponent: 'NYR', type: 'Playoffs', firstPicker: first },
+      { id: 'game-2', date: '2026-03-10', opponent: 'FLA', type: 'Regular', firstPicker: second }
+    ];
+  }
+
+  function buildEditOptions(users) {
+    return {
+      activeSeasonLabel: {
+        title: 'Active season',
+        hint: 'Choose which season Manage should treat as current.',
+        options: ['2025-26', '2026-27', '2027-28']
+      },
+      scoringProfile: {
+        title: 'Scoring profile',
+        hint: 'Choose the scoring system used for new rivalry matchups.',
+        options: ['Classic', 'Playoff Boost']
+      },
+      firstPicker: {
+        title: 'First picker',
+        hint: 'Choose who picks first next game. Picks alternate after that.',
+        options: users.map((user) => user.username)
+      }
+    };
+  }
 
   function getNextSeasonLabel(currentLabel) {
     const match = String(currentLabel || '').match(/^(\d{4})-(\d{2})$/);
@@ -57,6 +78,8 @@ window.CR = window.CR || {};
   }
 
   function build() {
+    const users = getManageUsers();
+    const firstPicker = users[0]?.username || 'Player 1';
     const currentSeason = '2025-26';
     const nextSeason = getNextSeasonLabel(currentSeason);
 
@@ -79,7 +102,7 @@ window.CR = window.CR || {};
         activeSeasonLabel: currentSeason,
         playoffMode: false,
         scoringProfile: 'Classic',
-        firstPicker: 'Aaron',
+        firstPicker,
         scoringSystems: {
           Classic: {
             firstGoal: 3,
@@ -95,11 +118,11 @@ window.CR = window.CR || {};
       },
       newSeasonDraft: {
         seasonLabel: nextSeason,
-        firstPicker: 'Aaron'
+        firstPicker
       },
       newSeasonOptions: [nextSeason],
       roster: MOCK_ROSTER,
-      schedule: MOCK_SCHEDULE,
+      schedule: buildSchedule(users),
       rosterDraft: {
         name: '',
         position: 'F'
@@ -108,7 +131,7 @@ window.CR = window.CR || {};
         date: '',
         opponent: '',
         type: 'Regular',
-        firstPicker: 'Aaron'
+        firstPicker
       },
       appHealth: {
         realtimeStatus: 'Connected',
@@ -117,8 +140,8 @@ window.CR = window.CR || {};
         pwaStatus: 'Installed',
         lastSyncLabel: '2 minutes ago'
       },
-      users: MOCK_USERS,
-      editOptions: EDIT_OPTIONS
+      users,
+      editOptions: buildEditOptions(users)
     };
   }
 
