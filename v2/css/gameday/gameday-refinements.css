@@ -1,0 +1,72 @@
+/* Game Day refinement layer */
+.gd-card,
+.gd-panel,
+.gd-postgame-card,
+.gd-feed-item,
+.gd-sheet-pick,
+.gd-roster-row {
+  box-shadow: none;
+}
+
+.gd-roster-row {
+  padding: 12px 14px;
+}
+
+.gd-player-card {
+  padding: 8px 0;
+}
+
+.gd-feed-item {
+  padding: 11px 12px;
+}
+
+.gd-postgame-card {
+  padding: 14px;
+}
+
+.gd-panel-head,
+.gd-label,
+.gd-filter,
+.gd-pill,
+.gd-inline-note,
+.gd-stat,
+.gd-tag,
+.gd-small-action {
+  letter-spacing: 0.04em;
+}
+
+.gd-side-label,
+.gd-label,
+.gd-panel-head {
+  font-weight: var(--font-strong, 800);
+}
+
+.gd-pregame-count,
+.gd-side-value,
+.gd-player-total,
+.gd-feed-points,
+.gd-postgame-title {
+  text-rendering: optimizeLegibility;
+}
+
+.gd-feed-tier-heavy {
+  box-shadow: 0 10px 22px rgba(154, 103, 0, 0.07);
+}
+
+.gd-score-card:hover,
+.gd-feed-item:hover {
+  transform: translateY(-1px);
+}
+
+.gd-feed-main strong,
+.gd-pick-main strong,
+.gd-player-main strong {
+  font-weight: var(--font-strong, 800);
+}
+
+.gd-feed-sub,
+.gd-postgame-sub,
+.gd-pick-main small,
+.gd-roster-row .gd-pick-main small {
+  color: var(--text-secondary);
+}
