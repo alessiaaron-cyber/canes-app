@@ -146,7 +146,9 @@
 }
 
 .manage-meta-button {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
   width: 100%;
   min-height: 112px;
   text-align: left;
@@ -165,17 +167,15 @@
 }
 
 .manage-meta-edit-hint {
-  display: inline-flex;
-  align-items: center;
-  min-height: 26px;
-  margin-top: 9px;
-  padding: 0 10px;
-  border-radius: 999px;
-  background: var(--ui-muted-surface);
-  color: var(--text-secondary);
+  align-self: flex-start;
+  margin-top: auto;
+}
+
+.manage-meta-edit-hint.cr-button {
+  min-height: 32px;
+  padding: 0 13px;
+  border-radius: 12px;
   font-size: 12px;
-  font-weight: 900;
-  letter-spacing: -0.01em;
 }
 
 .manage-health-topline {
@@ -234,7 +234,7 @@
 
 .manage-score-card-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
 }
