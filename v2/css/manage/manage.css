@@ -1,1 +1,15 @@
-REUSE_EXISTING_WITH_SELECTED_STATE_SOFTENED
+.manage-stack { gap: 16px; }
+.manage-card { overflow: hidden; }
+.manage-card-header { gap: 14px; }
+.manage-support-copy { margin-top: 7px; font-size: 13px; line-height: 1.45; color: var(--text-secondary); max-width: 34ch; }
+.manage-option-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 16px; }
+.manage-option-pill { display: flex; flex-direction: column; align-items: flex-start; gap: 5px; width: 100%; border: 1px solid var(--border-subtle); border-radius: var(--radius-md, 18px); padding: 13px; background: #f8fafc; color: var(--text-primary); text-align: left; transition: transform var(--motion-fast, 140ms) var(--ease-standard, ease), box-shadow var(--motion-fast, 140ms) ease, border-color var(--motion-fast, 140ms) ease; }
+.manage-option-pill:active { transform: scale(.992); }
+.manage-option-pill.is-active { background: var(--ui-primary); color: #fff; border-color: var(--ui-primary); box-shadow: 0 10px 22px rgba(17, 24, 39, 0.14); }
+.manage-option-pill-label { font-size: 14px; font-weight: var(--font-heavy, 900); letter-spacing: -0.02em; }
+.manage-option-pill-note { font-size: 12px; line-height: 1.35; color: inherit; opacity: 0.82; }
+.manage-edit-option { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; min-height: 50px; border: 1px solid var(--border-subtle); border-radius: var(--radius-md, 18px); background: #fbfcfd; padding: 0 14px; text-align: left; font: inherit; color: var(--ink-strong); }
+.manage-edit-option span { font-weight: var(--font-heavy, 900); letter-spacing: -0.02em; }
+.manage-edit-option strong { display: inline-flex; align-items: center; min-height: 24px; padding: 0 10px; border-radius: var(--radius-pill, 999px); background: rgba(15,23,42,.06); color: var(--text-secondary); border: 1px solid rgba(15,23,42,.08); font-size: 11px; font-weight: var(--font-heavy, 900); letter-spacing: .02em; }
+.manage-edit-option.is-active { border-color: rgba(15,23,42,.10); background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%); box-shadow: 0 8px 22px rgba(15,23,42,.05); }
+.manage-edit-option.is-active strong { background: rgba(200,16,46,.08); color: #a3122a; border-color: rgba(200,16,46,.12); }
