@@ -26,6 +26,46 @@
   color: var(--gd-carryover-slate) !important;
 }
 
+.gd-side-label.owner-primary,
+.gd-pick-card-head .owner-primary,
+.gd-tag.owner-primary {
+  color: var(--gd-red) !important;
+}
+
+.gd-side-label.owner-secondary,
+.gd-pick-card-head .owner-secondary,
+.gd-tag.owner-secondary {
+  color: var(--gd-ink) !important;
+}
+
+.gd-panel-head.owner-primary {
+  background: linear-gradient(135deg, var(--gd-red), var(--gd-red-dark));
+}
+
+.gd-panel-head.owner-secondary {
+  background: linear-gradient(135deg, #202530, #434b57);
+}
+
+.gd-panel-head-playoff.owner-primary {
+  background: linear-gradient(135deg, #b60f2a 0%, #7c1226 72%, #5d4a20 100%);
+}
+
+.gd-panel-head-playoff.owner-secondary {
+  background: linear-gradient(135deg, #1d2330 0%, #313a48 72%, #5c5136 100%);
+}
+
+.gd-sim-button.owner-primary {
+  background: var(--gd-red);
+  border-color: var(--gd-red);
+  color: #fff;
+}
+
+.gd-sim-button.owner-secondary {
+  background: #fff;
+  border-color: var(--gd-border);
+  color: var(--gd-ink);
+}
+
 .gd-hero-topline {
   display: grid;
   grid-template-columns: 1fr 1fr;
