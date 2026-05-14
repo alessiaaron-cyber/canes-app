@@ -8,16 +8,16 @@
   --role-action-danger-bg: var(--ui-danger-soft, #fff1f0);
   --role-action-danger-text: var(--ui-danger, #b42318);
 
-  --role-selected-bg: rgba(17, 24, 39, 0.08);
-  --role-selected-text: var(--ink-strong);
-  --role-selected-border: rgba(17, 24, 39, 0.12);
+  --role-selected-bg: var(--ink-strong);
+  --role-selected-text: #ffffff;
+  --role-selected-border: var(--ink-strong);
 
   --role-metadata-bg: rgba(102, 112, 133, 0.09);
   --role-metadata-text: var(--text-secondary);
   --role-metadata-border: transparent;
 
-  --role-status-live-bg: rgba(200, 16, 46, 0.1);
-  --role-status-live-text: #c8102e;
+  --role-status-live-bg: #c8102e;
+  --role-status-live-text: #ffffff;
   --role-status-success-bg: var(--live-green-soft);
   --role-status-success-text: var(--live-green);
   --role-status-special-bg: #fff4e5;
@@ -35,6 +35,31 @@
   --control-height-md: 44px;
   --control-height-lg: 52px;
   --control-height-row: 70px;
+}
+
+/* Prevent iOS preview/text-selection highlights from looking like intentional UI. */
+button,
+[role="button"],
+.cr-button,
+.cr-action-row,
+.cr-sheet-option,
+.manage-option-pill,
+.gd-sim-button,
+.gd-feed-item,
+.gd-roster-row,
+.gd-pick-row,
+.gd-player-card,
+.gd-inline-note,
+.gd-pill,
+.gd-stat,
+.gd-tag,
+.panel-tag,
+.cr-pill,
+.cr-status-pill,
+.manage-toggle-row,
+.history-season-overview-card {
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 /* Actions */
@@ -114,7 +139,7 @@
   background: var(--role-selected-bg);
   color: var(--role-selected-text);
   border-color: var(--role-selected-border);
-  box-shadow: 0 0 0 1px var(--role-selected-border) inset;
+  box-shadow: none;
 }
 
 /* Metadata and status should not look like controls. */
@@ -143,6 +168,13 @@
 .global-live-indicator {
   background: var(--role-status-live-bg);
   color: var(--role-status-live-text);
+}
+
+.gd-pill-state.live {
+  min-width: 78px;
+  padding: 0 13px;
+  border-color: transparent;
+  font-weight: var(--font-heavy, 900);
 }
 
 .panel-tag.calm,
