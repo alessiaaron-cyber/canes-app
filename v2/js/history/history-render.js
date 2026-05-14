@@ -43,7 +43,9 @@ window.CR = window.CR || {};
 
   function renderHighlights(data) {
     const cards = (data.highlights?.cards || []).slice(0, 3);
-    return `<section class="panel-card rivalry-highlights-card"><div class="history-section-head"><div><div class="eyebrow">Highlights</div><h3>Quick rivalry notes</h3></div></div><div class="rivalry-highlight-grid compact-grid">${cards.map((card) => `<article class="rivalry-highlight-item panel-card"><div class="eyebrow">${escapeHtml(card.label)}</div><div class="rivalry-highlight-value">${escapeHtml(card.value)}</div><p>${escapeHtml(card.copy)}</p></article>`).join('')}</div></section>`;
+    const performers = (data.playerSpotlights || []).slice(0, 2);
+    const performerCards = performers.map((player) => `<article class="rivalry-highlight-item history-highlight-performer"><div class="eyebrow">${escapeHtml(player.position)} • ${escapeHtml(player.owner)} lean</div><div class="rivalry-highlight-value">${escapeHtml(player.name)}</div><p>${escapeHtml(player.totalPoints)} pts • ${escapeHtml(player.clutch)}</p></article>`).join('');
+    return `<section class="panel-card rivalry-highlights-card"><div class="history-section-head"><div><div class="eyebrow">Highlights</div><h3>Rivalry notes</h3></div></div><div class="rivalry-highlight-grid compact-grid">${cards.map((card) => `<article class="rivalry-highlight-item panel-card"><div class="eyebrow">${escapeHtml(card.label)}</div><div class="rivalry-highlight-value">${escapeHtml(card.value)}</div><p>${escapeHtml(card.copy)}</p></article>`).join('')}${performerCards}</div></section>`;
   }
 
   function renderRecentGames(data) {
@@ -57,9 +59,8 @@ window.CR = window.CR || {};
     return `<article class="history-log-card rivalry-recap-card ${winnerClass} ${isArchive ? 'is-archive' : ''}" id="history-game-${escapeHtml(game.id)}"><div class="history-log-topline"><div><div class="history-log-kicker-row"><span class="history-log-kicker">Game ${escapeHtml(String(game.displayNumber))}</span>${gameTypeBadge}</div><div class="history-log-subtitle">${escapeHtml(game.date)}</div></div><div class="history-log-actions"><span class="history-score-pill">${escapeHtml(`${game.aaronScore}-${game.julieScore}`)}</span></div></div><div class="history-recap-winner ${winnerClass}">${escapeHtml(game.winner === 'Tie' ? 'Tie game' : `${game.winner} won this matchup`)}</div><div class="history-recap-sides"><section class="history-recap-side"><div class="history-recap-side-head"><strong>Aaron</strong><span>${escapeHtml(String(game.aaronScore))}</span></div><div class="history-recap-picks">${(game.picks?.Aaron || []).map((pick) => `<div class="history-recap-pick">${escapeHtml(pickLine(pick))}</div>`).join('')}</div></section><section class="history-recap-side"><div class="history-recap-side-head"><strong>Julie</strong><span>${escapeHtml(String(game.julieScore))}</span></div><div class="history-recap-picks">${(game.picks?.Julie || []).map((pick) => `<div class="history-recap-pick">${escapeHtml(pickLine(pick))}</div>`).join('')}</div></section></div><div class="history-recap-footer"><span class="history-recap-first-goal">First goal: ${escapeHtml(game.firstGoalScorer || '—')}</span><div class="history-recap-actions"><button class="cr-button edit" type="button" data-history-edit-game="${escapeHtml(game.id)}" data-history-edit-context="${context}">Edit</button></div></div></article>`;
   }
 
-  function renderPlayerSpotlights(data) {
-    if (!(data.playerSpotlights || []).length) return '';
-    return `<section class="panel-card history-player-wrap-card"><div class="history-section-head"><div><div class="eyebrow">Top performers</div><h3>Season impact picks</h3></div></div><div class="history-player-spotlights">${(data.playerSpotlights || []).map((player) => `<article class="history-player-spotlight-card"><div class="history-player-spotlight-topline"><div><div class="eyebrow">${escapeHtml(player.position)} • ${escapeHtml(player.owner)} lean</div><h3>${escapeHtml(player.name)}</h3></div><div class="history-player-hero-stat">${escapeHtml(String(player.totalPoints))}</div></div><p class="history-support-copy">${escapeHtml(player.clutch)}. ${escapeHtml(player.vibe)}.</p></article>`).join('')}</div></section>`;
+  function renderPlayerSpotlights() {
+    return '';
   }
 
   function renderSeasonCard(data, summary) {
@@ -84,7 +85,7 @@ window.CR = window.CR || {};
   }
 
   function renderHQ(data) {
-    return `<div class="history-feed rivalry-command-feed">${renderBoard(data)}${renderSeasonSnapshot(data)}${renderMomentum(data)}${renderHighlights(data)}${renderRecentGames(data)}${renderPlayerSpotlights(data)}</div>`;
+    return `<div class="history-feed rivalry-command-feed">${renderBoard(data)}${renderSeasonSnapshot(data)}${renderMomentum(data)}${renderHighlights(data)}${renderRecentGames(data)}</div>`;
   }
 
   function renderAdminSheet(state) {
