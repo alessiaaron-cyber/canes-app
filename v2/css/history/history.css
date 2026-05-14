@@ -173,16 +173,18 @@
 
 .history-record-pill.leader-primary,
 .history-record-pill.leader-aaron {
-  background: linear-gradient(180deg, #fff8f8 0%, #fff0f2 100%);
-  border-color: transparent;
-  box-shadow: 0 0 0 1px rgba(200, 16, 46, 0.10), 0 6px 18px rgba(200, 16, 46, 0.08);
+  background: rgba(200, 16, 46, 0.08);
+  color: var(--ui-canes-red, #c8102e);
+  border-color: rgba(200, 16, 46, 0.12);
+  box-shadow: none;
 }
 
 .history-record-pill.leader-secondary,
 .history-record-pill.leader-julie {
-  background: linear-gradient(180deg, #f6f8fb 0%, #eef3f8 100%);
-  border-color: transparent;
-  box-shadow: 0 0 0 1px rgba(16, 24, 40, 0.08), 0 6px 18px rgba(16, 24, 40, 0.06);
+  background: rgba(17, 24, 39, 0.08);
+  color: var(--ui-graphite, #111827);
+  border-color: rgba(17, 24, 39, 0.1);
+  box-shadow: none;
 }
 
 .history-record-pill.leader-tie {
@@ -242,12 +244,12 @@
 .history-sheet-inline-input.is-compact { font-size: 13px; color: var(--text-secondary); }
 
 .history-momentum-strip { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 7px; margin-top: 14px; }
-.history-momentum-node { min-height: 48px; border-radius: var(--radius-md, 18px); display: flex; align-items: center; justify-content: center; font-weight: var(--font-heavy, 900); font-size: 18px; border: 1px solid var(--border-subtle); background: #f4f6f8; color: var(--ink-strong); }
+.history-momentum-node { min-height: 44px; border-radius: var(--radius-md, 18px); display: flex; align-items: center; justify-content: center; font-weight: var(--font-heavy, 900); font-size: 17px; border: 1px solid var(--border-subtle); background: #f4f6f8; color: var(--ink-strong); }
 .history-momentum-node.winner-primary,
-.history-momentum-node.is-aaron { background: linear-gradient(180deg, #fff8f8 0%, #fff0f2 100%); }
+.history-momentum-node.is-aaron { background: rgba(200, 16, 46, 0.08); color: var(--ui-canes-red, #c8102e); border-color: rgba(200, 16, 46, 0.12); }
 .history-momentum-node.winner-secondary,
-.history-momentum-node.is-julie { background: linear-gradient(180deg, #f6f8fb 0%, #eef3f8 100%); }
-.history-momentum-node.is-playoff { box-shadow: inset 0 0 0 1px rgba(245, 158, 11, 0.34), 0 0 0 3px rgba(245, 158, 11, 0.12); }
+.history-momentum-node.is-julie { background: rgba(17, 24, 39, 0.08); color: var(--ui-graphite, #111827); border-color: rgba(17, 24, 39, 0.1); }
+.history-momentum-node.is-playoff { box-shadow: inset 0 0 0 1px rgba(245, 158, 11, 0.34); }
 
 .compact-grid,
 .recap-log-stack,
@@ -266,16 +268,22 @@
 .rivalry-recap-card.winner-tie { box-shadow: 0 8px 20px rgba(15, 23, 42, 0.045); }
 
 .history-log-card { background: linear-gradient(180deg, #ffffff 0%, #fbfcfd 100%); box-shadow: none; }
+.history-log-card.winner-primary,
+.history-log-card.winner-aaron { border-left: 4px solid var(--ui-canes-red, #c8102e); }
+.history-log-card.winner-secondary,
+.history-log-card.winner-julie { border-left: 4px solid var(--ui-graphite, #111827); }
+.history-log-card.winner-tie { border-left: 4px solid rgba(102,112,133,0.34); }
 .history-log-kicker { font-size: 13px; font-weight: var(--font-strong, 800); color: var(--ink-strong); }
 .history-log-subtitle { margin-top: 2px; font-size: 12px; font-weight: var(--font-medium, 700); }
 .history-score-pill { min-height: 36px; padding: 0 12px; border-radius: var(--radius-pill, 999px); background: linear-gradient(180deg, #ffffff 0%, #f5f7fa 100%); border: 1px solid var(--border-subtle); display: inline-flex; align-items: center; justify-content: center; font-size: 20px; }
 
-.history-recap-winner { margin-top: 10px; border-radius: var(--radius-sm, 14px); padding: 9px 11px; font-weight: var(--font-strong, 800); color: var(--ink-strong); background: #f4f6f8; }
-.rivalry-recap-card.is-archive .history-recap-winner { margin-top: 9px; padding: 8px 10px; }
+.history-recap-winner { display: inline-flex; align-items: center; width: auto; max-width: 100%; margin-top: 10px; border-radius: var(--radius-pill, 999px); padding: 6px 10px; font-size: 12px; letter-spacing: .01em; font-weight: var(--font-strong, 800); color: var(--ink-strong); background: #f4f6f8; border: 1px solid transparent; }
+.rivalry-recap-card.is-archive .history-recap-winner { margin-top: 9px; padding: 6px 10px; }
 .history-recap-winner.winner-primary,
-.history-recap-winner.winner-aaron { background: linear-gradient(180deg, #fff8f8 0%, #fff0f2 100%); }
+.history-recap-winner.winner-aaron { background: rgba(200, 16, 46, 0.08); color: var(--ui-canes-red, #c8102e); border-color: rgba(200, 16, 46, 0.12); }
 .history-recap-winner.winner-secondary,
-.history-recap-winner.winner-julie { background: linear-gradient(180deg, #f6f8fb 0%, #eef3f8 100%); }
+.history-recap-winner.winner-julie { background: rgba(17, 24, 39, 0.08); color: var(--ui-graphite, #111827); border-color: rgba(17, 24, 39, 0.1); }
+.history-recap-winner.winner-tie { background: rgba(102,112,133,0.1); color: var(--text-secondary); }
 
 .history-recap-side { border-radius: var(--radius-md, 18px); border: 1px solid rgba(15,23,42,.06); background: rgba(248,250,252,.74); padding: 10px; }
 .rivalry-recap-card.is-archive .history-recap-side { padding: 9px; }
@@ -305,10 +313,10 @@
 
 .history-season-overview-card { width: 100%; display: block; text-align: left; border: 1px solid var(--border-subtle); border-radius: var(--radius-xl, 26px); padding: 16px; background: linear-gradient(180deg, #ffffff 0%, #fbfcfd 100%); box-shadow: 0 8px 20px rgba(15, 23, 42, 0.045); }
 .history-season-overview-card.winner-primary,
-.history-season-overview-card.winner-aaron,
+.history-season-overview-card.winner-aaron { border-left: 4px solid var(--ui-canes-red, #c8102e); box-shadow: 0 8px 20px rgba(15, 23, 42, 0.045); }
 .history-season-overview-card.winner-secondary,
-.history-season-overview-card.winner-julie,
-.history-season-overview-card.winner-tie { box-shadow: 0 8px 20px rgba(15, 23, 42, 0.045); }
+.history-season-overview-card.winner-julie { border-left: 4px solid var(--ui-graphite, #111827); box-shadow: 0 8px 20px rgba(15, 23, 42, 0.045); }
+.history-season-overview-card.winner-tie { border-left: 4px solid rgba(102,112,133,0.34); box-shadow: 0 8px 20px rgba(15, 23, 42, 0.045); }
 .history-season-overview-topline { align-items: flex-start; }
 .history-season-overview-topline h3 { font-size: 22px; color: var(--ink-strong); }
 .history-season-view-cue { color: var(--text-secondary); font-size: 20px; line-height: 1; font-weight: var(--font-strong, 800); letter-spacing: -0.02em; }
