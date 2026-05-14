@@ -1,0 +1,44 @@
+window.CR = window.CR || {};
+
+(() => {
+  const CR = window.CR;
+
+  function renderStatChips(pick) {
+    return `
+      <div class="gd-player-stats">
+        <span class="gd-stat ${pick.goals ? 'live' : ''}">G ${pick.goals}</span>
+        <span class="gd-stat ${pick.assists ? 'live' : ''}">A ${pick.assists}</span>
+        <span class="gd-stat ${pick.firstGoal ? 'live' : ''}">FG</span>
+      </div>
+    `;
+  }
+
+  function renderPlayerCard({ side, picks, red, themeClass, pointsFor, isPlayoffs }) {
+    const resolvedTheme = themeClass || (red ? 'owner-primary' : 'owner-secondary');
+    const total = picks.reduce((sum, pick) => sum + pointsFor(pick), 0);
+
+    return `
+      <article class="gd-card gd-score-card ${isPlayoffs ? 'gd-card-playoff' : ''}">
+        <div class="gd-pick-card-head">
+          <strong class="${resolvedTheme}">${side}</strong>
+          <span class="gd-pick-card-score">${total} pts</span>
+        </div>
+
+        ${picks.map((pick) => `
+          <div class="gd-player-card">
+            <div class="gd-player-main">
+              <strong>${pick.player}</strong>
+              ${renderStatChips(pick)}
+            </div>
+            <div class="gd-player-total">+${pointsFor(pick)}</div>
+          </div>
+        `).join('')}
+      </article>
+    `;
+  }
+
+  CR.gameDayCardRender = {
+    renderStatChips,
+    renderPlayerCard
+  };
+})();
