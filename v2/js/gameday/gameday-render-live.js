@@ -15,7 +15,7 @@ window.CR = window.CR || {};
           ${carryover?.active ? '<span class="gd-inline-note gd-inline-note-warning">Carryover</span>' : ''}
           ${isPlayoffs ? '<span class="gd-inline-note gd-inline-note-playoff">High Stakes</span>' : ''}
         </div>
-        <button class="gd-manage-tiny" data-action="open-manage" type="button">Manage</button>
+        <button class="cr-button secondary gd-inline-action" data-action="open-manage" type="button">Manage</button>
       </div>
 
       <section class="gd-picks-grid">
