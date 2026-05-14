@@ -1,5 +1,5 @@
 /* Semantic UI foundation
-   Purpose: make interaction roles, metadata, status, and selection states visually distinct. */
+   Purpose: make interaction roles, metadata, status, and selection states visually distinct without repainting text blocks. */
 :root {
   --role-action-primary-bg: var(--ink-strong);
   --role-action-primary-text: #ffffff;
@@ -37,7 +37,6 @@
   --control-height-row: 70px;
 }
 
-/* Prevent iOS preview/text-selection highlights from looking like intentional UI. */
 button,
 [role="button"],
 .cr-button,
@@ -62,7 +61,6 @@ button,
   user-select: none;
 }
 
-/* Actions */
 .cr-button,
 .mini-button,
 .icon-button,
@@ -74,9 +72,7 @@ button,
   touch-action: manipulation;
 }
 
-.cr-button {
-  min-height: var(--control-height-sm);
-}
+.cr-button { min-height: var(--control-height-sm); }
 
 .cr-button.primary,
 .cr-button.add,
@@ -114,7 +110,6 @@ button,
   border-radius: var(--radius-sm);
 }
 
-/* Selection controls */
 .cr-segmented,
 .state-switcher,
 .playoff-switcher,
@@ -142,7 +137,7 @@ button,
   box-shadow: none;
 }
 
-/* Metadata and status should not look like controls. */
+/* True small metadata/status chips only. Do not include long descriptive copy classes here. */
 .cr-pill,
 .cr-status-pill,
 .status-pill,
@@ -152,15 +147,23 @@ button,
 .gd-tag,
 .history-season-meta-pill,
 .history-sheet-meta-pill,
-.history-season-overview-count,
-.history-season-overview-note,
-.manage-option-pill-note {
+.history-season-overview-count {
   min-height: 24px;
   background: var(--role-metadata-bg);
   color: var(--role-metadata-text);
   border-color: var(--role-metadata-border);
   box-shadow: none;
   cursor: default;
+}
+
+.history-season-overview-note,
+.manage-option-pill-note,
+.manage-support-copy,
+.gd-feed-sub,
+.gd-postgame-sub,
+.gd-pick-main small,
+.gd-roster-row .gd-pick-main small {
+  background: transparent !important;
 }
 
 .panel-tag.live,
@@ -204,7 +207,6 @@ button,
   color: var(--role-status-warning-text);
 }
 
-/* Rows that perform navigation/actions should read differently from passive cards. */
 .cr-action-row,
 .cr-sheet-option,
 .manage-toggle-row,
@@ -217,18 +219,13 @@ button,
 .cr-action-row,
 .cr-sheet-option,
 .manage-option-pill,
-.history-season-overview-card {
-  cursor: pointer;
-}
+.history-season-overview-card { cursor: pointer; }
 
 .cr-action-row:active,
 .cr-sheet-option:active,
 .manage-option-pill:active,
-.history-season-overview-card:active {
-  transform: scale(.992);
-}
+.history-season-overview-card:active { transform: scale(.992); }
 
-/* Disabled/claimed/unavailable should be quiet, not merely gray metadata. */
 .gd-roster-row.claimed,
 .cr-action-row.is-muted,
 .cr-is-muted,
@@ -239,13 +236,10 @@ button,
   cursor: default;
 }
 
-/* Button placement rhythm */
 .panel-card > .cr-button.primary:last-child,
 .panel-card > .cr-button.add:last-child,
 .panel-card > .cr-button.save:last-child,
 .cr-sheet-actions .cr-button.primary,
 .manage-card .cr-button.primary,
 .manage-card .cr-button.add,
-.manage-card .cr-button.save {
-  margin-top: 18px;
-}
+.manage-card .cr-button.save { margin-top: 18px; }
