@@ -2,15 +2,7 @@ window.CR = window.CR || {};
 
 (() => {
   const CR = window.CR;
-
-  function escapeHtml(value) {
-    return String(value ?? '')
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/\"/g, '&quot;')
-      .replace(/'/g, '&#39;');
-  }
+  const escapeHtml = CR.ui?.escapeHtml || ((value) => String(value ?? ''));
 
   function pickLine(pick) {
     const points = Number(pick.points || 0);
