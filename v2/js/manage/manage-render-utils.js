@@ -18,6 +18,13 @@ window.CR = window.CR || {};
     return `<button class="cr-icon-button ${className}" type="button" ${attrs} aria-label="${escapeHtml(label)}">${iconSvg(icon)}</button>`;
   }
 
+  function renderActionRow({ title, meta, attrs = '', actionsHtml = '', muted = false, chevron = false, tag = 'button' }) {
+    const safeTag = tag === 'article' ? 'article' : 'button';
+    const typeAttr = safeTag === 'button' ? 'type="button"' : '';
+    const suffix = actionsHtml || (chevron ? '<span class="cr-action-chevron">›</span>' : '');
+    return `<${safeTag} class="cr-action-row ${muted ? 'is-muted' : ''}" ${typeAttr} ${attrs}><div class="cr-action-copy"><strong>${escapeHtml(title)}</strong>${meta ? `<span>${escapeHtml(meta)}</span>` : ''}</div>${suffix}</${safeTag}>`;
+  }
+
   function renderToggleRow({ key, label, hint, checked }) {
     return `<button class="manage-toggle-row" type="button" data-manage-toggle="${escapeHtml(key)}" aria-pressed="${checked ? 'true' : 'false'}"><div class="manage-toggle-copy"><span class="manage-toggle-label">${escapeHtml(label)}</span>${hint ? `<span class="manage-toggle-hint">${escapeHtml(hint)}</span>` : ''}</div><span class="manage-switch ${checked ? 'is-on' : ''}" aria-hidden="true"><span class="manage-switch-knob"></span></span></button>`;
   }
@@ -51,6 +58,7 @@ window.CR = window.CR || {};
     escapeHtml,
     iconSvg,
     iconButton,
+    renderActionRow,
     renderToggleRow,
     renderPill,
     renderHealthItem,
