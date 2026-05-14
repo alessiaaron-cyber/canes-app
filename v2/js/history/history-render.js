@@ -17,30 +17,20 @@ window.CR = window.CR || {};
     return `${pick.playerName} • ${pick.goals}G ${pick.assists}A • ${points} pts`;
   }
 
-  function getUsers(data) {
-    const identityUsers = CR.identity?.getUsers?.(data);
-    return Array.isArray(identityUsers) && identityUsers.length ? identityUsers : (Array.isArray(data?.users) && data.users.length ? data.users : [
-      { username: 'Aaron', displayName: 'Aaron', themeClass: 'owner-primary', scoreKey: 'Aaron' },
-      { username: 'Julie', displayName: 'Julie', themeClass: 'owner-secondary', scoreKey: 'Julie' }
-    ]);
-  }
-
   function getUser(data, index) {
-    return getUsers(data)[index] || {};
+    return CR.identity?.getUser?.(index, data) || {};
   }
 
   function userName(data, index) {
-    const user = getUser(data, index);
-    return user.displayName || user.username || (index === 0 ? 'Player 1' : 'Player 2');
+    return CR.identity?.getDisplayName?.(index, data) || getUser(data, index).displayName || `Player ${index + 1}`;
   }
 
   function userThemeClass(data, usernameOrIndex) {
-    return CR.identity?.ownerClass?.(usernameOrIndex, data) || getUser(data, Number(usernameOrIndex) || 0).themeClass || (usernameOrIndex === 0 ? 'owner-primary' : 'owner-secondary');
+    return CR.identity?.ownerClass?.(usernameOrIndex, data) || (Number(usernameOrIndex) === 1 ? 'owner-secondary' : 'owner-primary');
   }
 
   function userScoreKey(data, index) {
-    const user = getUser(data, index);
-    return user.scoreKey || user.score_key || user.username || (index === 0 ? 'Aaron' : 'Julie');
+    return CR.identity?.getScoreKey?.(index, data) || getUser(data, index).scoreKey || userName(data, index);
   }
 
   function gameScores(data, game) {
@@ -53,7 +43,8 @@ window.CR = window.CR || {};
   }
 
   function picksFor(data, game, index) {
-    const keys = [userScoreKey(data, index), getUser(data, index).username, getUser(data, index).displayName, index === 0 ? 'Aaron' : 'Julie'].filter(Boolean);
+    const user = getUser(data, index);
+    const keys = [userScoreKey(data, index), user.username, user.displayName, index === 0 ? 'Aaron' : 'Julie'].filter(Boolean);
     const key = keys.find((candidate) => Array.isArray(game.picks?.[candidate]));
     return game.picks?.[key] || [];
   }
@@ -115,10 +106,6 @@ window.CR = window.CR || {};
     const context = isArchive ? 'archive' : 'recent';
     const gameTypeBadge = game.playoff ? '<span class="cr-pill playoff">Playoffs</span>' : '<span class="cr-pill regular">Regular</span>';
     return `<article class="history-log-card rivalry-recap-card ${winnerClass} ${isArchive ? 'is-archive' : ''}" id="history-game-${escapeHtml(game.id)}"><div class="history-log-topline"><div><div class="history-log-kicker-row"><span class="history-log-kicker">Game ${escapeHtml(String(game.displayNumber))}</span>${gameTypeBadge}</div><div class="history-log-subtitle">${escapeHtml(game.date)}</div></div><div class="history-log-actions"><span class="history-score-pill">${escapeHtml(`${scores.first}-${scores.second}`)}</span></div></div><div class="history-recap-winner ${winnerClass}">${escapeHtml(game.winner === 'Tie' ? 'Tie game' : `${game.winner} won this matchup`)}</div><div class="history-recap-sides"><section class="history-recap-side"><div class="history-recap-side-head"><strong class="${userThemeClass(data, 0)}">${escapeHtml(userName(data, 0))}</strong><span>${escapeHtml(String(scores.first))}</span></div><div class="history-recap-picks">${picksFor(data, game, 0).map((pick) => `<div class="history-recap-pick">${escapeHtml(pickLine(pick))}</div>`).join('')}</div></section><section class="history-recap-side"><div class="history-recap-side-head"><strong class="${userThemeClass(data, 1)}">${escapeHtml(userName(data, 1))}</strong><span>${escapeHtml(String(scores.second))}</span></div><div class="history-recap-picks">${picksFor(data, game, 1).map((pick) => `<div class="history-recap-pick">${escapeHtml(pickLine(pick))}</div>`).join('')}</div></section></div><div class="history-recap-footer"><span class="history-recap-first-goal">First goal: ${escapeHtml(game.firstGoalScorer || '—')}</span><div class="history-recap-actions"><button class="cr-button edit" type="button" data-history-edit-game="${escapeHtml(game.id)}" data-history-edit-context="${context}">Edit</button></div></div></article>`;
-  }
-
-  function renderPlayerSpotlights() {
-    return '';
   }
 
   function renderSeasonCard(data, summary) {
