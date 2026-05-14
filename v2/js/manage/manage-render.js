@@ -2,42 +2,16 @@ window.CR = window.CR || {};
 
 (() => {
   const CR = window.CR;
-  const escapeHtml = CR.ui?.escapeHtml || ((value) => String(value ?? ''));
-
-  function iconSvg(name) {
-    const icons = {
-      plus: '<path d="M12 5v14"/><path d="M5 12h14"/>',
-      pencil: '<path d="M21.17 6.4 17.6 2.83a2 2 0 0 0-2.83 0L3 14.6V20h5.4L20.17 8.23a2 2 0 0 0 0-2.83Z"/><path d="m14 4 6 6"/>',
-      trash: '<path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/>',
-      arrowLeft: '<path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>'
-    };
-    return `<svg class="cr-icon" viewBox="0 0 24 24" aria-hidden="true">${icons[name] || icons.plus}</svg>`;
-  }
-
-  function iconButton({ icon, label, className = 'cr-icon-button--soft', attrs = '' }) {
-    return `<button class="cr-icon-button ${className}" type="button" ${attrs} aria-label="${escapeHtml(label)}">${iconSvg(icon)}</button>`;
-  }
-
-  function renderToggleRow({ key, label, hint, checked }) {
-    return `<button class="manage-toggle-row" type="button" data-manage-toggle="${escapeHtml(key)}" aria-pressed="${checked ? 'true' : 'false'}"><div class="manage-toggle-copy"><span class="manage-toggle-label">${escapeHtml(label)}</span>${hint ? `<span class="manage-toggle-hint">${escapeHtml(hint)}</span>` : ''}</div><span class="manage-switch ${checked ? 'is-on' : ''}" aria-hidden="true"><span class="manage-switch-knob"></span></span></button>`;
-  }
-
-  function renderPill(value, label, active, note) {
-    return `<button class="manage-option-pill ${active ? 'is-active' : ''}" type="button" data-manage-stream-option="${escapeHtml(value)}" aria-pressed="${active ? 'true' : 'false'}"><span class="manage-option-pill-label">${escapeHtml(label)}</span>${note ? `<span class="manage-option-pill-note">${escapeHtml(note)}</span>` : ''}</button>`;
-  }
-
-  function renderHealthItem(label, value, tone = 'neutral') {
-    return `<article class="manage-health-item"><div class="manage-health-topline"><span class="eyebrow">${escapeHtml(label)}</span><span class="cr-pill ${escapeHtml(tone)}">${escapeHtml(value)}</span></div></article>`;
-  }
-
-  function renderEditableMetaCard({ field, label, value }) {
-    return `<button class="manage-meta-card manage-meta-button" type="button" data-manage-edit="${escapeHtml(field)}" aria-label="Edit ${escapeHtml(label)}"><span class="eyebrow">${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong><span class="manage-meta-edit-hint cr-icon-button cr-icon-button--ghost" aria-hidden="true">${iconSvg('pencil')}</span></button>`;
-  }
-
-  function renderCardHeader(eyebrow, title, copy, badge, actionHtml = '') {
-    const badgeHtml = badge ? `<span class="cr-pill ${escapeHtml(badge.className || 'neutral')}">${escapeHtml(badge.label || '')}</span>` : '';
-    return `<div class="panel-header compact-header manage-card-header"><div><div class="eyebrow">${escapeHtml(eyebrow)}</div><h2>${escapeHtml(title)}</h2>${copy ? `<p class="manage-support-copy">${escapeHtml(copy)}</p>` : ''}</div><div class="cr-card-actions">${badgeHtml}${actionHtml}</div></div>`;
-  }
+  const utils = CR.manageRenderUtils || {};
+  const escapeHtml = utils.escapeHtml || CR.ui?.escapeHtml || ((value) => String(value ?? ''));
+  const iconButton = utils.iconButton;
+  const renderToggleRow = utils.renderToggleRow;
+  const renderPill = utils.renderPill;
+  const renderHealthItem = utils.renderHealthItem;
+  const renderEditableMetaCard = utils.renderEditableMetaCard;
+  const renderCardHeader = utils.renderCardHeader;
+  const renderSubviewHeader = utils.renderSubviewHeader;
+  const renderSheetHeader = utils.renderSheetHeader;
 
   function renderNotifications(state) {
     const enabledCount = [state.notifications.pushEnabled, state.notifications.toastsEnabled].filter(Boolean).length;
@@ -71,10 +45,6 @@ window.CR = window.CR || {};
     return `<section class="panel-card manage-card">${renderCardHeader('Status center', 'System status', 'Read-only health for realtime, notifications, install state, and sync timing.', { className: 'success', label: state.appHealth.syncStatus })}<div class="manage-health-grid">${renderHealthItem('Realtime', state.appHealth.realtimeStatus, realtimeTone)}${renderHealthItem('Notifications', state.appHealth.notificationStatus, notificationTone)}${renderHealthItem('PWA', state.appHealth.pwaStatus, 'neutral')}${renderHealthItem('Last sync', state.appHealth.lastSyncLabel, 'neutral')}</div></section>`;
   }
 
-  function renderSubviewHeader(label, title, copy) {
-    return `<section class="panel-card cr-subpage-hero manage-subview-hero"><button class="cr-button back cr-back-button" type="button" data-manage-view="main">← Manage</button><span class="cr-pill neutral">${escapeHtml(label)}</span><h2>${escapeHtml(title)}</h2><p>${escapeHtml(copy)}</p></section>`;
-  }
-
   function renderRosterView(state) {
     const activeCount = state.roster.filter((p) => p.active).length;
     const addAction = iconButton({ icon: 'plus', label: 'Add player', className: 'cr-icon-button--primary cr-section-action', attrs: 'data-manage-open-player-sheet="add"' });
@@ -84,10 +54,6 @@ window.CR = window.CR || {};
   function renderScheduleView(state) {
     const addAction = iconButton({ icon: 'plus', label: 'Add game', className: 'cr-icon-button--primary cr-section-action', attrs: 'data-manage-open-game-sheet="add"' });
     return `<div class="content-stack manage-stack">${renderSubviewHeader('Schedule', 'Schedule', 'Manage all games. Finalized history stays protected until explicitly edited.')}<section class="panel-card manage-card">${renderCardHeader('NHL schedule import', 'Safe sync', 'Import Canes games while preserving finalized history.', null)}<button class="cr-button primary" type="button" data-manage-import-schedule>Import NHL Schedule</button></section><section class="panel-card manage-card">${renderCardHeader('Games', 'All games', `${state.schedule.length} games`, null, addAction)}<div class="cr-list-stack">${state.schedule.map((game) => `<article class="cr-action-row"><div class="cr-action-copy"><strong>${escapeHtml(game.date)} · ${escapeHtml(game.opponent)}</strong><span>${escapeHtml(game.type)} · ${escapeHtml(game.firstPicker)} picks first</span></div><div class="cr-row-icon-actions">${iconButton({ icon: 'pencil', label: `Edit ${game.opponent} game`, attrs: `data-manage-edit-game="${escapeHtml(game.id)}"` })}${iconButton({ icon: 'trash', label: `Remove ${game.opponent} game`, className: 'cr-icon-button--danger', attrs: `data-manage-confirm-remove-game="${escapeHtml(game.id)}"` })}</div></article>`).join('')}</div></section>${renderScheduleSheet(state)}${renderConfirmSheet(state)}</div>`;
-  }
-
-  function renderSheetHeader(eyebrow, title, copy, closeAttr) {
-    return `<div class="gd-sheet-handle"></div><div class="manage-edit-header"><div><div class="eyebrow">${escapeHtml(eyebrow)}</div><h2>${escapeHtml(title)}</h2>${copy ? `<p>${escapeHtml(copy)}</p>` : ''}</div><button class="manage-edit-close" type="button" ${closeAttr} aria-label="Close">×</button></div>`;
   }
 
   function renderRosterSheet(state) {
