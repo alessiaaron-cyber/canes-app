@@ -148,6 +148,10 @@ body {
 
 .account-chip-avatar,
 .account-panel-avatar { display: flex; align-items: center; justify-content: center; border-radius: 50%; background: linear-gradient(135deg, #111827, #1f2937); color: #fff; font-weight: var(--font-heavy); }
+.account-chip-avatar.avatar-primary,
+.account-panel-avatar.avatar-primary { background: linear-gradient(135deg, #c8102e, #7f1021); box-shadow: 0 12px 24px rgba(200, 16, 46, 0.20); }
+.account-chip-avatar.avatar-secondary,
+.account-panel-avatar.avatar-secondary { background: linear-gradient(135deg, #111827, #344054); box-shadow: 0 12px 24px rgba(17, 24, 39, 0.18); }
 .account-chip-avatar { width: 34px; height: 34px; font-size: 13px; }
 .account-chip-copy { min-width: 0; }
 .account-chip-name { font-size: 13px; font-weight: var(--font-strong); line-height: 1.1; }
