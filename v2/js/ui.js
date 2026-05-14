@@ -10,6 +10,55 @@ window.CR.ui.escapeHtml = (value) => String(value ?? '')
   .replace(/\"/g, '&quot;')
   .replace(/'/g, '&#39;');
 
+window.CR.ui.createViewStore = ({ initialState = {}, render, onAfterRender } = {}) => {
+  let state = { ...initialState };
+  let scheduled = false;
+
+  function getState() {
+    return state;
+  }
+
+  function setState(patch = {}, options = {}) {
+    const nextPatch = typeof patch === 'function' ? patch(state) : patch;
+    state = { ...state, ...(nextPatch || {}) };
+
+    if (options.render === false) return state;
+    scheduleRender();
+    return state;
+  }
+
+  function replaceState(nextState = {}, options = {}) {
+    state = { ...(nextState || {}) };
+
+    if (options.render === false) return state;
+    scheduleRender();
+    return state;
+  }
+
+  function scheduleRender() {
+    if (scheduled) return;
+    scheduled = true;
+
+    requestAnimationFrame(() => {
+      scheduled = false;
+      renderNow();
+    });
+  }
+
+  function renderNow() {
+    if (typeof render === 'function') render(state);
+    if (typeof onAfterRender === 'function') onAfterRender(state);
+  }
+
+  return {
+    getState,
+    setState,
+    replaceState,
+    render: renderNow,
+    scheduleRender
+  };
+};
+
 window.CR.showToast = (input) => {
   const toast = window.CR.$('#toast');
   if (!toast) return;
