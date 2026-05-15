@@ -377,6 +377,37 @@ window.CR = window.CR || {};
     }
   }
 
+  async function refreshHistoryData(options = {}) {
+    if (CR.historyState?.sheet?.open && !options.force) {
+      CR.historyNeedsRefresh = true;
+      return;
+    }
+
+    try {
+      const previousState = CR.historyState || {};
+      const source = await CR.historyDataService.fetchHistoryData();
+
+      CR.historyData = CR.historyModel.build(source);
+      CR.historyCache = { staticData: null, seasons: {} };
+      CR.historyPanelKeys = { hq: '', seasons: '', all_games: '', admin: '' };
+
+      const validSeason = CR.historyData.seasons?.some((season) => season.id === previousState.seasonId);
+      CR.historyState = {
+        seasonId: validSeason ? previousState.seasonId : CR.historyData.currentSeasonId,
+        view: previousState.view || 'hq',
+        previousView: previousState.previousView || 'hq',
+        returnView: previousState.returnView || 'hq',
+        sheet: previousState.sheet?.open && !options.closeSheet ? previousState.sheet : { open: false }
+      };
+
+      CR.historyNeedsRefresh = false;
+      renderHistory();
+    } catch (error) {
+      console.error('History refresh failed', error);
+      CR.showToast?.({ message: 'Could not refresh History', tier: 'warning' });
+    }
+  }
+
   async function initHistory() {
     try {
       const source = await CR.historyDataService.fetchHistoryData();
@@ -403,5 +434,6 @@ window.CR = window.CR || {};
   }
 
   CR.initHistory = initHistory;
+  CR.refreshHistoryData = refreshHistoryData;
   CR.renderHistory = renderHistory;
 })();
