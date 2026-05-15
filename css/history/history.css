@@ -453,6 +453,11 @@
 .history-seasons-stack { gap: 12px; }
 
 .history-season-overview-card { width: 100%; display: block; text-align: left; border: 1px solid var(--border-subtle); border-radius: var(--radius-xl, 26px); padding: 16px; background: linear-gradient(180deg, #ffffff 0%, #fbfcfd 100%); box-shadow: 0 8px 20px rgba(15, 23, 42, 0.045); }
+.history-season-overview-card.is-complete.winner-primary,
+.history-season-overview-card.is-complete.winner-aaron { border-color: rgba(200, 16, 46, 0.2); }
+.history-season-overview-card.is-complete.winner-secondary,
+.history-season-overview-card.is-complete.winner-julie { border-color: rgba(17, 24, 39, 0.18); }
+.history-season-overview-card.is-complete.winner-tie { border-color: var(--ui-tie-border); }
 .history-season-overview-topline { align-items: flex-start; }
 .history-season-overview-topline h3 { font-size: 22px; color: var(--ink-strong); }
 .history-season-view-cue { color: var(--text-secondary); font-size: 20px; line-height: 1; font-weight: var(--font-strong, 800); letter-spacing: -0.02em; }
