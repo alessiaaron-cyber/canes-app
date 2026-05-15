@@ -28,7 +28,7 @@ window.CR = window.CR || {};
     const draft = CR.gameDay?.draft || {};
     if (!canEditPicks()) return false;
     if (draft.status === 'complete' || Number(draft.currentPickNumber || 0) > 4) return false;
-    return isCurrentUserTurn() || isAdmin();
+    return isCurrentUserTurn();
   }
 
   function draftDisabledLabel() {
@@ -38,7 +38,17 @@ window.CR = window.CR || {};
     if (draft.status === 'complete' || Number(draft.currentPickNumber || 0) > 4) return 'Draft complete';
 
     const picker = draft.currentPicker?.displayName || 'other player';
-    return isAdmin() ? 'Admin override' : `Waiting on ${picker}`;
+    return `Waiting on ${picker}`;
+  }
+
+  function renderAdminOverrideButton(scheduled) {
+    if (!scheduled || !isAdmin()) return '';
+
+    return `
+      <button class="cr-button secondary gd-inline-action" data-action="open-manage" type="button">
+        Admin Override
+      </button>
+    `;
   }
 
   function renderPickSlot({ pick, side, key, isPlayoffs, isFocus, picksEnabled }) {
@@ -74,12 +84,12 @@ window.CR = window.CR || {};
     `;
   }
 
-  function renderOwnerPanel(index, users, isPlayoffs, lastDrafted, picksEnabled) {
+  function renderOwnerPanel(index, users, isPlayoffs, lastDrafted, scheduled) {
     const side = utils().getSideContext(index, { users });
 
     return `
-      <article class="gd-panel ${isPlayoffs && picksEnabled ? 'gd-panel-playoff' : ''}">
-        <div class="gd-panel-head ${side.ownerClass} ${isPlayoffs && picksEnabled ? 'gd-panel-head-playoff' : ''}">
+      <article class="gd-panel ${isPlayoffs && scheduled ? 'gd-panel-playoff' : ''}">
+        <div class="gd-panel-head ${side.ownerClass} ${isPlayoffs && scheduled ? 'gd-panel-head-playoff' : ''}">
           <span>${side.name}</span>
           <span>${side.picks.length}/2</span>
         </div>
@@ -91,8 +101,8 @@ window.CR = window.CR || {};
             side: side.name,
             key: side.key,
             isPlayoffs,
-            isFocus: picksEnabled && pick && pick.player === lastDrafted,
-            picksEnabled
+            isFocus: scheduled && pick && pick.player === lastDrafted,
+            picksEnabled: scheduled
           });
         }).join('')}
       </article>
@@ -128,7 +138,10 @@ window.CR = window.CR || {};
     return `
       <div class="gd-label-row" id="gdPregamePicksAnchor">
         <div class="gd-label">${isPlayoffs && scheduled ? 'Playoff Picks' : 'Picks'}</div>
-        ${!scheduled ? '<span class="gd-inline-note">Pick controls unlock when a game is scheduled.</span>' : waitingCopy}
+        <div class="gd-label-group">
+          ${!scheduled ? '<span class="gd-inline-note">Pick controls unlock when a game is scheduled.</span>' : waitingCopy}
+          ${renderAdminOverrideButton(scheduled)}
+        </div>
       </div>
 
       <section class="gd-picks-grid" id="gdPregamePicksGrid">
