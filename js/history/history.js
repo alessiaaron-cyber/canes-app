@@ -184,7 +184,7 @@ window.CR = window.CR || {};
 
   function buildSeasonBoard(selectedSeason, selectedGames, selectedSummary) {
     const totals = seasonTotals(selectedSeason, selectedGames);
-    const recent = buildRecentTen(selectedGames.filter(hasRealScore));
+    const recent = buildRecentTen(selectedGames);
     const recentWins = recent.reduce((acc, game) => {
       if (game.winner === 'Aaron') acc.aaron += 1;
       if (game.winner === 'Julie') acc.julie += 1;
@@ -194,7 +194,7 @@ window.CR = window.CR || {};
 
     const recentText = recent.length
       ? `Last ${recent.length}: Aaron ${recentWins.aaron} • Julie ${recentWins.julie}${recentWins.tie ? ` • Tie ${recentWins.tie}` : ''}`
-      : 'No scored game rows yet';
+      : 'No completed game rows yet';
 
     return {
       ...totals,
@@ -217,7 +217,7 @@ window.CR = window.CR || {};
   }
 
   function buildMomentum(selectedGames) {
-    return buildRecentTen(selectedGames.filter(hasRealScore)).map((game) => ({
+    return buildRecentTen(selectedGames).map((game) => ({
       id: game.id,
       winner: game.winner,
       playoff: Boolean(game.playoff),
@@ -248,9 +248,9 @@ window.CR = window.CR || {};
       selectedSeason,
       selectedSummary,
       selectedGames,
-      seasonBoard: buildSeasonBoard(selectedSeason, selectedGames, selectedSummary),
+      seasonBoard: buildSeasonBoard(selectedSeason, gameLog, selectedSummary),
       momentum: buildMomentum(gameLog),
-      recentGames: gameLog.filter(hasRealScore).slice(0, 4),
+      recentGames: gameLog.slice(0, 4),
       gameLog,
       playerSpotlights
     };
