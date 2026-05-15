@@ -26,6 +26,25 @@ window.CR = window.CR || {};
     }
   }
 
+  function hasOpenManageSheet(state = CR.manageState) {
+    return Boolean(
+      state?.activeEditField ||
+      state?.startSeasonOpen ||
+      state?.scoringEditOpen ||
+      state?.rosterSheetOpen ||
+      state?.scheduleSheetOpen ||
+      state?.confirmRemove
+    );
+  }
+
+  function syncManageSheetScrollLock(state = CR.manageState) {
+    if (hasOpenManageSheet(state)) {
+      CR.ui?.lockBodyScroll?.('manage-sheet-open');
+    } else {
+      CR.ui?.unlockBodyScroll?.('manage-sheet-open');
+    }
+  }
+
   function renderManageView(state) {
     const root = document.querySelector('#manageContent');
     if (!root || !CR.manageRender) return;
@@ -33,6 +52,7 @@ window.CR = window.CR || {};
     syncManageChrome(state);
     root.innerHTML = CR.manageRender.renderRoot(state);
     syncManageChrome(state);
+    syncManageSheetScrollLock(state);
   }
 
   function renderManage(options = {}) {
@@ -61,6 +81,7 @@ window.CR = window.CR || {};
       render: renderManageView,
       onAfterRender: (state) => {
         CR.manageState = state;
+        syncManageSheetScrollLock(state);
       }
     });
 
@@ -76,5 +97,6 @@ window.CR = window.CR || {};
 
   CR.renderManage = renderManage;
   CR.scrollManageToTop = scrollManageToTop;
+  CR.syncManageSheetScrollLock = syncManageSheetScrollLock;
   CR.initManage = initManage;
 })();
