@@ -24,18 +24,6 @@ window.CR = window.CR || {};
       </section>
 
       <div class="gd-label-row">
-        <div class="gd-label">Simulate Updates</div>
-        <div class="gd-filter">${isPlayoffs ? 'Playoff Moment Lab' : 'Goal / Assist / Bonus'}</div>
-      </div>
-
-      <div class="gd-sim-grid">
-        ${['goal', 'assist', 'first'].map((kind) => `
-          <button class="gd-sim-button ${left.ownerClass} ${isPlayoffs ? 'gd-sim-button-playoff' : ''}" data-side="${left.key}" data-kind="${kind}" type="button">${left.name} ${kind === 'first' ? 'First Goal' : kind.charAt(0).toUpperCase() + kind.slice(1)}</button>
-          <button class="gd-sim-button ${right.ownerClass} ${isPlayoffs ? 'gd-sim-button-playoff' : ''}" data-side="${right.key}" data-kind="${kind}" type="button">${right.name} ${kind === 'first' ? 'First Goal' : kind.charAt(0).toUpperCase() + kind.slice(1)}</button>
-        `).join('')}
-      </div>
-
-      <div class="gd-label-row">
         <div class="gd-label">${isPlayoffs ? 'Playoff Rivalry Feed' : 'Rivalry Feed'}</div>
       </div>
 
