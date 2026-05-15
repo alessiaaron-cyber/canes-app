@@ -3,6 +3,30 @@ window.CR = window.CR || {};
 (() => {
   const CR = window.CR;
 
+  function ensureEditState() {
+    CR.gameDayEditState = CR.gameDayEditState || {
+      isEditing: false,
+      dirty: false,
+      startedAt: 0
+    };
+
+    return CR.gameDayEditState;
+  }
+
+  function markEditing(dirty = true) {
+    const state = ensureEditState();
+    state.isEditing = true;
+    state.dirty = Boolean(dirty || state.dirty);
+    state.startedAt = state.startedAt || Date.now();
+  }
+
+  function clearEditing() {
+    const state = ensureEditState();
+    state.isEditing = false;
+    state.dirty = false;
+    state.startedAt = 0;
+  }
+
   function focusPregamePicks() {
     const anchor = document.querySelector('#gdPregamePicksAnchor');
 
@@ -18,6 +42,7 @@ window.CR = window.CR || {};
         button.addEventListener('click', () => {
           const side = button.dataset.side;
           const player = button.dataset.player;
+          markEditing();
           CR.gameDay.pregame[side] = CR.gameDay.pregame[side].filter((name) => name !== player);
           CR.gameDay.lastDraftedPlayer = '';
           rerender('pregame');
@@ -35,6 +60,7 @@ window.CR = window.CR || {};
           const side = typeof nextDraftSide === 'function' ? nextDraftSide() : null;
           if (!side) return;
 
+          markEditing();
           CR.gameDay.pregame[side].push(player);
           CR.gameDay.lastDraftedPlayer = player;
           rerender('pregame');
@@ -55,6 +81,7 @@ window.CR = window.CR || {};
         button.addEventListener('click', (event) => {
           event.preventDefault();
           event.stopPropagation();
+          markEditing(false);
           renderManageSheet();
           setModalOpen(true);
         });
@@ -68,5 +95,11 @@ window.CR = window.CR || {};
         });
       });
     }
+  };
+
+  CR.gameDayEdit = {
+    ensureEditState,
+    markEditing,
+    clearEditing
   };
 })();
