@@ -75,6 +75,23 @@ window.CR = window.CR || {};
     }
   }
 
+  async function saveGameDayPicks() {
+    const button = $('#saveSheet');
+    try {
+      CR.ui?.setActionBusy?.(button, true, { label: 'Saving…' });
+      await CR.gameDaySaveService?.savePregamePicks?.(CR.gameDay.currentGameId, CR.gameDay.pregame);
+      CR.gameDayEdit?.clearEditing?.();
+      setModalOpen(false);
+      await refreshGameDayData({ flash: true });
+      CR.showToast?.('Picks saved');
+    } catch (error) {
+      console.error('Game Day pick save failed', error);
+      CR.showToast?.({ message: error?.message || 'Could not save picks', tier: 'warning' });
+    } finally {
+      CR.ui?.setActionBusy?.(button, false);
+    }
+  }
+
   function registerRealtime() {
     if (CR.__gameDayRealtimeRegistered || !CR.realtime?.register) return;
     CR.__gameDayRealtimeRegistered = true;
@@ -147,11 +164,7 @@ window.CR = window.CR || {};
     $('#carryoverSwitcher')?.addEventListener('click', (event) => { const button = event.target.closest('button[data-carryover]'); if (!button) return; CR.gameDay.carryover = { active: button.dataset.carryover === 'on' }; CR.renderGameDayState(); });
     $('#refreshButton')?.addEventListener('click', () => CR.refreshGameDayData?.({ toast: true, flash: true }));
     $('#closeSheet')?.addEventListener('click', () => setModalOpen(false));
-    $('#saveSheet')?.addEventListener('click', () => {
-      CR.gameDayEdit?.clearEditing?.();
-      setModalOpen(false);
-      CR.renderGameDayState();
-    });
+    $('#saveSheet')?.addEventListener('click', saveGameDayPicks);
     $('#manageSheet')?.addEventListener('click', (event) => { if (event.target.id === 'manageSheet') setModalOpen(false); });
     CR.renderGameDayState(CR.gameDay.mode || 'pregame');
     refreshGameDayData();
