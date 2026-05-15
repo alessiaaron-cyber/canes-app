@@ -9,6 +9,38 @@ window.CR = window.CR || {};
     return Boolean(game.hasGame && game.scheduleText && game.scheduleText !== 'Schedule pending');
   }
 
+  function currentUserId() {
+    return String(CR.currentUser?.id || CR.currentProfile?.id || '').trim();
+  }
+
+  function isAdmin() {
+    return String(CR.currentProfile?.role || '').trim().toLowerCase() === 'admin';
+  }
+
+  function isCurrentUserTurn() {
+    const draft = CR.gameDay?.draft || {};
+    const pickerId = String(draft.currentPicker?.id || '').trim();
+    if (!pickerId || !currentUserId()) return false;
+    return pickerId === currentUserId();
+  }
+
+  function canUsePublicDraftControls() {
+    const draft = CR.gameDay?.draft || {};
+    if (!canEditPicks()) return false;
+    if (draft.status === 'complete' || Number(draft.currentPickNumber || 0) > 4) return false;
+    return isCurrentUserTurn() || isAdmin();
+  }
+
+  function draftDisabledLabel() {
+    if (!canEditPicks()) return 'Schedule pending';
+
+    const draft = CR.gameDay?.draft || {};
+    if (draft.status === 'complete' || Number(draft.currentPickNumber || 0) > 4) return 'Draft complete';
+
+    const picker = draft.currentPicker?.displayName || 'other player';
+    return isAdmin() ? 'Admin override' : `Waiting on ${picker}`;
+  }
+
   function renderPickSlot({ pick, side, key, isPlayoffs, isFocus, picksEnabled }) {
     if (!pick) {
       return `
@@ -16,7 +48,7 @@ window.CR = window.CR || {};
           <div class="gd-pick-icon">…</div>
           <div class="gd-pick-main">
             <strong>Open slot</strong>
-            <small>${picksEnabled ? (isPlayoffs ? 'Waiting for the next playoff pick' : 'Waiting for next pick') : 'Schedule pending'}</small>
+            <small>${picksEnabled ? (isPlayoffs ? 'Waiting for the next playoff pick' : 'Waiting for next pick') : draftDisabledLabel()}</small>
           </div>
         </div>
       `;
@@ -31,7 +63,7 @@ window.CR = window.CR || {};
         <div class="gd-pick-icon">✓</div>
         <div class="gd-pick-main">
           <strong>${pick.player}</strong>
-          <small>${picksEnabled ? (isPlayoffs ? 'Locked for playoff night' : 'Locked pick') : 'Pick locked until a game is scheduled'}</small>
+          <small>${picksEnabled ? (isPlayoffs ? 'Locked for playoff night' : 'Locked pick') : 'Pick locked'}</small>
           ${picksEnabled ? `
             <div class="gd-lock-actions">
               <button class="cr-button secondary gd-inline-action" data-side="${key}" data-player="${pick.player}" type="button">Change</button>
@@ -71,6 +103,7 @@ window.CR = window.CR || {};
     const owner = claimedOwner(entry.name);
     const ownerClass = owner ? (CR.identity?.ownerClass?.(owner) || '') : '';
     const displayName = entry.displayName || entry.name;
+    const label = picksEnabled ? 'Draft' : draftDisabledLabel();
 
     return `
       <div class="gd-roster-row ${owner ? 'claimed' : ''} ${!picksEnabled ? 'is-disabled' : ''}">
@@ -81,31 +114,33 @@ window.CR = window.CR || {};
 
         ${owner
           ? `<span class="gd-tag ${ownerClass}">${owner}</span>`
-          : `<button class="gd-draft-btn ${isPlayoffs && picksEnabled ? 'gd-draft-btn-playoff' : ''}" data-player="${entry.name}" type="button" ${picksEnabled ? '' : 'disabled'}>${picksEnabled ? 'Draft' : 'Pending'}</button>`}
+          : `<button class="gd-draft-btn ${isPlayoffs && picksEnabled ? 'gd-draft-btn-playoff' : ''}" data-player="${entry.name}" type="button" ${picksEnabled ? '' : 'disabled'}>${label}</button>`}
       </div>
     `;
   }
 
   function renderPregameSection({ users, roster, claimedOwner, isPlayoffs }) {
     const lastDrafted = CR.gameDay?.lastDraftedPlayer || '';
-    const picksEnabled = canEditPicks();
+    const scheduled = canEditPicks();
+    const picksEnabled = canUsePublicDraftControls();
+    const waitingCopy = scheduled && !picksEnabled ? `<span class="gd-inline-note">${draftDisabledLabel()}</span>` : '';
 
     return `
       <div class="gd-label-row" id="gdPregamePicksAnchor">
-        <div class="gd-label">${isPlayoffs && picksEnabled ? 'Playoff Picks' : 'Picks'}</div>
-        ${!picksEnabled ? '<span class="gd-inline-note">Pick controls unlock when a game is scheduled.</span>' : ''}
+        <div class="gd-label">${isPlayoffs && scheduled ? 'Playoff Picks' : 'Picks'}</div>
+        ${!scheduled ? '<span class="gd-inline-note">Pick controls unlock when a game is scheduled.</span>' : waitingCopy}
       </div>
 
       <section class="gd-picks-grid" id="gdPregamePicksGrid">
-        ${renderOwnerPanel(0, users, isPlayoffs, lastDrafted, picksEnabled)}
-        ${renderOwnerPanel(1, users, isPlayoffs, lastDrafted, picksEnabled)}
+        ${renderOwnerPanel(0, users, isPlayoffs, lastDrafted, scheduled)}
+        ${renderOwnerPanel(1, users, isPlayoffs, lastDrafted, scheduled)}
       </section>
 
       <div class="gd-label-row">
         <div class="gd-label">Current Canes Roster</div>
       </div>
 
-      <section class="gd-panel gd-roster ${isPlayoffs && picksEnabled ? 'gd-panel-playoff' : ''}">
+      <section class="gd-panel gd-roster ${isPlayoffs && scheduled ? 'gd-panel-playoff' : ''}">
         ${roster.map((entry) => renderRosterRow(entry, claimedOwner, isPlayoffs, picksEnabled)).join('')}
       </section>
     `;
