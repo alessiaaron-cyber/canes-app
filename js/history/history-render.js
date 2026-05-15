@@ -72,6 +72,42 @@ window.CR = window.CR || {};
     return `${winner} leads`;
   }
 
+  function gameLabel(game) {
+    return [game?.date, game?.opponent ? `vs ${game.opponent}` : ''].filter(Boolean).join(' • ') || game?.title || 'Game';
+  }
+
+  function hasScoredResult(game) {
+    const scores = gameScores({}, game);
+    return scores.first + scores.second > 0;
+  }
+
+  function seasonFeaturedResult(data, summary, games) {
+    const scoredGames = (games || []).filter(hasScoredResult).map((game) => {
+      const scores = gameScores(data, game);
+      return {
+        ...game,
+        scores,
+        label: gameLabel(game),
+        margin: Math.abs(scores.first - scores.second),
+        combined: scores.first + scores.second
+      };
+    });
+
+    if (!scoredGames.length) return '';
+
+    const playoff = scoredGames.find((game) => game.playoff);
+    if (playoff) return `${playoff.label}: playoff result (${playoff.scores.first}-${playoff.scores.second}).`;
+
+    const biggest = scoredGames.slice().sort((a, b) => b.margin - a.margin)[0];
+    if (biggest && biggest.margin >= 3) {
+      const winner = biggest.scores.first === biggest.scores.second ? 'Tie' : biggest.scores.first > biggest.scores.second ? userName(data, 0) : userName(data, 1);
+      return `${biggest.label}: biggest margin (${winner} +${biggest.margin}).`;
+    }
+
+    const wildest = scoredGames.slice().sort((a, b) => b.combined - a.combined)[0];
+    return `${wildest.label}: highest combined score (${wildest.combined} pts).`;
+  }
+
   function renderRootShell() {
     return `<div class="history-shell"><div id="historyPanelHq"></div><div id="historyPanelSeasons" hidden></div><div id="historyPanelAllGames" hidden></div><div id="historyAdminLayer"></div></div>`;
   }
@@ -113,12 +149,6 @@ window.CR = window.CR || {};
     const context = isArchive ? 'archive' : 'recent';
     const gameTypeBadge = game.playoff ? '<span class="cr-pill playoff">Playoffs</span>' : '<span class="cr-pill regular">Regular</span>';
     return `<article class="history-log-card rivalry-recap-card ${winnerClass} ${isArchive ? 'is-archive' : ''}" id="history-game-${escapeHtml(game.id)}"><div class="history-log-topline"><div><div class="history-log-kicker-row"><span class="history-log-kicker">Game ${escapeHtml(String(game.displayNumber))}</span>${gameTypeBadge}<span class="history-outcome-pill ${winnerClass}">${escapeHtml(outcomeText(game))}</span></div><div class="history-log-subtitle">${escapeHtml(game.subtitle || game.date)}</div></div></div><div class="history-recap-sides"><section class="history-recap-side"><div class="history-recap-side-head"><strong class="${userThemeClass(data, 0)}">${escapeHtml(userName(data, 0))}</strong><span>${escapeHtml(String(scores.first))}</span></div><div class="history-recap-picks">${picksFor(data, game, 0).map((pick) => `<div class="history-recap-pick">${escapeHtml(pickLine(pick))}</div>`).join('')}</div></section><section class="history-recap-side"><div class="history-recap-side-head"><strong class="${userThemeClass(data, 1)}">${escapeHtml(userName(data, 1))}</strong><span>${escapeHtml(String(scores.second))}</span></div><div class="history-recap-picks">${picksFor(data, game, 1).map((pick) => `<div class="history-recap-pick">${escapeHtml(pickLine(pick))}</div>`).join('')}</div></section></div><div class="history-recap-footer"><span class="history-recap-first-goal">First goal: ${escapeHtml(game.firstGoalScorer || '—')}</span><div class="history-recap-actions"><button class="cr-button edit" type="button" data-history-edit-game="${escapeHtml(game.id)}" data-history-edit-context="${context}">Edit</button></div></div></article>`;
-  }
-
-  function seasonFeaturedResult(data, summary, games) {
-    const scoped = CR.historyRuntime?.buildSeasonBoardForRender?.(summary.seasonId);
-    if (scoped?.bestGameTitle) return scoped.bestGameTitle;
-    return summary.bestGameTitle || '';
   }
 
   function renderSeasonCard(data, summary) {
