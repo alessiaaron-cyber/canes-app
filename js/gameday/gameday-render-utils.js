@@ -19,6 +19,30 @@ window.CR = window.CR || {};
     return identity().ownerClass?.(index) || (index === 0 ? 'owner-primary' : 'owner-secondary');
   }
 
+  function changedClass(key, className = 'is-realtime-changed') {
+    return CR.ui?.changedClass?.(key, className) || '';
+  }
+
+  function normalizeKeyPart(value) {
+    return String(value || '').trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'unknown';
+  }
+
+  function scoreChangedKey(owner) {
+    return `gameday:score:${normalizeKeyPart(owner)}`;
+  }
+
+  function pickChangedKey(player, stat) {
+    return `gameday:pick:${normalizeKeyPart(player)}:${normalizeKeyPart(stat)}`;
+  }
+
+  function firstGoalChangedKey() {
+    return 'gameday:first-goal';
+  }
+
+  function feedChangedKey() {
+    return 'gameday:feed';
+  }
+
   function getUserPicks(users, index) {
     const key = scoreKey(index);
     const name = userName(index);
@@ -52,6 +76,12 @@ window.CR = window.CR || {};
     userName,
     scoreKey,
     ownerClass,
+    changedClass,
+    normalizeKeyPart,
+    scoreChangedKey,
+    pickChangedKey,
+    firstGoalChangedKey,
+    feedChangedKey,
     getUserPicks,
     getUserScore,
     getSideContext,
