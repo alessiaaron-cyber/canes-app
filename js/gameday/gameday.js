@@ -169,6 +169,41 @@ window.CR = window.CR || {};
     return false;
   }
 
+  function changedKeysForPayload(payload) {
+    const row = payload?.new || payload?.old || {};
+    const utils = CR.gameDayRenderUtils || {};
+    const keys = ['gameday:sync'];
+
+    if (payload?.table === 'games') {
+      keys.push(utils.feedChangedKey?.());
+      keys.push(utils.firstGoalChangedKey?.());
+      keys.push(utils.scoreChangedKey?.('Aaron'));
+      keys.push(utils.scoreChangedKey?.('Julie'));
+    }
+
+    if (payload?.table === 'picks') {
+      const player = row.player_name || row.player || '';
+      const owner = row.owner || '';
+      keys.push(utils.feedChangedKey?.());
+      if (owner) keys.push(utils.scoreChangedKey?.(owner));
+      if (player) {
+        keys.push(utils.pickChangedKey?.(player, 'goals'));
+        keys.push(utils.pickChangedKey?.(player, 'assists'));
+        keys.push(utils.firstGoalChangedKey?.());
+      }
+    }
+
+    return keys.filter(Boolean);
+  }
+
+  function markRealtimeChanged(payloads = []) {
+    const keys = Array.from(new Set(payloads.flatMap(changedKeysForPayload)));
+    CR.ui?.markChanged?.(keys, {
+      ttl: 1200,
+      onChange: () => CR.renderGameDayState?.()
+    });
+  }
+
   function applyGameDayData(nextState = {}) {
     const previousMode = CR.gameDay?.mode;
 
@@ -240,10 +275,7 @@ window.CR = window.CR || {};
         if (!payloads.some(payloadBelongsToCurrentGame)) return;
         if (isUserEditing()) return;
 
-        CR.ui?.markChanged?.(['gameday:sync'], {
-          ttl: 1200,
-          onChange: () => CR.renderGameDayState?.()
-        });
+        markRealtimeChanged(payloads);
 
         await refreshGameDayData({ flash: true, skipIfEditing: true });
       }
