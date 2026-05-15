@@ -98,7 +98,8 @@ window.CR = window.CR || {};
   }
 
   function renderMomentum(data) {
-    return `<section class="panel-card history-momentum-card"><div class="history-section-head"><div><div class="eyebrow">Momentum</div><h3>Last eight swings</h3></div></div><div class="history-momentum-strip">${(data.momentum || []).map((item) => `<div class="history-momentum-node ${winnerThemeClass(data, item.winner)} ${item.playoff ? 'is-playoff' : ''}"><span>${escapeHtml(item.winner === 'Tie' ? 'T' : String(item.winner || '').slice(0, 1))}</span></div>`).join('')}</div><p class="history-support-copy">${escapeHtml(data.highlights?.heater?.copy || 'Momentum is still shifting.')}</p></section>`;
+    const results = (data.momentum || []).slice(0, 10);
+    return `<section class="panel-card history-momentum-card"><div class="history-section-head"><div><div class="eyebrow">Momentum</div><h3>Last 10 results</h3></div></div><div class="history-momentum-strip">${results.map((item) => `<div class="history-momentum-node ${winnerThemeClass(data, item.winner)} ${item.playoff ? 'is-playoff' : ''}"><span>${escapeHtml(item.winner === 'Tie' ? 'T' : String(item.winner || '').slice(0, 1))}</span></div>`).join('')}</div><p class="history-support-copy">${escapeHtml(data.highlights?.heater?.copy || 'Momentum is still shifting.')}</p></section>`;
   }
 
   function renderHighlights(data) {
