@@ -37,6 +37,10 @@ window.CR = window.CR || {};
     scrollHistoryToTop();
   }
 
+  function ownerClass(side) {
+    return side === 'Julie' ? 'owner-secondary' : 'owner-primary';
+  }
+
   function scoringRules(isPlayoff) {
     return isPlayoff
       ? { goal: 2, assist: 1, firstGoalBonus: 1 }
@@ -123,61 +127,15 @@ window.CR = window.CR || {};
             <div class="history-sheet-summary-copy">Aaron: ${(game.picks?.Aaron || []).map((pick) => escapeHtml(pick.playerName)).join(' / ')}</div>
             <div class="history-sheet-summary-copy">Julie: ${(game.picks?.Julie || []).map((pick) => escapeHtml(pick.playerName)).join(' / ')}</div>
           </div>
-          <div class="history-score-pill" data-history-total-score="1">${escapeHtml(`${game.aaronScore}-${game.julieScore}`)}</div>
         </div>
 
         <div class="history-sheet-tabs" role="tablist" aria-label="Edit game sections">
-          <button class="history-sheet-tab is-active" type="button" data-history-sheet-tab="result">Result</button>
+          <button class="history-sheet-tab is-active" type="button" data-history-sheet-tab="info">Info</button>
           <button class="history-sheet-tab" type="button" data-history-sheet-tab="picks">Picks</button>
-          <button class="history-sheet-tab" type="button" data-history-sheet-tab="info">Info</button>
+          <button class="history-sheet-tab" type="button" data-history-sheet-tab="result">Result</button>
         </div>
 
-        <section class="history-sheet-panel is-active" data-history-sheet-panel="result">
-          <label class="history-sheet-field">
-            <span>First goal scorer</span>
-            <input class="history-sheet-input" list="history-first-goal-options-${escapeHtml(game.id)}" value="${escapeHtml(game.firstGoalScorer || '')}" data-history-first-goal="1" aria-label="First goal scorer" />
-            <datalist id="history-first-goal-options-${escapeHtml(game.id)}">
-              ${firstGoalOptions.map((name) => `<option value="${escapeHtml(name)}"></option>`).join('')}
-            </datalist>
-          </label>
-
-          <div class="history-sheet-score-preview-grid">
-            <article class="history-sheet-score-preview-card">
-              <div class="eyebrow">Aaron</div>
-              <div class="history-sheet-score-preview-value" data-history-side-total="Aaron">${escapeHtml(String(game.aaronScore || 0))}</div>
-            </article>
-            <article class="history-sheet-score-preview-card">
-              <div class="eyebrow">Julie</div>
-              <div class="history-sheet-score-preview-value" data-history-side-total="Julie">${escapeHtml(String(game.julieScore || 0))}</div>
-            </article>
-          </div>
-
-          <div class="history-sheet-actions-note">Scores update automatically from goals, assists, game type, and first-goal bonus.</div>
-        </section>
-
-        <section class="history-sheet-panel" data-history-sheet-panel="picks" hidden>
-          <div class="history-sheet-side-section">
-            <div class="history-sheet-side-section-head">
-              <h3>Aaron Picks</h3>
-              <span class="history-sheet-ga-head">G / A</span>
-            </div>
-            <div class="history-sheet-pick-stack" data-history-side="Aaron">
-              ${renderPickCards(game.picks?.Aaron, 'Aaron')}
-            </div>
-          </div>
-
-          <div class="history-sheet-side-section">
-            <div class="history-sheet-side-section-head">
-              <h3>Julie Picks</h3>
-              <span class="history-sheet-ga-head">G / A</span>
-            </div>
-            <div class="history-sheet-pick-stack" data-history-side="Julie">
-              ${renderPickCards(game.picks?.Julie, 'Julie')}
-            </div>
-          </div>
-        </section>
-
-        <section class="history-sheet-panel" data-history-sheet-panel="info" hidden>
+        <section class="history-sheet-panel is-active" data-history-sheet-panel="info">
           <div class="history-sheet-field-grid">
             <label class="history-sheet-field">
               <span>Date</span>
@@ -204,6 +162,51 @@ window.CR = window.CR || {};
               </select>
             </label>
           </div>
+        </section>
+
+        <section class="history-sheet-panel" data-history-sheet-panel="picks" hidden>
+          <div class="history-sheet-side-section">
+            <div class="history-sheet-side-section-head">
+              <h3>Aaron Picks</h3>
+              <span class="history-sheet-ga-head">G / A</span>
+            </div>
+            <div class="history-sheet-pick-stack" data-history-side="Aaron">
+              ${renderPickCards(game.picks?.Aaron, 'Aaron')}
+            </div>
+          </div>
+
+          <div class="history-sheet-side-section">
+            <div class="history-sheet-side-section-head">
+              <h3>Julie Picks</h3>
+              <span class="history-sheet-ga-head">G / A</span>
+            </div>
+            <div class="history-sheet-pick-stack" data-history-side="Julie">
+              ${renderPickCards(game.picks?.Julie, 'Julie')}
+            </div>
+          </div>
+        </section>
+
+        <section class="history-sheet-panel" data-history-sheet-panel="result" hidden>
+          <label class="history-sheet-field">
+            <span>First goal scorer</span>
+            <input class="history-sheet-input" list="history-first-goal-options-${escapeHtml(game.id)}" value="${escapeHtml(game.firstGoalScorer || '')}" data-history-first-goal="1" aria-label="First goal scorer" />
+            <datalist id="history-first-goal-options-${escapeHtml(game.id)}">
+              ${firstGoalOptions.map((name) => `<option value="${escapeHtml(name)}"></option>`).join('')}
+            </datalist>
+          </label>
+
+          <div class="history-sheet-score-preview-grid">
+            <article class="history-sheet-score-preview-card">
+              <div class="eyebrow ${ownerClass('Aaron')}">Aaron</div>
+              <div class="history-sheet-score-preview-value" data-history-side-total="Aaron">${escapeHtml(String(game.aaronScore || 0))}</div>
+            </article>
+            <article class="history-sheet-score-preview-card">
+              <div class="eyebrow ${ownerClass('Julie')}">Julie</div>
+              <div class="history-sheet-score-preview-value" data-history-side-total="Julie">${escapeHtml(String(game.julieScore || 0))}</div>
+            </article>
+          </div>
+
+          <div class="history-sheet-actions-note">Scores update automatically from goals, assists, game type, and first-goal bonus.</div>
         </section>
 
         <div class="history-sheet-footer-note">First goal can be any roster player. Bonus applies only if that player was picked and has a goal logged.</div>
@@ -246,7 +249,6 @@ window.CR = window.CR || {};
 
     form.querySelector('[data-history-side-total="Aaron"]')?.replaceChildren(document.createTextNode(String(totals.Aaron)));
     form.querySelector('[data-history-side-total="Julie"]')?.replaceChildren(document.createTextNode(String(totals.Julie)));
-    form.querySelector('[data-history-total-score="1"]')?.replaceChildren(document.createTextNode(`${totals.Aaron}-${totals.Julie}`));
     form.querySelector('[data-history-first-goal-readout="1"]')?.replaceChildren(document.createTextNode(form.querySelector('[data-history-first-goal="1"]')?.value || '—'));
   }
 
