@@ -10,18 +10,51 @@ window.CR.ui.escapeHtml = (value) => String(value ?? '')
   .replace(/\"/g, '&quot;')
   .replace(/'/g, '&#39;');
 
+window.CR.ui.lockBodyScroll = (className = 'sheet-open') => {
+  const lock = window.CR.__bodyScrollLock || { locked: false, scrollY: 0, classes: new Set() };
+  lock.classes.add(className);
+
+  if (!lock.locked) {
+    lock.scrollY = window.scrollY || window.pageYOffset || 0;
+    lock.locked = true;
+    document.body.style.top = `-${lock.scrollY}px`;
+  }
+
+  document.body.classList.add(className);
+  document.documentElement.classList.add(className);
+  window.CR.__bodyScrollLock = lock;
+};
+
+window.CR.ui.unlockBodyScroll = (className = 'sheet-open') => {
+  const lock = window.CR.__bodyScrollLock;
+  if (!lock?.locked) return;
+
+  lock.classes.delete(className);
+  document.body.classList.remove(className);
+  document.documentElement.classList.remove(className);
+
+  if (lock.classes.size > 0) {
+    window.CR.__bodyScrollLock = lock;
+    return;
+  }
+
+  const scrollY = lock.scrollY || 0;
+  document.body.style.top = '';
+  lock.locked = false;
+  lock.scrollY = 0;
+  window.CR.__bodyScrollLock = lock;
+  window.scrollTo(0, scrollY);
+};
+
 window.CR.ui.createViewStore = ({ initialState = {}, render, onAfterRender } = {}) => {
   let state = { ...initialState };
   let scheduled = false;
 
-  function getState() {
-    return state;
-  }
+  function getState() { return state; }
 
   function setState(patch = {}, options = {}) {
     const nextPatch = typeof patch === 'function' ? patch(state) : patch;
     state = { ...state, ...(nextPatch || {}) };
-
     if (options.render === false) return state;
     scheduleRender();
     return state;
@@ -29,7 +62,6 @@ window.CR.ui.createViewStore = ({ initialState = {}, render, onAfterRender } = {
 
   function replaceState(nextState = {}, options = {}) {
     state = { ...(nextState || {}) };
-
     if (options.render === false) return state;
     scheduleRender();
     return state;
@@ -38,11 +70,7 @@ window.CR.ui.createViewStore = ({ initialState = {}, render, onAfterRender } = {
   function scheduleRender() {
     if (scheduled) return;
     scheduled = true;
-
-    requestAnimationFrame(() => {
-      scheduled = false;
-      renderNow();
-    });
+    requestAnimationFrame(() => { scheduled = false; renderNow(); });
   }
 
   function renderNow() {
@@ -50,13 +78,7 @@ window.CR.ui.createViewStore = ({ initialState = {}, render, onAfterRender } = {
     if (typeof onAfterRender === 'function') onAfterRender(state);
   }
 
-  return {
-    getState,
-    setState,
-    replaceState,
-    render: renderNow,
-    scheduleRender
-  };
+  return { getState, setState, replaceState, render: renderNow, scheduleRender };
 };
 
 window.CR.showToast = (input) => {
@@ -91,7 +113,6 @@ window.CR.initPullRefresh = () => {
   const label = window.CR.$('#pullRefreshLabel');
 
   if (!indicator || window.CR.__pullRefreshBound) return;
-
   window.CR.__pullRefreshBound = true;
 
   let pulling = false;
@@ -113,46 +134,34 @@ window.CR.initPullRefresh = () => {
     if (label) label.textContent = 'Pull to refresh';
   }
 
-  function isFormControl(target) {
-    return Boolean(target?.closest?.('input, textarea, select, button, [contenteditable="true"]'));
-  }
-
-  function isSheetInteraction(target) {
-    return Boolean(target?.closest?.('.gd-sheet, .history-admin-sheet, .history-admin-sheet-card, .history-sheet-panel, .history-sheet-form, .history-admin-sheet-details'));
-  }
+  function isFormControl(target) { return Boolean(target?.closest?.('input, textarea, select, button, [contenteditable="true"]')); }
+  function isSheetInteraction(target) { return Boolean(target?.closest?.('.gd-sheet, .history-admin-sheet, .history-admin-sheet-card, .history-sheet-panel, .history-sheet-form, .history-admin-sheet-details')); }
 
   function findScrollableAncestor(target) {
     let node = target instanceof Element ? target : null;
-
     while (node && node !== document.body && node !== document.documentElement) {
       const style = window.getComputedStyle(node);
-      const overflowY = style.overflowY;
-      const canScrollY = /(auto|scroll|overlay)/.test(overflowY) && node.scrollHeight > node.clientHeight + 1;
+      const canScrollY = /(auto|scroll|overlay)/.test(style.overflowY) && node.scrollHeight > node.clientHeight + 1;
       if (canScrollY) return node;
       node = node.parentElement;
     }
-
     return null;
   }
 
   function shouldIgnorePull(event) {
     const target = event.target;
+    if (window.CR.__bodyScrollLock?.locked) return true;
     if (isFormControl(target)) return true;
     if (isSheetInteraction(target)) return true;
-
-    const scroller = findScrollableAncestor(target);
-    if (scroller) return true;
-
+    if (findScrollableAncestor(target)) return true;
     return false;
   }
 
   window.addEventListener('touchstart', (event) => {
     if (event.touches.length !== 1) return;
     if (window.scrollY > 0) return;
-
     blockedTarget = shouldIgnorePull(event);
     if (blockedTarget) return;
-
     pulling = true;
     startY = event.touches[0].clientY;
     startX = event.touches[0].clientX;
@@ -169,13 +178,9 @@ window.CR.initPullRefresh = () => {
     const deltaY = currentY - startY;
     const deltaX = event.touches[0].clientX - startX;
 
-    if (Math.abs(deltaX) > Math.abs(deltaY) * 1.2) {
-      resetPull();
-      return;
-    }
+    if (Math.abs(deltaX) > Math.abs(deltaY) * 1.2) { resetPull(); return; }
 
     const delta = Math.max(0, Math.min(MAX_PULL, deltaY));
-
     if (delta < 8) return;
 
     indicator.classList.add('visible');
@@ -191,35 +196,22 @@ window.CR.initPullRefresh = () => {
   }, { passive: true });
 
   window.addEventListener('touchend', async () => {
-    if (blockedTarget) {
-      resetPull();
-      return;
-    }
+    if (blockedTarget) { resetPull(); return; }
     if (!pulling) return;
 
     const delta = Math.max(0, Math.min(MAX_PULL, currentY - startY));
-
     if (delta >= THRESHOLD && !refreshTriggered) {
       refreshTriggered = true;
       indicator.classList.add('refreshing');
       indicator.classList.remove('ready');
-
       if (label) label.textContent = 'Refreshing…';
-
       try {
         window.CR.flashSync?.();
         window.CR.showToast?.('Refreshing rivalry data');
-
-        if (typeof window.CR.refreshApp === 'function') {
-          await window.CR.refreshApp();
-        } else {
-          window.location.reload();
-        }
-      } catch (error) {
-        console.error('Pull refresh failed', error);
-      }
+        if (typeof window.CR.refreshApp === 'function') await window.CR.refreshApp();
+        else window.location.reload();
+      } catch (error) { console.error('Pull refresh failed', error); }
     }
-
     setTimeout(resetPull, 420);
   });
 
