@@ -363,8 +363,10 @@ window.CR = window.CR || {};
       mode === 'final' ? renderFinal() : ''
     ].join('');
 
-    $('#stateTitle').textContent = modeLabel(mode);
-    $('#stateBadge').textContent = isPlayoffs() ? 'Playoffs' : (mode === 'pregame' ? 'Regular' : modeLabel(mode));
+    const stateTitle = $('#stateTitle');
+    const stateBadge = $('#stateBadge');
+    if (stateTitle) stateTitle.textContent = modeLabel(mode);
+    if (stateBadge) stateBadge.textContent = isPlayoffs() ? 'Playoffs' : (mode === 'pregame' ? 'Regular' : modeLabel(mode));
 
     $('#phaseSwitcher')?.querySelectorAll('button').forEach((button) => {
       button.classList.toggle('active', button.dataset.phase === mode);
