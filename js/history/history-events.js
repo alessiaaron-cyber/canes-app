@@ -480,12 +480,12 @@ window.CR = window.CR || {};
     const sheetApply = event.target.closest('[data-history-sheet-apply]');
     if (sheetApply) {
       try {
-        sheetApply.disabled = true;
+        CR.ui.setActionBusy?.(sheetApply, true, { label: 'Saving…' });
         await saveHistoryEdit();
       } catch (error) {
         console.error('History save failed', error);
         CR.showToast?.({ message: error.message || 'Could not save history', tier: 'warning' });
-        sheetApply.disabled = false;
+        CR.ui.setActionBusy?.(sheetApply, false);
       }
     }
   }
