@@ -412,6 +412,8 @@
 .rivalry-recap-card.winner-tie { border-color: var(--ui-tie-border); }
 
 .history-log-card { background: linear-gradient(180deg, #ffffff 0%, #fbfcfd 100%); box-shadow: none; }
+.history-log-card.is-realtime-changed { animation: historyRealtimeCardFlash 1.15s ease-out both; }
+.history-recap-side-head.is-realtime-changed { animation: historyRealtimeScoreFlash 1.15s ease-out both; }
 .history-log-topline > div { min-width: 0; width: 100%; }
 .history-log-kicker { flex: 0 0 auto; font-size: 13px; font-weight: var(--font-strong, 800); color: var(--ink-strong); }
 .history-log-kicker-row { width: 100%; gap: 8px; justify-content: flex-start; }
@@ -513,6 +515,28 @@
 .history-admin-sheet .gd-sheet-copy { margin: 8px 8px 0; }
 .history-sheet-open,
 .history-sheet-open body { overflow: hidden; }
+
+@keyframes historyRealtimeCardFlash {
+  0% { border-color: rgba(200, 16, 46, 0.42); box-shadow: 0 0 0 0 rgba(200, 16, 46, 0.18), 0 8px 20px rgba(15, 23, 42, 0.045); background: linear-gradient(180deg, #fff7f8 0%, #ffffff 100%); }
+  55% { border-color: rgba(200, 16, 46, 0.26); box-shadow: 0 0 0 7px rgba(200, 16, 46, 0.04), 0 8px 20px rgba(15, 23, 42, 0.045); }
+  100% { box-shadow: 0 8px 20px rgba(15, 23, 42, 0.045); }
+}
+
+@keyframes historyRealtimeScoreFlash {
+  0% { background: rgba(200, 16, 46, 0.10); border-radius: var(--radius-sm, 14px); transform: scale(1.015); }
+  100% { background: transparent; transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .history-log-card.is-realtime-changed,
+  .history-recap-side-head.is-realtime-changed {
+    animation: none;
+  }
+
+  .history-log-card.is-realtime-changed {
+    border-color: rgba(200, 16, 46, 0.28);
+  }
+}
 
 @media (max-width: 430px) {
   .rivalry-board-title { font-size: clamp(24px, 6.4vw, 32px); }
