@@ -58,6 +58,10 @@ window.CR = window.CR || {};
     return Boolean(game.hasGame && game.scheduleText && game.scheduleText !== 'Schedule pending');
   }
 
+  function canManagePicks() {
+    return hasScheduledGame() && CR.gameDay.mode !== 'final';
+  }
+
   function getRoster() {
     return CR.gameDay.roster || CR.gameDayRoster || fallbackRoster;
   }
@@ -200,6 +204,7 @@ window.CR = window.CR || {};
 
     try {
       if (!hasScheduledGame()) throw new Error('Picks cannot be saved until a game is scheduled.');
+      if (CR.gameDay.mode === 'final') throw new Error('Final games are locked. Use History to correct finalized stats.');
 
       CR.ui?.setActionBusy?.(button, true, { label: 'Saving…' });
       await CR.gameDaySaveService?.savePregamePicks?.(CR.gameDay.currentGameId, CR.gameDay.pregame);
@@ -313,22 +318,58 @@ window.CR = window.CR || {};
     ];
   }
 
+  function manageSheetStatusCopy(picksEnabled) {
+    if (!hasScheduledGame()) {
+      return {
+        title: 'Schedule pending',
+        detail: 'Picks can be managed after the next game is scheduled.',
+        saveLabel: 'Schedule Pending'
+      };
+    }
+
+    if (CR.gameDay.mode === 'live') {
+      return {
+        title: 'Live game pick management',
+        detail: 'Pick swaps are allowed here; live stats remain read-only and come from NHL sync.',
+        saveLabel: picksEnabled ? 'Save Live Picks' : 'Locked'
+      };
+    }
+
+    if (CR.gameDay.mode === 'final') {
+      return {
+        title: 'Final game locked',
+        detail: 'Finalized games are read-only on Game Day. Use History for stat corrections.',
+        saveLabel: 'Final Locked'
+      };
+    }
+
+    return {
+      title: 'Pregame pick management',
+      detail: 'Draft or swap picks before puck drop.',
+      saveLabel: picksEnabled ? 'Save Picks' : 'Locked'
+    };
+  }
+
   function renderManageSheet() {
     const actions = $('#manageSheetActions');
     const saveButton = $('#saveSheet');
     if (!actions) return;
 
-    const picksEnabled = hasScheduledGame();
+    const picksEnabled = canManagePicks();
     const selectedPlayers = allSelectedPregamePlayers();
+    const status = manageSheetStatusCopy(picksEnabled);
 
     if (saveButton) {
       saveButton.disabled = !picksEnabled;
-      saveButton.textContent = picksEnabled ? 'Save Picks' : 'Schedule Pending';
+      saveButton.textContent = status.saveLabel;
     }
 
-    const pendingCopy = !picksEnabled
-      ? '<div class="gd-sheet-pick is-disabled"><strong>Schedule pending</strong><small>Picks can be managed after the next game is scheduled.</small></div>'
-      : '';
+    const statusCopy = `
+      <div class="gd-sheet-pick ${!picksEnabled ? 'is-disabled' : ''}">
+        <strong>${status.title}</strong>
+        <small>${status.detail}</small>
+      </div>
+    `;
 
     const pickControls = ['Aaron', 'Julie'].flatMap((side) => [0, 1].map((index) => {
       const selected = CR.gameDay.pregame[side]?.[index] || '';
@@ -340,17 +381,17 @@ window.CR = window.CR || {};
       return `
         <div class="gd-sheet-pick ${!picksEnabled ? 'is-disabled' : ''}">
           <strong>${side} Pick ${index + 1}</strong>
-          <small>${picksEnabled ? 'Swap locked player' : 'Locked until scheduled'}</small>
+          <small>${picksEnabled ? (CR.gameDay.mode === 'live' ? 'Swap picked player only' : 'Swap locked player') : 'Locked'}</small>
           <select class="gd-sheet-select" data-side="${side}" data-index="${index}" ${picksEnabled ? '' : 'disabled'}>${options}</select>
         </div>
       `;
     }).join('')).join('');
 
-    actions.innerHTML = pendingCopy + pickControls;
+    actions.innerHTML = statusCopy + pickControls;
 
     actions.querySelectorAll('.gd-sheet-select').forEach((select) => {
       select.addEventListener('change', (event) => {
-        if (!hasScheduledGame()) return;
+        if (!canManagePicks()) return;
 
         const side = event.target.dataset.side;
         const index = Number(event.target.dataset.index);
