@@ -119,3 +119,36 @@ h3 { margin-top: 4px; font-size: 18px; letter-spacing: -0.03em; }
 @keyframes pullRefreshSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 @media (max-width: 430px) { .account-chip-copy { display: none; } .pull-refresh-label { font-size: 11px; } }
 @media (prefers-reduced-motion: reduce) { *,*::before,*::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
+
+/* Lock background scroll while modal sheets are open */
+html.history-sheet-open,
+body.history-sheet-open,
+html.manage-sheet-open,
+body.manage-sheet-open,
+html.sheet-open,
+body.sheet-open {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+body.history-sheet-open,
+body.manage-sheet-open,
+body.sheet-open {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+}
+
+.history-admin-sheet,
+.gd-sheet {
+  touch-action: none;
+  overscroll-behavior: contain;
+}
+
+.history-admin-sheet-card,
+.gd-sheet-card,
+.history-admin-sheet-details,
+.history-sheet-panel {
+  touch-action: pan-y;
+  overscroll-behavior: contain;
+}
