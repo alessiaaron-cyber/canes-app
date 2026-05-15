@@ -79,9 +79,8 @@
 
 .rivalry-board-title {
   max-width: none;
-  font-size: clamp(28px, 7.4vw, 40px);
+  font-size: clamp(26px, 7vw, 40px);
   line-height: .98;
-  text-wrap: balance;
 }
 
 .history-hero-copy {
@@ -124,25 +123,39 @@
 }
 
 .history-status-pill.owner-tie {
-  background: rgba(102,112,133,0.1);
-  color: var(--text-secondary);
+  background: rgba(14, 116, 144, 0.1);
+  color: #0e7490;
+  border-color: rgba(14, 116, 144, 0.14);
 }
 
 .history-scoreboard-banner {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-  align-items: end;
-  gap: 12px;
+  grid-template-columns: 1fr;
+  align-items: center;
+  gap: 10px;
   margin-top: 18px;
-  padding: 14px 0 12px;
-  border-top: 1px solid rgba(15, 23, 42, 0.06);
-  border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+  padding: 14px 12px 13px;
+  border-radius: var(--radius-lg, 22px);
+  background: rgba(248, 250, 252, 0.78);
+  border: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.history-scoreboard-name-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.history-scoreboard-name-row .history-scoreboard-name:last-child {
+  text-align: right;
 }
 
 .history-scoreboard-side {
   min-width: 0;
   display: flex;
-  align-items: flex-end;
+  align-items: center;
 }
 
 .history-scoreboard-side.is-right {
@@ -151,10 +164,11 @@
 }
 
 .history-scoreboard-name {
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow: visible;
+  text-overflow: clip;
   white-space: nowrap;
   font-size: 12px;
+  line-height: 1;
   font-weight: var(--font-heavy, 900);
   letter-spacing: .08em;
   text-transform: uppercase;
@@ -162,15 +176,15 @@
 
 .history-scoreboard-center {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: center;
   gap: 9px;
   color: var(--ink-strong);
 }
 
 .history-scoreboard-center strong {
-  font-size: clamp(40px, 13vw, 58px);
-  line-height: .86;
+  font-size: clamp(50px, 15vw, 72px);
+  line-height: .88;
   font-weight: var(--font-heavy, 900);
   letter-spacing: -0.07em;
 }
@@ -180,7 +194,7 @@
   font-size: 24px;
   line-height: 1;
   font-weight: var(--font-heavy, 900);
-  transform: translateY(-2px);
+  transform: translateY(-1px);
 }
 
 .rivalry-board-score-grid,
@@ -315,8 +329,9 @@
 }
 
 .history-record-pill.leader-tie {
-  background: rgba(102,112,133,0.1);
-  border-color: transparent;
+  background: rgba(14, 116, 144, 0.1);
+  color: #0e7490;
+  border-color: rgba(14, 116, 144, 0.14);
   box-shadow: none;
 }
 
@@ -327,6 +342,8 @@
   font-weight: var(--font-medium, 700);
   color: var(--text-secondary);
 }
+
+.history-meta-note strong { color: var(--ink-strong); }
 
 .history-season-overview-tag { color: var(--ink-strong); background: #f4f6f8; font-weight: var(--font-strong, 800); }
 .history-season-overview-note { background: rgba(15, 23, 42, 0.04); color: var(--text-secondary); }
@@ -370,12 +387,14 @@
 .history-sheet-inline-input { min-height: 38px; }
 .history-sheet-inline-input.is-compact { font-size: 13px; color: var(--text-secondary); }
 
-.history-momentum-strip { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 7px; margin-top: 14px; }
-.history-momentum-node { min-height: 44px; border-radius: var(--radius-md, 18px); display: flex; align-items: center; justify-content: center; font-weight: var(--font-heavy, 900); font-size: 17px; border: 1px solid var(--border-subtle); background: #f4f6f8; color: var(--ink-strong); }
+.history-momentum-strip { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 6px; margin-top: 14px; }
+.history-momentum-node { min-height: 40px; border-radius: var(--radius-md, 18px); display: flex; align-items: center; justify-content: center; font-weight: var(--font-heavy, 900); font-size: 15px; border: 1px solid var(--border-subtle); background: #f4f6f8; color: var(--ink-strong); }
 .history-momentum-node.winner-primary,
 .history-momentum-node.is-aaron { background: rgba(200, 16, 46, 0.08); color: var(--ui-canes-red, #c8102e); border-color: rgba(200, 16, 46, 0.12); }
 .history-momentum-node.winner-secondary,
 .history-momentum-node.is-julie { background: rgba(17, 24, 39, 0.08); color: var(--ui-graphite, #111827); border-color: rgba(17, 24, 39, 0.1); }
+.history-momentum-node.winner-tie,
+.history-momentum-node.is-tie { background: rgba(14, 116, 144, 0.12); color: #0e7490; border-color: rgba(14, 116, 144, 0.2); }
 .history-momentum-node.is-playoff { box-shadow: inset 0 0 0 1px rgba(245, 158, 11, 0.34); }
 
 .compact-grid,
@@ -407,7 +426,8 @@
 .history-outcome-pill.winner-aaron { background: rgba(200, 16, 46, 0.08); color: var(--ui-canes-red, #c8102e); border-color: rgba(200, 16, 46, 0.12); }
 .history-outcome-pill.winner-secondary,
 .history-outcome-pill.winner-julie { background: rgba(17, 24, 39, 0.08); color: var(--ui-graphite, #111827); border-color: rgba(17, 24, 39, 0.1); }
-.history-outcome-pill.winner-tie { background: rgba(102,112,133,0.1); color: var(--text-secondary); }
+.history-outcome-pill.winner-tie { background: rgba(14, 116, 144, 0.12); color: #0e7490; border-color: rgba(14, 116, 144, 0.2); }
+.rivalry-recap-card.winner-tie { border-color: rgba(14, 116, 144, 0.2); }
 
 .history-recap-side { border-radius: var(--radius-md, 18px); border: 1px solid rgba(15,23,42,.06); background: rgba(248,250,252,.74); padding: 10px; }
 .rivalry-recap-card.is-archive .history-recap-side { padding: 9px; }
@@ -493,6 +513,8 @@
 .history-sheet-open body { overflow: hidden; }
 
 @media (max-width: 430px) {
+  .rivalry-board-title { font-size: clamp(24px, 6.4vw, 32px); }
+  .history-scoreboard-center strong { font-size: clamp(52px, 15vw, 68px); }
   .history-recap-sides,
   .history-sheet-sides,
   .history-sheet-score-grid,
@@ -513,48 +535,15 @@
   .history-sheet-pick-row.is-editable { grid-template-columns: 1fr; }
 }
 
+@media (max-width: 380px) {
+  .rivalry-board-title { font-size: 23px; }
+  .history-scoreboard-name { font-size: 11px; letter-spacing: .06em; }
+  .history-scoreboard-center strong { font-size: 50px; }
+}
+
 @media (min-width: 431px) {
   .rivalry-highlight-grid.compact-grid,
   .history-player-spotlights { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-}
-
-/* History scoreboard polish */
-.history-scoreboard-banner {
-  align-items: center;
-  padding: 14px 12px 13px;
-  border-radius: var(--radius-lg, 22px);
-  background: rgba(248, 250, 252, 0.78);
-  border: 1px solid rgba(15, 23, 42, 0.06);
-}
-
-.history-scoreboard-side {
-  align-items: center;
-}
-
-.history-scoreboard-name {
-  line-height: 1;
-}
-
-.history-scoreboard-center {
-  align-items: center;
-}
-
-.history-scoreboard-center strong {
-  line-height: .88;
-}
-
-.history-scoreboard-center span {
-  transform: translateY(-1px);
-}
-
-.history-momentum-strip {
-  grid-template-columns: repeat(10, minmax(0, 1fr));
-  gap: 6px;
-}
-
-.history-momentum-node {
-  min-height: 40px;
-  font-size: 15px;
 }
 
 /* Current season polish */
