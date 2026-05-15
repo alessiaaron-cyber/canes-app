@@ -30,6 +30,7 @@ window.CR = window.CR || {};
     const username = String(profile?.username || profile?.display_name || '').trim().toLowerCase();
     const users = window.CR.historyMockData?.users || [];
     const matchedUser = users.find((item) => String(item.username || item.displayName || '').trim().toLowerCase() === username);
+
     if (matchedUser?.avatarClass) return matchedUser.avatarClass;
     if (matchedUser?.themeClass === 'owner-primary') return 'avatar-primary';
     if (matchedUser?.themeClass === 'owner-secondary') return 'avatar-secondary';
@@ -56,6 +57,7 @@ window.CR = window.CR || {};
       username,
       email
     });
+
     const avatarClass = avatarThemeClass(profile);
 
     const chipAvatar = document.querySelector('#accountChipAvatar');
@@ -72,15 +74,18 @@ window.CR = window.CR || {};
       chipAvatar.textContent = initials;
       applyAvatarTheme(chipAvatar, avatarClass);
     }
+
     if (chipName) chipName.textContent = displayName;
     if (chipMeta) chipMeta.textContent = role;
 
     if (manageTitle) manageTitle.textContent = displayName;
     if (manageRole) manageRole.textContent = role;
+
     if (manageAvatar) {
       manageAvatar.textContent = initials;
       applyAvatarTheme(manageAvatar, avatarClass);
     }
+
     if (manageName) manageName.textContent = displayName;
     if (manageMeta) manageMeta.textContent = `@${username}`;
     if (manageEmail) manageEmail.textContent = email;
@@ -109,6 +114,7 @@ window.CR = window.CR || {};
 
   window.CR.refreshApp = async () => {
     window.CR.flashSync?.();
+
     try {
       await window.CR.refreshHistoryData?.();
       window.CR.renderGameDayState?.();
@@ -124,12 +130,16 @@ window.CR = window.CR || {};
     try {
       renderAccountIdentity();
       bindAccountUi();
+
       window.CR.initTabs?.();
       window.CR.initGameDay?.();
       window.CR.initHistory?.();
       window.CR.initManage?.();
       window.CR.initPullRefresh?.();
+
       window.CR.rivalryEventsConsumer?.register?.();
+      window.CR.activeDeviceService?.bind?.();
+      window.CR.activeDeviceService?.start?.();
 
       const savedTab = window.CR.getSavedTab?.() || 'gameday';
       window.CR.switchTab?.(savedTab);
