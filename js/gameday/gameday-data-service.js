@@ -117,33 +117,15 @@ window.CR = window.CR || {};
     Object.entries(users || {}).forEach(([owner, picks]) => {
       (picks || []).forEach((pick) => {
         if (pick.firstGoal || pick.player === firstGoalScorer) {
-          feed.push({
-            icon: '👑',
-            title: `${pick.player} first Canes goal`,
-            detail: `${owner} gets the first goal bonus`,
-            points: 2,
-            tier: 'heavy'
-          });
+          feed.push({ icon: '👑', title: `${pick.player} first Canes goal`, detail: `${owner} gets the first goal bonus`, points: 2, tier: 'heavy' });
         }
 
         if (toNumber(pick.goals) > 0) {
-          feed.push({
-            icon: '🚨',
-            title: `${pick.player} goal${toNumber(pick.goals) > 1 ? 's' : ''}`,
-            detail: `${owner} scores through a picked player`,
-            points: toNumber(pick.goals) * 2,
-            tier: 'medium'
-          });
+          feed.push({ icon: '🚨', title: `${pick.player} goal${toNumber(pick.goals) > 1 ? 's' : ''}`, detail: `${owner} scores through a picked player`, points: toNumber(pick.goals) * 2, tier: 'medium' });
         }
 
         if (toNumber(pick.assists) > 0) {
-          feed.push({
-            icon: '🎯',
-            title: `${pick.player} assist${toNumber(pick.assists) > 1 ? 's' : ''}`,
-            detail: `${owner} adds assist points`,
-            points: toNumber(pick.assists),
-            tier: 'light'
-          });
+          feed.push({ icon: '🎯', title: `${pick.player} assist${toNumber(pick.assists) > 1 ? 's' : ''}`, detail: `${owner} adds assist points`, points: toNumber(pick.assists), tier: 'light' });
         }
       });
     });
@@ -177,19 +159,13 @@ window.CR = window.CR || {};
       playoffMode: isPlayoffGame(game) ? 'playoffs' : 'regular',
       carryover: { active: Boolean(game?.carryover_active || game?.is_carryover) },
       pregame: mapPregamePicks(picks),
-      live: {
-        scores,
-        period: mode === 'pregame' ? 'Pregame' : periodText(game),
-        users: liveUsers,
-        feed: buildFeed(game, liveUsers)
-      },
+      live: { scores, period: mode === 'pregame' ? 'Pregame' : periodText(game), users: liveUsers, feed: buildFeed(game, liveUsers) },
       roster: roster?.length ? roster : CR.gameDayModel?.roster || []
     };
   }
 
   async function fetchCurrentGame() {
     const db = await CR.getSupabase();
-
     const seasonsRes = await db.from('seasons').select('*').eq('is_active', true).limit(1).maybeSingle();
     if (seasonsRes.error) throw seasonsRes.error;
 
@@ -208,10 +184,7 @@ window.CR = window.CR || {};
     const game = await fetchCurrentGame();
 
     const playersPromise = db.from('players').select('*').order('player_name');
-    const picksPromise = game?.id
-      ? db.from('picks').select('*').eq('game_id', game.id).order('pick_slot')
-      : Promise.resolve({ data: [], error: null });
-
+    const picksPromise = game?.id ? db.from('picks').select('*').eq('game_id', game.id).order('pick_slot') : Promise.resolve({ data: [], error: null });
     const [playersRes, picksRes] = await Promise.all([playersPromise, picksPromise]);
 
     if (playersRes.error) throw playersRes.error;
@@ -220,23 +193,51 @@ window.CR = window.CR || {};
     const roster = mapRoster(playersRes.data || []);
 
     if (!game) {
-      return {
-        source: 'supabase',
-        currentGameId: '',
-        mode: 'pregame',
-        playoffMode: 'regular',
-        carryover: { active: false },
-        pregame: ownerBuckets(),
-        live: { scores: { Aaron: 0, Julie: 0 }, period: 'No active game', users: ownerBuckets(), feed: [] },
-        roster
-      };
+      return { source: 'supabase', currentGameId: '', mode: 'pregame', playoffMode: 'regular', carryover: { active: false }, pregame: ownerBuckets(), live: { scores: { Aaron: 0, Julie: 0 }, period: 'No active game', users: ownerBuckets(), feed: [] }, roster };
     }
 
     return normalizeGameDayState({ game, picks: picksRes.data || [], roster });
   }
 
-  CR.gameDayDataService = {
-    fetchGameDayData,
-    normalizeGameDayState
-  };
+  function rowsFromPregameState(gameId, pregame = {}) {
+    return FALLBACK_USERS.flatMap((owner) => (pregame[owner] || []).map((playerName, index) => ({
+      game_id: gameId,
+      owner,
+      pick_slot: index + 1,
+      player_name: playerName,
+      goals: 0,
+      assists: 0,
+      points: 0
+    })));
+  }
+
+  async function savePregamePicks(gameId, pregame) {
+    if (!gameId) throw new Error('No active game is available for saving picks.');
+
+    const db = await CR.getSupabase();
+    const existingRes = await db.from('picks').select('*').eq('game_id', gameId);
+    if (existingRes.error) throw existingRes.error;
+
+    const existingRows = existingRes.data || [];
+    const nextRows = rowsFromPregameState(gameId, pregame);
+    const touchedRows = [];
+
+    for (const existing of existingRows) {
+      CR.realtime?.markLocalWrite?.('picks', existing, 3000);
+    }
+
+    const deleteRes = await db.from('picks').delete().eq('game_id', gameId);
+    if (deleteRes.error) throw deleteRes.error;
+
+    if (nextRows.length) {
+      const insertRes = await db.from('picks').insert(nextRows).select('*');
+      if (insertRes.error) throw insertRes.error;
+      touchedRows.push(...(insertRes.data || nextRows));
+    }
+
+    touchedRows.forEach((row) => CR.realtime?.markLocalWrite?.('picks', row, 3000));
+    return { savedRows: touchedRows };
+  }
+
+  CR.gameDayDataService = { fetchGameDayData, normalizeGameDayState, savePregamePicks };
 })();
