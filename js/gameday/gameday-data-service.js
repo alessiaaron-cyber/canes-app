@@ -33,21 +33,37 @@ window.CR = window.CR || {};
       .replace(/^-+|-+$/g, '');
   }
 
+  function rosterDisplayName(name) {
+    const parts = String(name || '').trim().split(/\s+/).filter(Boolean);
+    if (parts.length < 2) return String(name || '').trim();
+    const last = parts[parts.length - 1];
+    const first = parts.slice(0, -1).join(' ');
+    return `${last}, ${first}`;
+  }
+
+  function rosterSortKey(name) {
+    const parts = String(name || '').trim().split(/\s+/).filter(Boolean);
+    if (parts.length < 2) return String(name || '').trim().toLowerCase();
+    return `${parts[parts.length - 1]} ${parts.slice(0, -1).join(' ')}`.toLowerCase();
+  }
+
   function mapRoster(rows = []) {
     return rows
       .map((row) => {
         const name = row.player_name || row.name || '';
         if (!name) return null;
         const position = row.position || row.pos || '';
-        const vibe = row.vibe || row.detail || '';
+        const detail = position || 'Canes roster';
         return {
           id: String(row.id || playerIdForName(name)),
           name,
-          detail: [position, vibe].filter(Boolean).join(' • ') || position || 'Canes roster'
+          displayName: rosterDisplayName(name),
+          sortKey: rosterSortKey(name),
+          detail
         };
       })
       .filter(Boolean)
-      .sort((a, b) => a.name.localeCompare(b.name));
+      .sort((a, b) => a.sortKey.localeCompare(b.sortKey));
   }
 
   function ownerBuckets() {
@@ -160,7 +176,7 @@ window.CR = window.CR || {};
       carryover: { active: Boolean(game?.carryover_active || game?.is_carryover) },
       pregame: mapPregamePicks(picks),
       live: { scores, period: mode === 'pregame' ? 'Pregame' : periodText(game), users: liveUsers, feed: buildFeed(game, liveUsers) },
-      roster: roster?.length ? roster : CR.gameDayModel?.roster || []
+      roster: roster?.length ? roster : []
     };
   }
 
@@ -239,5 +255,5 @@ window.CR = window.CR || {};
     return { savedRows: touchedRows };
   }
 
-  CR.gameDayDataService = { fetchGameDayData, normalizeGameDayState, savePregamePicks };
+  CR.gameDayDataService = { fetchGameDayData, normalizeGameDayState, savePregamePicks, rosterDisplayName };
 })();
