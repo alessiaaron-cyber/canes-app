@@ -6,7 +6,7 @@ window.CR = window.CR || {};
 
   const FALLBACK_USERS = [
     { username: 'Aaron', displayName: 'Aaron', themeClass: 'owner-primary', avatarClass: 'avatar-primary', scoreKey: 'Aaron' },
-    { username: 'Julie', displayName: 'Julie', themeClass: 'owner-secondary', avatarClass: 'avatar-secondary', scoreKey: 'Julie' }
+    { username: 'Julie', displayName: 'Julie', themeClass: 'owner-secondary', avatarClass: 'owner-secondary', scoreKey: 'Julie' }
   ];
 
   function clone(value) {
@@ -53,6 +53,11 @@ window.CR = window.CR || {};
     return 'Tie';
   }
 
+  function isPlayoffGame(game) {
+    const typeText = String(game?.gameType || game?.game_type || '').trim().toLowerCase();
+    return Boolean(game?.playoff) || typeText.includes('playoff');
+  }
+
   function playerMap(players) {
     return new Map((players || []).map((player) => [player.id, player]));
   }
@@ -82,6 +87,7 @@ window.CR = window.CR || {};
 
     return {
       ...game,
+      playoff: isPlayoffGame(game),
       winner: gameWinner,
       margin: Math.abs(firstScore - secondScore),
       picks,
