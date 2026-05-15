@@ -96,8 +96,10 @@ window.CR.initPullRefresh = () => {
 
   let pulling = false;
   let startY = 0;
+  let startX = 0;
   let currentY = 0;
   let refreshTriggered = false;
+  let blockedTarget = false;
 
   const THRESHOLD = 84;
   const MAX_PULL = 120;
@@ -105,25 +107,74 @@ window.CR.initPullRefresh = () => {
   function resetPull() {
     pulling = false;
     refreshTriggered = false;
+    blockedTarget = false;
     indicator.classList.remove('visible', 'ready', 'refreshing');
     indicator.style.setProperty('--pull-distance', '0px');
     if (label) label.textContent = 'Pull to refresh';
   }
 
+  function isFormControl(target) {
+    return Boolean(target?.closest?.('input, textarea, select, button, [contenteditable="true"]'));
+  }
+
+  function isSheetInteraction(target) {
+    return Boolean(target?.closest?.('.gd-sheet, .history-admin-sheet, .history-admin-sheet-card, .history-sheet-panel, .history-sheet-form, .history-admin-sheet-details'));
+  }
+
+  function findScrollableAncestor(target) {
+    let node = target instanceof Element ? target : null;
+
+    while (node && node !== document.body && node !== document.documentElement) {
+      const style = window.getComputedStyle(node);
+      const overflowY = style.overflowY;
+      const canScrollY = /(auto|scroll|overlay)/.test(overflowY) && node.scrollHeight > node.clientHeight + 1;
+      if (canScrollY) return node;
+      node = node.parentElement;
+    }
+
+    return null;
+  }
+
+  function shouldIgnorePull(event) {
+    const target = event.target;
+    if (isFormControl(target)) return true;
+    if (isSheetInteraction(target)) return true;
+
+    const scroller = findScrollableAncestor(target);
+    if (scroller) return true;
+
+    return false;
+  }
+
   window.addEventListener('touchstart', (event) => {
+    if (event.touches.length !== 1) return;
     if (window.scrollY > 0) return;
+
+    blockedTarget = shouldIgnorePull(event);
+    if (blockedTarget) return;
 
     pulling = true;
     startY = event.touches[0].clientY;
+    startX = event.touches[0].clientX;
     currentY = startY;
   }, { passive: true });
 
   window.addEventListener('touchmove', (event) => {
+    if (blockedTarget) return;
     if (!pulling || refreshTriggered) return;
     if (window.scrollY > 0) return;
+    if (event.touches.length !== 1) return;
 
     currentY = event.touches[0].clientY;
-    const delta = Math.max(0, Math.min(MAX_PULL, currentY - startY));
+    const deltaY = currentY - startY;
+    const deltaX = event.touches[0].clientX - startX;
+
+    if (Math.abs(deltaX) > Math.abs(deltaY) * 1.2) {
+      resetPull();
+      return;
+    }
+
+    const delta = Math.max(0, Math.min(MAX_PULL, deltaY));
 
     if (delta < 8) return;
 
@@ -140,6 +191,10 @@ window.CR.initPullRefresh = () => {
   }, { passive: true });
 
   window.addEventListener('touchend', async () => {
+    if (blockedTarget) {
+      resetPull();
+      return;
+    }
     if (!pulling) return;
 
     const delta = Math.max(0, Math.min(MAX_PULL, currentY - startY));
@@ -167,4 +222,6 @@ window.CR.initPullRefresh = () => {
 
     setTimeout(resetPull, 420);
   });
+
+  window.addEventListener('touchcancel', resetPull, { passive: true });
 };
