@@ -517,3 +517,42 @@
   .rivalry-highlight-grid.compact-grid,
   .history-player-spotlights { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 }
+
+/* History scoreboard polish */
+.history-scoreboard-banner {
+  align-items: center;
+  padding: 14px 12px 13px;
+  border-radius: var(--radius-lg, 22px);
+  background: rgba(248, 250, 252, 0.78);
+  border: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.history-scoreboard-side {
+  align-items: center;
+}
+
+.history-scoreboard-name {
+  line-height: 1;
+}
+
+.history-scoreboard-center {
+  align-items: center;
+}
+
+.history-scoreboard-center strong {
+  line-height: .88;
+}
+
+.history-scoreboard-center span {
+  transform: translateY(-1px);
+}
+
+.history-momentum-strip {
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.history-momentum-node {
+  min-height: 40px;
+  font-size: 15px;
+}
