@@ -238,10 +238,28 @@ window.CR = window.CR || {};
     CR.historyPanelKeys[name] = key;
   }
 
+  function lockSheetScroll() {
+    if (CR.historyScrollLock?.locked) return;
+    const scrollY = window.scrollY || window.pageYOffset || 0;
+    CR.historyScrollLock = { locked: true, scrollY };
+    document.body.style.top = `-${scrollY}px`;
+    document.body.classList.add('history-sheet-open');
+    document.documentElement.classList.add('history-sheet-open');
+  }
+
+  function unlockSheetScroll() {
+    const scrollY = CR.historyScrollLock?.scrollY || 0;
+    CR.historyScrollLock = { locked: false, scrollY: 0 };
+    document.body.classList.remove('history-sheet-open');
+    document.documentElement.classList.remove('history-sheet-open');
+    document.body.style.top = '';
+    window.scrollTo(0, scrollY);
+  }
+
   function syncSheetScrollLock() {
     const isOpen = Boolean(CR.historyState?.sheet?.open);
-    document.body.classList.toggle('history-sheet-open', isOpen);
-    document.documentElement.classList.toggle('history-sheet-open', isOpen);
+    if (isOpen) lockSheetScroll();
+    else if (CR.historyScrollLock?.locked) unlockSheetScroll();
   }
 
   function renderHistory() {
@@ -277,6 +295,7 @@ window.CR = window.CR || {};
     CR.historyDom = null;
     CR.historyEventsBound = false;
     CR.historyPanelKeys = { hq: '', seasons: '', all_games: '', admin: '' };
+    CR.historyScrollLock = { locked: false, scrollY: 0 };
     CR.historyState = {
       seasonId: CR.historyData.currentSeasonId,
       view: 'hq',
