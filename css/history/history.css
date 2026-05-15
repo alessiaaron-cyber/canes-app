@@ -123,9 +123,9 @@
 }
 
 .history-status-pill.owner-tie {
-  background: rgba(14, 116, 144, 0.1);
-  color: #0e7490;
-  border-color: rgba(14, 116, 144, 0.14);
+  background: var(--ui-tie-soft);
+  color: var(--ui-tie);
+  border-color: var(--ui-tie-border);
 }
 
 .history-scoreboard-banner {
@@ -322,9 +322,9 @@
 }
 
 .history-record-pill.leader-tie {
-  background: rgba(14, 116, 144, 0.1);
-  color: #0e7490;
-  border-color: rgba(14, 116, 144, 0.14);
+  background: var(--ui-tie-soft);
+  color: var(--ui-tie);
+  border-color: var(--ui-tie-border);
   box-shadow: none;
 }
 
@@ -387,7 +387,7 @@
 .history-momentum-node.winner-secondary,
 .history-momentum-node.is-julie { background: rgba(17, 24, 39, 0.08); color: var(--ui-graphite, #111827); border-color: rgba(17, 24, 39, 0.1); }
 .history-momentum-node.winner-tie,
-.history-momentum-node.is-tie { background: rgba(14, 116, 144, 0.12); color: #0e7490; border-color: rgba(14, 116, 144, 0.2); }
+.history-momentum-node.is-tie { background: var(--ui-tie-soft); color: var(--ui-tie); border-color: var(--ui-tie-border); }
 .history-momentum-node.is-playoff { box-shadow: inset 0 0 0 1px rgba(245, 158, 11, 0.34); }
 
 .compact-grid,
@@ -409,7 +409,7 @@
 .rivalry-recap-card.winner-aaron { border-color: rgba(200, 16, 46, 0.2); }
 .rivalry-recap-card.winner-secondary,
 .rivalry-recap-card.winner-julie { border-color: rgba(17, 24, 39, 0.18); }
-.rivalry-recap-card.winner-tie { border-color: rgba(14, 116, 144, 0.22); }
+.rivalry-recap-card.winner-tie { border-color: var(--ui-tie-border); }
 
 .history-log-card { background: linear-gradient(180deg, #ffffff 0%, #fbfcfd 100%); box-shadow: none; }
 .history-log-topline > div { min-width: 0; width: 100%; }
@@ -424,7 +424,7 @@
 .history-outcome-pill.winner-aaron { background: rgba(200, 16, 46, 0.08); color: var(--ui-canes-red, #c8102e); border-color: rgba(200, 16, 46, 0.12); }
 .history-outcome-pill.winner-secondary,
 .history-outcome-pill.winner-julie { background: rgba(17, 24, 39, 0.08); color: var(--ui-graphite, #111827); border-color: rgba(17, 24, 39, 0.1); }
-.history-outcome-pill.winner-tie { background: rgba(14, 116, 144, 0.12); color: #0e7490; border-color: rgba(14, 116, 144, 0.2); }
+.history-outcome-pill.winner-tie { background: var(--ui-tie-soft); color: var(--ui-tie); border-color: var(--ui-tie-border); }
 
 .history-recap-side { border-radius: var(--radius-md, 18px); border: 1px solid rgba(15,23,42,.06); background: rgba(248,250,252,.74); padding: 10px; }
 .rivalry-recap-card.is-archive .history-recap-side { padding: 9px; }
