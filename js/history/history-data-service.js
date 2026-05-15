@@ -29,7 +29,7 @@ window.CR = window.CR || {};
   }
 
   function isPlayoffGame(row) {
-    return String(row?.game_type || '').toLowerCase().includes('playoff') || Number(row?.game_number || 0) >= 83;
+    return String(row?.game_type || '').toLowerCase().includes('playoff');
   }
 
   function isFinalGame(row) {
@@ -109,6 +109,7 @@ window.CR = window.CR || {};
         const winner = aaronScore > julieScore ? 'Aaron' : julieScore > aaronScore ? 'Julie' : 'Tie';
         const firstGoal = row.first_goal_scorer ? [`First goal: ${row.first_goal_scorer}`] : [];
         const resultTag = winner === 'Tie' ? 'Tie' : `${winner} win`;
+        const gameType = row.game_type || 'Regular Season';
 
         return {
           id: String(row.id),
@@ -118,11 +119,13 @@ window.CR = window.CR || {};
           firstPick: row.first_picker || '',
           firstGoalScorer: row.first_goal_scorer || '',
           title: gameTitle(row),
+          gameType,
+          game_type: gameType,
           playoff: isPlayoffGame(row),
           aaronScore,
           julieScore,
           summary: `${gameTitle(row)} finished ${aaronScore}-${julieScore}.`,
-          tags: [row.game_type || 'Regular Season', resultTag].filter(Boolean),
+          tags: [gameType, resultTag].filter(Boolean),
           moments: firstGoal.length ? firstGoal : [`${winner === 'Tie' ? 'Tie game' : `${winner} took the result`}`],
           picks: mapPicksForGame(row, picks, playerLookup)
         };
