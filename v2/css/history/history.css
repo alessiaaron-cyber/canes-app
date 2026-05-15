@@ -556,3 +556,13 @@
   min-height: 40px;
   font-size: 15px;
 }
+
+/* Current season polish */
+.history-hq-card .history-hq-title {
+  margin-top: 2px;
+}
+
+.history-season-score-grid .rivalry-score-card,
+.history-season-score-grid .rivalry-score-value {
+  text-align: center;
+}
