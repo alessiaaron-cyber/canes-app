@@ -109,10 +109,15 @@ window.CR = window.CR || {};
 
   window.CR.refreshApp = async () => {
     window.CR.flashSync?.();
-    window.CR.showToast?.('Rivalry refresh complete');
-    window.CR.renderGameDayState?.();
-    window.CR.renderHistory?.();
-    window.CR.renderManage?.();
+    try {
+      await window.CR.refreshHistoryData?.();
+      window.CR.renderGameDayState?.();
+      window.CR.renderManage?.();
+      window.CR.showToast?.('Rivalry refresh complete');
+    } catch (error) {
+      console.error('App refresh failed', error);
+      window.CR.showToast?.({ message: 'Could not refresh rivalry data', tier: 'warning' });
+    }
   };
 
   window.CR.startApp = () => {
