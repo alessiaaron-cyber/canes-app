@@ -220,8 +220,8 @@ window.CR = window.CR || {};
     return buildRecentTen(selectedGames.filter(hasRealScore)).map((game) => ({
       id: game.id,
       winner: game.winner,
-      playoff: isPlayoffGame(game),
-      shortLabel: isPlayoffGame(game) ? 'P' : 'R'
+      playoff: Boolean(game.playoff),
+      shortLabel: game.playoff ? 'P' : 'R'
     }));
   }
 
