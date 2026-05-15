@@ -17,7 +17,8 @@ window.CR = window.CR || {};
     const pregame = mode === 'pregame';
     const liveMode = mode === 'live';
     const finalMode = mode === 'final';
-    const hasGame = Boolean(game?.hasGame);
+    const scheduleText = game?.scheduleText || 'Schedule pending';
+    const hasScheduledGame = Boolean(game?.hasGame && scheduleText !== 'Schedule pending');
 
     const scoreSource = pregame ? {} : (finalMode ? final.scores : live.scores);
 
@@ -31,9 +32,7 @@ window.CR = window.CR || {};
       scores: scoreSource
     });
 
-    const period = pregame
-      ? (game?.scheduleText || 'Schedule pending')
-      : (liveMode ? live.period : '');
+    const period = pregame ? scheduleText : (liveMode ? live.period : '');
 
     const delta = left.score - right.score;
     const momentum = Math.min(Math.abs(delta) * 12, 48);
@@ -41,20 +40,20 @@ window.CR = window.CR || {};
     const totalPicks = left.picks.length + right.picks.length;
 
     const subline = pregame
-      ? (!hasGame
+      ? (!hasScheduledGame
           ? (game?.headline || 'Next game not scheduled yet')
           : (nextDraftSide
               ? `${nextDraftSide} drafting next • Pick ${totalPicks + 1} of 4`
               : 'Picks ready for puck drop'))
       : '';
 
-    const leftBadge = finalMode ? 'Final' : (liveMode ? 'Live' : (hasGame ? 'Pregame' : 'Pending'));
-    const playoffPill = isPlayoffs ? '<span class="gd-pill gd-pill-playoff">Playoff Mode</span>' : '';
-    const playoffSubline = isPlayoffs && pregame && hasGame ? '<div class="gd-playoff-copy">Postseason stakes are up tonight.</div>' : '';
+    const leftBadge = finalMode ? 'Final' : (liveMode ? 'Live' : (hasScheduledGame ? 'Pregame' : 'Pending'));
+    const playoffPill = isPlayoffs && hasScheduledGame ? '<span class="gd-pill gd-pill-playoff">Playoff Mode</span>' : '';
+    const playoffSubline = isPlayoffs && pregame && hasScheduledGame ? '<div class="gd-playoff-copy">Postseason stakes are up tonight.</div>' : '';
     const finalBanner = finalMode ? `<div class="gd-final-banner ${isPlayoffs ? 'gd-final-banner-playoff' : ''}">${winnerText(scoreSource)}</div>` : '';
 
     return `
-      <section class="gd-hero ${finalMode ? 'gd-hero-final' : ''} ${isPlayoffs ? 'gd-hero-playoff' : ''}">
+      <section class="gd-hero ${finalMode ? 'gd-hero-final' : ''} ${isPlayoffs && hasScheduledGame ? 'gd-hero-playoff' : ''}">
         <div class="gd-hero-topline">
           <div class="gd-hero-top-left">
             <span class="gd-pill gd-pill-state ${liveMode ? 'live' : finalMode ? 'final' : 'pregame'}">
@@ -89,7 +88,7 @@ window.CR = window.CR || {};
           </div>
 
           <div class="gd-center">
-            <img class="gd-logo ${isPlayoffs ? 'gd-logo-playoff' : ''}" src="./assets/app-icon.png" alt="Canes Rivalry">
+            <img class="gd-logo ${isPlayoffs && hasScheduledGame ? 'gd-logo-playoff' : ''}" src="./assets/app-icon.png" alt="Canes Rivalry">
           </div>
 
           <div class="gd-side">
@@ -107,7 +106,7 @@ window.CR = window.CR || {};
           </div>
         </div>
 
-        ${subline ? `<div class="gd-subline ${isPlayoffs ? 'gd-subline-playoff' : ''}">${subline}</div>` : ''}
+        ${subline ? `<div class="gd-subline ${isPlayoffs && hasScheduledGame ? 'gd-subline-playoff' : ''}">${subline}</div>` : ''}
         ${playoffSubline}
         ${finalBanner}
 
