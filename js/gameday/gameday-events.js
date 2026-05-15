@@ -37,7 +37,7 @@ window.CR = window.CR || {};
   }
 
   CR.gameDayEvents = {
-    bind({ claimedOwner, draftOrder, nextDraftSide, renderManageSheet, setModalOpen, rerender }) {
+    bind({ claimedOwner, nextDraftSide, renderManageSheet, setModalOpen, rerender }) {
       document.querySelectorAll('.gd-small-action').forEach((button) => {
         button.addEventListener('click', () => {
           const side = button.dataset.side;
@@ -84,14 +84,6 @@ window.CR = window.CR || {};
           markEditing(false);
           renderManageSheet();
           setModalOpen(true);
-        });
-      });
-
-      document.querySelectorAll('.gd-sim-button').forEach((button) => {
-        button.addEventListener('click', () => {
-          const side = button.dataset.side;
-          const kind = button.dataset.kind;
-          CR.applyMockLiveBatch?.([{ side, kind }]);
         });
       });
     }
