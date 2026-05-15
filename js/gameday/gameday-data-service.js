@@ -66,14 +66,26 @@ window.CR = window.CR || {};
     }).filter(Boolean).sort((a, b) => a.sortKey.localeCompare(b.sortKey));
   }
 
+  function fallbackProfiles() {
+    return FALLBACK_USERS.map((name) => ({
+      id: '',
+      email: '',
+      username: name.toLowerCase(),
+      displayName: name,
+      role: 'member'
+    }));
+  }
+
   function mapProfiles(rows = []) {
-    return rows.filter((profile) => profile?.is_active !== false).map((profile) => ({
+    const mapped = rows.filter((profile) => profile?.is_active !== false).map((profile) => ({
       id: String(profile.id || ''),
       email: profile.email || '',
       username: profile.username || '',
       displayName: profile.display_name || profile.username || profile.email || 'Player',
       role: profile.role || 'member'
     })).sort((a, b) => a.displayName.localeCompare(b.displayName));
+
+    return mapped.length ? mapped : fallbackProfiles();
   }
 
   function profileById(profiles = []) {
@@ -257,18 +269,25 @@ window.CR = window.CR || {};
     return selectGameForGameDay(gamesRes.data || []);
   }
 
+  async function safeLoadProfiles(db) {
+    const res = await db.from('user_profiles').select('id, email, username, display_name, role, is_active').eq('is_active', true).order('display_name');
+    if (res.error) {
+      console.warn('Game Day profiles unavailable; using fallback owners', res.error);
+      return fallbackProfiles();
+    }
+    return mapProfiles(res.data || []);
+  }
+
   async function fetchGameDayData() {
     const db = await CR.getSupabase();
     const game = await fetchCurrentGame();
     const playersPromise = db.from('players').select('*').order('player_name');
-    const profilesPromise = db.from('user_profiles').select('*').eq('is_active', true).order('display_name');
+    const profilesPromise = safeLoadProfiles(db);
     const picksPromise = game?.id ? db.from('picks').select('*').eq('game_id', game.id).order('pick_slot') : Promise.resolve({ data: [], error: null });
-    const [playersRes, profilesRes, picksRes] = await Promise.all([playersPromise, profilesPromise, picksPromise]);
+    const [playersRes, profiles, picksRes] = await Promise.all([playersPromise, profilesPromise, picksPromise]);
     if (playersRes.error) throw playersRes.error;
-    if (profilesRes.error) throw profilesRes.error;
     if (picksRes.error) throw picksRes.error;
     const roster = mapRoster(playersRes.data || []);
-    const profiles = mapProfiles(profilesRes.data || []);
     if (!game) return { source: 'supabase', currentGameId: '', mode: 'pregame', game: gameMeta(null), playoffMode: 'regular', carryover: { active: false }, draft: { status: 'pending', currentPickNumber: 0, currentPicker: { id: '', displayName: '' }, firstPicker: '' }, users: profiles, pregame: ownerBuckets(profiles), live: { scores: ownerList(profiles).reduce((acc, owner) => { acc[owner] = 0; return acc; }, {}), period: 'Schedule pending', users: ownerBuckets(profiles), feed: [] }, roster };
     return normalizeGameDayState({ game, picks: picksRes.data || [], roster, profiles });
   }
