@@ -72,23 +72,13 @@ window.CR = window.CR || {};
     return `${winner} leads`;
   }
 
-  function allTimeLeader(data, board = {}) {
-    const first = Number(board.aaron ?? 0);
-    const second = Number(board.julie ?? 0);
-    if (first > second) return { index: 0, name: userName(data, 0), margin: first - second, className: userThemeClass(data, 0) };
-    if (second > first) return { index: 1, name: userName(data, 1), margin: second - first, className: userThemeClass(data, 1) };
-    return { index: -1, name: 'Dead even', margin: 0, className: 'owner-tie' };
-  }
-
   function renderRootShell() {
     return `<div class="history-shell"><div id="historyPanelHq"></div><div id="historyPanelSeasons" hidden></div><div id="historyPanelAllGames" hidden></div><div id="historyAdminLayer"></div></div>`;
   }
 
   function renderBoard(data) {
     const board = data.allTimeBoard || {};
-    const leader = allTimeLeader(data, board);
-    const status = leader.margin ? `${leader.name} by ${leader.margin}` : 'All square';
-    return `<section class="panel-card rivalry-board-card history-legacy-card"><div class="rivalry-board-topline"><span class="eyebrow">All-Time Rivalry</span></div><h2 class="rivalry-board-title">${escapeHtml(board.lead || 'Rivalry tied')}</h2><div class="history-scoreboard-banner"><div class="history-scoreboard-name-row"><span class="history-scoreboard-name ${userThemeClass(data, 0)}">${escapeHtml(userName(data, 0))}</span><span class="history-scoreboard-name ${userThemeClass(data, 1)}">${escapeHtml(userName(data, 1))}</span></div><div class="history-scoreboard-center"><strong>${escapeHtml(String(board.aaron ?? 0))}</strong><span aria-hidden="true">—</span><strong>${escapeHtml(String(board.julie ?? 0))}</strong></div></div><p class="history-hero-copy">${leader.margin ? `${escapeHtml(status)} all-time. Every completed season and game total feeds this card.` : 'All square all-time. Every completed season and game total feeds this card.'}</p></section>`;
+    return `<section class="panel-card rivalry-board-card history-legacy-card"><div class="rivalry-board-topline"><span class="eyebrow">All-Time Rivalry</span></div><h2 class="rivalry-board-title">${escapeHtml(board.lead || 'Rivalry tied')}</h2><div class="history-scoreboard-banner"><div class="history-scoreboard-grid"><div class="history-scoreboard-team"><span class="history-scoreboard-name ${userThemeClass(data, 0)}">${escapeHtml(userName(data, 0))}</span><strong>${escapeHtml(String(board.aaron ?? 0))}</strong></div><span class="history-scoreboard-divider" aria-hidden="true">—</span><div class="history-scoreboard-team is-right"><span class="history-scoreboard-name ${userThemeClass(data, 1)}">${escapeHtml(userName(data, 1))}</span><strong>${escapeHtml(String(board.julie ?? 0))}</strong></div></div></div><p class="history-hero-copy">All completed season and game totals feed this card.</p></section>`;
   }
 
   function renderSeasonSnapshot(data) {
