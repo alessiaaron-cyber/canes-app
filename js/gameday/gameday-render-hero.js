@@ -4,6 +4,21 @@ window.CR = window.CR || {};
   const CR = window.CR;
   const utils = () => CR.gameDayRenderUtils;
 
+  function currentUserId() {
+    return String(CR.currentUser?.id || CR.currentProfile?.id || '').trim();
+  }
+
+  function draftTurnText({ draft, fallbackPicker, pickNumber, hasScheduledGame }) {
+    if (!hasScheduledGame) return '';
+    if (!draft || draft.status === 'complete' || Number(draft.currentPickNumber || 0) > 4) return 'Picks ready for puck drop';
+
+    const pickerName = draft.currentPicker?.displayName || fallbackPicker || 'Next player';
+    const isCurrentUserTurn = Boolean(draft.currentPicker?.id && currentUserId() && draft.currentPicker.id === currentUserId());
+    const prefix = isCurrentUserTurn ? 'Your pick' : `Waiting on ${pickerName}`;
+
+    return `${prefix} • Pick ${pickNumber} of 4`;
+  }
+
   function renderHeroSection({
     mode,
     game,
@@ -12,7 +27,8 @@ window.CR = window.CR || {};
     final,
     isPlayoffs,
     winnerText,
-    nextDraftSide
+    nextDraftSide,
+    draft
   }) {
     const pregame = mode === 'pregame';
     const liveMode = mode === 'live';
@@ -38,13 +54,17 @@ window.CR = window.CR || {};
     const momentum = Math.min(Math.abs(delta) * 12, 48);
     const momentumLeft = delta > 0 ? `calc(50% - ${momentum}%)` : '50%';
     const totalPicks = left.picks.length + right.picks.length;
+    const currentPickNumber = Number(draft?.currentPickNumber || totalPicks + 1 || 1);
 
     const subline = pregame
       ? (!hasScheduledGame
           ? (game?.headline || 'Next game not scheduled yet')
-          : (nextDraftSide
-              ? `${nextDraftSide} drafting next • Pick ${totalPicks + 1} of 4`
-              : 'Picks ready for puck drop'))
+          : draftTurnText({
+              draft,
+              fallbackPicker: nextDraftSide,
+              pickNumber: Math.min(currentPickNumber, 4),
+              hasScheduledGame
+            }))
       : '';
 
     const leftBadge = finalMode ? 'Final' : (liveMode ? 'Live' : (hasScheduledGame ? 'Pregame' : 'Pending'));
