@@ -67,9 +67,9 @@ window.CR = window.CR || {};
     return `${game.winner} won`;
   }
 
-  function leaderText(winner) {
-    if (String(winner || '').toLowerCase() === 'tie') return 'Tied';
-    return `${winner} leads`;
+  function seasonOutcomeText(winner, isCurrent) {
+    if (String(winner || '').toLowerCase() === 'tie') return isCurrent ? 'Tied' : 'Season tied';
+    return isCurrent ? `${winner} leads` : `${winner} won`;
   }
 
   function gameLabel(game) {
@@ -164,7 +164,9 @@ window.CR = window.CR || {};
     const leaderClass = leaderClassFromRecord(data, summary.recordText);
     const playoffCount = games.filter((game) => game.playoff).length;
     const featuredResult = seasonFeaturedResult(data, summary, games);
-    return `<button class="history-season-overview-card ${winnerClass}" type="button" data-history-open-season="${escapeHtml(summary.seasonId)}" aria-label="View ${escapeHtml(summary.label || season?.label || summary.seasonId)} season details"><div class="history-season-overview-topline"><div><div class="eyebrow">${escapeHtml(season?.isCurrent ? 'Current season' : 'Season')}</div><h3>${escapeHtml(summary.label || season?.label || summary.seasonId)}</h3></div><span class="history-outcome-pill ${winnerClass}">${escapeHtml(leaderText(winner))}</span></div><div class="history-season-overview-score"><div class="history-season-overview-side"><span class="history-season-overview-name ${userThemeClass(data, 0)}">${escapeHtml(userName(data, 0))}</span><strong>${escapeHtml(String(totals.first))}</strong></div><div class="history-season-overview-divider" aria-hidden="true">—</div><div class="history-season-overview-side is-right"><span class="history-season-overview-name ${userThemeClass(data, 1)}">${escapeHtml(userName(data, 1))}</span><strong>${escapeHtml(String(totals.second))}</strong></div></div><div class="history-season-overview-meta"><span class="history-meta-pill history-record-pill ${leaderClass}">Record ${escapeHtml(summary.recordText || '—')}</span><span class="history-meta-pill">${escapeHtml(String(games.length))} games</span><span class="history-meta-pill">${escapeHtml(playoffCount ? `${playoffCount} playoff games` : 'No playoff games')}</span></div>${featuredResult ? `<p class="history-meta-note"><strong>Featured result:</strong> ${escapeHtml(featuredResult)}</p>` : ''}</button>`;
+    const isCurrent = Boolean(season?.isCurrent || summary.isCurrent);
+    const completionClass = isCurrent ? 'is-current' : 'is-complete';
+    return `<button class="history-season-overview-card ${winnerClass} ${completionClass}" type="button" data-history-open-season="${escapeHtml(summary.seasonId)}" aria-label="View ${escapeHtml(summary.label || season?.label || summary.seasonId)} season details"><div class="history-season-overview-topline"><div><div class="eyebrow">${escapeHtml(isCurrent ? 'Current season' : 'Completed season')}</div><h3>${escapeHtml(summary.label || season?.label || summary.seasonId)}</h3></div><span class="history-outcome-pill ${winnerClass}">${escapeHtml(seasonOutcomeText(winner, isCurrent))}</span></div><div class="history-season-overview-score"><div class="history-season-overview-side"><span class="history-season-overview-name ${userThemeClass(data, 0)}">${escapeHtml(userName(data, 0))}</span><strong>${escapeHtml(String(totals.first))}</strong></div><div class="history-season-overview-divider" aria-hidden="true">—</div><div class="history-season-overview-side is-right"><span class="history-season-overview-name ${userThemeClass(data, 1)}">${escapeHtml(userName(data, 1))}</span><strong>${escapeHtml(String(totals.second))}</strong></div></div><div class="history-season-overview-meta"><span class="history-meta-pill history-record-pill ${leaderClass}">Record ${escapeHtml(summary.recordText || '—')}</span><span class="history-meta-pill">${escapeHtml(String(games.length))} games</span><span class="history-meta-pill">${escapeHtml(playoffCount ? `${playoffCount} playoff games` : 'No playoff games')}</span></div>${featuredResult ? `<p class="history-meta-note"><strong>Featured result:</strong> ${escapeHtml(featuredResult)}</p>` : ''}</button>`;
   }
 
   function renderSeasonsOverview(data) {
