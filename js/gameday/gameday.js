@@ -7,32 +7,31 @@ window.CR = window.CR || {};
   const render = CR.gameDayRender || {};
   const events = CR.gameDayEvents || {};
 
-  const fallbackRoster = model.roster || [
-    { name: 'Sebastian Aho', detail: 'C • Top line' },
-    { name: 'Andrei Svechnikov', detail: 'RW • PP1' },
-    { name: 'Seth Jarvis', detail: 'RW • Hot streak' },
-    { name: 'Jaccob Slavin', detail: 'D • Defensive anchor' },
-    { name: 'Jordan Staal', detail: 'C • Two-way center' },
-    { name: 'Jesperi Kotkaniemi', detail: 'C • Middle six' },
-    { name: 'Brent Burns', detail: 'D • PP2' },
-    { name: 'Jackson Blake', detail: 'RW • Rookie spark' }
-  ];
-
+  const fallbackRoster = model.roster || [];
   const draftOrder = model.draftOrder || ['Aaron', 'Julie', 'Aaron', 'Julie'];
 
   CR.gameDay = model.createInitialState
     ? model.createInitialState()
     : {
+        source: 'empty',
+        currentGameId: '',
         mode: 'pregame',
         playoffMode: 'regular',
         carryover: { active: false },
+        game: {
+          hasGame: false,
+          scheduleText: 'Schedule pending',
+          opponent: '',
+          headline: 'Next game not scheduled yet'
+        },
         pregame: { Aaron: [], Julie: [] },
         live: {
           scores: { Aaron: 0, Julie: 0 },
-          period: '',
+          period: 'Schedule pending',
           users: { Aaron: [], Julie: [] },
           feed: []
-        }
+        },
+        roster: []
       };
 
   if (!CR.gameDay.carryover) CR.gameDay.carryover = { active: false };
@@ -157,6 +156,7 @@ window.CR = window.CR || {};
       ...CR.gameDay,
       ...nextState,
       carryover: nextState.carryover || CR.gameDay?.carryover || { active: false },
+      game: nextState.game || CR.gameDay?.game,
       pregame: nextState.pregame || CR.gameDay?.pregame || { Aaron: [], Julie: [] },
       live: nextState.live || CR.gameDay?.live || {
         scores: { Aaron: 0, Julie: 0 },
@@ -171,178 +171,16 @@ window.CR = window.CR || {};
     CR.renderGameDayState?.(CR.gameDay.mode || previousMode || 'pregame');
   }
 
-  async function refreshGameDayData(options = {}) {
-    if (!CR.gameDayDataService?.fetchGameDayData) return CR.gameDay;
-    if (options.skipIfEditing && isUserEditing()) return CR.gameDay;
-
-    try {
-      const nextState = await CR.gameDayDataService.fetchGameDayData();
-      applyGameDayData(nextState);
-      if (options.flash) CR.flashSync?.();
-      if (options.toast) CR.showToast?.('Game Day refreshed');
-      return CR.gameDay;
-    } catch (error) {
-      console.error('Game Day data refresh failed', error);
-      if (options.toast) CR.showToast?.({ message: 'Could not refresh Game Day', tier: 'warning' });
-      return CR.gameDay;
-    }
-  }
-
-  async function saveGameDayPicks() {
-    const button = $('#saveSheet');
-
-    try {
-      CR.ui?.setActionBusy?.(button, true, { label: 'Saving…' });
-      await CR.gameDaySaveService?.savePregamePicks?.(CR.gameDay.currentGameId, CR.gameDay.pregame);
-      CR.gameDayEdit?.clearEditing?.();
-      setModalOpen(false);
-      await refreshGameDayData({ flash: true });
-      CR.showToast?.('Picks saved');
-    } catch (error) {
-      console.error('Game Day pick save failed', error);
-      CR.showToast?.({ message: error?.message || 'Could not save picks', tier: 'warning' });
-    } finally {
-      CR.ui?.setActionBusy?.(button, false);
-    }
-  }
-
-  function registerRealtime() {
-    if (CR.__gameDayRealtimeRegistered || !CR.realtime?.register) return;
-
-    CR.__gameDayRealtimeRegistered = true;
-    CR.realtime.register('gameday', {
-      tables: ['games', 'picks'],
-      debounceMs: 250,
-      onChange: async (payloads = []) => {
-        if (!payloads.some(payloadBelongsToCurrentGame)) return;
-        if (isUserEditing()) return;
-
-        CR.ui?.markChanged?.(['gameday:sync'], {
-          ttl: 1200,
-          onChange: () => CR.renderGameDayState?.()
-        });
-
-        await refreshGameDayData({ flash: true, skipIfEditing: true });
-      }
-    });
-
-    CR.realtime.start?.();
-  }
-
-  function renderPlayerCard(args = {}) {
-    return render.renderPlayerCard({ ...args, pointsFor });
-  }
-
-  function setModalOpen(isOpen) {
-    const modal = $('#manageSheet');
-    if (!modal) return;
-
-    modal.classList.toggle('is-open', isOpen);
-
-    if (isOpen) {
-      CR.ui?.lockBodyScroll?.('manage-sheet-open');
-    } else {
-      CR.ui?.unlockBodyScroll?.('manage-sheet-open');
-    }
-  }
-
-  function updateGlobalLiveIndicator() {
-    $('#globalLiveIndicator')?.classList.toggle('is-hidden', CR.gameDay.mode !== 'live');
-  }
-
   function renderHero() {
     return render.renderHeroSection({
       mode: CR.gameDay.mode,
+      game: CR.gameDay.game,
       pregameUsers: getPregameStructured(),
       live: CR.gameDay.live,
       final: getFinalData(),
       isPlayoffs: isPlayoffs(),
       winnerText,
       nextDraftSide: nextDraftSide()
-    });
-  }
-
-  function renderPregame() {
-    return render.renderPregameSection({
-      users: getPregameStructured(),
-      roster: getRoster(),
-      claimedOwner,
-      isPlayoffs: isPlayoffs()
-    });
-  }
-
-  function renderLive() {
-    return render.renderLiveSection({
-      state: CR.gameDay.live,
-      renderPlayerCard,
-      carryover: CR.gameDay.carryover,
-      isPlayoffs: isPlayoffs()
-    });
-  }
-
-  function renderFinal() {
-    const state = getFinalData();
-    const bonus = firstGoalHit(state.users);
-
-    return render.renderFinalSection({
-      state,
-      bonusText: bonus ? `${bonus.player} hit first goal bonus` : 'First goal bonus not hit',
-      mvpText: mvpText(state.users),
-      edgeText: leadingStatType(state.users),
-      totalEventsText: totalEventsText(state.users),
-      renderPlayerCard,
-      carryover: CR.gameDay.carryover,
-      isPlayoffs: isPlayoffs()
-    });
-  }
-
-  function allSelectedPregamePlayers() {
-    return [
-      ...(CR.gameDay.pregame.Aaron || []),
-      ...(CR.gameDay.pregame.Julie || [])
-    ];
-  }
-
-  function renderManageSheet() {
-    const actions = $('#manageSheetActions');
-    if (!actions) return;
-
-    const selectedPlayers = allSelectedPregamePlayers();
-
-    actions.innerHTML = ['Aaron', 'Julie'].flatMap((side) => [0, 1].map((index) => {
-      const selected = CR.gameDay.pregame[side]?.[index] || '';
-      const options = [''].concat(getRoster().map((player) => player.name)).map((name) => {
-        const disabled = name && selectedPlayers.includes(name) && name !== selected;
-        return `<option value="${name}" ${name === selected ? 'selected' : ''} ${disabled ? 'disabled' : ''}>${name || 'Open slot'}</option>`;
-      }).join('');
-
-      return `<div class="gd-sheet-pick"><strong>${side} Pick ${index + 1}</strong><small>Swap locked player</small><select class="gd-sheet-select" data-side="${side}" data-index="${index}">${options}</select></div>`;
-    }).join('')).join('');
-
-    actions.querySelectorAll('.gd-sheet-select').forEach((select) => {
-      select.addEventListener('change', (event) => {
-        const side = event.target.dataset.side;
-        const index = Number(event.target.dataset.index);
-        const updated = (CR.gameDay.pregame[side] || []).slice();
-
-        updated[index] = event.target.value;
-        CR.gameDay.pregame[side] = updated.filter(Boolean);
-
-        if (CR.gameDay.carryover?.active) CR.gameDay.carryover.active = false;
-        CR.gameDayEdit?.markEditing?.();
-        renderManageSheet();
-      });
-    });
-  }
-
-  function bindInteractions() {
-    events.bind?.({
-      claimedOwner,
-      draftOrder,
-      nextDraftSide,
-      renderManageSheet,
-      setModalOpen,
-      rerender: CR.renderGameDayState
     });
   }
 
@@ -354,72 +192,9 @@ window.CR = window.CR || {};
     if (!container || !view) return;
 
     view.classList.toggle('mode-playoffs', isPlayoffs());
-    view.classList.toggle('is-realtime-changed', CR.ui?.isChanged?.('gameday:sync'));
 
     container.innerHTML = [
-      renderHero(),
-      mode === 'pregame' ? renderPregame() : '',
-      mode === 'live' ? renderLive() : '',
-      mode === 'final' ? renderFinal() : ''
+      renderHero()
     ].join('');
-
-    const stateTitle = $('#stateTitle');
-    const stateBadge = $('#stateBadge');
-    if (stateTitle) stateTitle.textContent = modeLabel(mode);
-    if (stateBadge) stateBadge.textContent = isPlayoffs() ? 'Playoffs' : (mode === 'pregame' ? 'Regular' : modeLabel(mode));
-
-    $('#phaseSwitcher')?.querySelectorAll('button').forEach((button) => {
-      button.classList.toggle('active', button.dataset.phase === mode);
-    });
-
-    $('#modeSwitcher')?.querySelectorAll('button').forEach((button) => {
-      button.classList.toggle('active', button.dataset.playoffMode === CR.gameDay.playoffMode);
-    });
-
-    $('#carryoverSwitcher')?.querySelectorAll('button').forEach((button) => {
-      button.classList.toggle('active', (button.dataset.carryover === 'on') === Boolean(CR.gameDay.carryover?.active));
-    });
-
-    updateGlobalLiveIndicator();
-    bindInteractions();
   };
-
-  CR.initGameDay = () => {
-    $('#phaseSwitcher')?.addEventListener('click', (event) => {
-      const button = event.target.closest('button[data-phase]');
-      if (button) CR.renderGameDayState(button.dataset.phase);
-    });
-
-    $('#modeSwitcher')?.addEventListener('click', (event) => {
-      const button = event.target.closest('button[data-playoff-mode]');
-      if (!button) return;
-      CR.gameDay.playoffMode = button.dataset.playoffMode;
-      CR.renderGameDayState();
-    });
-
-    $('#carryoverSwitcher')?.addEventListener('click', (event) => {
-      const button = event.target.closest('button[data-carryover]');
-      if (!button) return;
-      CR.gameDay.carryover = { active: button.dataset.carryover === 'on' };
-      CR.renderGameDayState();
-    });
-
-    $('#refreshButton')?.addEventListener('click', () => {
-      CR.refreshGameDayData?.({ toast: true, flash: true });
-    });
-
-    $('#closeSheet')?.addEventListener('click', () => setModalOpen(false));
-    $('#saveSheet')?.addEventListener('click', saveGameDayPicks);
-    $('#manageSheet')?.addEventListener('click', (event) => {
-      if (event.target.id === 'manageSheet') setModalOpen(false);
-    });
-
-    CR.renderGameDayState(CR.gameDay.mode || 'pregame');
-    refreshGameDayData();
-    registerRealtime();
-  };
-
-  CR.applyGameDayData = applyGameDayData;
-  CR.refreshGameDayData = refreshGameDayData;
-  CR.registerGameDayRealtime = registerRealtime;
 })();
