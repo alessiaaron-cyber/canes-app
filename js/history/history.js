@@ -262,9 +262,26 @@ window.CR = window.CR || {};
     else if (CR.historyScrollLock?.locked) unlockSheetScroll();
   }
 
-  function renderHistory() {
+  function renderHistoryUnavailable(message = 'History data could not be loaded.') {
     const root = document.querySelector('#historyView');
     if (!root) return;
+
+    root.innerHTML = `
+      <section class="panel-card history-hq-card">
+        <div class="history-section-head">
+          <div>
+            <div class="eyebrow">History</div>
+            <h3>Unavailable</h3>
+          </div>
+        </div>
+        <p class="history-support-copy">${message}</p>
+      </section>
+    `;
+  }
+
+  function renderHistory() {
+    const root = document.querySelector('#historyView');
+    if (!root || !CR.historyData || !CR.historyState) return;
 
     ensureHistoryShell(root);
 
@@ -289,21 +306,29 @@ window.CR = window.CR || {};
     }
   }
 
-  function initHistory() {
-    CR.historyData = CR.historyModel.build(CR.historyMockData);
-    CR.historyCache = { staticData: null, seasons: {} };
-    CR.historyDom = null;
-    CR.historyEventsBound = false;
-    CR.historyPanelKeys = { hq: '', seasons: '', all_games: '', admin: '' };
-    CR.historyScrollLock = { locked: false, scrollY: 0 };
-    CR.historyState = {
-      seasonId: CR.historyData.currentSeasonId,
-      view: 'hq',
-      previousView: 'hq',
-      returnView: 'hq',
-      sheet: { open: false }
-    };
-    renderHistory();
+  async function initHistory() {
+    try {
+      const source = await CR.historyDataService.fetchHistoryData();
+
+      CR.historyData = CR.historyModel.build(source);
+      CR.historyCache = { staticData: null, seasons: {} };
+      CR.historyDom = null;
+      CR.historyEventsBound = false;
+      CR.historyPanelKeys = { hq: '', seasons: '', all_games: '', admin: '' };
+      CR.historyScrollLock = { locked: false, scrollY: 0 };
+      CR.historyState = {
+        seasonId: CR.historyData.currentSeasonId,
+        view: 'hq',
+        previousView: 'hq',
+        returnView: 'hq',
+        sheet: { open: false }
+      };
+
+      renderHistory();
+    } catch (error) {
+      console.error('History load failed', error);
+      renderHistoryUnavailable('Real rivalry history is currently unavailable. Check Supabase access or schema mapping.');
+    }
   }
 
   CR.initHistory = initHistory;
