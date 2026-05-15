@@ -24,6 +24,12 @@ window.CR = window.CR || {};
           opponent: '',
           headline: 'Next game not scheduled yet'
         },
+        draft: {
+          status: 'pending',
+          currentPickNumber: 0,
+          currentPicker: { id: '', displayName: '' },
+          firstPicker: ''
+        },
         pregame: { Aaron: [], Julie: [] },
         live: {
           scores: { Aaron: 0, Julie: 0 },
@@ -35,6 +41,7 @@ window.CR = window.CR || {};
       };
 
   if (!CR.gameDay.carryover) CR.gameDay.carryover = { active: false };
+  if (!CR.gameDay.draft) CR.gameDay.draft = { status: 'pending', currentPickNumber: 0, currentPicker: { id: '', displayName: '' }, firstPicker: '' };
   CR.gameDayRoster = CR.gameDay.roster || fallbackRoster;
 
   const $ = (selector) => document.querySelector(selector);
@@ -211,6 +218,7 @@ window.CR = window.CR || {};
       ...CR.gameDay,
       ...nextState,
       carryover: nextState.carryover || CR.gameDay?.carryover || { active: false },
+      draft: nextState.draft || CR.gameDay?.draft || { status: 'pending', currentPickNumber: 0, currentPicker: { id: '', displayName: '' }, firstPicker: '' },
       game: nextState.game || CR.gameDay?.game,
       pregame: nextState.pregame || CR.gameDay?.pregame || { Aaron: [], Julie: [] },
       live: nextState.live || CR.gameDay?.live || {
@@ -314,7 +322,8 @@ window.CR = window.CR || {};
       final: getFinalData(),
       isPlayoffs: isPlayoffs(),
       winnerText,
-      nextDraftSide: nextDraftSide()
+      nextDraftSide: nextDraftSide(),
+      draft: CR.gameDay.draft
     });
   }
 
