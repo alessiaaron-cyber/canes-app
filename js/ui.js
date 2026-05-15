@@ -31,6 +31,45 @@ window.CR.ui.setActionBusy = (button, isBusy, options = {}) => {
   }
 };
 
+window.CR.ui.changedKeys = window.CR.ui.changedKeys || new Set();
+window.CR.ui.changedTimers = window.CR.ui.changedTimers || new Map();
+
+window.CR.ui.markChanged = (keys, options = {}) => {
+  const list = Array.isArray(keys) ? keys : [keys];
+  const cleanKeys = list.map((key) => String(key || '').trim()).filter(Boolean);
+  if (!cleanKeys.length) return;
+
+  const ttl = Number(options.ttl || 1200);
+  const onChange = typeof options.onChange === 'function' ? options.onChange : null;
+
+  cleanKeys.forEach((key) => {
+    window.CR.ui.changedKeys.add(key);
+    clearTimeout(window.CR.ui.changedTimers.get(key));
+    window.CR.ui.changedTimers.set(key, setTimeout(() => {
+      window.CR.ui.changedKeys.delete(key);
+      window.CR.ui.changedTimers.delete(key);
+      if (onChange) onChange({ key, active: false });
+    }, ttl));
+  });
+
+  if (onChange) onChange({ keys: cleanKeys, active: true });
+};
+
+window.CR.ui.clearChanged = (keys) => {
+  const list = keys ? (Array.isArray(keys) ? keys : [keys]) : Array.from(window.CR.ui.changedKeys);
+  list.forEach((key) => {
+    clearTimeout(window.CR.ui.changedTimers.get(key));
+    window.CR.ui.changedTimers.delete(key);
+    window.CR.ui.changedKeys.delete(key);
+  });
+};
+
+window.CR.ui.isChanged = (key) => window.CR.ui.changedKeys.has(String(key || '').trim());
+
+window.CR.ui.changedClass = (key, className = 'is-realtime-changed') => (
+  window.CR.ui.isChanged(key) ? className : ''
+);
+
 window.CR.ui.lockBodyScroll = (className = 'sheet-open') => {
   const lock = window.CR.__bodyScrollLock || { locked: false, scrollY: 0, classes: new Set() };
   lock.classes.add(className);
