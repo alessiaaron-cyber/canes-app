@@ -4,6 +4,11 @@ window.CR = window.CR || {};
   const CR = window.CR;
   const OWNERS = ['Aaron', 'Julie'];
 
+  function hasScheduledGame() {
+    const game = CR.gameDay?.game || {};
+    return Boolean(game.hasGame && game.scheduleText && game.scheduleText !== 'Schedule pending');
+  }
+
   function rowsFromPregameState(gameId, pregame = {}) {
     return OWNERS.flatMap((owner) => (pregame[owner] || []).map((playerName, index) => ({
       game_id: gameId,
@@ -17,6 +22,7 @@ window.CR = window.CR || {};
   }
 
   async function savePregamePicks(gameId, pregame) {
+    if (!hasScheduledGame()) throw new Error('Picks cannot be saved until a game is scheduled.');
     if (!gameId) throw new Error('No active game is available for saving picks.');
 
     const db = await CR.getSupabase();
@@ -49,6 +55,7 @@ window.CR = window.CR || {};
 
   CR.gameDaySaveService = {
     savePregamePicks,
-    rowsFromPregameState
+    rowsFromPregameState,
+    hasScheduledGame
   };
 })();
