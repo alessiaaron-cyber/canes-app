@@ -72,13 +72,23 @@ window.CR = window.CR || {};
     return `${winner} leads`;
   }
 
+  function allTimeLeader(data, board = {}) {
+    const first = Number(board.aaron ?? 0);
+    const second = Number(board.julie ?? 0);
+    if (first > second) return { index: 0, name: userName(data, 0), margin: first - second, className: userThemeClass(data, 0) };
+    if (second > first) return { index: 1, name: userName(data, 1), margin: second - first, className: userThemeClass(data, 1) };
+    return { index: -1, name: 'Dead even', margin: 0, className: 'owner-tie' };
+  }
+
   function renderRootShell() {
     return `<div class="history-shell"><div id="historyPanelHq"></div><div id="historyPanelSeasons" hidden></div><div id="historyPanelAllGames" hidden></div><div id="historyAdminLayer"></div></div>`;
   }
 
   function renderBoard(data) {
     const board = data.allTimeBoard || {};
-    return `<section class="panel-card rivalry-board-card history-legacy-card"><div class="rivalry-board-topline"><span class="eyebrow">Rivalry History</span></div><h2 class="rivalry-board-title">${escapeHtml(board.lead || 'Rivalry tied')}</h2><div class="rivalry-board-score-grid"><article class="rivalry-score-card"><div class="eyebrow ${userThemeClass(data, 0)}">${escapeHtml(userName(data, 0))}</div><div class="rivalry-score-value">${escapeHtml(String(board.aaron ?? 0))}</div></article><article class="rivalry-score-card"><div class="eyebrow ${userThemeClass(data, 1)}">${escapeHtml(userName(data, 1))}</div><div class="rivalry-score-value">${escapeHtml(String(board.julie ?? 0))}</div></article></div><div class="rivalry-board-meta-row"><span class="history-meta-pill">${escapeHtml(String(board.totalGames || 0))} games logged</span></div></section>`;
+    const leader = allTimeLeader(data, board);
+    const status = leader.margin ? `${leader.name} by ${leader.margin}` : 'All square';
+    return `<section class="panel-card rivalry-board-card history-legacy-card"><div class="rivalry-board-topline"><span class="eyebrow">Rivalry History</span><span class="history-status-pill ${leader.className}">${escapeHtml(status)}</span></div><h2 class="rivalry-board-title">${escapeHtml(board.lead || 'Rivalry tied')}</h2><p class="history-hero-copy">${leader.margin ? `${escapeHtml(leader.name)} holds the all-time edge, but every game still moves the line.` : 'The all-time race is tied. Every game is a chance to grab the lead.'}</p><div class="rivalry-board-score-grid history-hero-score-grid"><article class="rivalry-score-card history-hero-score-card"><div class="eyebrow ${userThemeClass(data, 0)}">${escapeHtml(userName(data, 0))}</div><div class="rivalry-score-value">${escapeHtml(String(board.aaron ?? 0))}</div></article><article class="rivalry-score-card history-hero-score-card"><div class="eyebrow ${userThemeClass(data, 1)}">${escapeHtml(userName(data, 1))}</div><div class="rivalry-score-value">${escapeHtml(String(board.julie ?? 0))}</div></article></div><div class="rivalry-board-meta-row"><span class="history-meta-pill">${escapeHtml(String(board.totalGames || 0))} games logged</span></div></section>`;
   }
 
   function renderSeasonSnapshot(data) {
