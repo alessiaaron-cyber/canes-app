@@ -129,6 +129,7 @@ window.CR = window.CR || {};
       window.CR.initHistory?.();
       window.CR.initManage?.();
       window.CR.initPullRefresh?.();
+      window.CR.rivalryEventsConsumer?.register?.();
 
       const savedTab = window.CR.getSavedTab?.() || 'gameday';
       window.CR.switchTab?.(savedTab);
