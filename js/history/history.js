@@ -42,8 +42,12 @@ window.CR = window.CR || {};
     return [game?.date, game?.opponent ? `vs ${game.opponent}` : ''].filter(Boolean).join(' • ') || game?.title || 'Game';
   }
 
-  function isPlayoffLike(game) {
-    return Boolean(game?.playoff) || String(game?.title || '').toLowerCase().includes('playoff') || (game?.tags || []).some((tag) => String(tag || '').toLowerCase().includes('playoff'));
+  function gameTypeValue(game) {
+    return String(game?.gameType || game?.game_type || '').trim().toLowerCase();
+  }
+
+  function isPlayoffGame(game) {
+    return gameTypeValue(game).includes('playoff');
   }
 
   function buildSeasonPlayerSpotlights(selectedGames) {
@@ -170,7 +174,7 @@ window.CR = window.CR || {};
 
     const biggest = scoredGames.slice().sort((a, b) => b.marginValue - a.marginValue)[0];
     const wildest = scoredGames.slice().sort((a, b) => b.combinedValue - a.combinedValue)[0];
-    const playoff = scoredGames.find((game) => isPlayoffLike(game));
+    const playoff = scoredGames.find((game) => isPlayoffGame(game));
 
     if (playoff) return `${playoff.label}: playoff result (${playoff.aaronScore}-${playoff.julieScore}).`;
     if (biggest && biggest.marginValue >= 3) return `${biggest.label}: biggest margin (${biggest.winner} +${biggest.marginValue}).`;
@@ -205,7 +209,7 @@ window.CR = window.CR || {};
   function buildGameLog(selectedGames) {
     return selectedGames.map((game, index) => ({
       ...game,
-      playoff: isPlayoffLike(game),
+      playoff: isPlayoffGame(game),
       displayNumber: selectedGames.length - index,
       subtitle: gameSubtitle(game),
       firstGoalScorer: firstGoalScorer(game)
@@ -216,8 +220,8 @@ window.CR = window.CR || {};
     return buildRecentTen(selectedGames.filter(hasRealScore)).map((game) => ({
       id: game.id,
       winner: game.winner,
-      playoff: isPlayoffLike(game),
-      shortLabel: isPlayoffLike(game) ? 'P' : 'R'
+      playoff: isPlayoffGame(game),
+      shortLabel: isPlayoffGame(game) ? 'P' : 'R'
     }));
   }
 
