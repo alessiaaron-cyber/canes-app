@@ -114,17 +114,24 @@ window.CR = window.CR || {};
     return game?.game_date || game?.game_time || game?.start_time || game?.scheduled_at || game?.gameDate || '';
   }
 
-  function formatScheduleText(game) {
+  function scheduleDate(game) {
     const value = gameDateValue(game);
-    if (!value) return 'Schedule pending';
+    if (!value) return null;
     const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return 'Schedule pending';
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+
+  function formatScheduleText(game) {
+    const date = scheduleDate(game);
+    if (!date) return 'Schedule pending';
     return date.toLocaleString([], { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
   }
 
   function gameMeta(game) {
-    if (!game) return { hasGame: false, scheduleText: 'Schedule pending', opponent: '', headline: 'Next game not scheduled yet' };
-    return { hasGame: true, scheduleText: formatScheduleText(game), opponent: game.opponent || game.away_team || game.home_team || '', headline: game.opponent ? `Canes vs ${game.opponent}` : 'Canes game' };
+    const date = scheduleDate(game);
+    const scheduleText = date ? formatScheduleText(game) : 'Schedule pending';
+    if (!game || !date) return { hasGame: false, scheduleText, opponent: '', headline: 'Next game not scheduled yet' };
+    return { hasGame: true, scheduleText, opponent: game.opponent || game.away_team || game.home_team || '', headline: game.opponent ? `Canes vs ${game.opponent}` : 'Canes game' };
   }
 
   function normalizeGameDayState({ game, picks, roster }) {
