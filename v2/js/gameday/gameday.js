@@ -203,8 +203,12 @@ window.CR = window.CR || {};
     const modal = $('#manageSheet');
     if (!modal) return;
     modal.classList.toggle('is-open', isOpen);
-    document.body.classList.toggle('modal-open', isOpen);
-    document.documentElement.classList.toggle('modal-open', isOpen);
+
+    if (isOpen) {
+      CR.ui?.lockBodyScroll?.('manage-sheet-open');
+    } else {
+      CR.ui?.unlockBodyScroll?.('manage-sheet-open');
+    }
   }
 
   function updateGlobalLiveIndicator() {
