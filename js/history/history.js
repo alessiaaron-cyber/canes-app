@@ -34,6 +34,10 @@ window.CR = window.CR || {};
     return [game.date, game.opponent].filter(Boolean).join(' • ');
   }
 
+  function hasRealScore(game) {
+    return Number(game?.aaronScore || 0) + Number(game?.julieScore || 0) > 0;
+  }
+
   function buildSeasonPlayerSpotlights(selectedGames) {
     const byPlayer = new Map();
 
@@ -118,7 +122,7 @@ window.CR = window.CR || {};
       }
 
       const margin = Number(game.margin || Math.abs(Number(game.aaronScore || 0) - Number(game.julieScore || 0)));
-      if (!biggestBlowout || margin > biggestBlowout.margin) {
+      if (hasRealScore(game) && (!biggestBlowout || margin > biggestBlowout.margin)) {
         biggestBlowout = { owner: game.winner, margin, title: game.title };
       }
 
@@ -127,16 +131,16 @@ window.CR = window.CR || {};
     });
 
     const firstGoalKing = Array.from(firstGoalCounts.entries()).sort((a, b) => b[1] - a[1])[0] || ['—', 0];
-    const latest = ordered[ordered.length - 1];
+    const latest = ordered.filter(hasRealScore).slice(-1)[0];
     const heater = !latest || latest.winner === 'Tie'
       ? { title: 'No current heater', copy: 'Nobody owns momentum right now.' }
-      : { title: `${latest.winner} heater`, copy: `${latest.winner} took the latest result and is holding momentum.` };
+      : { title: `${latest.winner} heater`, copy: `${latest.winner} took the latest scored result and is holding momentum.` };
 
     return {
       heater,
       cards: [
         { label: 'Longest streak', value: `${longest.owner} W${longest.count}`, copy: 'The longest run from completed game data.' },
-        { label: 'Biggest blowout', value: `${biggestBlowout?.owner || '—'} +${biggestBlowout?.margin || 0}`, copy: `${biggestBlowout?.title || 'No game yet'} had the largest margin.` },
+        { label: 'Biggest blowout', value: `${biggestBlowout?.owner || '—'} +${biggestBlowout?.margin || 0}`, copy: `${biggestBlowout?.title || 'No scored game yet'} had the largest margin.` },
         { label: 'First-goal king', value: firstGoalKing[0], copy: `${firstGoalKing[1]} first-goal hits logged` }
       ]
     };
@@ -145,25 +149,29 @@ window.CR = window.CR || {};
   function signatureNight(selectedGames) {
     if (!selectedGames.length) return 'No completed game rows yet.';
 
-    const games = selectedGames.map((game) => ({
+    const scoredGames = selectedGames.filter(hasRealScore).map((game) => ({
       ...game,
       marginValue: Math.abs(Number(game.aaronScore || 0) - Number(game.julieScore || 0)),
       combinedValue: Number(game.aaronScore || 0) + Number(game.julieScore || 0)
     }));
 
-    const biggest = games.slice().sort((a, b) => b.marginValue - a.marginValue)[0];
-    const wildest = games.slice().sort((a, b) => b.combinedValue - a.combinedValue)[0];
-    const playoff = games.find((game) => game.playoff);
+    if (!scoredGames.length) {
+      return 'Completed game rows exist, but no scored results are available yet.';
+    }
 
-    if (playoff) return `${playoff.title}: playoff result (${playoff.aaronScore}-${playoff.julieScore}).`;
+    const biggest = scoredGames.slice().sort((a, b) => b.marginValue - a.marginValue)[0];
+    const wildest = scoredGames.slice().sort((a, b) => b.combinedValue - a.combinedValue)[0];
+    const playoff = scoredGames.find((game) => game.playoff);
+
+    if (playoff) return `${playoff.title}: playoff result with scoring logged (${playoff.aaronScore}-${playoff.julieScore}).`;
     if (biggest && biggest.marginValue >= 3) return `${biggest.title}: biggest margin (${biggest.winner} +${biggest.marginValue}).`;
     if (wildest) return `${wildest.title}: highest combined score (${wildest.combinedValue} pts).`;
-    return `${games[0].title}: latest completed result.`;
+    return `${scoredGames[0].title}: latest scored result.`;
   }
 
   function buildSeasonBoard(selectedSeason, selectedGames, selectedSummary) {
     const totals = seasonTotals(selectedSeason, selectedGames);
-    const recent = buildRecentTen(selectedGames);
+    const recent = buildRecentTen(selectedGames.filter(hasRealScore));
     const recentWins = recent.reduce((acc, game) => {
       if (game.winner === 'Aaron') acc.aaron += 1;
       if (game.winner === 'Julie') acc.julie += 1;
@@ -173,7 +181,7 @@ window.CR = window.CR || {};
 
     const recentText = recent.length
       ? `Last ${recent.length}: Aaron ${recentWins.aaron} • Julie ${recentWins.julie}${recentWins.tie ? ` • Tie ${recentWins.tie}` : ''}`
-      : 'No completed game rows yet';
+      : 'No scored game rows yet';
 
     return {
       ...totals,
@@ -195,7 +203,7 @@ window.CR = window.CR || {};
   }
 
   function buildMomentum(selectedGames) {
-    return buildRecentTen(selectedGames).map((game) => ({
+    return buildRecentTen(selectedGames.filter(hasRealScore)).map((game) => ({
       id: game.id,
       winner: game.winner,
       playoff: game.playoff,
@@ -215,7 +223,7 @@ window.CR = window.CR || {};
     const resolvedSeasonId = selectedSeason?.id || seasonId;
     const selectedGames = model.seasonGames?.[resolvedSeasonId] || [];
     const selectedSummary = model.seasonSummaries?.find((season) => season.seasonId === resolvedSeasonId) || null;
-    const playerSpotlights = buildSeasonPlayerSpotlights(selectedGames);
+    const playerSpotlights = buildSeasonPlayerSpotlights(selectedGames.filter(hasRealScore));
     const gameLog = buildGameLog(selectedGames);
 
     return {
@@ -224,7 +232,7 @@ window.CR = window.CR || {};
       selectedGames,
       seasonBoard: buildSeasonBoard(selectedSeason, selectedGames, selectedSummary),
       momentum: buildMomentum(selectedGames),
-      recentGames: gameLog.slice(0, 4),
+      recentGames: gameLog.filter(hasRealScore).slice(0, 4),
       gameLog,
       playerSpotlights
     };
