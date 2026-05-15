@@ -36,6 +36,36 @@ window.CR = window.CR || {};
     });
   }
 
+  async function handleDraftClick(button, rerender) {
+    const player = button.dataset.player;
+    if (!player || button.disabled) return;
+
+    try {
+      CR.ui?.setActionBusy?.(button, true, { label: 'Drafting…' });
+      await CR.gameDaySaveService?.saveDraftPick?.(CR.gameDay.currentGameId, player);
+      CR.gameDay.lastDraftedPlayer = player;
+      clearEditing();
+      await CR.refreshGameDayData?.({ flash: true });
+      CR.showToast?.(`${player} drafted`);
+
+      requestAnimationFrame(() => {
+        focusPregamePicks();
+      });
+
+      clearTimeout(window.__gdLastDraftedTimer);
+      window.__gdLastDraftedTimer = setTimeout(() => {
+        CR.gameDay.lastDraftedPlayer = '';
+        if (CR.gameDay.mode === 'pregame') rerender('pregame');
+      }, 950);
+    } catch (error) {
+      console.error('Draft pick failed', error);
+      CR.showToast?.({ message: error?.message || 'Could not draft player', tier: 'warning' });
+      await CR.refreshGameDayData?.({ flash: true });
+    } finally {
+      CR.ui?.setActionBusy?.(button, false);
+    }
+  }
+
   CR.gameDayEvents = {
     bind({ claimedOwner, nextDraftSide, renderManageSheet, setModalOpen, rerender }) {
       document.querySelectorAll('.gd-small-action').forEach((button) => {
@@ -50,30 +80,14 @@ window.CR = window.CR || {};
       });
 
       document.querySelectorAll('.gd-draft-btn').forEach((button) => {
-        button.addEventListener('click', (event) => {
+        button.addEventListener('click', async (event) => {
           event.preventDefault();
           event.stopPropagation();
 
           const player = button.dataset.player;
           if (claimedOwner(player)) return;
 
-          const side = typeof nextDraftSide === 'function' ? nextDraftSide() : null;
-          if (!side) return;
-
-          markEditing();
-          CR.gameDay.pregame[side].push(player);
-          CR.gameDay.lastDraftedPlayer = player;
-          rerender('pregame');
-
-          requestAnimationFrame(() => {
-            focusPregamePicks();
-          });
-
-          clearTimeout(window.__gdLastDraftedTimer);
-          window.__gdLastDraftedTimer = setTimeout(() => {
-            CR.gameDay.lastDraftedPlayer = '';
-            if (CR.gameDay.mode === 'pregame') rerender('pregame');
-          }, 950);
+          await handleDraftClick(button, rerender);
         });
       });
 
