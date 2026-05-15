@@ -6,6 +6,7 @@ window.CR = window.CR || {};
 
   function renderHeroSection({
     mode,
+    game,
     pregameUsers,
     live,
     final,
@@ -16,6 +17,7 @@ window.CR = window.CR || {};
     const pregame = mode === 'pregame';
     const liveMode = mode === 'live';
     const finalMode = mode === 'final';
+    const hasGame = Boolean(game?.hasGame);
 
     const scoreSource = pregame ? {} : (finalMode ? final.scores : live.scores);
 
@@ -30,38 +32,26 @@ window.CR = window.CR || {};
     });
 
     const period = pregame
-      ? 'Tonight • 7:00 PM'
+      ? (game?.scheduleText || 'Schedule pending')
       : (liveMode ? live.period : '');
 
     const delta = left.score - right.score;
     const momentum = Math.min(Math.abs(delta) * 12, 48);
-    const momentumLeft = delta > 0
-      ? `calc(50% - ${momentum}%)`
-      : '50%';
-
+    const momentumLeft = delta > 0 ? `calc(50% - ${momentum}%)` : '50%';
     const totalPicks = left.picks.length + right.picks.length;
 
     const subline = pregame
-      ? (nextDraftSide
-          ? `${nextDraftSide} drafting next • Pick ${totalPicks + 1} of 4`
-          : 'Picks ready for puck drop')
+      ? (!hasGame
+          ? (game?.headline || 'Next game not scheduled yet')
+          : (nextDraftSide
+              ? `${nextDraftSide} drafting next • Pick ${totalPicks + 1} of 4`
+              : 'Picks ready for puck drop'))
       : '';
 
-    const leftBadge = finalMode
-      ? 'Final'
-      : (liveMode ? 'Live' : 'Pregame');
-
-    const playoffPill = isPlayoffs
-      ? '<span class="gd-pill gd-pill-playoff">Playoff Mode</span>'
-      : '';
-
-    const playoffSubline = isPlayoffs && pregame
-      ? '<div class="gd-playoff-copy">Postseason stakes are up tonight.</div>'
-      : '';
-
-    const finalBanner = finalMode
-      ? `<div class="gd-final-banner ${isPlayoffs ? 'gd-final-banner-playoff' : ''}">${winnerText(scoreSource)}</div>`
-      : '';
+    const leftBadge = finalMode ? 'Final' : (liveMode ? 'Live' : (hasGame ? 'Pregame' : 'Pending'));
+    const playoffPill = isPlayoffs ? '<span class="gd-pill gd-pill-playoff">Playoff Mode</span>' : '';
+    const playoffSubline = isPlayoffs && pregame && hasGame ? '<div class="gd-playoff-copy">Postseason stakes are up tonight.</div>' : '';
+    const finalBanner = finalMode ? `<div class="gd-final-banner ${isPlayoffs ? 'gd-final-banner-playoff' : ''}">${winnerText(scoreSource)}</div>` : '';
 
     return `
       <section class="gd-hero ${finalMode ? 'gd-hero-final' : ''} ${isPlayoffs ? 'gd-hero-playoff' : ''}">
@@ -99,11 +89,7 @@ window.CR = window.CR || {};
           </div>
 
           <div class="gd-center">
-            <img
-              class="gd-logo ${isPlayoffs ? 'gd-logo-playoff' : ''}"
-              src="./assets/app-icon.png"
-              alt="Canes Rivalry"
-            >
+            <img class="gd-logo ${isPlayoffs ? 'gd-logo-playoff' : ''}" src="./assets/app-icon.png" alt="Canes Rivalry">
           </div>
 
           <div class="gd-side">
@@ -121,24 +107,15 @@ window.CR = window.CR || {};
           </div>
         </div>
 
-        ${subline
-          ? `<div class="gd-subline ${isPlayoffs ? 'gd-subline-playoff' : ''}">${subline}</div>`
-          : ''}
-
+        ${subline ? `<div class="gd-subline ${isPlayoffs ? 'gd-subline-playoff' : ''}">${subline}</div>` : ''}
         ${playoffSubline}
         ${finalBanner}
 
         ${liveMode
           ? `
-            <div class="gd-momentum-label ${isPlayoffs ? 'gd-momentum-label-playoff' : ''}">
-              Momentum
-            </div>
-
+            <div class="gd-momentum-label ${isPlayoffs ? 'gd-momentum-label-playoff' : ''}">Momentum</div>
             <div class="gd-track ${isPlayoffs ? 'gd-track-playoff' : ''}">
-              <div
-                class="gd-track-fill gd-momentum-fill ${isPlayoffs ? 'gd-track-fill-playoff' : ''}"
-                style="left:${momentumLeft};width:${momentum}%"
-              ></div>
+              <div class="gd-track-fill gd-momentum-fill ${isPlayoffs ? 'gd-track-fill-playoff' : ''}" style="left:${momentumLeft};width:${momentum}%"></div>
             </div>
           `
           : ''}
