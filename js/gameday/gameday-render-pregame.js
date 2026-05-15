@@ -62,11 +62,12 @@ window.CR = window.CR || {};
   function renderRosterRow(entry, claimedOwner, isPlayoffs) {
     const owner = claimedOwner(entry.name);
     const ownerClass = owner ? (CR.identity?.ownerClass?.(owner) || '') : '';
+    const displayName = entry.displayName || entry.name;
 
     return `
       <div class="gd-roster-row ${owner ? 'claimed' : ''}">
         <div class="gd-pick-main">
-          <strong>${entry.name}</strong>
+          <strong>${displayName}</strong>
           <small>${entry.detail}</small>
         </div>
 
