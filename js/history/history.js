@@ -225,6 +225,10 @@ window.CR = window.CR || {};
     }));
   }
 
+  function momentumSignature(items = []) {
+    return items.map((item) => `${item.id}:${item.winner}:${item.playoff ? 'P' : 'R'}`).join('|');
+  }
+
   function buildStaticHistoryData(model) {
     return {
       allTimeBoard: buildAllTimeBoard(model),
@@ -351,7 +355,8 @@ window.CR = window.CR || {};
     ensureHistoryShell(root);
 
     const scoped = getScopedData(CR.historyData, CR.historyState);
-    const hqKey = `${CR.historyData.currentSeasonId}`;
+    const hqMomentumKey = momentumSignature(scoped.hqSeasonData?.momentum || []);
+    const hqKey = `${CR.historyData.currentSeasonId}:${hqMomentumKey}`;
     const seasonKey = `${CR.historyState.seasonId}`;
 
     renderPanel('hq', `hq:${hqKey}`, CR.historyRender.renderHQ(scoped), CR.historyDom.hq);
