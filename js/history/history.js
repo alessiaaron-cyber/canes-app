@@ -377,6 +377,42 @@ window.CR = window.CR || {};
     }
   }
 
+  function changedKeysFromRealtimePayloads(payloads = []) {
+    const keys = [];
+    payloads.forEach((payload) => {
+      const row = payload.new || payload.old || {};
+      if (payload.table === 'games' && row.id) {
+        keys.push(`history:game:${row.id}`);
+        keys.push(`history:game:${row.id}:score`);
+      }
+      if (payload.table === 'picks') {
+        const gameId = row.game_id;
+        if (gameId) keys.push(`history:game:${gameId}`);
+        if (row.id) keys.push(`history:pick:${row.id}`);
+      }
+    });
+    return Array.from(new Set(keys));
+  }
+
+  function registerHistoryRealtime() {
+    if (!CR.realtime?.register || CR.historyRealtimeRegistered) return;
+    CR.historyRealtimeRegistered = true;
+
+    CR.realtime.register('history', {
+      tables: ['games', 'picks'],
+      debounceMs: 220,
+      onChange: async (payloads) => {
+        const keys = changedKeysFromRealtimePayloads(payloads);
+        if (keys.length) {
+          CR.ui?.markChanged?.(keys, { onChange: () => renderHistory() });
+        }
+        await refreshHistoryData();
+      }
+    });
+
+    CR.realtime.start?.();
+  }
+
   async function refreshHistoryData(options = {}) {
     if (CR.historyState?.sheet?.open && !options.force) {
       CR.historyNeedsRefresh = true;
@@ -426,6 +462,7 @@ window.CR = window.CR || {};
         sheet: { open: false }
       };
 
+      registerHistoryRealtime();
       renderHistory();
     } catch (error) {
       console.error('History load failed', error);
