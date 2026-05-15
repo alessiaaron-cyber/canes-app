@@ -55,6 +55,19 @@ window.CR = window.CR || {};
     return Array.from(byPlayer.values()).sort((a, b) => b.totalPoints - a.totalPoints || b.gamesPicked - a.gamesPicked).slice(0, 3);
   }
 
+  function buildRecentTen(selectedGames, allGames = []) {
+    const byId = new Set();
+    const recent = [];
+
+    [...selectedGames, ...allGames].forEach((game) => {
+      if (!game || byId.has(game.id) || recent.length >= 10) return;
+      byId.add(game.id);
+      recent.push(game);
+    });
+
+    return recent;
+  }
+
   function buildAllTimeBoard(games) {
     const totals = games.reduce((acc, game) => {
       acc.aaron += Number(game.aaronScore || 0);
@@ -112,14 +125,14 @@ window.CR = window.CR || {};
     };
   }
 
-  function buildSeasonBoard(selectedSeason, selectedGames, selectedSummary) {
+  function buildSeasonBoard(selectedSeason, selectedGames, selectedSummary, allGames = []) {
     const totals = selectedGames.reduce((acc, game) => {
       acc.aaron += Number(game.aaronScore || 0);
       acc.julie += Number(game.julieScore || 0);
       return acc;
     }, { aaron: 0, julie: 0 });
 
-    const recent = selectedGames.slice(0, 5);
+    const recent = buildRecentTen(selectedGames, allGames);
     const recentWins = recent.reduce((acc, game) => {
       if (game.winner === 'Aaron') acc.aaron += 1;
       if (game.winner === 'Julie') acc.julie += 1;
@@ -145,16 +158,7 @@ window.CR = window.CR || {};
   }
 
   function buildMomentum(selectedGames, allGames = []) {
-    const byId = new Set();
-    const recent = [];
-
-    [...selectedGames, ...allGames].forEach((game) => {
-      if (!game || byId.has(game.id) || recent.length >= 10) return;
-      byId.add(game.id);
-      recent.push(game);
-    });
-
-    return recent.map((game) => ({
+    return buildRecentTen(selectedGames, allGames).map((game) => ({
       id: game.id,
       winner: game.winner,
       playoff: game.playoff,
@@ -181,7 +185,7 @@ window.CR = window.CR || {};
       selectedSeason,
       selectedSummary,
       selectedGames,
-      seasonBoard: buildSeasonBoard(selectedSeason, selectedGames, selectedSummary),
+      seasonBoard: buildSeasonBoard(selectedSeason, selectedGames, selectedSummary, model.games || []),
       momentum: buildMomentum(selectedGames, model.games || []),
       recentGames: gameLog.slice(0, 4),
       gameLog,
