@@ -46,7 +46,7 @@ window.CR = window.CR || {};
             : existing.pickedByAaron > existing.pickedByJulie ? 'Aaron' : 'Julie';
 
           existing.recordWhenPicked = `${existing.winsWhenPicked}-${Math.max(0, existing.gamesPicked - existing.winsWhenPicked)}`;
-          existing.clutch = existing.totalPoints >= 10 ? 'Season-shaping chaos' : existing.totalPoints >= 6 ? 'Reliable swing piece' : 'Quietly clutch';
+          existing.clutch = existing.totalPoints >= 10 ? 'Season-shaping chaos' : existing.totalPoints >= 6 ? 'Reliable momentum piece' : 'Quietly clutch';
           byPlayer.set(pick.playerName, existing);
         });
       });
@@ -100,7 +100,7 @@ window.CR = window.CR || {};
     const latest = ordered[ordered.length - 1];
     const heater = !latest || latest.winner === 'Tie'
       ? { title: 'No current heater', copy: 'Nobody owns momentum right now.' }
-      : { title: `${latest.winner} heater`, copy: `${latest.winner} took the latest swing and is holding momentum.` };
+      : { title: `${latest.winner} heater`, copy: `${latest.winner} took the latest result and is holding momentum.` };
 
     return {
       heater,
