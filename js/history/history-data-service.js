@@ -114,6 +114,9 @@ window.CR = window.CR || {};
           id: String(row.id),
           seasonId: String(row.season_id),
           date: row.game_date || row.date || '',
+          opponent: row.opponent || '',
+          firstPick: row.first_picker || '',
+          firstGoalScorer: row.first_goal_scorer || '',
           title: gameTitle(row),
           playoff: isPlayoffGame(row),
           aaronScore,
@@ -132,7 +135,9 @@ window.CR = window.CR || {};
       label: seasonLabel(row),
       shortLabel: seasonShortLabel(row),
       isCurrent: String(row.id) === String(currentSeasonId),
-      note: row.note || (row.is_active ? 'Current season.' : 'Completed season.')
+      note: row.note || (row.is_active ? 'Current season.' : 'Completed season.'),
+      aaronScore: toNumber(row.aaron_final_total ?? row.aaron_points ?? row.aaron_total),
+      julieScore: toNumber(row.julie_final_total ?? row.julie_points ?? row.julie_total)
     }));
   }
 
