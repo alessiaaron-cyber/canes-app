@@ -13,9 +13,32 @@ window.CR = window.CR || {};
     `;
   }
 
-  function renderPlayerCard({ side, picks, themeClass, pointsFor, isPlayoffs }) {
+  function renderEmptyPickState(isFinal) {
+    return `
+      <div class="gd-player-card gd-player-card-empty">
+        <div class="gd-player-main">
+          <strong>No picks locked</strong>
+          <small>${isFinal ? 'No pick results were recorded for this side.' : 'Pick slots will appear here after players are selected.'}</small>
+        </div>
+        <div class="gd-player-total">0</div>
+      </div>
+    `;
+  }
+
+  function renderPlayerCard({ side, picks = [], themeClass, pointsFor, isPlayoffs, isFinal = false }) {
     const resolvedTheme = themeClass || 'owner-primary';
     const total = picks.reduce((sum, pick) => sum + pointsFor(pick), 0);
+    const pickRows = picks.length
+      ? picks.map((pick) => `
+          <div class="gd-player-card">
+            <div class="gd-player-main">
+              <strong>${pick.player}</strong>
+              ${renderStatChips(pick)}
+            </div>
+            <div class="gd-player-total">+${pointsFor(pick)}</div>
+          </div>
+        `).join('')
+      : renderEmptyPickState(isFinal);
 
     return `
       <article class="gd-card gd-score-card ${isPlayoffs ? 'gd-card-playoff' : ''}">
@@ -24,15 +47,7 @@ window.CR = window.CR || {};
           <span class="gd-pick-card-score">${total} pts</span>
         </div>
 
-        ${picks.map((pick) => `
-          <div class="gd-player-card">
-            <div class="gd-player-main">
-              <strong>${pick.player}</strong>
-              ${renderStatChips(pick)}
-            </div>
-            <div class="gd-player-total">+${pointsFor(pick)}</div>
-          </div>
-        `).join('')}
+        ${pickRows}
       </article>
     `;
   }
