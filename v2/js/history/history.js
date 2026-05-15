@@ -144,8 +144,16 @@ window.CR = window.CR || {};
     }));
   }
 
-  function buildMomentum(selectedGames) {
-    const recent = selectedGames.slice(0, 8);
+  function buildMomentum(selectedGames, allGames = []) {
+    const byId = new Set();
+    const recent = [];
+
+    [...selectedGames, ...allGames].forEach((game) => {
+      if (!game || byId.has(game.id) || recent.length >= 10) return;
+      byId.add(game.id);
+      recent.push(game);
+    });
+
     return recent.map((game) => ({
       id: game.id,
       winner: game.winner,
@@ -174,7 +182,7 @@ window.CR = window.CR || {};
       selectedSummary,
       selectedGames,
       seasonBoard: buildSeasonBoard(selectedSeason, selectedGames, selectedSummary),
-      momentum: buildMomentum(selectedGames),
+      momentum: buildMomentum(selectedGames, model.games || []),
       recentGames: gameLog.slice(0, 4),
       gameLog,
       playerSpotlights
