@@ -129,10 +129,7 @@
 }
 
 .history-scoreboard-banner {
-  display: grid;
-  grid-template-columns: 1fr;
-  align-items: center;
-  gap: 10px;
+  display: block;
   margin-top: 18px;
   padding: 14px 12px 13px;
   border-radius: var(--radius-lg, 22px);
@@ -140,27 +137,25 @@
   border: 1px solid rgba(15, 23, 42, 0.06);
 }
 
-.history-scoreboard-name-row {
+.history-scoreboard-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
+  grid-template-columns: minmax(0, 1fr) 30px minmax(0, 1fr);
+  align-items: end;
+  column-gap: 10px;
 }
 
-.history-scoreboard-name-row .history-scoreboard-name:last-child {
-  text-align: right;
-}
-
-.history-scoreboard-side {
+.history-scoreboard-team {
   min-width: 0;
   display: flex;
+  flex-direction: column;
   align-items: center;
+  gap: 4px;
+  text-align: center;
 }
 
-.history-scoreboard-side.is-right {
-  justify-content: flex-end;
-  text-align: right;
+.history-scoreboard-team.is-right {
+  align-items: center;
+  text-align: center;
 }
 
 .history-scoreboard-name {
@@ -174,27 +169,25 @@
   text-transform: uppercase;
 }
 
-.history-scoreboard-center {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 9px;
-  color: var(--ink-strong);
-}
-
-.history-scoreboard-center strong {
+.history-scoreboard-team strong {
   font-size: clamp(50px, 15vw, 72px);
   line-height: .88;
   font-weight: var(--font-heavy, 900);
   letter-spacing: -0.07em;
+  color: var(--ink-strong);
 }
 
-.history-scoreboard-center span {
+.history-scoreboard-divider {
+  align-self: end;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
   color: var(--text-tertiary);
   font-size: 24px;
   line-height: 1;
   font-weight: var(--font-heavy, 900);
-  transform: translateY(-1px);
+  transform: translateY(-4px);
 }
 
 .rivalry-board-score-grid,
@@ -412,6 +405,11 @@
 .rivalry-recap-card.winner-secondary,
 .rivalry-recap-card.winner-julie,
 .rivalry-recap-card.winner-tie { box-shadow: 0 8px 20px rgba(15, 23, 42, 0.045); }
+.rivalry-recap-card.winner-primary,
+.rivalry-recap-card.winner-aaron { border-color: rgba(200, 16, 46, 0.2); }
+.rivalry-recap-card.winner-secondary,
+.rivalry-recap-card.winner-julie { border-color: rgba(17, 24, 39, 0.18); }
+.rivalry-recap-card.winner-tie { border-color: rgba(14, 116, 144, 0.22); }
 
 .history-log-card { background: linear-gradient(180deg, #ffffff 0%, #fbfcfd 100%); box-shadow: none; }
 .history-log-topline > div { min-width: 0; width: 100%; }
@@ -427,7 +425,6 @@
 .history-outcome-pill.winner-secondary,
 .history-outcome-pill.winner-julie { background: rgba(17, 24, 39, 0.08); color: var(--ui-graphite, #111827); border-color: rgba(17, 24, 39, 0.1); }
 .history-outcome-pill.winner-tie { background: rgba(14, 116, 144, 0.12); color: #0e7490; border-color: rgba(14, 116, 144, 0.2); }
-.rivalry-recap-card.winner-tie { border-color: rgba(14, 116, 144, 0.2); }
 
 .history-recap-side { border-radius: var(--radius-md, 18px); border: 1px solid rgba(15,23,42,.06); background: rgba(248,250,252,.74); padding: 10px; }
 .rivalry-recap-card.is-archive .history-recap-side { padding: 9px; }
@@ -514,7 +511,7 @@
 
 @media (max-width: 430px) {
   .rivalry-board-title { font-size: clamp(24px, 6.4vw, 32px); }
-  .history-scoreboard-center strong { font-size: clamp(52px, 15vw, 68px); }
+  .history-scoreboard-team strong { font-size: clamp(52px, 15vw, 68px); }
   .history-recap-sides,
   .history-sheet-sides,
   .history-sheet-score-grid,
@@ -538,7 +535,7 @@
 @media (max-width: 380px) {
   .rivalry-board-title { font-size: 23px; }
   .history-scoreboard-name { font-size: 11px; letter-spacing: .06em; }
-  .history-scoreboard-center strong { font-size: 50px; }
+  .history-scoreboard-team strong { font-size: 50px; }
 }
 
 @media (min-width: 431px) {
