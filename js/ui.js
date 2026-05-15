@@ -10,6 +10,27 @@ window.CR.ui.escapeHtml = (value) => String(value ?? '')
   .replace(/\"/g, '&quot;')
   .replace(/'/g, '&#39;');
 
+window.CR.ui.setActionBusy = (button, isBusy, options = {}) => {
+  if (!button) return;
+
+  if (isBusy) {
+    if (!button.dataset.idleLabel) button.dataset.idleLabel = button.textContent || '';
+    button.disabled = true;
+    button.classList.add('is-busy');
+    button.setAttribute('aria-busy', 'true');
+    button.textContent = options.label || 'Working…';
+    return;
+  }
+
+  button.disabled = false;
+  button.classList.remove('is-busy');
+  button.removeAttribute('aria-busy');
+  if (button.dataset.idleLabel) {
+    button.textContent = button.dataset.idleLabel;
+    delete button.dataset.idleLabel;
+  }
+};
+
 window.CR.ui.lockBodyScroll = (className = 'sheet-open') => {
   const lock = window.CR.__bodyScrollLock || { locked: false, scrollY: 0, classes: new Set() };
   lock.classes.add(className);
