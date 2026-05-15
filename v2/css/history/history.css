@@ -30,8 +30,8 @@
 .rivalry-board-card {
   position: relative;
   padding-top: 18px;
-  background: radial-gradient(circle at top right, rgba(200,16,46,.12), transparent 34%), linear-gradient(180deg, #ffffff 0%, #fbfcfd 58%, #fff7f8 100%);
-  box-shadow: 0 14px 32px rgba(15, 23, 42, 0.07);
+  background: linear-gradient(180deg, #ffffff 0%, #fbfcfd 100%);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.055);
 }
 
 .history-hq-card,
@@ -66,6 +66,8 @@
   gap: 12px;
 }
 
+.rivalry-board-topline { align-items: flex-start; }
+
 .rivalry-board-title,
 .history-hq-title,
 .history-section-head h3,
@@ -76,9 +78,10 @@
 }
 
 .rivalry-board-title {
-  max-width: 12ch;
-  font-size: clamp(30px, 9vw, 44px);
-  line-height: .92;
+  max-width: none;
+  font-size: clamp(28px, 7.4vw, 40px);
+  line-height: .98;
+  text-wrap: balance;
 }
 
 .history-hero-copy {
@@ -94,10 +97,10 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 28px;
-  padding: 0 10px;
+  min-height: 26px;
+  padding: 0 9px;
   border-radius: var(--radius-pill, 999px);
-  font-size: 12px;
+  font-size: 11px;
   line-height: 1;
   white-space: nowrap;
   font-weight: var(--font-strong, 800);
@@ -108,9 +111,9 @@
 
 .history-status-pill.owner-primary,
 .history-status-pill.owner-aaron {
-  background: rgba(200, 16, 46, 0.09);
+  background: rgba(200, 16, 46, 0.08);
   color: var(--ui-canes-red, #c8102e);
-  border-color: rgba(200, 16, 46, 0.14);
+  border-color: rgba(200, 16, 46, 0.12);
 }
 
 .history-status-pill.owner-secondary,
@@ -160,9 +163,9 @@
 }
 
 .history-hero-score-card {
-  padding: 16px;
+  padding: 15px;
   border-color: rgba(15,23,42,.08);
-  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.045);
+  box-shadow: none;
 }
 
 .owner-primary,
@@ -185,7 +188,7 @@
 
 .history-hero-score-card .rivalry-score-value {
   margin-top: 2px;
-  font-size: 38px;
+  font-size: 36px;
 }
 
 .rivalry-score-value.owner-primary,
