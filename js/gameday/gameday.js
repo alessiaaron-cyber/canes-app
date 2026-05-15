@@ -5,7 +5,7 @@ window.CR = window.CR || {};
   const helpers = CR.gameDayHelpers || {};
   const render = CR.gameDayRender || {};
   const events = CR.gameDayEvents || {};
-  const roster = model.roster || [
+  const fallbackRoster = model.roster || [
     { name: 'Sebastian Aho', detail: 'C • Top line' },
     { name: 'Andrei Svechnikov', detail: 'RW • PP1' },
     { name: 'Seth Jarvis', detail: 'RW • Hot streak' },
@@ -50,10 +50,13 @@ window.CR = window.CR || {};
     CR.gameDay.carryover = { active: false };
   }
 
+  CR.gameDayRoster = CR.gameDay.roster || fallbackRoster;
+
   const $ = (s) => document.querySelector(s);
   const pointsFor = (pick) => model.pointsFor ? model.pointsFor(pick) : ((pick.goals * 2) + pick.assists + (pick.firstGoal ? 2 : 0));
   const clone = (value) => model.clone ? model.clone(value) : JSON.parse(JSON.stringify(value));
   const isPlayoffs = () => CR.gameDay.playoffMode === 'playoffs';
+  const getRoster = () => CR.gameDay.roster || CR.gameDayRoster || fallbackRoster;
   const getPregameStructured = () => helpers.getPregameStructured ? helpers.getPregameStructured(CR.gameDay) : ({
     Aaron: CR.gameDay.pregame.Aaron.map((player) => ({ player })),
     Julie: CR.gameDay.pregame.Julie.map((player) => ({ player }))
@@ -157,6 +160,35 @@ window.CR = window.CR || {};
     return base;
   };
 
+  function applyGameDayData(nextState = {}) {
+    const previousMode = CR.gameDay?.mode;
+    CR.gameDay = {
+      ...CR.gameDay,
+      ...nextState,
+      carryover: nextState.carryover || CR.gameDay?.carryover || { active: false },
+      pregame: nextState.pregame || CR.gameDay?.pregame || { Aaron: [], Julie: [] },
+      live: nextState.live || CR.gameDay?.live || { scores: { Aaron: 0, Julie: 0 }, period: '', users: { Aaron: [], Julie: [] }, feed: [] }
+    };
+    CR.gameDayRoster = nextState.roster || CR.gameDayRoster || fallbackRoster;
+    CR.gameDay.roster = CR.gameDayRoster;
+    CR.renderGameDayState?.(CR.gameDay.mode || previousMode || 'pregame');
+  }
+
+  async function refreshGameDayData(options = {}) {
+    if (!CR.gameDayDataService?.fetchGameDayData) return CR.gameDay;
+
+    try {
+      const nextState = await CR.gameDayDataService.fetchGameDayData();
+      applyGameDayData(nextState);
+      if (options.toast) CR.showToast?.('Game Day refreshed');
+      return CR.gameDay;
+    } catch (error) {
+      console.error('Game Day data refresh failed', error);
+      if (options.toast) CR.showToast?.({ message: 'Could not refresh Game Day', tier: 'warning' });
+      return CR.gameDay;
+    }
+  }
+
   CR.applyMockLiveBatch = (batch = []) => {
     const appliedEvents = [];
 
@@ -197,7 +229,7 @@ window.CR = window.CR || {};
     CR.renderGameDayState('live');
   };
 
-  const renderPlayerCard = ({ side, picks, score, red }) => render.renderPlayerCard({ side, picks, score, red, pointsFor });
+  const renderPlayerCard = ({ side, picks, score, red, themeClass, isPlayoffs }) => render.renderPlayerCard({ side, picks, score, red, themeClass, isPlayoffs, pointsFor });
 
   function setModalOpen(isOpen) {
     const modal = $('#manageSheet');
@@ -236,8 +268,9 @@ window.CR = window.CR || {};
   function renderPregame() {
     return render.renderPregameSection({
       users: getPregameStructured(),
-      roster,
-      claimedOwner
+      roster: getRoster(),
+      claimedOwner,
+      isPlayoffs: isPlayoffs()
     });
   }
 
@@ -245,7 +278,8 @@ window.CR = window.CR || {};
     return render.renderLiveSection({
       state: CR.gameDay.live,
       renderPlayerCard,
-      carryover: CR.gameDay.carryover
+      carryover: CR.gameDay.carryover,
+      isPlayoffs: isPlayoffs()
     });
   }
 
@@ -259,7 +293,8 @@ window.CR = window.CR || {};
       edgeText: leadingStatType(state.users),
       totalEventsText: `${totalGoals(state.users)} goals • ${totalAssists(state.users)} assists`,
       renderPlayerCard,
-      carryover: CR.gameDay.carryover
+      carryover: CR.gameDay.carryover,
+      isPlayoffs: isPlayoffs()
     });
   }
 
@@ -269,7 +304,7 @@ window.CR = window.CR || {};
     const allSelected = () => [...CR.gameDay.pregame.Aaron, ...CR.gameDay.pregame.Julie];
     actions.innerHTML = ['Aaron', 'Julie'].flatMap((side) => [0, 1].map((index) => {
       const selected = CR.gameDay.pregame[side][index] || '';
-      const opts = [''].concat(roster.map((r) => r.name)).map((name) => {
+      const opts = [''].concat(getRoster().map((r) => r.name)).map((name) => {
         const disabled = name && allSelected().includes(name) && name !== selected;
         return `<option value="${name}" ${name === selected ? 'selected' : ''} ${disabled ? 'disabled' : ''}>${name || 'Open slot'}</option>`;
       }).join('');
@@ -331,8 +366,7 @@ window.CR = window.CR || {};
       CR.renderGameDayState();
     });
     $('#refreshButton')?.addEventListener('click', () => {
-      CR.flashSync?.();
-      CR.showToast?.('Mock realtime refresh complete');
+      CR.refreshGameDayData?.({ toast: true });
     });
     $('#closeSheet')?.addEventListener('click', () => setModalOpen(false));
     $('#saveSheet')?.addEventListener('click', () => {
@@ -343,5 +377,9 @@ window.CR = window.CR || {};
       if (event.target.id === 'manageSheet') setModalOpen(false);
     });
     CR.renderGameDayState(CR.gameDay.mode || 'pregame');
+    refreshGameDayData();
   };
+
+  CR.applyGameDayData = applyGameDayData;
+  CR.refreshGameDayData = refreshGameDayData;
 })();
