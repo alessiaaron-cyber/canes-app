@@ -3,50 +3,38 @@ window.CR = window.CR || {};
 (() => {
   const CR = window.CR;
 
-  const baseRoster = [
-    { name: 'Sebastian Aho', detail: 'C • Top line' },
-    { name: 'Andrei Svechnikov', detail: 'RW • PP1' },
-    { name: 'Seth Jarvis', detail: 'RW • Hot streak' },
-    { name: 'Jaccob Slavin', detail: 'D • Defensive anchor' },
-    { name: 'Jordan Staal', detail: 'C • Two-way center' },
-    { name: 'Jesperi Kotkaniemi', detail: 'C • Middle six' },
-    { name: 'Brent Burns', detail: 'D • PP2' },
-    { name: 'Jackson Blake', detail: 'RW • Rookie spark' }
-  ];
-
   const createBaseState = () => ({
+    source: 'empty',
+    currentGameId: '',
     mode: 'pregame',
     playoffMode: 'regular',
     carryover: {
       active: false
     },
+    game: {
+      hasGame: false,
+      scheduleText: 'Schedule pending',
+      opponent: '',
+      headline: 'Next game not scheduled yet'
+    },
     pregame: {
-      Aaron: ['Sebastian Aho', 'Andrei Svechnikov'],
-      Julie: ['Seth Jarvis', 'Jaccob Slavin']
+      Aaron: [],
+      Julie: []
     },
     live: {
-      scores: { Aaron: 4, Julie: 3 },
-      period: '2nd • 8:14',
+      scores: { Aaron: 0, Julie: 0 },
+      period: 'Schedule pending',
       users: {
-        Aaron: [
-          { player: 'Sebastian Aho', goals: 1, assists: 0, firstGoal: true },
-          { player: 'Andrei Svechnikov', goals: 0, assists: 1, firstGoal: false }
-        ],
-        Julie: [
-          { player: 'Seth Jarvis', goals: 0, assists: 1, firstGoal: false },
-          { player: 'Jaccob Slavin', goals: 0, assists: 1, firstGoal: false }
-        ]
+        Aaron: [],
+        Julie: []
       },
-      feed: [
-        { icon: '🚨', title: 'Sebastian Aho goal', detail: 'Aaron scores through a picked player', points: 2, tier: 'medium' },
-        { icon: '🎯', title: 'Seth Jarvis assist', detail: 'Julie adds an assist point', points: 1, tier: 'light' },
-        { icon: '👑', title: 'First goal bonus', detail: 'Aho hit the first Canes goal bonus', points: 2, tier: 'heavy' }
-      ]
-    }
+      feed: []
+    },
+    roster: []
   });
 
   CR.gameDayModel = {
-    roster: baseRoster,
+    roster: [],
     draftOrder: ['Aaron', 'Julie', 'Aaron', 'Julie'],
     createInitialState() {
       return JSON.parse(JSON.stringify(createBaseState()));
@@ -54,8 +42,8 @@ window.CR = window.CR || {};
     clone(value) {
       return JSON.parse(JSON.stringify(value));
     },
-    pointsFor(pick) {
-      return (pick.goals * 2) + pick.assists + (pick.firstGoal ? 2 : 0);
+    pointsFor(pick = {}) {
+      return (Number(pick.goals || 0) * 2) + Number(pick.assists || 0) + (pick.firstGoal ? 2 : 0);
     },
     momentTier(kind) {
       if (kind === 'assist') return 'light';
