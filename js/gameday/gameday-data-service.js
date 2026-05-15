@@ -14,6 +14,10 @@ window.CR = window.CR || {};
     return String(value || '').trim().toLowerCase();
   }
 
+  function normalizeText(value) {
+    return String(value || '').trim().toLowerCase();
+  }
+
   function modeForGame(game) {
     const status = normalizeStatus(game?.status);
     if (status === 'final') return 'final';
@@ -62,8 +66,51 @@ window.CR = window.CR || {};
     }).filter(Boolean).sort((a, b) => a.sortKey.localeCompare(b.sortKey));
   }
 
-  function ownerBuckets() {
-    return FALLBACK_USERS.reduce((acc, owner) => { acc[owner] = []; return acc; }, {});
+  function mapProfiles(rows = []) {
+    return rows.filter((profile) => profile?.is_active !== false).map((profile) => ({
+      id: String(profile.id || ''),
+      email: profile.email || '',
+      username: profile.username || '',
+      displayName: profile.display_name || profile.username || profile.email || 'Player',
+      role: profile.role || 'member'
+    })).sort((a, b) => a.displayName.localeCompare(b.displayName));
+  }
+
+  function profileById(profiles = []) {
+    return profiles.reduce((acc, profile) => {
+      if (profile.id) acc[profile.id] = profile;
+      return acc;
+    }, {});
+  }
+
+  function profileByName(profiles = []) {
+    return profiles.reduce((acc, profile) => {
+      acc[normalizeText(profile.displayName)] = profile;
+      acc[normalizeText(profile.username)] = profile;
+      return acc;
+    }, {});
+  }
+
+  function ownerList(profiles = []) {
+    return profiles.length ? profiles.map((profile) => profile.displayName) : FALLBACK_USERS;
+  }
+
+  function ownerBuckets(profiles = []) {
+    return ownerList(profiles).reduce((acc, owner) => { acc[owner] = []; return acc; }, {});
+  }
+
+  function resolveOwner(pick = {}, context = {}) {
+    const byId = context.profilesById || {};
+    const byName = context.profilesByName || {};
+    const profile = byId[String(pick.owner_user_id || '')] || byName[normalizeText(pick.owner)] || null;
+    return profile?.displayName || pick.owner || '';
+  }
+
+  function resolveCurrentPicker(game = {}, context = {}) {
+    const byId = context.profilesById || {};
+    const byName = context.profilesByName || {};
+    const profile = byId[String(game.current_pick_user_id || '')] || byName[normalizeText(game.first_picker)] || null;
+    return profile ? { id: profile.id, displayName: profile.displayName } : { id: '', displayName: game.first_picker || '' };
   }
 
   function pointsForPick(pick, firstGoalScorer) {
@@ -73,10 +120,10 @@ window.CR = window.CR || {};
     return (goals * 2) + assists + (isFirstGoal ? 2 : 0);
   }
 
-  function mapPregamePicks(picks = []) {
-    const buckets = ownerBuckets();
+  function mapPregamePicks(picks = [], context = {}) {
+    const buckets = ownerBuckets(context.profiles);
     picks.slice().sort((a, b) => toNumber(a.pick_slot) - toNumber(b.pick_slot)).forEach((pick) => {
-      const owner = pick.owner || '';
+      const owner = resolveOwner(pick, context);
       const name = pick.player_name || '';
       if (!owner || !name) return;
       buckets[owner] = buckets[owner] || [];
@@ -85,18 +132,18 @@ window.CR = window.CR || {};
     return buckets;
   }
 
-  function mapLiveUsers(game, picks = []) {
-    const buckets = ownerBuckets();
+  function mapLiveUsers(game, picks = [], context = {}) {
+    const buckets = ownerBuckets(context.profiles);
     const firstGoalScorer = game?.first_goal_scorer || '';
     picks.slice().sort((a, b) => toNumber(a.pick_slot) - toNumber(b.pick_slot)).forEach((pick) => {
-      const owner = pick.owner || '';
+      const owner = resolveOwner(pick, context);
       const player = pick.player_name || '';
       if (!owner || !player) return;
       const goals = toNumber(pick.goals);
       const assists = toNumber(pick.assists);
       const firstGoal = Boolean(firstGoalScorer && player === firstGoalScorer && goals > 0);
       buckets[owner] = buckets[owner] || [];
-      buckets[owner].push({ player, goals, assists, firstGoal, points: toNumber(pick.points, pointsForPick(pick, firstGoalScorer)) });
+      buckets[owner].push({ player, goals, assists, firstGoal, points: toNumber(pick.points, pointsForPick(pick, firstGoalScorer)), ownerUserId: pick.owner_user_id || '' });
     });
     return buckets;
   }
@@ -150,11 +197,35 @@ window.CR = window.CR || {};
     return { hasGame: true, scheduleText, opponent: game.opponent || game.away_team || game.home_team || '', headline: game.opponent ? `Canes vs ${game.opponent}` : 'Canes game' };
   }
 
-  function normalizeGameDayState({ game, picks, roster }) {
+  function normalizeGameDayState({ game, picks, roster, profiles }) {
+    const context = { profiles, profilesById: profileById(profiles), profilesByName: profileByName(profiles) };
     const mode = modeForGame(game);
-    const liveUsers = mapLiveUsers(game, picks);
-    const scores = { Aaron: toNumber(game?.aaron_points, scoreFromUsers(liveUsers, 'Aaron')), Julie: toNumber(game?.julie_points, scoreFromUsers(liveUsers, 'Julie')) };
-    return { source: 'supabase', currentGameId: game?.id ? String(game.id) : '', mode, game: gameMeta(game), playoffMode: isPlayoffGame(game) ? 'playoffs' : 'regular', carryover: { active: Boolean(game?.carryover_active || game?.is_carryover) }, pregame: mapPregamePicks(picks), live: { scores, period: mode === 'pregame' ? formatScheduleText(game) : periodText(game), users: liveUsers, feed: buildFeed(game, liveUsers) }, roster: roster?.length ? roster : [] };
+    const liveUsers = mapLiveUsers(game, picks, context);
+    const owners = ownerList(profiles);
+    const scores = owners.reduce((acc, owner) => {
+      const legacyScoreKey = owner === 'Aaron' ? 'aaron_points' : owner === 'Julie' ? 'julie_points' : '';
+      acc[owner] = legacyScoreKey ? toNumber(game?.[legacyScoreKey], scoreFromUsers(liveUsers, owner)) : scoreFromUsers(liveUsers, owner);
+      return acc;
+    }, {});
+
+    return {
+      source: 'supabase',
+      currentGameId: game?.id ? String(game.id) : '',
+      mode,
+      game: gameMeta(game),
+      playoffMode: isPlayoffGame(game) ? 'playoffs' : 'regular',
+      carryover: { active: Boolean(game?.carryover_active || game?.is_carryover) },
+      draft: {
+        status: game?.draft_status || 'open',
+        currentPickNumber: toNumber(game?.current_pick_number, 1),
+        currentPicker: resolveCurrentPicker(game, context),
+        firstPicker: game?.first_picker || ''
+      },
+      users: profiles || [],
+      pregame: mapPregamePicks(picks, context),
+      live: { scores, period: mode === 'pregame' ? formatScheduleText(game) : periodText(game), users: liveUsers, feed: buildFeed(game, liveUsers) },
+      roster: roster?.length ? roster : []
+    };
   }
 
   function sortByGameNumber(games = []) {
@@ -190,13 +261,16 @@ window.CR = window.CR || {};
     const db = await CR.getSupabase();
     const game = await fetchCurrentGame();
     const playersPromise = db.from('players').select('*').order('player_name');
+    const profilesPromise = db.from('user_profiles').select('*').eq('is_active', true).order('display_name');
     const picksPromise = game?.id ? db.from('picks').select('*').eq('game_id', game.id).order('pick_slot') : Promise.resolve({ data: [], error: null });
-    const [playersRes, picksRes] = await Promise.all([playersPromise, picksPromise]);
+    const [playersRes, profilesRes, picksRes] = await Promise.all([playersPromise, profilesPromise, picksPromise]);
     if (playersRes.error) throw playersRes.error;
+    if (profilesRes.error) throw profilesRes.error;
     if (picksRes.error) throw picksRes.error;
     const roster = mapRoster(playersRes.data || []);
-    if (!game) return { source: 'supabase', currentGameId: '', mode: 'pregame', game: gameMeta(null), playoffMode: 'regular', carryover: { active: false }, pregame: ownerBuckets(), live: { scores: { Aaron: 0, Julie: 0 }, period: 'Schedule pending', users: ownerBuckets(), feed: [] }, roster };
-    return normalizeGameDayState({ game, picks: picksRes.data || [], roster });
+    const profiles = mapProfiles(profilesRes.data || []);
+    if (!game) return { source: 'supabase', currentGameId: '', mode: 'pregame', game: gameMeta(null), playoffMode: 'regular', carryover: { active: false }, draft: { status: 'pending', currentPickNumber: 0, currentPicker: { id: '', displayName: '' }, firstPicker: '' }, users: profiles, pregame: ownerBuckets(profiles), live: { scores: ownerList(profiles).reduce((acc, owner) => { acc[owner] = 0; return acc; }, {}), period: 'Schedule pending', users: ownerBuckets(profiles), feed: [] }, roster };
+    return normalizeGameDayState({ game, picks: picksRes.data || [], roster, profiles });
   }
 
   CR.gameDayDataService = { fetchGameDayData, normalizeGameDayState, rosterDisplayName, selectGameForGameDay };
