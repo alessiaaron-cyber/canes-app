@@ -21,6 +21,18 @@ window.CR = window.CR || {};
     return 'pregame';
   }
 
+  function isLiveStatus(status) {
+    return ['live', 'in_progress', 'in progress', 'active', 'crit'].includes(normalizeStatus(status));
+  }
+
+  function isFinalStatus(status) {
+    return normalizeStatus(status) === 'final';
+  }
+
+  function isHiddenStatus(status) {
+    return normalizeStatus(status) === 'hidden';
+  }
+
   function isPlayoffGame(game) {
     return String(game?.game_type || game?.gameType || '').toLowerCase().includes('playoff');
   }
@@ -127,6 +139,10 @@ window.CR = window.CR || {};
     return date.toLocaleString([], { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
   }
 
+  function isSameLocalDay(a, b) {
+    return Boolean(a && b && a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate());
+  }
+
   function gameMeta(game) {
     const date = scheduleDate(game);
     const scheduleText = date ? formatScheduleText(game) : 'Schedule pending';
@@ -141,6 +157,24 @@ window.CR = window.CR || {};
     return { source: 'supabase', currentGameId: game?.id ? String(game.id) : '', mode, game: gameMeta(game), playoffMode: isPlayoffGame(game) ? 'playoffs' : 'regular', carryover: { active: Boolean(game?.carryover_active || game?.is_carryover) }, pregame: mapPregamePicks(picks), live: { scores, period: mode === 'pregame' ? formatScheduleText(game) : periodText(game), users: liveUsers, feed: buildFeed(game, liveUsers) }, roster: roster?.length ? roster : [] };
   }
 
+  function sortByGameNumber(games = []) {
+    return games.slice().sort((a, b) => toNumber(a.game_number, 9999) - toNumber(b.game_number, 9999));
+  }
+
+  function selectGameForGameDay(games = []) {
+    const visibleGames = sortByGameNumber(games).filter((game) => !isHiddenStatus(game.status));
+    const now = new Date();
+
+    const liveGame = visibleGames.find((game) => isLiveStatus(game.status));
+    if (liveGame) return liveGame;
+
+    const sameDayFinal = visibleGames.find((game) => isFinalStatus(game.status) && isSameLocalDay(scheduleDate(game), now));
+    if (sameDayFinal) return sameDayFinal;
+
+    const nonFinalGame = visibleGames.find((game) => !isFinalStatus(game.status));
+    return nonFinalGame || null;
+  }
+
   async function fetchCurrentGame() {
     const db = await CR.getSupabase();
     const seasonsRes = await db.from('seasons').select('*').eq('is_active', true).limit(1).maybeSingle();
@@ -149,8 +183,7 @@ window.CR = window.CR || {};
     if (seasonsRes.data?.id) query = query.eq('season_id', seasonsRes.data.id);
     const gamesRes = await query.order('game_number', { ascending: true });
     if (gamesRes.error) throw gamesRes.error;
-    const games = gamesRes.data || [];
-    return games.find((game) => !['final', 'hidden'].includes(normalizeStatus(game.status))) || null;
+    return selectGameForGameDay(gamesRes.data || []);
   }
 
   async function fetchGameDayData() {
@@ -166,5 +199,5 @@ window.CR = window.CR || {};
     return normalizeGameDayState({ game, picks: picksRes.data || [], roster });
   }
 
-  CR.gameDayDataService = { fetchGameDayData, normalizeGameDayState, rosterDisplayName };
+  CR.gameDayDataService = { fetchGameDayData, normalizeGameDayState, rosterDisplayName, selectGameForGameDay };
 })();
