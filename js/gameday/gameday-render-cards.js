@@ -3,12 +3,20 @@ window.CR = window.CR || {};
 (() => {
   const CR = window.CR;
 
+  function utils() {
+    return CR.gameDayRenderUtils || {};
+  }
+
   function renderStatChips(pick) {
+    const goalsKey = utils().pickChangedKey?.(pick.player, 'goals');
+    const assistsKey = utils().pickChangedKey?.(pick.player, 'assists');
+    const firstGoalKey = utils().firstGoalChangedKey?.();
+
     return `
       <div class="gd-player-stats">
-        <span class="gd-stat ${pick.goals ? 'live' : ''}">G ${pick.goals}</span>
-        <span class="gd-stat ${pick.assists ? 'live' : ''}">A ${pick.assists}</span>
-        <span class="gd-stat ${pick.firstGoal ? 'live' : ''}">FG</span>
+        <span class="gd-stat ${pick.goals ? 'live' : ''} ${utils().changedClass?.(goalsKey)}">G ${pick.goals}</span>
+        <span class="gd-stat ${pick.assists ? 'live' : ''} ${utils().changedClass?.(assistsKey)}">A ${pick.assists}</span>
+        <span class="gd-stat ${pick.firstGoal ? 'live' : ''} ${utils().changedClass?.(firstGoalKey)}">FG</span>
       </div>
     `;
   }
@@ -28,6 +36,8 @@ window.CR = window.CR || {};
   function renderPlayerCard({ side, picks = [], themeClass, pointsFor, isPlayoffs, isFinal = false }) {
     const resolvedTheme = themeClass || 'owner-primary';
     const total = picks.reduce((sum, pick) => sum + pointsFor(pick), 0);
+    const scoreKey = utils().scoreChangedKey?.(side);
+
     const pickRows = picks.length
       ? picks.map((pick) => `
           <div class="gd-player-card">
@@ -41,7 +51,7 @@ window.CR = window.CR || {};
       : renderEmptyPickState(isFinal);
 
     return `
-      <article class="gd-card gd-score-card ${isPlayoffs ? 'gd-card-playoff' : ''}">
+      <article class="gd-card gd-score-card ${isPlayoffs ? 'gd-card-playoff' : ''} ${utils().changedClass?.(scoreKey)}">
         <div class="gd-pick-card-head">
           <strong class="${resolvedTheme}">${side}</strong>
           <span class="gd-pick-card-score">${total} pts</span>
