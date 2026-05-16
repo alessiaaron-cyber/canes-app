@@ -31,6 +31,7 @@ window.CR = window.CR || {};
     const current = state();
     if (!current) return;
     current.activeEditField = null;
+    current.profileEditOpen = false;
     current.startSeasonOpen = false;
     current.scoringEditOpen = false;
     current.rosterSheetOpen = false;
@@ -40,6 +41,102 @@ window.CR = window.CR || {};
 
   function makeId(prefix) {
     return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  }
+
+  function currentProfileDraft() {
+    const profile = CR.currentProfile || {};
+    return {
+      displayName: profile.display_name || profile.username || '',
+      colorHex: profile.color_hex || '#111827'
+    };
+  }
+
+  function colorOptionFor(hex, current = state()) {
+    const normalized = String(hex || '').trim().toLowerCase();
+    return current?.profileColorOptions?.find((option) => option.hex.toLowerCase() === normalized) || null;
+  }
+
+  function isColorAvailable(hex, current = state()) {
+    const option = colorOptionFor(hex, current);
+    if (!option) return false;
+
+    const profile = CR.currentProfile || {};
+    const currentId = String(profile.id || '');
+    const normalized = String(hex || '').trim().toLowerCase();
+
+    return !(current.users || []).some((user) => {
+      if (String(user.id || '') === currentId) return false;
+      const userHex = String(user.colorHex || user.color_hex || '').trim().toLowerCase();
+      const userOption = colorOptionFor(userHex, current);
+      return userHex === normalized || (userOption?.family && userOption.family === option.family);
+    });
+  }
+
+  async function refreshProfileAfterSave(profile) {
+    CR.currentProfile = profile;
+    CR.currentProfiles = (CR.currentProfiles || CR.gameDay?.users || []).map((user) => String(user.id || '') === String(profile.id || '') ? {
+      ...user,
+      displayName: profile.display_name || user.displayName,
+      display_name: profile.display_name,
+      colorHex: profile.color_hex,
+      color_hex: profile.color_hex,
+      colorLabel: profile.color_label,
+      color_label: profile.color_label
+    } : user);
+
+    if (CR.gameDay?.users) {
+      CR.gameDay.users = CR.gameDay.users.map((user) => String(user.id || '') === String(profile.id || '') ? {
+        ...user,
+        displayName: profile.display_name || user.displayName,
+        display_name: profile.display_name,
+        colorHex: profile.color_hex,
+        color_hex: profile.color_hex,
+        colorLabel: profile.color_label,
+        color_label: profile.color_label
+      } : user);
+    }
+
+    CR.identity?.applyUserColorVariables?.();
+    CR.renderAccountIdentity?.();
+    CR.renderGameDayState?.();
+    await CR.refreshHistoryData?.();
+  }
+
+  async function saveProfile(button) {
+    const current = state();
+    const profile = CR.currentProfile || {};
+    const draft = current.profileDraft || currentProfileDraft();
+    const displayName = String(draft.displayName || '').trim();
+    const colorHex = String(draft.colorHex || '').trim().toLowerCase();
+    const colorOption = colorOptionFor(colorHex, current);
+
+    if (!profile.id) throw new Error('No profile is loaded.');
+    if (!displayName) throw new Error('Display name is required.');
+    if (!colorOption) throw new Error('Choose an available profile color.');
+    if (!isColorAvailable(colorHex, current)) throw new Error('That color is already used or too similar to another player.');
+
+    CR.ui?.setActionBusy?.(button, true, { label: 'Saving…' });
+    const db = await CR.getSupabase();
+    const result = await db
+      .from('user_profiles')
+      .update({
+        display_name: displayName,
+        color_hex: colorOption.hex,
+        color_label: colorOption.label,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', profile.id)
+      .select('*')
+      .single();
+
+    if (result.error) throw result.error;
+
+    await refreshProfileAfterSave(result.data);
+    current.profileEditOpen = false;
+    current.profileDraft = null;
+    current.users = CR.identity?.getUsers?.() || current.users;
+    rerender();
+    CR.showToast?.({ message: 'Profile updated' });
   }
 
   function resetRosterDraft() {
@@ -63,10 +160,26 @@ window.CR = window.CR || {};
 
   function bindManageEvents() {
     const root = document.querySelector('#manageContent');
+    const editProfileButton = document.querySelector('#manageEditProfileButton');
+
+    editProfileButton?.addEventListener('click', () => {
+      const current = state();
+      closeAllSheets();
+      current.profileDraft = currentProfileDraft();
+      current.profileEditOpen = true;
+      rerender();
+    });
+
     if (!root) return;
 
     root.addEventListener('input', (event) => {
       const current = state();
+      const profileInput = event.target.closest('[data-manage-profile-input]');
+      if (profileInput) {
+        current.profileDraft = current.profileDraft || currentProfileDraft();
+        current.profileDraft[profileInput.dataset.manageProfileInput] = profileInput.value;
+        return;
+      }
       const newSeasonInput = event.target.closest('[data-manage-new-season-input]');
       if (newSeasonInput) { current.newSeasonDraft.seasonLabel = newSeasonInput.value; return; }
       const rosterInput = event.target.closest('[data-manage-roster-input]');
@@ -75,8 +188,33 @@ window.CR = window.CR || {};
       if (scheduleInput) current.scheduleDraft[scheduleInput.dataset.manageScheduleInput] = scheduleInput.value;
     });
 
-    root.addEventListener('click', (event) => {
+    root.addEventListener('click', async (event) => {
       const current = state();
+
+      const closeProfile = event.target.closest('[data-manage-close-profile-editor]');
+      if (closeProfile) { current.profileEditOpen = false; current.profileDraft = null; rerender(); return; }
+
+      const profileColor = event.target.closest('[data-manage-profile-color]');
+      if (profileColor && !profileColor.disabled) {
+        current.profileDraft = current.profileDraft || currentProfileDraft();
+        current.profileDraft.colorHex = profileColor.dataset.manageProfileColor;
+        rerender();
+        return;
+      }
+
+      const saveProfileButton = event.target.closest('[data-manage-save-profile]');
+      if (saveProfileButton) {
+        try {
+          await saveProfile(saveProfileButton);
+        } catch (error) {
+          console.error('Profile save failed', error);
+          CR.showToast?.({ message: error?.message || 'Could not save profile', tier: 'warning' });
+        } finally {
+          CR.ui?.setActionBusy?.(saveProfileButton, false);
+        }
+        return;
+      }
+
       const viewTrigger = event.target.closest('[data-manage-view]');
       if (viewTrigger) { closeAllSheets(); current.activeManageView = viewTrigger.dataset.manageView || 'main'; rerender({ scrollTop: true }); return; }
 
