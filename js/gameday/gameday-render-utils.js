@@ -7,12 +7,21 @@ window.CR = window.CR || {};
     return CR.identity || {};
   }
 
+  function user(index) {
+    return identity().getUser?.(index) || {};
+  }
+
   function userName(index) {
     return identity().getDisplayName?.(index) || (index === 0 ? 'Aaron' : 'Julie');
   }
 
   function scoreKey(index) {
-    return identity().getScoreKey?.(index) || userName(index);
+    return identity().getScoreKey?.(index) || legacyOwner(index) || userName(index);
+  }
+
+  function legacyOwner(index) {
+    const profileUser = user(index);
+    return profileUser.legacyOwner || profileUser.legacy_owner || (index === 0 ? 'Aaron' : 'Julie');
   }
 
   function ownerClass(index) {
@@ -43,18 +52,20 @@ window.CR = window.CR || {};
     return 'gameday:feed';
   }
 
+  function lookupKeys(index) {
+    return [scoreKey(index), legacyOwner(index), user(index).username, userName(index), index === 0 ? 'Aaron' : 'Julie'].filter(Boolean);
+  }
+
   function getUserPicks(users, index) {
-    const key = scoreKey(index);
-    const name = userName(index);
-    const fallback = index === 0 ? 'Aaron' : 'Julie';
-    return users?.[key] || users?.[name] || users?.[fallback] || [];
+    const keys = lookupKeys(index);
+    const key = keys.find((candidate) => Array.isArray(users?.[candidate]));
+    return users?.[key] || [];
   }
 
   function getUserScore(scores, index) {
-    const key = scoreKey(index);
-    const name = userName(index);
-    const fallback = index === 0 ? 'Aaron' : 'Julie';
-    return Number(scores?.[key] ?? scores?.[name] ?? scores?.[fallback] ?? 0);
+    const keys = lookupKeys(index);
+    const key = keys.find((candidate) => scores?.[candidate] !== undefined && scores?.[candidate] !== null);
+    return Number(scores?.[key] ?? 0);
   }
 
   function getSideContext(index, data = {}) {
@@ -62,6 +73,7 @@ window.CR = window.CR || {};
       index,
       name: userName(index),
       key: scoreKey(index),
+      legacyOwner: legacyOwner(index),
       ownerClass: ownerClass(index),
       picks: getUserPicks(data.users, index),
       score: getUserScore(data.scores, index)
@@ -73,8 +85,10 @@ window.CR = window.CR || {};
   }
 
   CR.gameDayRenderUtils = {
+    user,
     userName,
     scoreKey,
+    legacyOwner,
     ownerClass,
     changedClass,
     normalizeKeyPart,
@@ -82,6 +96,7 @@ window.CR = window.CR || {};
     pickChangedKey,
     firstGoalChangedKey,
     feedChangedKey,
+    lookupKeys,
     getUserPicks,
     getUserScore,
     getSideContext,
