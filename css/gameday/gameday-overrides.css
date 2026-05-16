@@ -26,6 +26,126 @@
   color: var(--gd-carryover-slate) !important;
 }
 
+.gd-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 14px 0 8px;
+}
+
+.gd-label {
+  color: var(--gd-muted);
+  font-size: .74rem;
+  font-weight: 900;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.gd-label-group {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.gd-picks-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  align-items: stretch;
+}
+
+.gd-picks-grid .gd-panel {
+  min-width: 0;
+}
+
+.gd-panel .gd-pick-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 58px;
+  margin: 10px 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--gd-border);
+  border-radius: 16px;
+  background: #fff;
+}
+
+.gd-panel .gd-pick-row:first-of-type {
+  margin-top: 12px;
+}
+
+.gd-panel .gd-pick-row:last-child {
+  margin-bottom: 12px;
+}
+
+.gd-pick-row.is-empty,
+.gd-pick-row.is-disabled {
+  background: #f8fafc;
+}
+
+.gd-pick-row-focus {
+  border-color: var(--cr-user-1-border, rgba(200, 16, 46, .2));
+  box-shadow: 0 0 0 3px var(--cr-user-1-soft, rgba(200, 16, 46, .08));
+}
+
+.gd-pick-icon {
+  flex: 0 0 30px;
+  width: 30px;
+  height: 30px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #f3f4f6;
+  color: var(--gd-muted);
+  font-weight: 1000;
+}
+
+.gd-pick-row:not(.is-empty) .gd-pick-icon {
+  background: var(--cr-current-user-soft, var(--gd-red-soft));
+  color: var(--cr-current-user-color, var(--gd-red));
+}
+
+.gd-roster {
+  overflow: hidden;
+}
+
+.gd-roster .gd-roster-row {
+  border-width: 0 0 1px;
+  border-radius: 0;
+}
+
+.gd-roster .gd-roster-row:last-child {
+  border-bottom: 0;
+}
+
+.gd-draft-btn {
+  flex: 0 0 auto;
+  min-height: 34px;
+  padding: 0 11px;
+  border: 1px solid var(--gd-border);
+  border-radius: var(--gd-pill);
+  background: var(--gd-ink);
+  color: #fff;
+  font: inherit;
+  font-size: .72rem;
+  font-weight: 900;
+  letter-spacing: .03em;
+}
+
+.gd-draft-btn:disabled {
+  background: #eef2f6;
+  color: var(--gd-muted);
+}
+
+.gd-draft-btn-playoff:not(:disabled) {
+  background: linear-gradient(135deg, var(--gd-playoff-gold), #9c6e18);
+  border-color: rgba(200,154,43,.45);
+}
+
 .gd-side-label.owner-primary,
 .gd-pick-card-head .owner-primary,
 .gd-tag.owner-primary {
@@ -135,5 +255,13 @@
   .gd-pill-playoff {
     font-size: .64rem;
     padding: 0 8px;
+  }
+
+  .gd-picks-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .gd-label-row {
+    align-items: flex-start;
   }
 }
