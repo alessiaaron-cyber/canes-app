@@ -76,20 +76,25 @@ window.CR = window.CR || {};
     };
   }
 
-  function rowsFromPregameState(gameId, pregame = {}) {
-    return OWNERS.flatMap((owner) => (pregame[owner] || []).map((playerName, index) => ({
+  function rowForSlot(gameId, owner, pickSlot, playerName = '') {
+    return {
       game_id: gameId,
       owner,
       owner_user_id: profileByDisplayName(owner)?.id || null,
-      pick_slot: index + 1,
-      player_name: playerName,
+      pick_slot: pickSlot,
+      player_name: playerName || '',
+      original_pick_text: playerName || null,
       goals: 0,
       assists: 0,
       points: 0,
-      picked_by_user_id: currentUserId() || null,
+      picked_by_user_id: playerName ? (currentUserId() || null) : null,
       updated_by_user_id: currentUserId() || null,
       updated_at: new Date().toISOString()
-    })));
+    };
+  }
+
+  function rowsFromPregameState(gameId, pregame = {}) {
+    return OWNERS.flatMap((owner) => [0, 1].map((index) => rowForSlot(gameId, owner, index + 1, pregame[owner]?.[index] || '')));
   }
 
   async function savePregamePicks(gameId, pregame) {
@@ -97,26 +102,16 @@ window.CR = window.CR || {};
     if (!gameId) throw new Error('No active game is available for saving picks.');
 
     const db = await CR.getSupabase();
-    const existingRes = await db.from('picks').select('*').eq('game_id', gameId);
-    if (existingRes.error) throw existingRes.error;
-
-    const existingRows = existingRes.data || [];
     const nextRows = rowsFromPregameState(gameId, pregame);
 
-    existingRows.forEach((row) => {
-      CR.realtime?.markLocalWrite?.('picks', row, 3000);
-    });
+    const upsertRes = await db
+      .from('picks')
+      .upsert(nextRows, { onConflict: 'game_id,owner,pick_slot' })
+      .select('*');
 
-    const deleteRes = await db.from('picks').delete().eq('game_id', gameId);
-    if (deleteRes.error) throw deleteRes.error;
+    if (upsertRes.error) throw upsertRes.error;
 
-    let savedRows = [];
-    if (nextRows.length) {
-      const insertRes = await db.from('picks').insert(nextRows).select('*');
-      if (insertRes.error) throw insertRes.error;
-      savedRows = insertRes.data || nextRows;
-    }
-
+    const savedRows = upsertRes.data || nextRows;
     savedRows.forEach((row) => {
       CR.realtime?.markLocalWrite?.('picks', row, 3000);
     });
@@ -151,19 +146,8 @@ window.CR = window.CR || {};
     if ((existingRes.data || []).length) throw new Error('That player has already been picked.');
 
     const slot = draftPickSlot(pickNumber);
-    const row = {
-      game_id: gameId,
-      owner: ownerProfile.displayName,
-      owner_user_id: ownerProfile.id || null,
-      pick_slot: slot,
-      player_name: playerName,
-      goals: 0,
-      assists: 0,
-      points: 0,
-      picked_by_user_id: userId,
-      updated_by_user_id: userId,
-      updated_at: new Date().toISOString()
-    };
+    const row = rowForSlot(gameId, ownerProfile.displayName, slot, playerName);
+    row.picked_by_user_id = userId;
 
     const upsertRes = await db
       .from('picks')
@@ -212,16 +196,7 @@ window.CR = window.CR || {};
       throw new Error('There is no drafted player in the last pick slot.');
     }
 
-    const clearPatch = {
-      player_name: '',
-      original_pick_text: null,
-      goals: 0,
-      assists: 0,
-      points: 0,
-      picked_by_user_id: null,
-      updated_by_user_id: currentUserId() || null,
-      updated_at: new Date().toISOString()
-    };
+    const clearPatch = rowForSlot(gameId, ownerProfile.displayName, slot, '');
 
     const pickUpdateRes = await db
       .from('picks')
