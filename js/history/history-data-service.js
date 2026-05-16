@@ -4,8 +4,8 @@ window.CR = window.CR || {};
   const CR = window.CR;
 
   const FALLBACK_USERS = [
-    { id: 'user-aaron', username: 'Aaron', displayName: 'Aaron', themeClass: 'owner-primary', avatarClass: 'avatar-primary', scoreKey: 'Aaron' },
-    { id: 'user-julie', username: 'Julie', displayName: 'Julie', themeClass: 'owner-secondary', avatarClass: 'avatar-secondary', scoreKey: 'Julie' }
+    { id: 'user-aaron', username: 'Aaron', displayName: 'Aaron', legacyOwner: 'Aaron', themeClass: 'owner-primary', avatarClass: 'avatar-primary', scoreKey: 'Aaron' },
+    { id: 'user-julie', username: 'Julie', displayName: 'Julie', legacyOwner: 'Julie', themeClass: 'owner-secondary', avatarClass: 'avatar-secondary', scoreKey: 'Julie' }
   ];
 
   function toNumber(value, fallback = 0) {
@@ -44,6 +44,18 @@ window.CR = window.CR || {};
       .replace(/^-+|-+$/g, '');
   }
 
+  function sortSeasons(rows = []) {
+    return rows.slice().sort((a, b) => String(a.season_key || a.display_name || a.id || '').localeCompare(String(b.season_key || b.display_name || b.id || '')));
+  }
+
+  function sortGames(rows = []) {
+    return rows.slice().sort((a, b) => toNumber(a.game_number, 9999) - toNumber(b.game_number, 9999));
+  }
+
+  function sortPicks(rows = []) {
+    return rows.slice().sort((a, b) => toNumber(a.pick_slot, 9999) - toNumber(b.pick_slot, 9999));
+  }
+
   function mapPlayers(rows) {
     const byId = new Map();
 
@@ -79,9 +91,8 @@ window.CR = window.CR || {};
   }
 
   function mapPicksForGame(game, picks, playerLookup) {
-    return (picks || [])
+    return sortPicks(picks || [])
       .filter((pick) => Number(pick.game_id) === Number(game.id))
-      .sort((a, b) => toNumber(a.pick_slot) - toNumber(b.pick_slot))
       .reduce((acc, pick) => {
         const owner = pick.owner || 'Unknown';
         const name = pick.player_name || '';
@@ -91,6 +102,8 @@ window.CR = window.CR || {};
         acc[owner] = acc[owner] || [];
         acc[owner].push({
           playerId,
+          playerName: name,
+          player: name,
           goals: toNumber(pick.goals),
           assists: toNumber(pick.assists),
           firstGoal: Boolean(game.first_goal_scorer && name === game.first_goal_scorer && toNumber(pick.goals) > 0),
@@ -101,7 +114,7 @@ window.CR = window.CR || {};
   }
 
   function mapGames(rows, picks, playerLookup) {
-    return (rows || [])
+    return sortGames(rows || [])
       .filter((row) => row && row.status !== 'Hidden' && isFinalGame(row))
       .map((row) => {
         const aaronScore = toNumber(row.aaron_points);
@@ -124,6 +137,7 @@ window.CR = window.CR || {};
           playoff: isPlayoffGame(row),
           aaronScore,
           julieScore,
+          winner,
           summary: `${gameTitle(row)} finished ${aaronScore}-${julieScore}.`,
           tags: [gameType, resultTag].filter(Boolean),
           moments: firstGoal.length ? firstGoal : [`${winner === 'Tie' ? 'Tie game' : `${winner} took the result`}`],
@@ -133,7 +147,7 @@ window.CR = window.CR || {};
   }
 
   function mapSeasons(rows, currentSeasonId) {
-    return (rows || []).map((row) => ({
+    return sortSeasons(rows || []).map((row) => ({
       id: String(row.id),
       label: seasonLabel(row),
       shortLabel: seasonShortLabel(row),
@@ -147,29 +161,29 @@ window.CR = window.CR || {};
   async function fetchHistoryData() {
     const db = await CR.getSupabase();
 
-    const seasonsRes = await db.from('seasons').select('*').order('season_key');
+    const seasonsRes = await db.from('seasons').select('*');
     if (seasonsRes.error) throw seasonsRes.error;
 
-    const seasons = seasonsRes.data || [];
+    const seasons = sortSeasons(seasonsRes.data || []);
     const activeSeason = seasons.find((season) => season.is_active) || seasons[seasons.length - 1] || null;
     const currentSeasonId = activeSeason?.id ? String(activeSeason.id) : '';
 
     const [gamesRes, playersRes] = await Promise.all([
-      db.from('games').select('*').order('game_number'),
-      db.from('players').select('*').order('player_name')
+      db.from('games').select('*'),
+      db.from('players').select('*')
     ]);
 
     if (gamesRes.error) throw gamesRes.error;
     if (playersRes.error) throw playersRes.error;
 
-    const gamesRows = gamesRes.data || [];
+    const gamesRows = sortGames(gamesRes.data || []);
     let picksRows = [];
 
     if (gamesRows.length) {
       const gameIds = gamesRows.map((game) => game.id);
-      const picksRes = await db.from('picks').select('*').in('game_id', gameIds).order('pick_slot');
+      const picksRes = await db.from('picks').select('*').in('game_id', gameIds);
       if (picksRes.error) throw picksRes.error;
-      picksRows = picksRes.data || [];
+      picksRows = sortPicks(picksRes.data || []);
     }
 
     const players = mapPlayers(playersRes.data || []);
@@ -178,7 +192,7 @@ window.CR = window.CR || {};
     return {
       source: 'supabase',
       currentSeasonId,
-      users: FALLBACK_USERS,
+      users: CR.identity?.getUsers?.() || FALLBACK_USERS,
       seasons: mapSeasons(seasons, currentSeasonId),
       players,
       games: mapGames(gamesRows, picksRows, playerLookup)
