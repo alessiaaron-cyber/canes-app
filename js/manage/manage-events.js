@@ -86,15 +86,8 @@ window.CR = window.CR || {};
       }
     }
 
-    const freshUsers = CR.identity?.getUsers?.() || [];
-
-    if (CR.gameDay) {
-      CR.gameDay.profileUsers = freshUsers;
-    }
-
     CR.identity?.applyUserColorVariables?.();
     CR.renderAccountIdentity?.();
-    CR.renderGameDayState?.();
 
     try {
       await CR.refreshHistoryData?.();
