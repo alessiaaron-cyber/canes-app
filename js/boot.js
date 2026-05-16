@@ -161,6 +161,7 @@ window.CR = window.CR || {};
     CR.pendingAuthEmail = '';
     CR.currentUser = null;
     CR.currentProfile = null;
+    CR.currentProfiles = [];
     CR.session = null;
     await boot();
   }
@@ -226,7 +227,10 @@ window.CR = window.CR || {};
       };
     }
 
-    const profile = await CR.auth.loadProfile(user);
+    const [profile, profiles] = await Promise.all([
+      CR.auth.loadProfile(user),
+      CR.auth.loadActiveProfiles()
+    ]);
 
     if (!profile) {
       return {
@@ -239,7 +243,8 @@ window.CR = window.CR || {};
       state: STATES.READY,
       session,
       user,
-      profile
+      profile,
+      profiles
     };
   }
 
@@ -284,8 +289,11 @@ window.CR = window.CR || {};
           CR.session = resolved.session;
           CR.currentUser = resolved.user;
           CR.currentProfile = resolved.profile;
+          CR.currentProfiles = resolved.profiles || [];
 
           if (sameUserAlreadyMounted) {
+            CR.identity?.applyUserColorVariables?.();
+            CR.renderAccountIdentity?.();
             return;
           }
 
