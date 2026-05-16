@@ -4,8 +4,8 @@ window.CR = window.CR || {};
   const CR = window.CR;
 
   const fallbackUsers = [
-    { username: 'Aaron', displayName: 'Aaron', themeClass: 'owner-primary', avatarClass: 'avatar-primary', scoreKey: 'Aaron', colorHex: '#c8102e', colorLabel: 'Canes Red' },
-    { username: 'Julie', displayName: 'Julie', themeClass: 'owner-secondary', avatarClass: 'avatar-secondary', scoreKey: 'Julie', colorHex: '#111827', colorLabel: 'Graphite' }
+    { username: 'Aaron', displayName: 'Aaron', legacyOwner: 'Aaron', themeClass: 'owner-primary', avatarClass: 'avatar-primary', scoreKey: 'Aaron', colorHex: '#c8102e', colorLabel: 'Canes Red' },
+    { username: 'Julie', displayName: 'Julie', legacyOwner: 'Julie', themeClass: 'owner-secondary', avatarClass: 'avatar-secondary', scoreKey: 'Julie', colorHex: '#111827', colorLabel: 'Graphite' }
   ];
 
   function normalizeHex(value, fallback = '#111827') {
@@ -38,23 +38,67 @@ window.CR = window.CR || {};
     return `#${[adjust(rgb.r), adjust(rgb.g), adjust(rgb.b)].map((part) => part.toString(16).padStart(2, '0')).join('')}`;
   }
 
+  function compact(value) {
+    return String(value || '').trim();
+  }
+
   function normalizeUser(user, index) {
     const fallback = fallbackUsers[index] || fallbackUsers[0];
-    const username = user?.username || user?.displayName || user?.display_name || fallback.username;
-    const displayName = user?.displayName || user?.display_name || user?.username || fallback.displayName;
-    const themeClass = user?.themeClass || user?.theme_class || fallback.themeClass;
-    const avatarClass = user?.avatarClass || user?.avatar_class || (themeClass === 'owner-secondary' ? 'avatar-secondary' : 'avatar-primary');
-    const scoreKey = user?.scoreKey || user?.score_key || displayName || username || fallback.scoreKey;
+    const profileDisplay = compact(user?.display_name);
+    const appDisplay = compact(user?.displayName);
+    const username = compact(user?.username) || fallback.username;
+    const legacyOwner = compact(user?.legacyOwner || user?.legacy_owner || user?.owner || fallback.legacyOwner || fallback.scoreKey);
+    const displayName = profileDisplay || appDisplay || username || fallback.displayName;
+    const themeClass = compact(user?.themeClass || user?.theme_class) || fallback.themeClass;
+    const avatarClass = compact(user?.avatarClass || user?.avatar_class) || (themeClass === 'owner-secondary' ? 'avatar-secondary' : 'avatar-primary');
+    const scoreKey = compact(user?.scoreKey || user?.score_key || legacyOwner) || fallback.scoreKey;
     const colorHex = normalizeHex(user?.colorHex || user?.color_hex, fallback.colorHex);
-    const colorLabel = user?.colorLabel || user?.color_label || fallback.colorLabel || 'User color';
+    const colorLabel = compact(user?.colorLabel || user?.color_label) || fallback.colorLabel || 'User color';
 
-    return { ...user, username, displayName, themeClass, avatarClass, scoreKey, colorHex, colorLabel };
+    return {
+      ...user,
+      username,
+      displayName,
+      display_name: displayName,
+      legacyOwner,
+      legacy_owner: legacyOwner,
+      themeClass,
+      avatarClass,
+      scoreKey,
+      colorHex,
+      colorLabel
+    };
+  }
+
+  function mergeProfileUsers(users = []) {
+    const profiles = Array.isArray(CR.currentProfiles) ? CR.currentProfiles : [];
+    return users.map((user, index) => {
+      const fallback = fallbackUsers[index] || {};
+      const normalized = normalizeUser(user, index);
+      const profile = profiles.find((item) => {
+        return String(item.id || '') === String(normalized.id || '') ||
+          compact(item.username).toLowerCase() === compact(normalized.username).toLowerCase() ||
+          compact(item.display_name).toLowerCase() === compact(normalized.legacyOwner || fallback.legacyOwner).toLowerCase();
+      });
+
+      if (!profile) return normalized;
+
+      return normalizeUser({
+        ...normalized,
+        ...profile,
+        legacyOwner: normalized.legacyOwner,
+        legacy_owner: normalized.legacyOwner,
+        scoreKey: normalized.scoreKey,
+        themeClass: normalized.themeClass,
+        avatarClass: normalized.avatarClass
+      }, index);
+    });
   }
 
   function getUsers(source) {
     const candidates = source?.users || CR.gameDay?.users || CR.currentProfiles || CR.historyMockData?.users || CR.gameDayUsers || fallbackUsers;
     const users = Array.isArray(candidates) && candidates.length ? candidates : fallbackUsers;
-    return users.map(normalizeUser);
+    return mergeProfileUsers(users).map(normalizeUser);
   }
 
   function getUser(index = 0, source) {
@@ -63,8 +107,16 @@ window.CR = window.CR || {};
 
   function findUser(indexOrName = 0, source) {
     if (typeof indexOrName === 'number') return getUser(indexOrName, source);
-    const lookup = String(indexOrName || '').trim().toLowerCase();
-    return getUsers(source).find((user) => [user.id, user.username, user.displayName, user.scoreKey].some((value) => String(value || '').trim().toLowerCase() === lookup)) || null;
+    const lookup = compact(indexOrName).toLowerCase();
+    return getUsers(source).find((user) => [
+      user.id,
+      user.username,
+      user.display_name,
+      user.displayName,
+      user.scoreKey,
+      user.legacyOwner,
+      user.legacy_owner
+    ].some((value) => compact(value).toLowerCase() === lookup)) || null;
   }
 
   function getDisplayName(index = 0, source) {
@@ -147,6 +199,7 @@ window.CR = window.CR || {};
     leaderClass,
     winnerClass,
     applyUserColorVariables,
+    normalizeUser,
     normalizeHex,
     shade,
     rgbString
