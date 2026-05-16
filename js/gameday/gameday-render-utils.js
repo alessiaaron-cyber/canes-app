@@ -57,15 +57,17 @@ window.CR = window.CR || {};
   }
 
   function getUserPicks(users, index) {
+    const source = users && typeof users === 'object' ? users : {};
     const keys = lookupKeys(index);
-    const key = keys.find((candidate) => Array.isArray(users?.[candidate]));
-    return users?.[key] || [];
+    const key = keys.find((candidate) => Array.isArray(source?.[candidate]));
+    return Array.isArray(source?.[key]) ? source[key] : [];
   }
 
   function getUserScore(scores, index) {
+    const source = scores && typeof scores === 'object' ? scores : {};
     const keys = lookupKeys(index);
-    const key = keys.find((candidate) => scores?.[candidate] !== undefined && scores?.[candidate] !== null);
-    return Number(scores?.[key] ?? 0);
+    const key = keys.find((candidate) => source?.[candidate] !== undefined && source?.[candidate] !== null);
+    return Number(source?.[key] ?? 0);
   }
 
   function getSideContext(index, data = {}) {
