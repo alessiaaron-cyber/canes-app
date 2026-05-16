@@ -20,6 +20,135 @@ window.CR = window.CR || {};
   const renderStartSeasonSheet = sheets.renderStartSeasonSheet || (() => '');
   const renderScoringSheet = sheets.renderScoringSheet || (() => '');
 
+  function currentProfile() {
+    return CR.currentProfile || {};
+  }
+
+  function currentUser() {
+    return CR.currentUser || {};
+  }
+
+  function profileDraft(state) {
+    const profile = currentProfile();
+    return state.profileDraft || {
+      displayName: profile.display_name || profile.username || '',
+      colorHex: profile.color_hex || profile.colorHex || '#111827'
+    };
+  }
+
+  function colorFamilyFor(hex, state) {
+    const normalized = String(hex || '').trim().toLowerCase();
+    return state.profileColorOptions?.find((option) => option.hex.toLowerCase() === normalized)?.family || '';
+  }
+
+  function colorDisabledReason(option, state, draft) {
+    const currentId = String(currentProfile().id || '');
+    const optionHex = String(option.hex || '').toLowerCase();
+    const optionFamily = option.family;
+    const currentHex = String(draft.colorHex || '').toLowerCase();
+
+    if (optionHex === currentHex) return '';
+
+    const conflict = (state.users || []).find((user) => {
+      if (String(user.id || '') === currentId) return false;
+      const userHex = String(user.colorHex || user.color_hex || '').toLowerCase();
+      if (!userHex) return false;
+      return userHex === optionHex || colorFamilyFor(userHex, state) === optionFamily;
+    });
+
+    if (!conflict) return '';
+
+    const conflictHex = String(conflict.colorHex || conflict.color_hex || '').toLowerCase();
+    if (conflictHex === optionHex) return `Already used by ${escapeHtml(conflict.displayName || conflict.username || 'another player')}`;
+    return `Too similar to ${escapeHtml(conflict.displayName || conflict.username || 'another player')}`;
+  }
+
+  function renderProfileColorButton(option, state, draft) {
+    const selected = String(option.hex).toLowerCase() === String(draft.colorHex || '').toLowerCase();
+    const reason = colorDisabledReason(option, state, draft);
+    const disabled = Boolean(reason);
+
+    return `
+      <button
+        class="manage-color-option ${selected ? 'is-selected' : ''} ${disabled ? 'is-disabled' : ''}"
+        type="button"
+        data-manage-profile-color="${escapeHtml(option.hex)}"
+        ${disabled ? 'disabled' : ''}
+        style="--profile-color:${escapeHtml(option.hex)}"
+      >
+        <span class="manage-color-swatch"></span>
+        <span class="manage-color-copy">
+          <strong>${escapeHtml(option.label)}</strong>
+          <small>${selected ? 'Current color' : (reason || 'Available')}</small>
+        </span>
+      </button>
+    `;
+  }
+
+  function renderProfileEditSheet(state) {
+    if (!state.profileEditOpen) return '';
+
+    const profile = currentProfile();
+    const user = currentUser();
+    const draft = profileDraft(state);
+    const role = profile.role || 'member';
+
+    return `
+      <div class="manage-edit-sheet" role="dialog" aria-modal="true" aria-labelledby="profileEditTitle">
+        <div class="manage-edit-backdrop" data-manage-close-profile-editor></div>
+        <div class="manage-edit-card profile-edit-card">
+          <div class="manage-edit-header">
+            <div>
+              <div class="eyebrow">Account</div>
+              <h2 id="profileEditTitle">Edit Profile</h2>
+              <p>Personalize how you appear across Game Day, History, and Manage.</p>
+            </div>
+            <button class="manage-edit-close" type="button" data-manage-close-profile-editor aria-label="Close">×</button>
+          </div>
+
+          <div class="manage-profile-form">
+            <label class="history-sheet-field">
+              <span>Display name</span>
+              <input class="history-sheet-input" type="text" maxlength="40" value="${escapeHtml(draft.displayName)}" data-manage-profile-input="displayName" />
+            </label>
+
+            <div class="manage-readonly-grid">
+              <div class="manage-readonly-field">
+                <span>Username</span>
+                <strong>@${escapeHtml(profile.username || 'member')}</strong>
+              </div>
+              <div class="manage-readonly-field">
+                <span>Role</span>
+                <strong>${escapeHtml(String(role).charAt(0).toUpperCase() + String(role).slice(1))}</strong>
+              </div>
+            </div>
+
+            <div class="manage-readonly-field is-wide">
+              <span>Email</span>
+              <strong>${escapeHtml(user.email || profile.email || '—')}</strong>
+            </div>
+
+            <div class="manage-color-section">
+              <div class="manage-color-section-head">
+                <div>
+                  <span class="eyebrow">Profile color</span>
+                  <strong>Choose your rivalry color</strong>
+                </div>
+                <span class="manage-color-current" style="--profile-color:${escapeHtml(draft.colorHex)}">${escapeHtml(draft.colorHex)}</span>
+              </div>
+              <p class="manage-color-note">Colors already used by another player, or too visually similar to theirs, are unavailable.</p>
+              <div class="manage-color-grid">
+                ${(state.profileColorOptions || []).map((option) => renderProfileColorButton(option, state, draft)).join('')}
+              </div>
+            </div>
+          </div>
+
+          <button class="cr-button save" type="button" data-manage-save-profile>Save Profile</button>
+        </div>
+      </div>
+    `;
+  }
+
   function renderNotifications(state) {
     const enabledCount = [state.notifications.pushEnabled, state.notifications.toastsEnabled].filter(Boolean).length;
     return `<section class="panel-card manage-card">${renderCardHeader('Notifications', 'Rivalry alerts', 'Simple notification controls while the smarter rivalry logic runs automatically behind the scenes.', { className: 'neutral', label: `${enabledCount} on` })}<div class="manage-setting-stack">${renderToggleRow({ key: 'notifications.pushEnabled', label: 'Push alerts', hint: 'Send rivalry moments to your phone.', checked: state.notifications.pushEnabled })}${renderToggleRow({ key: 'notifications.toastsEnabled', label: 'In-app toasts', hint: 'Show quick banners while the app is open.', checked: state.notifications.toastsEnabled })}</div></section>`;
@@ -72,7 +201,7 @@ window.CR = window.CR || {};
   }
 
   function renderMain(state) {
-    return `<div class="content-stack manage-stack">${renderNotifications(state)}${renderWatchExperience(state)}${renderManageTools(state)}${renderSeasonSetup(state)}${renderStatus(state)}</div>${renderEditSheet(state)}${renderStartSeasonSheet(state)}${renderScoringSheet(state)}`;
+    return `<div class="content-stack manage-stack">${renderNotifications(state)}${renderWatchExperience(state)}${renderManageTools(state)}${renderSeasonSetup(state)}${renderStatus(state)}</div>${renderProfileEditSheet(state)}${renderEditSheet(state)}${renderStartSeasonSheet(state)}${renderScoringSheet(state)}`;
   }
 
   function renderRoot(state) {
@@ -81,5 +210,5 @@ window.CR = window.CR || {};
     return renderMain(state);
   }
 
-  CR.manageRender = { renderRoot };
+  CR.manageRender = { renderRoot, renderProfileEditSheet };
 })();
