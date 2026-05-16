@@ -23,8 +23,8 @@ window.CR = window.CR || {};
   ];
 
   const FALLBACK_USERS = [
-    { id: 'aaron', username: 'Aaron', displayName: 'Aaron', themeClass: 'owner-primary', avatarClass: 'avatar-primary', scoreKey: 'Aaron', colorHex: '#c8102e', colorLabel: 'Canes Red' },
-    { id: 'julie', username: 'Julie', displayName: 'Julie', themeClass: 'owner-secondary', avatarClass: 'avatar-secondary', scoreKey: 'Julie', colorHex: '#111827', colorLabel: 'Graphite' }
+    { id: 'aaron', username: 'Aaron', displayName: 'Aaron', legacyOwner: 'Aaron', themeClass: 'owner-primary', avatarClass: 'avatar-primary', scoreKey: 'Aaron', colorHex: '#c8102e', colorLabel: 'Canes Red' },
+    { id: 'julie', username: 'Julie', displayName: 'Julie', legacyOwner: 'Julie', themeClass: 'owner-secondary', avatarClass: 'avatar-secondary', scoreKey: 'Julie', colorHex: '#111827', colorLabel: 'Graphite' }
   ];
 
   const MOCK_ROSTER = [
@@ -38,21 +38,31 @@ window.CR = window.CR || {};
   function getManageUsers() {
     const identityUsers = CR.identity?.getUsers?.();
     const source = Array.isArray(identityUsers) && identityUsers.length ? identityUsers : FALLBACK_USERS;
-    return source.map((user, index) => ({
-      id: user.id || `user-${index + 1}`,
-      username: user.username || user.displayName || `Player ${index + 1}`,
-      displayName: user.displayName || user.username || `Player ${index + 1}`,
-      themeClass: user.themeClass || (index === 0 ? 'owner-primary' : 'owner-secondary'),
-      avatarClass: user.avatarClass || (index === 0 ? 'avatar-primary' : 'avatar-secondary'),
-      scoreKey: user.scoreKey || user.username || user.displayName || `Player ${index + 1}`,
-      colorHex: user.colorHex || user.color_hex || FALLBACK_USERS[index]?.colorHex || '#111827',
-      colorLabel: user.colorLabel || user.color_label || FALLBACK_USERS[index]?.colorLabel || 'Profile color'
-    }));
+    return source.map((user, index) => {
+      const fallback = FALLBACK_USERS[index] || FALLBACK_USERS[0];
+      const displayName = user.displayName || user.display_name || user.username || `Player ${index + 1}`;
+      const username = user.username || fallback.username || displayName;
+      const legacyOwner = user.legacyOwner || user.legacy_owner || fallback.legacyOwner || fallback.scoreKey;
+      const scoreKey = user.scoreKey || user.score_key || legacyOwner || username;
+
+      return {
+        id: user.id || `user-${index + 1}`,
+        username,
+        displayName,
+        label: displayName,
+        legacyOwner,
+        themeClass: user.themeClass || (index === 0 ? 'owner-primary' : 'owner-secondary'),
+        avatarClass: user.avatarClass || (index === 0 ? 'avatar-primary' : 'avatar-secondary'),
+        scoreKey,
+        colorHex: user.colorHex || user.color_hex || fallback.colorHex || '#111827',
+        colorLabel: user.colorLabel || user.color_label || fallback.colorLabel || 'Profile color'
+      };
+    });
   }
 
   function buildSchedule(users) {
-    const first = users[0]?.username || 'Player 1';
-    const second = users[1]?.username || 'Player 2';
+    const first = users[0]?.displayName || 'Player 1';
+    const second = users[1]?.displayName || 'Player 2';
     return [
       { id: 'game-1', date: '2026-03-08', opponent: 'NYR', type: 'Playoffs', firstPicker: first },
       { id: 'game-2', date: '2026-03-10', opponent: 'FLA', type: 'Regular', firstPicker: second }
@@ -74,7 +84,7 @@ window.CR = window.CR || {};
       firstPicker: {
         title: 'First picker',
         hint: 'Choose who picks first next game. Picks alternate after that.',
-        options: users.map((user) => user.username)
+        options: users.map((user) => user.displayName)
       }
     };
   }
@@ -90,7 +100,7 @@ window.CR = window.CR || {};
 
   function build() {
     const users = getManageUsers();
-    const firstPicker = users[0]?.username || 'Player 1';
+    const firstPicker = users[0]?.displayName || 'Player 1';
     const currentSeason = '2025-26';
     const nextSeason = getNextSeasonLabel(currentSeason);
 
