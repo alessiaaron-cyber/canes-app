@@ -72,8 +72,7 @@ body { min-height: 100vh; min-height: 100dvh; margin: 0; background: linear-grad
 .app-header-actions { display: flex; align-items: center; gap: 10px; }
 .account-chip { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: var(--radius-pill); background: rgba(255,255,255,0.88); border: 1px solid rgba(15,23,42,0.06); box-shadow: none; backdrop-filter: blur(18px); }
 .account-chip-avatar, .account-panel-avatar { display: flex; align-items: center; justify-content: center; border-radius: 50%; background: linear-gradient(135deg, var(--cr-current-user-color, #111827), var(--cr-current-user-color-dark, #1f2937)); color: #fff; font-weight: var(--font-heavy); }
-.account-chip-avatar.avatar-primary, .account-panel-avatar.avatar-primary { background: linear-gradient(135deg, var(--cr-user-1-color, #c8102e), var(--cr-user-1-color-dark, #7f1021)); box-shadow: none; }
-.account-chip-avatar.avatar-secondary, .account-panel-avatar.avatar-secondary { background: linear-gradient(135deg, var(--cr-user-2-color, #111827), var(--cr-user-2-color-dark, #344054)); box-shadow: none; }
+.account-chip-avatar.avatar-primary, .account-chip-avatar.avatar-secondary, .account-panel-avatar.avatar-primary, .account-panel-avatar.avatar-secondary { background: linear-gradient(135deg, var(--cr-current-user-color, #111827), var(--cr-current-user-color-dark, #1f2937)); box-shadow: none; }
 .account-chip-avatar { width: 34px; height: 34px; font-size: 13px; }
 .account-chip-copy { min-width: 0; }
 .account-chip-name { font-size: 13px; font-weight: var(--font-strong); line-height: 1.1; }
