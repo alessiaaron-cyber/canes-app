@@ -88,14 +88,19 @@ window.CR = window.CR || {};
 
     const freshUsers = CR.identity?.getUsers?.() || [];
 
-    if (CR.gameDay?.users) {
-      CR.gameDay.users = freshUsers;
+    if (CR.gameDay) {
+      CR.gameDay.profileUsers = freshUsers;
     }
 
     CR.identity?.applyUserColorVariables?.();
     CR.renderAccountIdentity?.();
     CR.renderGameDayState?.();
-    await CR.refreshHistoryData?.();
+
+    try {
+      await CR.refreshHistoryData?.();
+    } catch (error) {
+      console.warn('History refresh after profile save failed', error);
+    }
   }
 
   async function saveProfile(button) {
@@ -127,12 +132,14 @@ window.CR = window.CR || {};
 
     if (result.error) throw result.error;
 
-    await refreshProfileAfterSave(result.data);
     current.profileEditOpen = false;
     current.profileDraft = null;
-    current.users = CR.identity?.getUsers?.() || current.users;
     rerender();
     CR.showToast?.({ message: 'Profile updated' });
+
+    await refreshProfileAfterSave(result.data);
+    current.users = CR.identity?.getUsers?.() || current.users;
+    rerender();
   }
 
   function resetRosterDraft() {
@@ -204,7 +211,8 @@ window.CR = window.CR || {};
           await saveProfile(saveProfileButton);
         } catch (error) {
           console.error('Profile save failed', error);
-          CR.showToast?.({ message: error?.message || 'Could not save profile', tier: 'warning' });
+          const message = error?.message || String(error || 'Could not save profile');
+          CR.showToast?.({ message, tier: 'warning' });
         } finally {
           CR.ui?.setActionBusy?.(saveProfileButton, false);
         }
