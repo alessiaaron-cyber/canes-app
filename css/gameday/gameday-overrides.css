@@ -29,21 +29,21 @@
 .gd-side-label.owner-primary,
 .gd-pick-card-head .owner-primary,
 .gd-tag.owner-primary {
-  color: var(--gd-red) !important;
+  color: var(--cr-user-1-color, var(--gd-red)) !important;
 }
 
 .gd-side-label.owner-secondary,
 .gd-pick-card-head .owner-secondary,
 .gd-tag.owner-secondary {
-  color: var(--gd-ink) !important;
+  color: var(--cr-user-2-color, var(--gd-ink)) !important;
 }
 
 .gd-panel-head.owner-primary {
-  background: linear-gradient(135deg, var(--gd-red), var(--gd-red-dark));
+  background: linear-gradient(135deg, var(--cr-user-1-color, var(--gd-red)), var(--cr-user-1-color-dark, var(--gd-red-dark)));
 }
 
 .gd-panel-head.owner-secondary {
-  background: linear-gradient(135deg, #202530, #434b57);
+  background: linear-gradient(135deg, var(--cr-user-2-color, #202530), var(--cr-user-2-color-dark, #434b57));
 }
 
 .gd-panel-head.owner-primary,
@@ -54,16 +54,16 @@
 }
 
 .gd-panel-head-playoff.owner-primary {
-  background: linear-gradient(135deg, #b60f2a 0%, #7c1226 72%, #5d4a20 100%);
+  background: linear-gradient(135deg, var(--cr-user-1-color, #b60f2a) 0%, var(--cr-user-1-color-dark, #7c1226) 72%, #5d4a20 100%);
 }
 
 .gd-panel-head-playoff.owner-secondary {
-  background: linear-gradient(135deg, #1d2330 0%, #313a48 72%, #5c5136 100%);
+  background: linear-gradient(135deg, var(--cr-user-2-color, #1d2330) 0%, var(--cr-user-2-color-dark, #313a48) 72%, #5c5136 100%);
 }
 
 .gd-sim-button.owner-primary {
-  background: var(--gd-red);
-  border-color: var(--gd-red);
+  background: var(--cr-user-1-color, var(--gd-red));
+  border-color: var(--cr-user-1-color, var(--gd-red));
   color: #fff !important;
 }
 
@@ -74,8 +74,8 @@
 
 .gd-sim-button.owner-secondary {
   background: #fff;
-  border-color: var(--gd-border);
-  color: var(--gd-ink) !important;
+  border-color: var(--cr-user-2-border, var(--gd-border));
+  color: var(--cr-user-2-color, var(--gd-ink)) !important;
 }
 
 .gd-hero-topline {
