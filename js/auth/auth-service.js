@@ -52,6 +52,20 @@ window.CR = window.CR || {};
     return data || null;
   }
 
+  async function loadActiveProfiles() {
+    const supabase = await CR.getSupabase();
+
+    const { data, error } = await supabase
+      .from('user_profiles')
+      .select('*')
+      .eq('is_active', true)
+      .order('created_at', { ascending: true });
+
+    if (error) throw error;
+
+    return data || [];
+  }
+
   async function isAllowedUser() {
     const supabase = await CR.getSupabase();
 
@@ -68,6 +82,7 @@ window.CR = window.CR || {};
     verifyOtp,
     signOut,
     loadProfile,
+    loadActiveProfiles,
     isAllowedUser
   };
 })();
