@@ -94,28 +94,19 @@ window.CR = window.CR || {};
     return Array.from(byPlayer.values()).sort((a, b) => b.totalPoints - a.totalPoints || b.gamesPicked - a.gamesPicked).slice(0, 3);
   }
 
-  function buildRecentTen(selectedGames) {
-    return selectedGames.slice(0, 10);
-  }
+  function buildRecentTen(selectedGames) { return selectedGames.slice(0, 10); }
 
   function buildAllTimeBoard(model) {
     const bySeason = model.seasons || [];
     let aaron = 0;
     let julie = 0;
-
     bySeason.forEach((season) => {
       const games = model.seasonGames?.[season.id] || [];
       const totals = seasonTotals(season, games);
       aaron += totals.aaron;
       julie += totals.julie;
     });
-
-    const lead = aaron === julie
-      ? 'Rivalry tied all-time'
-      : aaron > julie
-        ? `Aaron leads the rivalry by ${aaron - julie}`
-        : `Julie leads the rivalry by ${julie - aaron}`;
-
+    const lead = aaron === julie ? 'Rivalry tied all-time' : aaron > julie ? `Aaron leads the rivalry by ${aaron - julie}` : `Julie leads the rivalry by ${julie - aaron}`;
     return { aaron, julie, lead, totalGames: model.games?.length || 0 };
   }
 
@@ -125,115 +116,30 @@ window.CR = window.CR || {};
     let current = { owner: '', count: 0 };
     let biggestBlowout = null;
     const firstGoalCounts = new Map();
-
     ordered.forEach((game) => {
       if (game.winner !== 'Tie') {
         if (current.owner === game.winner) current.count += 1;
         else current = { owner: game.winner, count: 1 };
         if (current.count > longest.count) longest = { ...current };
       }
-
       const margin = Number(game.margin || Math.abs(Number(game.aaronScore || 0) - Number(game.julieScore || 0)));
-      if (hasRealScore(game) && (!biggestBlowout || margin > biggestBlowout.margin)) {
-        biggestBlowout = { owner: game.winner, margin, title: gameLabel(game) };
-      }
-
+      if (hasRealScore(game) && (!biggestBlowout || margin > biggestBlowout.margin)) biggestBlowout = { owner: game.winner, margin, title: gameLabel(game) };
       const scorer = firstGoalScorer(game);
       if (scorer && scorer !== '—') firstGoalCounts.set(scorer, (firstGoalCounts.get(scorer) || 0) + 1);
     });
-
-    const firstGoalKing = Array.from(firstGoalCounts.entries()).sort((a, b) => b[1] - a[1])[0] || ['—', 0];
-    const latest = ordered.filter(hasRealScore).slice(-1)[0];
-    const heater = !latest || latest.winner === 'Tie'
-      ? { title: 'No current heater', copy: 'Nobody owns momentum right now.' }
-      : { title: `${latest.winner} heater`, copy: `${latest.winner} took the latest scored result and is holding momentum.` };
-
-    return {
-      heater,
-      cards: [
-        { label: 'Longest streak', value: `${longest.owner} W${longest.count}`, copy: 'The longest run from completed game data.' },
-        { label: 'Biggest blowout', value: `${biggestBlowout?.owner || '—'} +${biggestBlowout?.margin || 0}`, copy: `${biggestBlowout?.title || 'No scored game yet'} had the largest margin.` },
-        { label: 'First-goal king', value: firstGoalKing[0], copy: `${firstGoalKing[1]} first-goal hits logged` }
-      ]
-    };
+    const topFirstGoal = Array.from(firstGoalCounts.entries()).sort((a, b) => b[1] - a[1])[0];
+    return { longest, biggestBlowout, topFirstGoal };
   }
 
-  function signatureNight(selectedGames) {
-    if (!selectedGames.length) return 'No completed game rows yet.';
+  function buildMomentum(games) { return buildRecentTen(games).map((game) => ({ winner: game.winner, playoff: isPlayoffGame(game), id: game.id })); }
+  function buildGameLog(games) { return games.slice().sort((a, b) => Number(b.displayNumber || 0) - Number(a.displayNumber || 0)); }
 
-    const scoredGames = selectedGames.filter(hasRealScore).map((game) => ({
-      ...game,
-      label: gameLabel(game),
-      marginValue: Math.abs(Number(game.aaronScore || 0) - Number(game.julieScore || 0)),
-      combinedValue: Number(game.aaronScore || 0) + Number(game.julieScore || 0)
-    }));
-
-    if (!scoredGames.length) {
-      return 'Completed game rows exist, but no scored results are available yet.';
-    }
-
-    const biggest = scoredGames.slice().sort((a, b) => b.marginValue - a.marginValue)[0];
-    const wildest = scoredGames.slice().sort((a, b) => b.combinedValue - a.combinedValue)[0];
-    const playoff = scoredGames.find((game) => isPlayoffGame(game));
-
-    if (playoff) return `${playoff.label}: playoff result (${playoff.aaronScore}-${playoff.julieScore}).`;
-    if (biggest && biggest.marginValue >= 3) return `${biggest.label}: biggest margin (${biggest.winner} +${biggest.marginValue}).`;
-    if (wildest) return `${wildest.label}: highest combined score (${wildest.combinedValue} pts).`;
-    return `${scoredGames[0].label}: latest scored result.`;
-  }
-
-  function buildSeasonBoard(selectedSeason, selectedGames, selectedSummary) {
-    const totals = seasonTotals(selectedSeason, selectedGames);
-    const recent = buildRecentTen(selectedGames);
-    const recentWins = recent.reduce((acc, game) => {
-      if (game.winner === 'Aaron') acc.aaron += 1;
-      if (game.winner === 'Julie') acc.julie += 1;
-      if (game.winner === 'Tie') acc.tie += 1;
-      return acc;
-    }, { aaron: 0, julie: 0, tie: 0 });
-
-    const recentText = recent.length
-      ? `Last ${recent.length}: Aaron ${recentWins.aaron} • Julie ${recentWins.julie}${recentWins.tie ? ` • Tie ${recentWins.tie}` : ''}`
-      : 'No completed game rows yet';
-
-    return {
-      ...totals,
-      seasonLabel: selectedSeason?.label || 'Season',
-      recordText: selectedSummary?.recordText || '—',
-      playoffText: selectedSummary?.playoffText || '—',
-      bestGameTitle: signatureNight(selectedGames),
-      recentText
-    };
-  }
-
-  function buildGameLog(selectedGames) {
-    return selectedGames.map((game, index) => ({
-      ...game,
-      playoff: isPlayoffGame(game),
-      displayNumber: selectedGames.length - index,
-      subtitle: gameSubtitle(game),
-      firstGoalScorer: firstGoalScorer(game)
-    }));
-  }
-
-  function buildMomentum(selectedGames) {
-    return buildRecentTen(selectedGames).map((game) => ({
-      id: game.id,
-      winner: game.winner,
-      playoff: Boolean(game.playoff),
-      shortLabel: game.playoff ? 'P' : 'R'
-    }));
-  }
-
-  function momentumSignature(items = []) {
-    return items.map((item) => `${item.id}:${item.winner}:${item.playoff ? 'P' : 'R'}`).join('|');
-  }
-
-  function buildStaticHistoryData(model) {
-    return {
-      allTimeBoard: buildAllTimeBoard(model),
-      highlights: buildHighlights(model.games || [])
-    };
+  function buildSeasonBoard(season, games, summary) {
+    const totals = seasonTotals(season, games);
+    const aaron = totals.aaron;
+    const julie = totals.julie;
+    const leader = aaron === julie ? 'Tied' : aaron > julie ? 'Aaron leads' : 'Julie leads';
+    return { seasonLabel: season?.label || summary?.label || 'Season', aaron, julie, recordText: `${aaron}-${julie}`, recentText: leader, bestGameTitle: games.find(hasRealScore)?.title || '' };
   }
 
   function buildSeasonScopedData(model, seasonId) {
@@ -243,54 +149,26 @@ window.CR = window.CR || {};
     const selectedSummary = model.seasonSummaries?.find((season) => season.seasonId === resolvedSeasonId) || null;
     const playerSpotlights = buildSeasonPlayerSpotlights(selectedGames.filter(hasRealScore));
     const gameLog = buildGameLog(selectedGames);
+    return { selectedSeason, selectedSummary, selectedGames, seasonBoard: buildSeasonBoard(selectedSeason, gameLog, selectedSummary), momentum: buildMomentum(gameLog), recentGames: gameLog.slice(0, 4), gameLog, playerSpotlights };
+  }
 
-    return {
-      selectedSeason,
-      selectedSummary,
-      selectedGames,
-      seasonBoard: buildSeasonBoard(selectedSeason, gameLog, selectedSummary),
-      momentum: buildMomentum(gameLog),
-      recentGames: gameLog.slice(0, 4),
-      gameLog,
-      playerSpotlights
-    };
+  function buildStaticHistoryData(model) {
+    return { allTimeBoard: buildAllTimeBoard(model), highlights: { ...buildHighlights(model.games || []), cards: [] }, seasonSummaries: model.seasonSummaries || [] };
   }
 
   function getScopedData(model, state) {
     const cache = CR.historyCache || (CR.historyCache = { staticData: null, seasons: {} });
     const hqSeasonId = model.currentSeasonId || state.seasonId;
-
-    if (!cache.staticData) {
-      cache.staticData = buildStaticHistoryData(model);
-    }
-
-    if (!cache.seasons[state.seasonId]) {
-      cache.seasons[state.seasonId] = buildSeasonScopedData(model, state.seasonId);
-    }
-
-    if (!cache.seasons[hqSeasonId]) {
-      cache.seasons[hqSeasonId] = buildSeasonScopedData(model, hqSeasonId);
-    }
-
-    return {
-      ...model,
-      ...cache.staticData,
-      ...cache.seasons[state.seasonId],
-      hqSeasonData: cache.seasons[hqSeasonId]
-    };
+    if (!cache.staticData) cache.staticData = buildStaticHistoryData(model);
+    if (!cache.seasons[state.seasonId]) cache.seasons[state.seasonId] = buildSeasonScopedData(model, state.seasonId);
+    if (!cache.seasons[hqSeasonId]) cache.seasons[hqSeasonId] = buildSeasonScopedData(model, hqSeasonId);
+    return { ...model, ...cache.staticData, ...cache.seasons[state.seasonId], hqSeasonData: cache.seasons[hqSeasonId] };
   }
 
   function ensureHistoryShell(root) {
     if (CR.historyDom?.root === root) return;
-
     root.innerHTML = CR.historyRender.renderRootShell();
-    CR.historyDom = {
-      root,
-      hq: root.querySelector('#historyPanelHq'),
-      seasons: root.querySelector('#historyPanelSeasons'),
-      allGames: root.querySelector('#historyPanelAllGames'),
-      admin: root.querySelector('#historyAdminLayer')
-    };
+    CR.historyDom = { root, hq: root.querySelector('#historyPanelHq'), seasons: root.querySelector('#historyPanelSeasons'), allGames: root.querySelector('#historyPanelAllGames'), admin: root.querySelector('#historyAdminLayer') };
     CR.historyPanelKeys = { hq: '', seasons: '', all_games: '', admin: '' };
   }
 
@@ -301,11 +179,7 @@ window.CR = window.CR || {};
     CR.historyDom.allGames.hidden = view !== 'all_games';
   }
 
-  function renderPanel(name, key, html, target) {
-    if (CR.historyPanelKeys[name] === key) return;
-    target.innerHTML = html;
-    CR.historyPanelKeys[name] = key;
-  }
+  function renderPanel(name, key, html, target) { if (CR.historyPanelKeys[name] === key) return; target.innerHTML = html; CR.historyPanelKeys[name] = key; }
 
   function lockSheetScroll() {
     if (CR.historyScrollLock?.locked) return;
@@ -325,149 +199,77 @@ window.CR = window.CR || {};
     window.scrollTo(0, scrollY);
   }
 
-  function syncSheetScrollLock() {
-    const isOpen = Boolean(CR.historyState?.sheet?.open);
-    if (isOpen) lockSheetScroll();
-    else if (CR.historyScrollLock?.locked) unlockSheetScroll();
-  }
+  function syncSheetScrollLock() { const isOpen = Boolean(CR.historyState?.sheet?.open); if (isOpen) lockSheetScroll(); else if (CR.historyScrollLock?.locked) unlockSheetScroll(); }
 
   function renderHistoryUnavailable(message = 'History data could not be loaded.') {
     const root = document.querySelector('#historyView');
     if (!root) return;
-
-    root.innerHTML = `
-      <section class="panel-card history-hq-card">
-        <div class="history-section-head">
-          <div>
-            <div class="eyebrow">History</div>
-            <h3>Unavailable</h3>
-          </div>
-        </div>
-        <p class="history-support-copy">${message}</p>
-      </section>
-    `;
+    root.innerHTML = `<section class="panel-card history-hq-card"><div class="history-section-head"><div><div class="eyebrow">History</div><h3>Unavailable</h3></div></div><p class="history-support-copy">${message}</p></section>`;
   }
 
   function renderHistory() {
     const root = document.querySelector('#historyView');
     if (!root || !CR.historyData || !CR.historyState) return;
-
+    CR.identity?.applyUserColorVariables?.({ users: CR.historyData.users });
     ensureHistoryShell(root);
-
     const scoped = getScopedData(CR.historyData, CR.historyState);
     const hqMomentumKey = momentumSignature(scoped.hqSeasonData?.momentum || []);
     const hqKey = `${CR.historyData.currentSeasonId}:${hqMomentumKey}`;
     const seasonKey = `${CR.historyState.seasonId}`;
-
     renderPanel('hq', `hq:${hqKey}`, CR.historyRender.renderHQ(scoped), CR.historyDom.hq);
     renderPanel('seasons', 'seasons:static', CR.historyRender.renderSeasonsOverview(scoped), CR.historyDom.seasons);
     renderPanel('all_games', `all_games:${seasonKey}`, CR.historyRender.renderAllGames(scoped), CR.historyDom.allGames);
-
-    const sheetState = CR.historyState.sheet?.open
-      ? `${CR.historyState.sheet.title}|${CR.historyState.sheet.message}|${CR.historyState.sheet.primaryAction}`
-      : 'closed';
+    const sheetState = CR.historyState.sheet?.open ? `${CR.historyState.sheet.title}|${CR.historyState.sheet.message}|${CR.historyState.sheet.primaryAction}` : 'closed';
     renderPanel('admin', `admin:${sheetState}`, CR.historyRender.renderAdminSheet(CR.historyState), CR.historyDom.admin);
-
     syncPanelVisibility(CR.historyState.view);
     syncSheetScrollLock();
-
-    if (!CR.historyEventsBound) {
-      CR.historyEvents.bindHistoryEvents();
-      CR.historyEventsBound = true;
-    }
+    if (!CR.historyEventsBound) { CR.historyEvents.bindHistoryEvents(); CR.historyEventsBound = true; }
   }
 
+  function momentumSignature(momentum = []) { return momentum.map((item) => `${item.id}:${item.winner}:${item.playoff}`).join('|'); }
   function changedKeysFromRealtimePayloads(payloads = []) {
     const keys = [];
-    payloads.forEach((payload) => {
-      const row = payload.new || payload.old || {};
-      if (payload.table === 'games' && row.id) {
-        keys.push(`history:game:${row.id}`);
-        keys.push(`history:game:${row.id}:score`);
-      }
-      if (payload.table === 'picks') {
-        const gameId = row.game_id;
-        if (gameId) keys.push(`history:game:${gameId}`);
-        if (row.id) keys.push(`history:pick:${row.id}`);
-      }
-    });
+    payloads.forEach((payload) => { const row = payload.new || payload.old || {}; if (payload.table === 'games' && row.id) { keys.push(`history:game:${row.id}`); keys.push(`history:game:${row.id}:score`); } if (payload.table === 'picks') { const gameId = row.game_id; if (gameId) keys.push(`history:game:${gameId}`); if (row.id) keys.push(`history:pick:${row.id}`); } });
     return Array.from(new Set(keys));
   }
 
   function registerHistoryRealtime() {
     if (!CR.realtime?.register || CR.historyRealtimeRegistered) return;
     CR.historyRealtimeRegistered = true;
-
-    CR.realtime.register('history', {
-      tables: ['games', 'picks'],
-      debounceMs: 220,
-      onChange: async (payloads) => {
-        const keys = changedKeysFromRealtimePayloads(payloads);
-        if (keys.length) {
-          CR.ui?.markChanged?.(keys, { onChange: () => renderHistory() });
-        }
-        await refreshHistoryData();
-      }
-    });
-
+    CR.realtime.register('history', { tables: ['games', 'picks'], debounceMs: 220, onChange: async (payloads) => { const keys = changedKeysFromRealtimePayloads(payloads); if (keys.length) CR.ui?.markChanged?.(keys, { onChange: () => renderHistory() }); await refreshHistoryData(); } });
     CR.realtime.start?.();
   }
 
   async function refreshHistoryData(options = {}) {
-    if (CR.historyState?.sheet?.open && !options.force) {
-      CR.historyNeedsRefresh = true;
-      return;
-    }
-
+    if (CR.historyState?.sheet?.open && !options.force) { CR.historyNeedsRefresh = true; return; }
     try {
       const previousState = CR.historyState || {};
       const source = await CR.historyDataService.fetchHistoryData();
-
       CR.historyData = CR.historyModel.build(source);
+      CR.identity?.applyUserColorVariables?.({ users: CR.historyData.users });
       CR.historyCache = { staticData: null, seasons: {} };
       CR.historyPanelKeys = { hq: '', seasons: '', all_games: '', admin: '' };
-
       const validSeason = CR.historyData.seasons?.some((season) => season.id === previousState.seasonId);
-      CR.historyState = {
-        seasonId: validSeason ? previousState.seasonId : CR.historyData.currentSeasonId,
-        view: previousState.view || 'hq',
-        previousView: previousState.previousView || 'hq',
-        returnView: previousState.returnView || 'hq',
-        sheet: previousState.sheet?.open && !options.closeSheet ? previousState.sheet : { open: false }
-      };
-
+      CR.historyState = { seasonId: validSeason ? previousState.seasonId : CR.historyData.currentSeasonId, view: previousState.view || 'hq', previousView: previousState.previousView || 'hq', returnView: previousState.returnView || 'hq', sheet: previousState.sheet?.open && !options.closeSheet ? previousState.sheet : { open: false } };
       CR.historyNeedsRefresh = false;
       renderHistory();
-    } catch (error) {
-      console.error('History refresh failed', error);
-      CR.showToast?.({ message: 'Could not refresh History', tier: 'warning' });
-    }
+    } catch (error) { console.error('History refresh failed', error); CR.showToast?.({ message: 'Could not refresh History', tier: 'warning' }); }
   }
 
   async function initHistory() {
     try {
       const source = await CR.historyDataService.fetchHistoryData();
-
       CR.historyData = CR.historyModel.build(source);
+      CR.identity?.applyUserColorVariables?.({ users: CR.historyData.users });
       CR.historyCache = { staticData: null, seasons: {} };
       CR.historyDom = null;
       CR.historyEventsBound = false;
       CR.historyPanelKeys = { hq: '', seasons: '', all_games: '', admin: '' };
       CR.historyScrollLock = { locked: false, scrollY: 0 };
-      CR.historyState = {
-        seasonId: CR.historyData.currentSeasonId,
-        view: 'hq',
-        previousView: 'hq',
-        returnView: 'hq',
-        sheet: { open: false }
-      };
-
+      CR.historyState = { seasonId: CR.historyData.currentSeasonId, view: 'hq', previousView: 'hq', returnView: 'hq', sheet: { open: false } };
       registerHistoryRealtime();
       renderHistory();
-    } catch (error) {
-      console.error('History load failed', error);
-      renderHistoryUnavailable('Real rivalry history is currently unavailable. Check Supabase access or schema mapping.');
-    }
+    } catch (error) { console.error('History load failed', error); renderHistoryUnavailable('Real rivalry history is currently unavailable. Check Supabase access or schema mapping.'); }
   }
 
   CR.initHistory = initHistory;
