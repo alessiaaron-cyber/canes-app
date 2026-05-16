@@ -51,7 +51,7 @@ window.CR = window.CR || {};
     `;
   }
 
-  function renderPickSlot({ pick, side, key, isPlayoffs, isFocus, picksEnabled }) {
+  function renderPickSlot({ pick, isPlayoffs, isFocus, picksEnabled }) {
     if (!pick) {
       return `
         <div class="gd-pick-row is-empty ${!picksEnabled ? 'is-disabled' : ''}">
@@ -67,18 +67,12 @@ window.CR = window.CR || {};
     return `
       <div
         class="gd-pick-row ${isFocus ? 'gd-pick-row-focus' : ''} ${!picksEnabled ? 'is-disabled' : ''}"
-        data-pick-side="${key}"
         data-pick-player="${pick.player}"
       >
         <div class="gd-pick-icon">✓</div>
         <div class="gd-pick-main">
           <strong>${pick.player}</strong>
           <small>${picksEnabled ? (isPlayoffs ? 'Locked for playoff night' : 'Locked pick') : 'Pick locked'}</small>
-          ${picksEnabled ? `
-            <div class="gd-lock-actions">
-              <button class="cr-button secondary gd-inline-action" data-side="${key}" data-player="${pick.player}" type="button">Change</button>
-            </div>
-          ` : ''}
         </div>
       </div>
     `;
@@ -98,8 +92,6 @@ window.CR = window.CR || {};
           const pick = side.picks[pickIndex];
           return renderPickSlot({
             pick,
-            side: side.name,
-            key: side.key,
             isPlayoffs,
             isFocus: scheduled && pick && pick.player === lastDrafted,
             picksEnabled: scheduled
