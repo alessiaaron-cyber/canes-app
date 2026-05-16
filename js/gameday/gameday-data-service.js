@@ -3,7 +3,10 @@ window.CR = window.CR || {};
 (() => {
   const CR = window.CR;
 
-  const FALLBACK_USERS = ['Aaron', 'Julie'];
+  const FALLBACK_USERS = [
+    { displayName: 'Aaron', legacyOwner: 'Aaron', rivalrySlot: 1, scoreKey: 'Aaron' },
+    { displayName: 'Julie', legacyOwner: 'Julie', rivalrySlot: 2, scoreKey: 'Julie' }
+  ];
 
   function toNumber(value, fallback = 0) {
     const n = Number(value);
@@ -67,23 +70,51 @@ window.CR = window.CR || {};
   }
 
   function fallbackProfiles() {
-    return FALLBACK_USERS.map((name) => ({
+    return FALLBACK_USERS.map((user, index) => ({
       id: '',
       email: '',
-      username: name.toLowerCase(),
-      displayName: name,
-      role: 'member'
+      username: user.displayName.toLowerCase(),
+      displayName: user.displayName,
+      display_name: user.displayName,
+      role: 'member',
+      rivalrySlot: user.rivalrySlot,
+      rivalry_slot: user.rivalrySlot,
+      legacyOwner: user.legacyOwner,
+      legacy_owner: user.legacyOwner,
+      legacy_owner_key: user.legacyOwner,
+      scoreKey: user.scoreKey,
+      themeClass: index === 0 ? 'owner-primary' : 'owner-secondary',
+      avatarClass: index === 0 ? 'avatar-primary' : 'avatar-secondary'
     }));
   }
 
   function mapProfiles(rows = []) {
-    const mapped = rows.filter((profile) => profile?.is_active !== false).map((profile) => ({
-      id: String(profile.id || ''),
-      email: profile.email || '',
-      username: profile.username || '',
-      displayName: profile.display_name || profile.username || profile.email || 'Player',
-      role: profile.role || 'member'
-    })).sort((a, b) => a.displayName.localeCompare(b.displayName));
+    const mapped = rows.filter((profile) => profile?.is_active !== false).map((profile, index) => {
+      const fallback = FALLBACK_USERS[toNumber(profile.rivalry_slot, index + 1) - 1] || FALLBACK_USERS[index] || FALLBACK_USERS[0];
+      const slot = toNumber(profile.rivalry_slot, fallback.rivalrySlot);
+      const legacyOwner = profile.legacy_owner_key || fallback.legacyOwner;
+      return {
+        id: String(profile.id || ''),
+        email: profile.email || '',
+        username: profile.username || '',
+        displayName: profile.display_name || profile.username || profile.email || fallback.displayName,
+        display_name: profile.display_name || profile.username || profile.email || fallback.displayName,
+        role: profile.role || 'member',
+        colorHex: profile.color_hex || fallback.colorHex,
+        color_hex: profile.color_hex || fallback.colorHex,
+        colorLabel: profile.color_label || '',
+        color_label: profile.color_label || '',
+        rivalrySlot: slot,
+        rivalry_slot: slot,
+        legacyOwner,
+        legacy_owner: legacyOwner,
+        legacy_owner_key: legacyOwner,
+        scoreKey: legacyOwner,
+        score_key: legacyOwner,
+        themeClass: slot === 2 ? 'owner-secondary' : 'owner-primary',
+        avatarClass: slot === 2 ? 'avatar-secondary' : 'avatar-primary'
+      };
+    }).sort((a, b) => toNumber(a.rivalrySlot, 99) - toNumber(b.rivalrySlot, 99));
 
     return mapped.length ? mapped : fallbackProfiles();
   }
@@ -95,16 +126,24 @@ window.CR = window.CR || {};
     }, {});
   }
 
+  function profileByLegacyOwner(profiles = []) {
+    return profiles.reduce((acc, profile) => {
+      acc[normalizeText(profile.legacyOwner || profile.legacy_owner || profile.legacy_owner_key)] = profile;
+      return acc;
+    }, {});
+  }
+
   function profileByName(profiles = []) {
     return profiles.reduce((acc, profile) => {
       acc[normalizeText(profile.displayName)] = profile;
       acc[normalizeText(profile.username)] = profile;
+      acc[normalizeText(profile.legacyOwner || profile.legacy_owner || profile.legacy_owner_key)] = profile;
       return acc;
     }, {});
   }
 
   function ownerList(profiles = []) {
-    return profiles.length ? profiles.map((profile) => profile.displayName) : FALLBACK_USERS;
+    return profiles.length ? profiles.map((profile) => profile.legacyOwner || profile.legacy_owner || profile.legacy_owner_key || profile.displayName) : FALLBACK_USERS.map((user) => user.legacyOwner);
   }
 
   function ownerBuckets(profiles = []) {
@@ -113,16 +152,16 @@ window.CR = window.CR || {};
 
   function resolveOwner(pick = {}, context = {}) {
     const byId = context.profilesById || {};
-    const byName = context.profilesByName || {};
-    const profile = byId[String(pick.owner_user_id || '')] || byName[normalizeText(pick.owner)] || null;
-    return profile?.displayName || pick.owner || '';
+    const byLegacy = context.profilesByLegacyOwner || {};
+    const profile = byId[String(pick.owner_user_id || '')] || byLegacy[normalizeText(pick.owner)] || null;
+    return profile?.legacyOwner || profile?.legacy_owner || profile?.legacy_owner_key || pick.owner || '';
   }
 
   function resolveCurrentPicker(game = {}, context = {}) {
     const byId = context.profilesById || {};
-    const byName = context.profilesByName || {};
-    const profile = byId[String(game.current_pick_user_id || '')] || byName[normalizeText(game.first_picker)] || null;
-    return profile ? { id: profile.id, displayName: profile.displayName } : { id: '', displayName: game.first_picker || '' };
+    const byLegacy = context.profilesByLegacyOwner || {};
+    const profile = byId[String(game.current_pick_user_id || game.first_picker_user_id || '')] || byLegacy[normalizeText(game.first_picker)] || null;
+    return profile ? { id: profile.id, displayName: profile.displayName, legacyOwner: profile.legacyOwner } : { id: '', displayName: game.first_picker || '', legacyOwner: game.first_picker || '' };
   }
 
   function pointsForPick(pick, firstGoalScorer) {
@@ -164,10 +203,11 @@ window.CR = window.CR || {};
     const feed = [];
     const firstGoalScorer = game?.first_goal_scorer || '';
     Object.entries(users || {}).forEach(([owner, picks]) => {
+      const ownerDisplay = CR.identity?.findUser?.(owner)?.displayName || owner;
       (picks || []).forEach((pick) => {
-        if (pick.firstGoal || pick.player === firstGoalScorer) feed.push({ icon: '👑', title: `${pick.player} first Canes goal`, detail: `${owner} gets the first goal bonus`, points: 2, tier: 'heavy' });
-        if (toNumber(pick.goals) > 0) feed.push({ icon: '🚨', title: `${pick.player} goal${toNumber(pick.goals) > 1 ? 's' : ''}`, detail: `${owner} scores through a picked player`, points: toNumber(pick.goals) * 2, tier: 'medium' });
-        if (toNumber(pick.assists) > 0) feed.push({ icon: '🎯', title: `${pick.player} assist${toNumber(pick.assists) > 1 ? 's' : ''}`, detail: `${owner} adds assist points`, points: toNumber(pick.assists), tier: 'light' });
+        if (pick.firstGoal || pick.player === firstGoalScorer) feed.push({ icon: '👑', title: `${pick.player} first Canes goal`, detail: `${ownerDisplay} gets the first goal bonus`, points: 2, tier: 'heavy' });
+        if (toNumber(pick.goals) > 0) feed.push({ icon: '🚨', title: `${pick.player} goal${toNumber(pick.goals) > 1 ? 's' : ''}`, detail: `${ownerDisplay} scores through a picked player`, points: toNumber(pick.goals) * 2, tier: 'medium' });
+        if (toNumber(pick.assists) > 0) feed.push({ icon: '🎯', title: `${pick.player} assist${toNumber(pick.assists) > 1 ? 's' : ''}`, detail: `${ownerDisplay} adds assist points`, points: toNumber(pick.assists), tier: 'light' });
       });
     });
     return feed.length ? feed : [{ icon: '🏒', title: 'Waiting for rivalry moments', detail: 'Live scoring updates will appear here.', points: 0, tier: 'light' }];
@@ -210,7 +250,7 @@ window.CR = window.CR || {};
   }
 
   function normalizeGameDayState({ game, picks, roster, profiles }) {
-    const context = { profiles, profilesById: profileById(profiles), profilesByName: profileByName(profiles) };
+    const context = { profiles, profilesById: profileById(profiles), profilesByLegacyOwner: profileByLegacyOwner(profiles), profilesByName: profileByName(profiles) };
     const mode = modeForGame(game);
     const liveUsers = mapLiveUsers(game, picks, context);
     const owners = ownerList(profiles);
@@ -231,7 +271,7 @@ window.CR = window.CR || {};
         status: game?.draft_status || 'open',
         currentPickNumber: toNumber(game?.current_pick_number, 1),
         currentPicker: resolveCurrentPicker(game, context),
-        firstPicker: game?.first_picker || ''
+        firstPicker: game?.first_picker_user_id || game?.first_picker || ''
       },
       users: profiles || [],
       pregame: mapPregamePicks(picks, context),
@@ -270,7 +310,10 @@ window.CR = window.CR || {};
   }
 
   async function safeLoadProfiles(db) {
-    const res = await db.from('user_profiles').select('id, email, username, display_name, role, is_active').eq('is_active', true).order('display_name');
+    const res = await db
+      .from('user_profiles')
+      .select('id, email, username, display_name, role, is_active, color_hex, color_label, rivalry_slot, legacy_owner_key')
+      .eq('is_active', true);
     if (res.error) {
       console.warn('Game Day profiles unavailable; using fallback owners', res.error);
       return fallbackProfiles();
