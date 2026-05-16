@@ -74,26 +74,22 @@ window.CR = window.CR || {};
 
   async function refreshProfileAfterSave(profile) {
     CR.currentProfile = profile;
-    CR.currentProfiles = (CR.currentProfiles || CR.gameDay?.users || []).map((user) => String(user.id || '') === String(profile.id || '') ? {
-      ...user,
-      displayName: profile.display_name || user.displayName,
-      display_name: profile.display_name,
-      colorHex: profile.color_hex,
-      color_hex: profile.color_hex,
-      colorLabel: profile.color_label,
-      color_label: profile.color_label
-    } : user);
+
+    try {
+      CR.currentProfiles = await CR.auth?.loadActiveProfiles?.() || [profile];
+      CR.currentProfile = CR.currentProfiles.find((item) => String(item.id || '') === String(profile.id || '')) || profile;
+    } catch (error) {
+      console.warn('Could not reload active profiles after save', error);
+      CR.currentProfiles = (CR.currentProfiles || []).map((user) => String(user.id || '') === String(profile.id || '') ? profile : user);
+      if (!CR.currentProfiles.some((user) => String(user.id || '') === String(profile.id || ''))) {
+        CR.currentProfiles.push(profile);
+      }
+    }
+
+    const freshUsers = CR.identity?.getUsers?.() || [];
 
     if (CR.gameDay?.users) {
-      CR.gameDay.users = CR.gameDay.users.map((user) => String(user.id || '') === String(profile.id || '') ? {
-        ...user,
-        displayName: profile.display_name || user.displayName,
-        display_name: profile.display_name,
-        colorHex: profile.color_hex,
-        color_hex: profile.color_hex,
-        colorLabel: profile.color_label,
-        color_label: profile.color_label
-      } : user);
+      CR.gameDay.users = freshUsers;
     }
 
     CR.identity?.applyUserColorVariables?.();
