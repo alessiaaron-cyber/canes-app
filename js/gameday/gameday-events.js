@@ -67,18 +67,7 @@ window.CR = window.CR || {};
   }
 
   CR.gameDayEvents = {
-    bind({ claimedOwner, nextDraftSide, renderManageSheet, setModalOpen, rerender }) {
-      document.querySelectorAll('.gd-small-action').forEach((button) => {
-        button.addEventListener('click', () => {
-          const side = button.dataset.side;
-          const player = button.dataset.player;
-          markEditing();
-          CR.gameDay.pregame[side] = CR.gameDay.pregame[side].filter((name) => name !== player);
-          CR.gameDay.lastDraftedPlayer = '';
-          rerender('pregame');
-        });
-      });
-
+    bind({ claimedOwner, renderManageSheet, setModalOpen, rerender }) {
       document.querySelectorAll('.gd-draft-btn').forEach((button) => {
         button.addEventListener('click', async (event) => {
           event.preventDefault();
