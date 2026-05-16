@@ -12,6 +12,30 @@
   gap: 14px;
 }
 
+.owner-primary,
+.owner-aaron,
+.leader-primary,
+.leader-aaron,
+.winner-primary,
+.winner-aaron,
+.is-aaron {
+  --history-owner-color: var(--cr-user-1-color, #c8102e);
+  --history-owner-soft: var(--cr-user-1-soft, rgba(200, 16, 46, 0.08));
+  --history-owner-border: var(--cr-user-1-border, rgba(200, 16, 46, 0.16));
+}
+
+.owner-secondary,
+.owner-julie,
+.leader-secondary,
+.leader-julie,
+.winner-secondary,
+.winner-julie,
+.is-julie {
+  --history-owner-color: var(--cr-user-2-color, #111827);
+  --history-owner-soft: var(--cr-user-2-soft, rgba(17, 24, 39, 0.08));
+  --history-owner-border: var(--cr-user-2-border, rgba(17, 24, 39, 0.16));
+}
+
 .rivalry-board-card,
 .history-hq-card,
 .history-momentum-card,
@@ -109,17 +133,12 @@
 }
 
 .history-status-pill.owner-primary,
-.history-status-pill.owner-aaron {
-  background: rgba(200, 16, 46, 0.08);
-  color: var(--ui-canes-red, #c8102e);
-  border-color: rgba(200, 16, 46, 0.12);
-}
-
+.history-status-pill.owner-aaron,
 .history-status-pill.owner-secondary,
 .history-status-pill.owner-julie {
-  background: rgba(17, 24, 39, 0.08);
-  color: var(--ui-graphite, #111827);
-  border-color: rgba(17, 24, 39, 0.1);
+  background: var(--history-owner-soft);
+  color: var(--history-owner-color);
+  border-color: var(--history-owner-border);
 }
 
 .history-status-pill.owner-tie {
@@ -231,9 +250,9 @@
 }
 
 .owner-primary,
-.owner-aaron { color: var(--ui-canes-red, #c8102e) !important; }
+.owner-aaron,
 .owner-secondary,
-.owner-julie { color: var(--ink-strong, #101828) !important; }
+.owner-julie { color: var(--history-owner-color) !important; }
 
 .rivalry-score-value,
 .history-player-hero-stat,
@@ -306,18 +325,12 @@
 }
 
 .history-record-pill.leader-primary,
-.history-record-pill.leader-aaron {
-  background: rgba(200, 16, 46, 0.08);
-  color: var(--ui-canes-red, #c8102e);
-  border-color: rgba(200, 16, 46, 0.12);
-  box-shadow: none;
-}
-
+.history-record-pill.leader-aaron,
 .history-record-pill.leader-secondary,
 .history-record-pill.leader-julie {
-  background: rgba(17, 24, 39, 0.08);
-  color: var(--ui-graphite, #111827);
-  border-color: rgba(17, 24, 39, 0.1);
+  background: var(--history-owner-soft);
+  color: var(--history-owner-color);
+  border-color: var(--history-owner-border);
   box-shadow: none;
 }
 
@@ -383,9 +396,9 @@
 .history-momentum-strip { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 6px; margin-top: 14px; }
 .history-momentum-node { min-height: 40px; border-radius: var(--radius-md, 18px); display: flex; align-items: center; justify-content: center; font-weight: var(--font-heavy, 900); font-size: 15px; border: 1px solid var(--border-subtle); background: #f4f6f8; color: var(--ink-strong); }
 .history-momentum-node.winner-primary,
-.history-momentum-node.is-aaron { background: rgba(200, 16, 46, 0.08); color: var(--ui-canes-red, #c8102e); border-color: rgba(200, 16, 46, 0.12); }
+.history-momentum-node.is-aaron,
 .history-momentum-node.winner-secondary,
-.history-momentum-node.is-julie { background: rgba(17, 24, 39, 0.08); color: var(--ui-graphite, #111827); border-color: rgba(17, 24, 39, 0.1); }
+.history-momentum-node.is-julie { background: var(--history-owner-soft); color: var(--history-owner-color); border-color: var(--history-owner-border); }
 .history-momentum-node.winner-tie,
 .history-momentum-node.is-tie { background: var(--ui-tie-soft); color: var(--ui-tie); border-color: var(--ui-tie-border); }
 .history-momentum-node.is-playoff { box-shadow: inset 0 0 0 1px rgba(245, 158, 11, 0.34); }
@@ -406,9 +419,9 @@
 .rivalry-recap-card.winner-julie,
 .rivalry-recap-card.winner-tie { box-shadow: 0 8px 20px rgba(15, 23, 42, 0.045); }
 .rivalry-recap-card.winner-primary,
-.rivalry-recap-card.winner-aaron { border-color: rgba(200, 16, 46, 0.2); }
+.rivalry-recap-card.winner-aaron,
 .rivalry-recap-card.winner-secondary,
-.rivalry-recap-card.winner-julie { border-color: rgba(17, 24, 39, 0.18); }
+.rivalry-recap-card.winner-julie { border-color: var(--history-owner-border); }
 .rivalry-recap-card.winner-tie { border-color: var(--ui-tie-border); }
 
 .history-log-card { background: linear-gradient(180deg, #ffffff 0%, #fbfcfd 100%); box-shadow: none; }
@@ -423,9 +436,9 @@
 .history-outcome-stack { align-self: flex-start; align-items: flex-start; flex: 0 0 auto; flex-direction: row; gap: 0; padding-top: 0; }
 .history-outcome-pill { display: inline-flex; align-items: center; justify-content: center; width: auto; max-width: 100%; min-height: 24px; border-radius: var(--radius-pill, 999px); padding: 0 9px; font-size: 11px; line-height: 1; letter-spacing: .01em; font-weight: var(--font-strong, 800); color: var(--ink-strong); background: rgba(102,112,133,0.1); border: 1px solid transparent; white-space: nowrap; }
 .history-outcome-pill.winner-primary,
-.history-outcome-pill.winner-aaron { background: rgba(200, 16, 46, 0.08); color: var(--ui-canes-red, #c8102e); border-color: rgba(200, 16, 46, 0.12); }
+.history-outcome-pill.winner-aaron,
 .history-outcome-pill.winner-secondary,
-.history-outcome-pill.winner-julie { background: rgba(17, 24, 39, 0.08); color: var(--ui-graphite, #111827); border-color: rgba(17, 24, 39, 0.1); }
+.history-outcome-pill.winner-julie { background: var(--history-owner-soft); color: var(--history-owner-color); border-color: var(--history-owner-border); }
 .history-outcome-pill.winner-tie { background: var(--ui-tie-soft); color: var(--ui-tie); border-color: var(--ui-tie-border); }
 
 .history-recap-side { border-radius: var(--radius-md, 18px); border: 1px solid rgba(15,23,42,.06); background: rgba(248,250,252,.74); padding: 10px; }
@@ -456,9 +469,9 @@
 
 .history-season-overview-card { width: 100%; display: block; text-align: left; border: 1px solid var(--border-subtle); border-radius: var(--radius-xl, 26px); padding: 16px; background: linear-gradient(180deg, #ffffff 0%, #fbfcfd 100%); box-shadow: 0 8px 20px rgba(15, 23, 42, 0.045); }
 .history-season-overview-card.is-complete.winner-primary,
-.history-season-overview-card.is-complete.winner-aaron { border-color: rgba(200, 16, 46, 0.2); }
+.history-season-overview-card.is-complete.winner-aaron,
 .history-season-overview-card.is-complete.winner-secondary,
-.history-season-overview-card.is-complete.winner-julie { border-color: rgba(17, 24, 39, 0.18); }
+.history-season-overview-card.is-complete.winner-julie { border-color: var(--history-owner-border); }
 .history-season-overview-card.is-complete.winner-tie { border-color: var(--ui-tie-border); }
 .history-season-overview-topline { align-items: flex-start; }
 .history-season-overview-topline h3 { font-size: 22px; color: var(--ink-strong); }
@@ -517,13 +530,13 @@
 .history-sheet-open body { overflow: hidden; }
 
 @keyframes historyRealtimeCardFlash {
-  0% { border-color: rgba(200, 16, 46, 0.42); box-shadow: 0 0 0 0 rgba(200, 16, 46, 0.18), 0 8px 20px rgba(15, 23, 42, 0.045); background: linear-gradient(180deg, #fff7f8 0%, #ffffff 100%); }
-  55% { border-color: rgba(200, 16, 46, 0.26); box-shadow: 0 0 0 7px rgba(200, 16, 46, 0.04), 0 8px 20px rgba(15, 23, 42, 0.045); }
+  0% { border-color: var(--cr-user-1-border, rgba(200, 16, 46, 0.42)); box-shadow: 0 0 0 0 var(--cr-user-1-soft, rgba(200, 16, 46, 0.18)), 0 8px 20px rgba(15, 23, 42, 0.045); background: linear-gradient(180deg, #fff7f8 0%, #ffffff 100%); }
+  55% { border-color: var(--cr-user-1-border, rgba(200, 16, 46, 0.26)); box-shadow: 0 0 0 7px var(--cr-user-1-soft, rgba(200, 16, 46, 0.04)), 0 8px 20px rgba(15, 23, 42, 0.045); }
   100% { box-shadow: 0 8px 20px rgba(15, 23, 42, 0.045); }
 }
 
 @keyframes historyRealtimeScoreFlash {
-  0% { background: rgba(200, 16, 46, 0.10); border-radius: var(--radius-sm, 14px); transform: scale(1.015); }
+  0% { background: var(--cr-user-1-soft, rgba(200, 16, 46, 0.10)); border-radius: var(--radius-sm, 14px); transform: scale(1.015); }
   100% { background: transparent; transform: scale(1); }
 }
 
@@ -534,7 +547,7 @@
   }
 
   .history-log-card.is-realtime-changed {
-    border-color: rgba(200, 16, 46, 0.28);
+    border-color: var(--cr-user-1-border, rgba(200, 16, 46, 0.28));
   }
 }
 
