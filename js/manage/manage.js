@@ -29,6 +29,7 @@ window.CR = window.CR || {};
   function hasOpenManageSheet(state = CR.manageState) {
     return Boolean(
       state?.activeEditField ||
+      state?.profileEditOpen ||
       state?.startSeasonOpen ||
       state?.scoringEditOpen ||
       state?.rosterSheetOpen ||
