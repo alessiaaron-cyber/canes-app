@@ -13,9 +13,18 @@ window.CR = window.CR || {};
     { value: 'final', label: 'Final Only', note: 'Keep everything hidden until the game ends.' }
   ];
 
+  const PROFILE_COLOR_OPTIONS = [
+    { label: 'Canes Red', hex: '#c8102e', family: 'red' },
+    { label: 'Graphite', hex: '#111827', family: 'neutral' },
+    { label: 'Storm Blue', hex: '#1d4ed8', family: 'blue' },
+    { label: 'Ice Navy', hex: '#1e3a8a', family: 'blue' },
+    { label: 'Royal Purple', hex: '#6d28d9', family: 'purple' },
+    { label: 'Deep Violet', hex: '#581c87', family: 'purple' }
+  ];
+
   const FALLBACK_USERS = [
-    { id: 'aaron', username: 'Aaron', displayName: 'Aaron', themeClass: 'owner-primary', avatarClass: 'avatar-primary', scoreKey: 'Aaron' },
-    { id: 'julie', username: 'Julie', displayName: 'Julie', themeClass: 'owner-secondary', avatarClass: 'avatar-secondary', scoreKey: 'Julie' }
+    { id: 'aaron', username: 'Aaron', displayName: 'Aaron', themeClass: 'owner-primary', avatarClass: 'avatar-primary', scoreKey: 'Aaron', colorHex: '#c8102e', colorLabel: 'Canes Red' },
+    { id: 'julie', username: 'Julie', displayName: 'Julie', themeClass: 'owner-secondary', avatarClass: 'avatar-secondary', scoreKey: 'Julie', colorHex: '#111827', colorLabel: 'Graphite' }
   ];
 
   const MOCK_ROSTER = [
@@ -35,7 +44,9 @@ window.CR = window.CR || {};
       displayName: user.displayName || user.username || `Player ${index + 1}`,
       themeClass: user.themeClass || (index === 0 ? 'owner-primary' : 'owner-secondary'),
       avatarClass: user.avatarClass || (index === 0 ? 'avatar-primary' : 'avatar-secondary'),
-      scoreKey: user.scoreKey || user.username || user.displayName || `Player ${index + 1}`
+      scoreKey: user.scoreKey || user.username || user.displayName || `Player ${index + 1}`,
+      colorHex: user.colorHex || user.color_hex || FALLBACK_USERS[index]?.colorHex || '#111827',
+      colorLabel: user.colorLabel || user.color_label || FALLBACK_USERS[index]?.colorLabel || 'Profile color'
     }));
   }
 
@@ -85,6 +96,8 @@ window.CR = window.CR || {};
 
     return {
       activeManageView: 'main',
+      activeEditField: null,
+      profileColorOpen: false,
       editingScheduleGameId: null,
       editingRosterPlayerId: null,
       streamMode: {
@@ -141,9 +154,10 @@ window.CR = window.CR || {};
         lastSyncLabel: '2 minutes ago'
       },
       users,
+      profileColorOptions: PROFILE_COLOR_OPTIONS,
       editOptions: buildEditOptions(users)
     };
   }
 
-  window.CR.manageModel = { build };
+  window.CR.manageModel = { build, PROFILE_COLOR_OPTIONS };
 })();
