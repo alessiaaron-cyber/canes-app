@@ -138,114 +138,104 @@ window.CR = window.CR || {};
 
   function firstGoalSummary(users = {}, mode = CR.gameDay.mode) {
     const bonus = firstGoalHit(users);
-
-    if (bonus) return `${bonus.player} hit the first goal bonus`;
-    if (mode === 'live') return 'First goal bonus still open';
-    if (mode === 'final') return 'No picked player hit first goal';
-    return 'First goal bonus pending';
-  }
-
-  function mvpText(users = {}) {
-    const picks = allLivePicks(users);
-    if (!picks.length) return 'No MVP yet';
-
-    const best = picks.slice().sort((a, b) => pointsFor(b) - pointsFor(a))[0];
-    return `${best.player} • ${pointsFor(best)} pts`;
+    if (bonus) return `${bonus.player} hit the first goal bonus.`;
+    return mode === 'final' ? 'No first goal bonus recorded.' : 'First goal bonus still live.';
   }
 
   function leadingStatType(users = {}) {
     const goals = totalGoals(users);
     const assists = totalAssists(users);
-
-    if (goals === 0 && assists === 0) return 'No scoring events yet';
-    if (goals > assists) return `${goals} goal points drove the night`;
-    if (assists > goals) return `${assists} assist points drove the night`;
-    return 'Goals and assists landed evenly';
+    if (goals > assists) return 'Goals carried the night.';
+    if (assists > goals) return 'Assists drove the scoring.';
+    return 'Goals and assists stayed balanced.';
   }
 
   function totalEventsText(users = {}) {
-    return `${totalGoals(users)} goals • ${totalAssists(users)} assists`;
+    const goals = totalGoals(users);
+    const assists = totalAssists(users);
+    return `${goals} goals • ${assists} assists`;
+  }
+
+  function mvpText(users = {}) {
+    const picks = allLivePicks(users).slice().sort((a, b) => pointsFor(b) - pointsFor(a));
+    return picks[0]?.player ? `${picks[0].player} led the rivalry card.` : 'No player separated yet.';
   }
 
   function payloadBelongsToCurrentGame(payload) {
-    const gameId = String(CR.gameDay?.currentGameId || '');
-    const row = payload?.new || payload?.old || {};
-
-    if (payload?.table === 'games') return !gameId || String(row.id || '') === gameId;
-    if (payload?.table === 'picks') return !gameId || String(row.game_id || '') === gameId;
-    return false;
-  }
-
-  function changedKeysForPayload(payload) {
-    const row = payload?.new || payload?.old || {};
-    const utils = CR.gameDayRenderUtils || {};
-    const keys = ['gameday:sync'];
-
-    if (payload?.table === 'games') {
-      keys.push(utils.feedChangedKey?.());
-      keys.push(utils.firstGoalChangedKey?.());
-      keys.push(utils.scoreChangedKey?.('Aaron'));
-      keys.push(utils.scoreChangedKey?.('Julie'));
-    }
-
-    if (payload?.table === 'picks') {
-      const player = row.player_name || row.player || '';
-      const owner = row.owner || '';
-      keys.push(utils.feedChangedKey?.());
-      if (owner) keys.push(utils.scoreChangedKey?.(owner));
-      if (player) {
-        keys.push(utils.pickChangedKey?.(player, 'goals'));
-        keys.push(utils.pickChangedKey?.(player, 'assists'));
-        keys.push(utils.firstGoalChangedKey?.());
-      }
-    }
-
-    return keys.filter(Boolean);
+    const row = payload.new || payload.old || {};
+    if (!CR.gameDay.currentGameId) return true;
+    if (payload.table === 'games') return String(row.id || '') === String(CR.gameDay.currentGameId);
+    if (payload.table === 'picks') return String(row.game_id || '') === String(CR.gameDay.currentGameId);
+    return true;
   }
 
   function markRealtimeChanged(payloads = []) {
-    const keys = Array.from(new Set(payloads.flatMap(changedKeysForPayload)));
-    CR.ui?.markChanged?.(keys, {
-      ttl: 1200,
-      onChange: () => CR.renderGameDayState?.()
+    const keys = ['gameday:sync'];
+
+    payloads.forEach((payload) => {
+      const row = payload.new || payload.old || {};
+      if (payload.table === 'games') {
+        if ('aaron_points' in row || 'julie_points' in row) {
+          keys.push('gameday:score:Aaron', 'gameday:score:Julie');
+        }
+        if ('first_goal_scorer' in row) keys.push('gameday:first-goal');
+        if ('status' in row) keys.push('gameday:feed');
+      }
+
+      if (payload.table === 'picks') {
+        const player = row.player_name || row.player || row.id;
+        if (player) {
+          ['goals', 'assists', 'points'].forEach((stat) => keys.push(`gameday:pick:${CR.gameDayRenderUtils?.normalizeKeyPart?.(player) || player}:${stat}`));
+        }
+        keys.push('gameday:feed');
+      }
     });
+
+    CR.ui?.markChanged?.(Array.from(new Set(keys)));
   }
 
-  function applyGameDayData(nextState = {}) {
-    const previousMode = CR.gameDay?.mode;
+  function applyGameDayData(data = {}) {
+    if (!data || typeof data !== 'object') return CR.gameDay;
 
     CR.gameDay = {
       ...CR.gameDay,
-      ...nextState,
-      carryover: nextState.carryover || CR.gameDay?.carryover || { active: false },
-      draft: nextState.draft || CR.gameDay?.draft || { status: 'pending', currentPickNumber: 0, currentPicker: { id: '', displayName: '' }, firstPicker: '' },
-      game: nextState.game || CR.gameDay?.game,
-      pregame: nextState.pregame || CR.gameDay?.pregame || { Aaron: [], Julie: [] },
-      live: nextState.live || CR.gameDay?.live || {
-        scores: { Aaron: 0, Julie: 0 },
-        period: '',
-        users: { Aaron: [], Julie: [] },
-        feed: []
-      }
+      ...data,
+      game: { ...CR.gameDay.game, ...(data.game || {}) },
+      carryover: { ...CR.gameDay.carryover, ...(data.carryover || {}) },
+      draft: { ...CR.gameDay.draft, ...(data.draft || {}) },
+      live: {
+        ...CR.gameDay.live,
+        ...(data.live || {}),
+        scores: { ...(CR.gameDay.live?.scores || {}), ...(data.live?.scores || {}) },
+        users: data.live?.users || CR.gameDay.live?.users || {}
+      },
+      pregame: data.pregame || CR.gameDay.pregame || {},
+      roster: data.roster || CR.gameDay.roster || []
     };
 
-    CR.gameDayRoster = nextState.roster || CR.gameDayRoster || fallbackRoster;
-    CR.gameDay.roster = CR.gameDayRoster;
-    CR.renderGameDayState?.(CR.gameDay.mode || previousMode || 'pregame');
+    CR.gameDayRoster = CR.gameDay.roster || CR.gameDayRoster || fallbackRoster;
+    CR.identity?.applyUserColorVariables?.({ users: CR.gameDay.users });
+    return CR.gameDay;
   }
 
   async function refreshGameDayData(options = {}) {
-    if (!CR.gameDayDataService?.fetchGameDayData) return CR.gameDay;
     if (options.skipIfEditing && isUserEditing()) return CR.gameDay;
 
+    if (!CR.gameDayDataService?.fetchGameDayData) {
+      CR.renderGameDayState?.();
+      return CR.gameDay;
+    }
+
     try {
-      const nextState = await CR.gameDayDataService.fetchGameDayData();
-      applyGameDayData(nextState);
+      const data = await CR.gameDayDataService.fetchGameDayData();
+      applyGameDayData(data);
+      CR.gameDayEdit?.clearEditing?.();
+      CR.renderGameDayState(data.mode || CR.gameDay.mode);
       if (options.flash) CR.flashSync?.();
-      if (options.toast) CR.showToast?.('Game Day refreshed');
+      if (options.toast) CR.showToast?.('Game Day updated');
       return CR.gameDay;
     } catch (error) {
-      console.error('Game Day data refresh failed', error);
+      console.error('Game Day refresh failed', error);
       if (options.toast) CR.showToast?.({ message: 'Could not refresh Game Day', tier: 'warning' });
       return CR.gameDay;
     }
@@ -496,6 +486,7 @@ window.CR = window.CR || {};
 
   CR.renderGameDayState = (mode = CR.gameDay.mode) => {
     CR.gameDay.mode = mode;
+    CR.identity?.applyUserColorVariables?.({ users: CR.gameDay.users });
 
     const container = $('#gameDayContent');
     const view = $('#gameDayView');
@@ -562,6 +553,7 @@ window.CR = window.CR || {};
       if (event.target.id === 'manageSheet') setModalOpen(false);
     });
 
+    CR.identity?.applyUserColorVariables?.({ users: CR.gameDay.users });
     CR.renderGameDayState(CR.gameDay.mode || 'pregame');
     refreshGameDayData();
     registerRealtime();
