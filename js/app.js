@@ -22,18 +22,13 @@ window.CR = window.CR || {};
   }
 
   function avatarThemeClass(profile) {
+    const identityClass = window.CR.identity?.getAvatarClass?.(profile?.id || profile?.display_name || profile?.username);
+    if (identityClass) return identityClass;
+
     const explicit = String(profile?.avatar_class || profile?.avatarClass || profile?.theme_class || profile?.themeClass || '').trim();
     if (explicit === 'avatar-primary' || explicit === 'avatar-secondary') return explicit;
     if (explicit === 'owner-primary') return 'avatar-primary';
     if (explicit === 'owner-secondary') return 'avatar-secondary';
-
-    const username = String(profile?.username || profile?.display_name || '').trim().toLowerCase();
-    const users = window.CR.historyMockData?.users || [];
-    const matchedUser = users.find((item) => String(item.username || item.displayName || '').trim().toLowerCase() === username);
-
-    if (matchedUser?.avatarClass) return matchedUser.avatarClass;
-    if (matchedUser?.themeClass === 'owner-primary') return 'avatar-primary';
-    if (matchedUser?.themeClass === 'owner-secondary') return 'avatar-secondary';
 
     return 'avatar-primary';
   }
@@ -47,6 +42,8 @@ window.CR = window.CR || {};
   function renderAccountIdentity() {
     const profile = window.CR.currentProfile || {};
     const user = window.CR.currentUser || {};
+
+    window.CR.identity?.applyUserColorVariables?.();
 
     const displayName = safeText(profile.display_name || profile.username, 'Canes Rivalry');
     const username = safeText(profile.username, 'member');
@@ -116,6 +113,7 @@ window.CR = window.CR || {};
     window.CR.flashSync?.();
 
     try {
+      window.CR.identity?.applyUserColorVariables?.();
       await window.CR.refreshHistoryData?.();
       window.CR.renderGameDayState?.();
       window.CR.renderManage?.();
@@ -128,6 +126,7 @@ window.CR = window.CR || {};
 
   window.CR.startApp = () => {
     try {
+      window.CR.identity?.applyUserColorVariables?.();
       renderAccountIdentity();
       bindAccountUi();
 
