@@ -97,6 +97,7 @@ window.CR = window.CR || {};
 
     window.CR.currentUser = null;
     window.CR.currentProfile = null;
+    window.CR.currentProfiles = [];
     window.CR.session = null;
     window.location.reload();
   }
@@ -109,19 +110,51 @@ window.CR = window.CR || {};
     document.querySelector('#manageSignOutButton')?.addEventListener('click', handleManageSignOut);
   }
 
+  async function runRefreshStep(label, fn) {
+    if (typeof fn !== 'function') return null;
+
+    try {
+      await fn();
+      return null;
+    } catch (error) {
+      console.error(`${label} refresh step failed`, error);
+      return label;
+    }
+  }
+
   window.CR.refreshApp = async () => {
     window.CR.flashSync?.();
 
-    try {
+    const failures = [];
+
+    const identityFailure = await runRefreshStep('Identity', async () => {
       window.CR.identity?.applyUserColorVariables?.();
+      window.CR.renderAccountIdentity?.();
+    });
+    if (identityFailure) failures.push(identityFailure);
+
+    const gameDayFailure = await runRefreshStep('Game Day', async () => {
+      if (window.CR.refreshGameDayData) await window.CR.refreshGameDayData({ skipIfEditing: true });
+      else window.CR.renderGameDayState?.();
+    });
+    if (gameDayFailure) failures.push(gameDayFailure);
+
+    const historyFailure = await runRefreshStep('History', async () => {
       await window.CR.refreshHistoryData?.();
-      window.CR.renderGameDayState?.();
+    });
+    if (historyFailure) failures.push(historyFailure);
+
+    const manageFailure = await runRefreshStep('Manage', async () => {
       window.CR.renderManage?.();
-      window.CR.showToast?.('Rivalry refresh complete');
-    } catch (error) {
-      console.error('App refresh failed', error);
-      window.CR.showToast?.({ message: 'Could not refresh rivalry data', tier: 'warning' });
+    });
+    if (manageFailure) failures.push(manageFailure);
+
+    if (failures.length) {
+      window.CR.showToast?.({ message: `Refresh partly failed: ${failures.join(', ')}`, tier: 'warning' });
+      return;
     }
+
+    window.CR.showToast?.('Rivalry refresh complete');
   };
 
   window.CR.startApp = () => {
@@ -148,4 +181,6 @@ window.CR = window.CR || {};
       root.insertAdjacentHTML('afterbegin', '<div style="padding:16px;background:#fee;color:#900;font-weight:800">V2 preview render failed. Check console.</div>');
     }
   };
+
+  window.CR.renderAccountIdentity = renderAccountIdentity;
 })();
