@@ -13,10 +13,6 @@ window.CR = window.CR || {};
     return String(CR.currentUser?.id || CR.currentProfile?.id || '').trim();
   }
 
-  function currentProfile() {
-    return CR.currentProfile || null;
-  }
-
   function normalizeName(value) {
     return String(value || '').trim().toLowerCase();
   }
@@ -66,6 +62,17 @@ window.CR = window.CR || {};
       draft_status: 'open',
       current_pick_number: nextPickNumber,
       current_pick_user_id: nextProfile?.id || null
+    };
+  }
+
+  function rollbackDraftStateToPick(pickNumber = 1) {
+    const rollbackPickNumber = Math.max(1, Math.min(Number(pickNumber || 1), 4));
+    const picker = draftTurnProfile(rollbackPickNumber);
+
+    return {
+      draft_status: 'open',
+      current_pick_number: rollbackPickNumber,
+      current_pick_user_id: picker?.id || null
     };
   }
 
@@ -136,6 +143,7 @@ window.CR = window.CR || {};
       .from('picks')
       .select('id')
       .eq('game_id', gameId)
+      .neq('player_name', '')
       .ilike('player_name', playerName)
       .limit(1);
 
@@ -175,13 +183,74 @@ window.CR = window.CR || {};
     return { savedRow: upsertRes.data || row, game: gameUpdateRes.data || gamePatch };
   }
 
+  async function undoLastDraftPick(gameId) {
+    if (!hasScheduledGame()) throw new Error('Picks cannot be changed until a game is scheduled.');
+    if (!gameId) throw new Error('No active game is available for undo.');
+
+    const draft = CR.gameDay?.draft || {};
+    const currentPickNumber = Number(draft.currentPickNumber || 1);
+    const undoPickNumber = currentPickNumber > 4 ? 4 : currentPickNumber - 1;
+
+    if (undoPickNumber < 1) throw new Error('There are no draft picks to undo.');
+
+    const ownerProfile = draftTurnProfile(undoPickNumber);
+    const slot = draftPickSlot(undoPickNumber);
+
+    if (!ownerProfile?.displayName) throw new Error('Could not determine pick to undo.');
+
+    const db = await CR.getSupabase();
+    const existingRes = await db
+      .from('picks')
+      .select('*')
+      .eq('game_id', gameId)
+      .eq('owner', ownerProfile.displayName)
+      .eq('pick_slot', slot)
+      .maybeSingle();
+
+    if (existingRes.error) throw existingRes.error;
+    if (!existingRes.data || !String(existingRes.data.player_name || '').trim()) {
+      throw new Error('There is no drafted player in the last pick slot.');
+    }
+
+    const clearPatch = {
+      player_name: '',
+      original_pick_text: null,
+      goals: 0,
+      assists: 0,
+      points: 0,
+      picked_by_user_id: null,
+      updated_by_user_id: currentUserId() || null,
+      updated_at: new Date().toISOString()
+    };
+
+    const pickUpdateRes = await db
+      .from('picks')
+      .update(clearPatch)
+      .eq('id', existingRes.data.id)
+      .select('*')
+      .single();
+
+    if (pickUpdateRes.error) throw pickUpdateRes.error;
+
+    const gamePatch = rollbackDraftStateToPick(undoPickNumber);
+    const gameUpdateRes = await db.from('games').update(gamePatch).eq('id', gameId).select('*').single();
+    if (gameUpdateRes.error) throw gameUpdateRes.error;
+
+    CR.realtime?.markLocalWrite?.('picks', pickUpdateRes.data || { id: existingRes.data.id, ...clearPatch }, 3000);
+    CR.realtime?.markLocalWrite?.('games', gameUpdateRes.data || { id: gameId, ...gamePatch }, 3000);
+
+    return { clearedRow: pickUpdateRes.data, game: gameUpdateRes.data, undonePickNumber: undoPickNumber };
+  }
+
   CR.gameDaySaveService = {
     savePregamePicks,
     saveDraftPick,
+    undoLastDraftPick,
     rowsFromPregameState,
     hasScheduledGame,
     draftTurnProfile,
     draftPickSlot,
-    nextDraftStateAfterPick
+    nextDraftStateAfterPick,
+    rollbackDraftStateToPick
   };
 })();
