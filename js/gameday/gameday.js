@@ -272,6 +272,25 @@ window.CR = window.CR || {};
     }
   }
 
+  async function undoLastDraftPick() {
+    const button = $('#undoDraftPick');
+
+    try {
+      if (!canManagePicks()) throw new Error('Draft undo is not available right now.');
+      CR.ui?.setActionBusy?.(button, true, { label: 'Undoing…' });
+      await CR.gameDaySaveService?.undoLastDraftPick?.(CR.gameDay.currentGameId);
+      CR.gameDayEdit?.clearEditing?.();
+      await refreshGameDayData({ flash: true });
+      renderManageSheet();
+      CR.showToast?.('Last draft pick undone');
+    } catch (error) {
+      console.error('Draft undo failed', error);
+      CR.showToast?.({ message: error?.message || 'Could not undo last pick', tier: 'warning' });
+    } finally {
+      CR.ui?.setActionBusy?.(button, false);
+    }
+  }
+
   function registerRealtime() {
     if (CR.__gameDayRealtimeRegistered || !CR.realtime?.register) return;
 
@@ -393,9 +412,9 @@ window.CR = window.CR || {};
     }
 
     return {
-      title: 'Pregame pick management',
-      detail: 'Draft or swap picks before puck drop.',
-      saveLabel: picksEnabled ? 'Save Picks' : 'Locked'
+      title: 'Admin override',
+      detail: 'Use this only to fix mistakes or draft for someone unavailable.',
+      saveLabel: picksEnabled ? 'Save Override' : 'Locked'
     };
   }
 
@@ -420,6 +439,12 @@ window.CR = window.CR || {};
       </div>
     `;
 
+    const undoAction = `
+      <button class="cr-button secondary gd-inline-action" id="undoDraftPick" type="button" ${picksEnabled ? '' : 'disabled'}>
+        Undo Last Draft Pick
+      </button>
+    `;
+
     const pickControls = ['Aaron', 'Julie'].flatMap((side) => [0, 1].map((index) => {
       const selected = CR.gameDay.pregame[side]?.[index] || '';
       const options = [''].concat(getRoster().map((player) => player.name)).map((name) => {
@@ -430,13 +455,15 @@ window.CR = window.CR || {};
       return `
         <div class="gd-sheet-pick ${!picksEnabled ? 'is-disabled' : ''}">
           <strong>${side} Pick ${index + 1}</strong>
-          <small>${picksEnabled ? (CR.gameDay.mode === 'live' ? 'Swap picked player only' : 'Swap locked player') : 'Locked'}</small>
+          <small>${picksEnabled ? (CR.gameDay.mode === 'live' ? 'Swap picked player only' : 'Override locked player') : 'Locked'}</small>
           <select class="gd-sheet-select" data-side="${side}" data-index="${index}" ${picksEnabled ? '' : 'disabled'}>${options}</select>
         </div>
       `;
     }).join('')).join('');
 
-    actions.innerHTML = statusCopy + pickControls;
+    actions.innerHTML = statusCopy + undoAction + pickControls;
+
+    $('#undoDraftPick')?.addEventListener('click', undoLastDraftPick);
 
     actions.querySelectorAll('.gd-sheet-select').forEach((select) => {
       select.addEventListener('change', (event) => {
